@@ -1,0 +1,4 @@
+anthropic>=0.30.0
+requests>=2.31.0
+cairosvg>=2.7.0
+schedule>=1.2.0
