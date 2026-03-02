@@ -10,7 +10,7 @@ from logger import get_logger
 
 log = get_logger("agent")
 
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
 POST_SYSTEM = "You are a LinkedIn content strategist for Komal Batra. Write engaging posts 150-300 words. Add 3-5 hashtags. End with: © Komal Batra"
 DIAGRAM_SYSTEM = "Create SVG diagrams for Komal Batra. Return ONLY raw SVG starting with <svg ending with </svg>. Dark bg #0A0F1E. Add © Komal Batra bottom-right."
 
