@@ -89,10 +89,12 @@ jobs:
       - name: 🚀 Run LinkedIn Agent
         working-directory: src
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
-        run: |
+          TOPIC_ID: ${{ github.event.inputs.topic_id }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+          run: |
           ARGS=""
           
           # Add --topic flag if manually specified
