@@ -1,0 +1,114 @@
+name: 🤖 LinkedIn Agent — Komal Batra
+
+on:
+  schedule:
+    - cron: "30 3 * * *"   # 9:00 AM IST
+    - cron: "30 12 * * *"  # 6:00 PM IST
+
+  workflow_dispatch:
+    inputs:
+      topic_id:
+        description: "Topic ID (leave blank for auto-selection)"
+        required: false
+        default: ""
+        type: choice
+        options:
+          - ""
+          - llm-architecture
+          - ai-agents-2025
+          - mlops-pipeline
+          - rag-systems
+          - kubernetes-mastery
+          - docker-cheatsheet
+          - aws-architecture
+          - cicd-pipelines
+          - system-design
+          - api-design
+          - git-workflow
+          - solid-principles
+          - zero-trust
+          - devsecops
+          - data-lakehouse
+          - kafka-streaming
+      dry_run:
+        description: "Dry run (generate but don't post)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  post-to-linkedin:
+    name: Generate & Post Content
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 🔧 Install system deps
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
+            libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+
+      - name: 📦 Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: ℹ️ Run Info
+        run: |
+          echo "LinkedIn Agent — © Komal Batra"
+          echo "Run time: $(date '+%Y-%m-%d %H:%M %Z')"
+          echo "Trigger: ${{ github.event_name }}"
+          echo "Topic: ${{ github.event.inputs.topic_id || 'auto' }}"
+          echo "Dry run: ${{ github.event.inputs.dry_run || 'false' }}"
+
+      - name: 🚀 Run LinkedIn Agent
+        working-directory: src
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.topic_id }}" ]; then
+            ARGS="$ARGS --topic ${{ github.event.inputs.topic_id }}"
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python agent.py $ARGS
+
+      - name: 📁 Upload Diagrams
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams-${{ github.run_number }}
+          path: |
+            src/diagrams/*.svg
+            src/diagrams/*.png
+            src/output_post_*.txt
+            src/agent.log
+          retention-days: 30
+
+      - name: 💾 Save Topic History
+        if: success() && github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "LinkedIn Agent"
+          git config user.email "agent@komal-batra.dev"
+          git add src/.topic_history.json || true
+          git diff --staged --quiet || git commit -m "chore: update topic history [skip ci]"
+          git push || true
+
+      - name: ❌ Notify on Failure
+        if: failure()
+        run: echo "::error::LinkedIn Agent failed! Check logs — common causes: expired token, API limits"
