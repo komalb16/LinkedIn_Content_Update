@@ -21,9 +21,19 @@ DIAGRAM_SYSTEM = "You are a technical SVG diagram creator for " + AUTHOR + ". Re
 
 
 def call_gemini(prompt, system):
+    print("DEBUG: Checking for GEMINI_API_KEY in environment...")
+    print("DEBUG: Available env keys:", [k for k in os.environ.keys() if not k.startswith("npm") and not k.startswith("RUNNER")])
+
     api_key = os.environ.get("GEMINI_API_KEY")
+
     if not api_key:
-        raise ValueError("GEMINI_API_KEY not set")
+        print("DEBUG: GEMINI_API_KEY not found! Trying alternate names...")
+        for key in os.environ.keys():
+            if "GEMINI" in key.upper() or "API" in key.upper():
+                print("DEBUG: Found possible key:", key)
+        raise ValueError("GEMINI_API_KEY not set in environment")
+
+    print("DEBUG: GEMINI_API_KEY found, length=" + str(len(api_key)))
 
     payload = {
         "system_instruction": {"parts": [{"text": system}]},
@@ -36,6 +46,12 @@ def call_gemini(prompt, system):
         json=payload,
         headers={"Content-Type": "application/json"}
     )
+
+    print("DEBUG: Gemini API response status:", resp.status_code)
+
+    if resp.status_code != 200:
+        print("DEBUG: Gemini error response:", resp.text)
+
     resp.raise_for_status()
     data = resp.json()
     return data["candidates"][0]["content"]["parts"][0]["text"]
