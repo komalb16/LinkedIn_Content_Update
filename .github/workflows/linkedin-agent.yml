@@ -46,6 +46,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -61,7 +63,7 @@ jobs:
       - name: Run Agent
         working-directory: src
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
           TOPIC_ID: ${{ github.event.inputs.topic_id }}
@@ -71,6 +73,15 @@ jobs:
           if [ -n "$TOPIC_ID" ]; then ARGS="$ARGS --topic $TOPIC_ID"; fi
           if [ "$DRY_RUN" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           python agent.py $ARGS
+
+      - name: Save Topic History
+        if: always()
+        run: |
+          git config user.name "LinkedIn Agent Bot"
+          git config user.email "agent@github-actions.com"
+          git add src/.topic_history.json || true
+          git diff --staged --quiet || git commit -m "chore: update topic history [skip ci]"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || true
 
       - name: Upload Artifacts
         if: always()
