@@ -2,7 +2,7 @@ name: 🤖 LinkedIn Agent — Komal Batra
 
 # ─── Triggers ───────────────────────────────────────────────────────────────
 on:
-  # Scheduled: twice daily at 9 AM and 6 PM IST (3:30 UTC and 12:30 UTC)
+  # Scheduled: Daily at 9 AM IST (3:30 UTC / 22:30 EST/ 19:30 PST)
   schedule:
     - cron: "30 3 * * *"   # 9:00 AM IST  (morning post)
 
