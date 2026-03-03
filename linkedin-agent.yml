@@ -72,7 +72,7 @@ jobs:
       # 4. Install Python dependencies
       - name: 📦 Install dependencies
         run: pip install -r requirements.txt
-
+        run: pip install requests cairosvg schedule
       # 5. Show run info
       - name: ℹ️ Run Info
         run: |
