@@ -1,10 +1,9 @@
+import time
 import requests
 from logger import get_logger
 
 log = get_logger("linkedin")
-
 LINKEDIN_API = "https://api.linkedin.com/v2"
-
 
 class LinkedInPoster:
     def __init__(self, access_token, person_urn):
@@ -21,32 +20,101 @@ class LinkedInPoster:
         }
         log.info("LinkedIn poster initialized for: " + person_urn)
 
+    def _svg_to_png_bytes(self, svg_path):
+        try:
+            import cairosvg
+            png_bytes = cairosvg.svg2png(url=svg_path, output_width=1200, output_height=628)
+            log.info("SVG converted to PNG successfully")
+            return png_bytes
+        except Exception as e:
+            log.warning("SVG to PNG failed: " + str(e))
+            return None
+
+    def _register_image_upload(self):
+        url = LINKEDIN_API + "/assets?action=registerUpload"
+        payload = {
+            "registerUploadRequest": {
+                "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
+                "owner": self.person_urn,
+                "serviceRelationships": [{"relationshipType": "OWNER", "identifier": "urn:li:userGeneratedContent"}]
+            }
+        }
+        resp = requests.post(url, headers=self.headers, json=payload)
+        if resp.status_code != 200:
+            log.error("Register upload failed: " + resp.text)
+            return None, None
+        data = resp.json()
+        upload_url = data["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
+        asset = data["value"]["asset"]
+        log.info("Upload registered. Asset: " + asset)
+        return upload_url, asset
+
+    def _upload_image_bytes(self, upload_url, image_bytes):
+        upload_headers = {
+            "Authorization": "Bearer " + self.access_token,
+            "Content-Type": "application/octet-stream",
+        }
+        resp = requests.put(upload_url, headers=upload_headers, data=image_bytes)
+        if resp.status_code not in [200, 201]:
+            log.error("Image upload failed: " + str(resp.status_code))
+            return False
+        log.info("Image uploaded successfully")
+        return True
+
+    def _create_ugc_post(self, text, asset=None):
+        url = LINKEDIN_API + "/ugcPosts"
+        media = []
+        if asset:
+            media = [{"status": "READY", "description": {"text": "© Komal Batra"}, "media": asset, "title": {"text": "Technical Diagram by Komal Batra"}}]
+        payload = {
+            "author": self.person_urn,
+            "lifecycleState": "PUBLISHED",
+            "specificContent": {
+                "com.linkedin.ugc.ShareContent": {
+                    "shareCommentary": {"text": text},
+                    "shareMediaCategory": "IMAGE" if asset else "NONE",
+                    "media": media,
+                }
+            },
+            "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"}
+        }
+        resp = requests.post(url, headers=self.headers, json=payload)
+        if resp.status_code == 201:
+            post_id = resp.json().get("id", "unknown")
+            log.info("Post created with image! ID: " + post_id)
+            return {"success": True, "post_id": post_id}
+        else:
+            log.error("Post failed: " + str(resp.status_code) + " " + resp.text)
+            return {"success": False, "error": resp.text}
+
     def create_post_with_image(self, text, image_path, title=""):
-        return self.create_text_post(text)
+        try:
+            png_bytes = self._svg_to_png_bytes(image_path)
+            if not png_bytes:
+                log.warning("No PNG — posting text only")
+                return self.create_text_post(text)
+            upload_url, asset = self._register_image_upload()
+            if not upload_url:
+                log.warning("Upload register failed — posting text only")
+                return self.create_text_post(text)
+            time.sleep(1)
+            uploaded = self._upload_image_bytes(upload_url, png_bytes)
+            if not uploaded:
+                log.warning("Upload failed — posting text only")
+                return self.create_text_post(text)
+            time.sleep(3)
+            result = self._create_ugc_post(text, asset)
+            if result.get("success"):
+                return result
+            log.warning("Image post failed — falling back to text only")
+            return self.create_text_post(text)
+        except Exception as e:
+            log.error("Unexpected error: " + str(e))
+            return self.create_text_post(text)
 
     def create_text_post(self, text):
         try:
-            url = LINKEDIN_API + "/ugcPosts"
-            payload = {
-                "author": self.person_urn,
-                "lifecycleState": "PUBLISHED",
-                "specificContent": {
-                    "com.linkedin.ugc.ShareContent": {
-                        "shareCommentary": {"text": text},
-                        "shareMediaCategory": "NONE",
-                    }
-                },
-                "visibility": {
-                    "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
-                }
-            }
-            resp = requests.post(url, headers=self.headers, json=payload)
-            if resp.status_code != 201:
-                log.error("LinkedIn API error: " + str(resp.status_code) + " " + resp.text)
-                return {"success": False, "error": resp.text}
-            post_id = resp.json().get("id", "unknown")
-            log.info("Post created! ID: " + post_id)
-            return {"success": True, "post_id": post_id}
+            return self._create_ugc_post(text, asset=None)
         except Exception as e:
-            log.error("Unexpected error: " + str(e))
+            log.error("Text post failed: " + str(e))
             return {"success": False, "error": str(e)}
