@@ -305,7 +305,22 @@ def make_fallback_svg(topic_name, topic_id, diagram_type):
   <!-- Footer -->
   <line x1="40" y1="518" x2="860" y2="518" stroke="{color}" stroke-width="0.5" opacity="0.2"/>
   <text x="40" y="537" fill="#334155" font-size="10" font-family="Arial,sans-serif">{now}</text>
-  <text x="860" y="537" text-anchor="end" fill="{color}" font-size="13" font-weight="bold" font-family="Arial,sans-serif">© Komal Batra</text>
+  <!-- AI-themed signature -->
+  <defs>
+    <linearGradient id="siggrad" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#00D4AA"/>
+      <stop offset="50%" stop-color="#A29BFE"/>
+      <stop offset="100%" stop-color="#FF6B6B"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="680" y="520" width="200" height="24" rx="12" fill="url(#siggrad)" opacity="0.15"/>
+  <rect x="681" y="521" width="198" height="22" rx="11" fill="none" stroke="url(#siggrad)" stroke-width="0.8" opacity="0.6"/>
+  <text x="688" y="536" fill="#A29BFE" font-size="10" font-family="Arial,sans-serif" filter="url(#glow)">✦ AI</text>
+  <text x="718" y="537" fill="white" font-size="12" font-weight="bold" font-family="Arial,sans-serif" filter="url(#glow)" letter-spacing="1">© Komal Batra</text>
 </svg>'''
     return svg
 
