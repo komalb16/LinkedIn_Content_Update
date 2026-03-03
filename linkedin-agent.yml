@@ -5,7 +5,6 @@ on:
   # Scheduled: twice daily at 9 AM and 6 PM IST (3:30 UTC and 12:30 UTC)
   schedule:
     - cron: "30 3 * * *"   # 9:00 AM IST  (morning post)
-    - cron: "30 12 * * *"  # 6:00 PM IST  (evening post)
 
   # Manual trigger from GitHub UI — with optional inputs
   workflow_dispatch:
