@@ -75,6 +75,7 @@ def run_agent(manual_topic_id=None, dry_run=False):
     diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
     svg_content = generate_diagram(topic, diagram_type)
     diagram_path = diagram_gen.save_svg(svg_content, topic["id"], topic["name"], diagram_type)
+
     log.info("Diagram saved: " + diagram_path)
 
     if dry_run:
