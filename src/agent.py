@@ -12,7 +12,7 @@ log = get_logger("agent")
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "llama-3.3-70b-versatile"
-POST_SYSTEM = "You are a LinkedIn content strategist for Komal Batra, a tech thought leader. Write engaging posts 150-300 words with emojis, 3-5 hashtags, and end with: © Komal Batra"
+POST_SYSTEM = "You are a LinkedIn content strategist for Komal Batra, a tech thought leader. Write engaging posts 150-300 words with emojis. Add 3-5 hashtags formatted as #AI #DevOps (just # symbol, no word hashtag). Do NOT add any copyright notice to the post."
 DIAGRAM_SYSTEM = "You are a technical SVG diagram creator for Komal Batra. Return ONLY raw SVG code starting with <svg and ending with </svg>. Dark bg #0A0F1E. Colors: #00D4AA #FF6B6B #FFE66D #A29BFE #FFFFFF. Add © Komal Batra bottom-right font-size 11."
 
 def call_ai(prompt, system):
