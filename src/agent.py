@@ -30,7 +30,7 @@ def call_gemini(prompt, system):
         }
     }
 
-    url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=" + api_key
+    url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-8b:generateContent?key=" + api_key
     resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
 
     if resp.status_code != 200:
