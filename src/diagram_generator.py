@@ -122,7 +122,7 @@ def make_fallback_svg(topic_name, topic_id, diagram_type):
   <text x="450" y="80" text-anchor="middle" fill="#475569" font-size="13" font-family="Arial, sans-serif">{diagram_type} · {now}</text>
   <line x1="50" y1="95" x2="850" y2="95" stroke="{color}" stroke-width="0.5" opacity="0.4"/>
   {shapes}
-  <text x="880" y="540" text-anchor="end" fill="#475569" font-size="11" font-family="Arial, sans-serif">© Komal Batra</text>
+  <text x="880" y="540" text-anchor="end" fill="{color}" font-size="13" font-weight="bold" font-family="Arial, sans-serif">© Komal Batra</text>
 </svg>'''
     return svg
 
