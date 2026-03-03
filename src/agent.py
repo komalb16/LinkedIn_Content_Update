@@ -18,17 +18,26 @@ def call_gemini(prompt, system):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY not set")
+
     payload = {
-        "system_instruction": {"parts": [{"text": system}]},
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"maxOutputTokens": 2048, "temperature": 0.8}
+        "contents": [{
+            "role": "user",
+            "parts": [{"text": system + "\n\n" + prompt}]
+        }],
+        "generationConfig": {
+            "maxOutputTokens": 2048,
+            "temperature": 0.8
+        }
     }
-    resp = requests.post(GEMINI_URL + "?key=" + api_key, json=payload, headers={"Content-Type": "application/json"})
+
+    url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=" + api_key
+    resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
+
     if resp.status_code != 200:
         print("Gemini error:", resp.text)
+
     resp.raise_for_status()
     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-
 def generate_post(topic):
     log.info("Generating post: " + topic["name"])
     prompt = "Write a LinkedIn post about: " + topic["prompt"] + " for " + datetime.now().strftime("%B %Y") + ". End with a question."
