@@ -1,0 +1,19 @@
+name: Keepalive
+
+on:
+  schedule:
+    - cron: "30 16 * * *"
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep workflows active
+        uses: gautamkrishnar/keepalive-workflow@v2
+        with:
+          time_elapsed: 20
