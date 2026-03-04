@@ -41,7 +41,6 @@ jobs:
   post-to-linkedin:
     name: Generate and Post Content
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -92,3 +91,11 @@ jobs:
             src/output_post_*.txt
             src/agent.log
           retention-days: 30
+
+  keep-alive:
+    name: Keep Workflow Active
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep alive
+        run: echo "Keeping workflow active — $(date)"
