@@ -2,7 +2,7 @@ name: LinkedIn Agent Komal Batra
 
 on:
   schedule:
-    - cron: "45 4 * * *"
+    - cron: "15 4 * * *"
   workflow_dispatch:
     inputs:
       topic_id:
