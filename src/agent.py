@@ -5,6 +5,7 @@ import json
 import random
 import argparse
 import requests
+import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from topic_manager import TopicManager
@@ -208,9 +209,12 @@ def get_post_mode():
 
 def run_agent(manual_topic_id=None, dry_run=False, force_news=None):
     log.info("=" * 60)
+    # Add jitter only for scheduled runs, not dry runs
+    if not dry_run:
+        jitter = random.randint(0, 300)
+        log.info("Waiting " + str(jitter) + " seconds before posting...")
+        time.sleep(jitter)
     log.info("LinkedIn Agent — Komal Batra — " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    log.info("Mode: " + ("DRY RUN" if dry_run else "LIVE"))
-    log.info("=" * 60)
 
     topic_mgr = TopicManager()
     diagram_gen = DiagramGenerator()
