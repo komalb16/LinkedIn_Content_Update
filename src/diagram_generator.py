@@ -6,693 +6,470 @@ from logger import get_logger
 log = get_logger("diagrams")
 OUTPUT_DIR = "diagrams"
 
-def get_palette(topic_id):
-    tid = topic_id.lower()
-    if any(x in tid for x in ["llm", "rag", "agent", "mlops"]): 
-        return {"bg":"#0D1117","p":"#00D4AA","s":"#7C3AED","a":"#F59E0B","d":"#EF4444","i":"#3B82F6","t":"#E2E8F0"}
-    if any(x in tid for x in ["kube", "docker", "aws", "cicd"]): 
-        return {"bg":"#0D1117","p":"#4ECDC4","s":"#2563EB","a":"#F59E0B","d":"#EF4444","i":"#8B5CF6","t":"#E2E8F0"}
-    if any(x in tid for x in ["zero", "devsec"]): 
-        return {"bg":"#0D1117","p":"#EF4444","s":"#F97316","a":"#FBBF24","d":"#DC2626","i":"#6366F1","t":"#E2E8F0"}
-    if any(x in tid for x in ["kafka", "data", "lake"]): 
-        return {"bg":"#0D1117","p":"#8B5CF6","s":"#06B6D4","a":"#10B981","d":"#F43F5E","i":"#3B82F6","t":"#E2E8F0"}
-    return {"bg":"#0D1117","p":"#FFE66D","s":"#4ECDC4","a":"#A29BFE","d":"#FF6B6B","i":"#74B9FF","t":"#E2E8F0"}
+PALETTES = {
+    "ai":      {"bg":"#0F172A","c":["#7C3AED","#2563EB","#0891B2","#059669","#D97706","#DC2626"]},
+    "cloud":   {"bg":"#0F172A","c":["#1D4ED8","#0891B2","#047857","#B45309","#7C3AED","#BE185D"]},
+    "security":{"bg":"#0F172A","c":["#DC2626","#D97706","#7C3AED","#0891B2","#047857","#1D4ED8"]},
+    "data":    {"bg":"#0F172A","c":["#7C3AED","#1D4ED8","#0891B2","#047857","#D97706","#DC2626"]},
+    "devops":  {"bg":"#0F172A","c":["#047857","#1D4ED8","#7C3AED","#D97706","#DC2626","#0891B2"]},
+    "default": {"bg":"#0F172A","c":["#1D4ED8","#7C3AED","#047857","#D97706","#DC2626","#0891B2"]},
+}
 
-def box(x,y,w,h,title,sub,color,rx=10):
-    s = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{color}" fill-opacity="0.12" stroke="{color}" stroke-width="1.5"/>'
-    s += f'<text x="{x+w//2}" y="{y+h//2-4}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
+def get_pal(tid):
+    t = tid.lower()
+    if any(x in t for x in ["llm","rag","agent","mlops"]): return PALETTES["ai"]
+    if any(x in t for x in ["kube","docker","aws","cicd"]): return PALETTES["cloud"]
+    if any(x in t for x in ["zero","devsec"]): return PALETTES["security"]
+    if any(x in t for x in ["kafka","data","lake"]): return PALETTES["data"]
+    return PALETTES["default"]
+
+def fb(x,y,w,h,color,title,sub="",rx=10):
+    s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{color}"/>'
+    s += f'<rect x="{x}" y="{y}" width="{w}" height="4" rx="{rx}" fill="white" opacity="0.18"/>'
     if sub:
-        s += f'<text x="{x+w//2}" y="{y+h//2+11}" text-anchor="middle" fill="#94A3B8" font-size="9" font-family="Arial,sans-serif">{sub}</text>'
+        s += f'<text x="{x+w//2}" y="{y+h//2-4}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
+        s += f'<text x="{x+w//2}" y="{y+h//2+10}" text-anchor="middle" fill="rgba(255,255,255,0.72)" font-size="9" font-family="Arial,sans-serif">{sub}</text>'
+    else:
+        s += f'<text x="{x+w//2}" y="{y+h//2+4}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
     return s
 
-def section(x,y,w,h,title,color):
-    s = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="{color}" fill-opacity="0.06" stroke="{color}" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4,3"/>'
-    s += f'<rect x="{x+8}" y="{y-10}" width="{len(title)*7+16}" height="18" rx="4" fill="{color}" fill-opacity="0.9"/>'
-    s += f'<text x="{x+16}" y="{y+3}" fill="#0D1117" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
+def sf(x,y,w,h,label,color):
+    lw = len(label)*7+20
+    s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="14" fill="{color}" fill-opacity="0.08" stroke="{color}" stroke-width="2"/>'
+    s += f'<rect x="{x+12}" y="{y-12}" width="{lw}" height="22" rx="6" fill="{color}"/>'
+    s += f'<text x="{x+12+lw//2}" y="{y+5}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
     return s
 
-def arr(x1,y1,x2,y2,color,label="",dashed=False):
-    dash = 'stroke-dasharray="5,3"' if dashed else ''
-    # determine direction for label placement
-    mx = (x1+x2)//2
-    my = (y1+y2)//2
-    s = f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="1.5" {dash} marker-end="url(#arr{color.replace("#","")})"/>'
+def ar(x1,y1,x2,y2,color="white",label="",dashed=False):
+    dash='stroke-dasharray="6,4"' if dashed else ''
+    cid=color.replace("#","").replace("(","").replace(")","").replace(",","")[:8]
+    uid=f"{cid}{abs(x1)}{abs(y1)}"
+    mx,my=(x1+x2)//2,(y1+y2)//2
+    s =f'<defs><marker id="m{uid}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="{color}"/></marker></defs>'
+    s+=f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="2" {dash} marker-end="url(#m{uid})"/>'
     if label:
-        s += f'<rect x="{mx-len(label)*3}" y="{my-9}" width="{len(label)*6+8}" height="14" rx="3" fill="#1E293B"/>'
-        s += f'<text x="{mx}" y="{my+2}" text-anchor="middle" fill="{color}" font-size="8" font-family="Arial,sans-serif">{label}</text>'
+        bw=len(label)*5+8
+        s+=f'<rect x="{mx-bw//2}" y="{my-8}" width="{bw}" height="14" rx="4" fill="#1E293B" stroke="{color}" stroke-width="0.5"/>'
+        s+=f'<text x="{mx}" y="{my+3}" text-anchor="middle" fill="{color}" font-size="8" font-family="Arial,sans-serif">{label}</text>'
     return s
 
-def curve(x1,y1,x2,y2,color,label="",dashed=False):
-    dash = 'stroke-dasharray="5,3"' if dashed else ''
-    mx,my = (x1+x2)//2, min(y1,y2)-40
-    s = f'<path d="M{x1},{y1} Q{mx},{my} {x2},{y2}" fill="none" stroke="{color}" stroke-width="1.5" {dash} marker-end="url(#arr{color.replace("#","")})"/>'
-    if label:
-        lx,ly = mx,(y1+y2)//2-20
-        s += f'<rect x="{lx-len(label)*3}" y="{ly-9}" width="{len(label)*6+8}" height="14" rx="3" fill="#1E293B"/>'
-        s += f'<text x="{lx}" y="{ly+2}" text-anchor="middle" fill="{color}" font-size="8" font-family="Arial,sans-serif">{label}</text>'
-    return s
-
-def icon_node(x,y,r,icon,label,sub,color):
-    s = f'<circle cx="{x}" cy="{y}" r="{r}" fill="{color}" fill-opacity="0.12" stroke="{color}" stroke-width="2"/>'
-    s += f'<text x="{x}" y="{y+6}" text-anchor="middle" font-size="{r}" font-family="Arial,sans-serif">{icon}</text>'
-    s += f'<text x="{x}" y="{y+r+14}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
+def ic(cx,cy,r,icon,label,sub,color):
+    s =f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}"/>'
+    s+=f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="white" stroke-width="1.5" opacity="0.2"/>'
+    s+=f'<text x="{cx}" y="{cy+int(r*0.35)}" text-anchor="middle" font-size="{int(r*0.7)}" font-family="Arial,sans-serif">{icon}</text>'
+    s+=f'<text x="{cx}" y="{cy+r+16}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
     if sub:
-        s += f'<text x="{x}" y="{y+r+26}" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+        s+=f'<text x="{cx}" y="{cy+r+29}" text-anchor="middle" fill="#94A3B8" font-size="9" font-family="Arial,sans-serif">{sub}</text>'
     return s
 
-def defs_block(colors):
-    d = '<defs>'
-    d += '<pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 30" fill="none" stroke="white" stroke-width="0.2" opacity="0.08"/></pattern>'
-    seen = set()
-    for c in colors:
-        if c not in seen:
-            seen.add(c)
-            cid = c.replace("#","")
-            d += f'<marker id="arr{cid}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="{c}"/></marker>'
-    d += '</defs>'
-    return d
-
-def signature(c):
-    return f'''
-  <rect x="660" y="522" width="220" height="22" rx="11" fill="none" stroke="url(#sig)" stroke-width="1" opacity="0.7"/>
-  <rect x="661" y="523" width="218" height="20" rx="10" fill="url(#sig)" fill-opacity="0.08"/>
-  <text x="673" y="537" fill="#A29BFE" font-size="10" font-family="Arial,sans-serif">&#10022; AI &#183;</text>
-  <text x="706" y="537" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="0.5">&#169; Komal Batra</text>'''
-
-def wrap_svg(content, title, subtitle, color, now, all_colors):
-    colors_list = list(set(all_colors + [color]))
-    d = defs_block(colors_list)
-    d += '<linearGradient id="sig" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stop-color="#00D4AA"/><stop offset="50%" stop-color="#A29BFE"/><stop offset="100%" stop-color="#FF6B6B"/></linearGradient>'
-    d += f'<linearGradient id="topg" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stop-color="{color}"/><stop offset="100%" stop-color="{color}" stop-opacity="0.2"/></linearGradient>'
-    safe = title.replace("&","and").replace("<","").replace(">","")
+def wrap(content,title,subtitle,accent,date_str):
+    st=title.replace("&","and").replace("<","").replace(">","")
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550" width="900" height="550">
-  {d}
-  <rect width="900" height="550" fill="#0D1117"/>
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" stroke-width="0.3" opacity="0.05"/></pattern>
+    <linearGradient id="hdr" x1="0" x2="1"><stop offset="0%" stop-color="{accent}"/><stop offset="100%" stop-color="{accent}" stop-opacity="0.2"/></linearGradient>
+    <linearGradient id="sig" x1="0" x2="1"><stop offset="0%" stop-color="#0EA5E9"/><stop offset="50%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#EC4899"/></linearGradient>
+  </defs>
+  <rect width="900" height="550" fill="#0F172A"/>
   <rect width="900" height="550" fill="url(#grid)"/>
-  <rect x="0" y="0" width="900" height="4" fill="url(#topg)"/>
-  <circle cx="840" cy="80" r="120" fill="{color}" opacity="0.03"/>
-  <circle cx="60" cy="480" r="80" fill="{color}" opacity="0.03"/>
-  <text x="20" y="35" fill="{color}" font-size="10" font-weight="bold" font-family="Arial,sans-serif" opacity="0.8" letter-spacing="2">{subtitle.upper()}</text>
-  <text x="450" y="65" text-anchor="middle" fill="white" font-size="20" font-weight="bold" font-family="Arial,sans-serif">{safe}</text>
-  <line x1="20" y1="75" x2="880" y2="75" stroke="{color}" stroke-width="0.5" opacity="0.25"/>
+  <rect x="0" y="0" width="900" height="5" fill="url(#hdr)"/>
+  <circle cx="820" cy="100" r="180" fill="{accent}" opacity="0.04"/>
+  <text x="20" y="36" fill="{accent}" font-size="10" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="2" opacity="0.85">{subtitle.upper()}</text>
+  <text x="450" y="68" text-anchor="middle" fill="white" font-size="22" font-weight="bold" font-family="Arial,sans-serif">{st}</text>
+  <line x1="20" y1="78" x2="880" y2="78" stroke="white" stroke-width="0.5" opacity="0.1"/>
   {content}
-  <line x1="20" y1="515" x2="880" y2="515" stroke="{color}" stroke-width="0.5" opacity="0.2"/>
-  <text x="20" y="533" fill="#334155" font-size="9" font-family="Arial,sans-serif">{now} &#183; Generated by AI</text>
-  {signature(color)}
+  <line x1="20" y1="515" x2="880" y2="515" stroke="white" stroke-width="0.5" opacity="0.08"/>
+  <text x="20" y="533" fill="#334155" font-size="9" font-family="Arial,sans-serif">{date_str}</text>
+  <rect x="660" y="522" width="220" height="22" rx="11" fill="url(#sig)" fill-opacity="0.15" stroke="url(#sig)" stroke-width="1"/>
+  <text x="750" y="537" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="0.5">&#10022; AI &#169; Komal Batra</text>
 </svg>'''
 
-# ─── KUBERNETES ───────────────────────────────────────────────────────────────
 def make_kubernetes(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Control Plane
-    svg += section(30,85,840,105,"CONTROL PLANE",s)
-    svg += box(55,100,120,70,"API Server","entry point",s)
-    svg += box(220,100,120,70,"Scheduler","filters/scores",a)
-    svg += box(385,100,130,70,"Controller Mgr","reconciles state",a)
-    svg += box(560,100,100,70,"etcd","key-value store",d)
-    svg += box(700,100,150,70,"kubectl / UI","admin access",i)
-    svg += arr(175,135,220,135,a,"schedules")
-    svg += arr(340,135,385,135,a)
-    svg += arr(515,135,560,135,a,"stores state",True)
-    svg += arr(700,135,660,135,i,"requests")
-    # Worker Node 1
-    svg += section(30,205,390,165,"WORKER NODE 1",i)
-    svg += box(50,230,110,50,"Kubelet","node agent",i)
-    svg += box(185,230,110,50,"Kube-proxy","iptables/IPVS",i)
-    svg += box(50,295,80,55,"Pod A","nginx:latest",c)
-    svg += box(145,295,80,55,"Pod B","app:v2",c)
-    svg += box(240,295,80,55,"Pod C","worker:v1",c)
-    svg += box(335,295,70,55,"CNI","Calico",a)
-    svg += arr(160,255,185,255,i,"manages")
-    svg += arr(115,280,115,295,c,"runs",True)
-    # Worker Node 2
-    svg += section(440,205,430,165,"WORKER NODE 2",i)
-    svg += box(460,230,110,50,"Kubelet","node agent",i)
-    svg += box(595,230,110,50,"Kube-proxy","networking",i)
-    svg += box(460,295,80,55,"Pod D","db:v3",c)
-    svg += box(555,295,80,55,"Pod E","cache:v1",c)
-    svg += box(650,295,80,55,"Pod F","api:v2",c)
-    svg += box(745,295,100,55,"Ingress","NGINX controller",s)
-    svg += arr(570,255,595,255,i,"manages")
-    # Connections from Control Plane to Nodes
-    svg += arr(115,170,115,205,s,"schedules pods",True)
-    svg += arr(600,170,600,205,s,"schedules pods",True)
-    # Bottom row
-    svg += section(30,385,260,95,"STORAGE",a)
-    svg += box(45,405,110,55,"PVC","volume claim",a)
-    svg += box(165,405,110,55,"PersistentVol","StorageClass",a)
-    svg += arr(155,432,165,432,a,"binds")
-    svg += section(305,385,260,95,"AUTOSCALING",d)
-    svg += box(320,405,105,55,"HPA","CPU/mem based",d)
-    svg += box(440,405,110,55,"VPA","right-sizing",d)
-    svg += arr(425,432,440,432,d)
-    svg += section(580,385,290,95,"MONITORING",s)
-    svg += box(595,405,120,55,"Prometheus","metrics scrape",s)
-    svg += box(730,405,120,55,"Grafana","dashboards",s)
-    svg += arr(715,432,730,432,s,"visualize")
-    return svg, "Cluster Architecture"
+    C=p["c"]; s=""
+    s+=sf(20,88,860,110,"CONTROL PLANE",C[0])
+    s+=fb(35,102,150,80,C[0],"API Server","entry point")
+    s+=fb(200,102,150,80,C[1],"Scheduler","filters/scores")
+    s+=fb(365,102,180,80,C[2],"Controller Mgr","reconciles state")
+    s+=fb(560,102,120,80,C[3],"etcd","key-value store")
+    s+=fb(695,102,170,80,C[4],"kubectl / UI","admin access")
+    s+=ar(185,142,200,142,"white","schedules")
+    s+=ar(350,142,365,142,"white")
+    s+=ar(540,142,560,142,"#94A3B8","stores",True)
+    s+=ar(695,142,665,142,"#94A3B8","request")
+    s+=sf(20,210,415,180,"WORKER NODE 1",C[1])
+    s+=fb(35,228,125,55,C[1],"Kubelet","node agent")
+    s+=fb(175,228,130,55,C[2],"Kube-proxy","iptables/IPVS")
+    s+=fb(35,295,90,82,C[0],"Pod A","nginx:latest")
+    s+=fb(140,295,90,82,C[3],"Pod B","app:v2")
+    s+=fb(245,295,90,82,C[4],"Pod C","worker:v1")
+    s+=fb(350,295,75,82,C[5],"CNI","Calico")
+    s+=ar(160,255,175,255,"white","manages")
+    s+=ar(110,282,110,295,"#94A3B8","runs",True)
+    s+=sf(450,210,430,180,"WORKER NODE 2",C[2])
+    s+=fb(465,228,125,55,C[1],"Kubelet","node agent")
+    s+=fb(605,228,130,55,C[2],"Kube-proxy","networking")
+    s+=fb(465,295,90,82,C[0],"Pod D","db:v3")
+    s+=fb(565,295,90,82,C[3],"Pod E","cache:v1")
+    s+=fb(665,295,90,82,C[4],"Pod F","api:v2")
+    s+=fb(770,295,95,82,C[5],"Ingress","NGINX LB")
+    s+=ar(590,255,605,255,"white","manages")
+    s+=ar(110,182,110,210,"#94A3B8","",True)
+    s+=ar(665,182,665,210,"#94A3B8","",True)
+    s+=sf(20,404,270,95,"STORAGE",C[3])
+    s+=fb(30,420,120,68,C[3],"PVC","volume claim")
+    s+=fb(158,420,120,68,C[4],"PersistentVol","StorageClass")
+    s+=ar(150,454,158,454,"white","binds")
+    s+=sf(305,404,265,95,"AUTOSCALING",C[4])
+    s+=fb(315,420,115,68,C[4],"HPA","CPU/mem based")
+    s+=fb(445,420,115,68,C[5],"VPA","right-sizing")
+    s+=ar(430,454,445,454,"white")
+    s+=sf(585,404,295,95,"MONITORING",C[0])
+    s+=fb(595,420,130,68,C[0],"Prometheus","metrics scrape")
+    s+=fb(740,420,130,68,C[2],"Grafana","dashboards")
+    s+=ar(730,454,740,454,"white","visualize")
+    return s,"Cluster Architecture"
 
-# ─── LLM / AI AGENTS ─────────────────────────────────────────────────────────
 def make_llm(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Input
-    svg += section(20,85,140,340,"INPUT",i)
-    svg += icon_node(90,130,22,"👤","User","query/prompt",i)
-    svg += icon_node(90,220,"18","📄","Documents","context",i)
-    svg += icon_node(90,305,"18","🔌","APIs","tools/data",a)
-    # Orchestration
-    svg += section(180,85,220,340,"ORCHESTRATION",s)
-    svg += box(195,105,185,60,"Prompt Manager","template/vars/history",s)
-    svg += box(195,183,185,60,"Memory Store","short+long term",s)
-    svg += box(195,261,185,60,"Tool Router","function calling",a)
-    svg += box(195,339,185,55,"Agent Loop","plan/act/observe",a)
-    # LLM Core
-    svg += section(420,85,240,340,"LLM CORE",c)
-    svg += box(435,105,205,60,"Tokenizer","BPE encoding",c)
-    svg += box(435,183,205,60,"Transformer","32 attn heads",c)
-    svg += box(435,261,205,60,"FFN + Norm","feed-forward layers",c)
-    svg += box(435,339,205,55,"Sampler","temp/top-p/top-k",c)
-    # Outputs
-    svg += section(680,85,200,340,"OUTPUT",d)
-    svg += box(695,105,170,60,"Streaming","SSE / tokens",d)
-    svg += box(695,183,170,60,"Structured","JSON / XML",d)
-    svg += box(695,261,170,60,"Tool Calls","function results",a)
-    svg += box(695,339,170,55,"Audit Log","trace/eval",i)
-    # Arrows
-    svg += arr(112,130,195,135,i,"prompt")
-    svg += arr(112,220,195,213,i,"docs",True)
-    svg += arr(112,305,195,291,a,"tools",True)
-    svg += arr(380,135,435,135,s,"tokenize")
-    svg += arr(380,213,435,213,s,"context")
-    svg += arr(380,291,435,291,a,"tools")
-    svg += arr(380,366,435,366,a,"plan")
-    svg += arr(640,135,695,135,c,"stream")
-    svg += arr(640,213,695,213,c,"parse")
-    svg += arr(640,291,695,291,c,"execute")
-    svg += arr(640,366,695,366,c,"log")
-    # Internal LLM flow
-    svg += arr(537,165,537,183,c)
-    svg += arr(537,243,537,261,c)
-    svg += arr(537,321,537,339,c)
-    # RAG at bottom
-    svg += section(20,440,860,60,"RAG LAYER",a)
-    svg += box(40,453,150,38,"Vector DB","Pinecone/Weaviate",a)
-    svg += box(210,453,150,38,"Chunker","512 tok/overlap",a)
-    svg += box(380,453,150,38,"Embedder","text-embedding-3",a)
-    svg += box(550,453,150,38,"Re-ranker","cross-encoder",a)
-    svg += box(720,453,140,38,"Eval Metrics","RAGAS/faithfulness",i)
-    svg += arr(190,472,210,472,a,"split")
-    svg += arr(360,472,380,472,a,"embed")
-    svg += arr(530,472,550,472,a,"rank")
-    svg += arr(700,472,720,472,i,"eval")
-    return svg, "Architecture Diagram"
+    C=p["c"]; s=""
+    s+=sf(15,88,145,340,"INPUT",C[1])
+    s+=ic(87,135,28,"👤","User","queries",C[1])
+    s+=ic(87,225,24,"📄","Documents","context",C[2])
+    s+=ic(87,310,24,"🔌","APIs","tools/data",C[3])
+    s+=sf(175,88,220,340,"ORCHESTRATION",C[0])
+    s+=fb(188,108,190,62,C[0],"Prompt Manager","template/vars/history")
+    s+=fb(188,185,190,62,C[1],"Memory Store","short+long term")
+    s+=fb(188,263,190,62,C[2],"Tool Router","function calling")
+    s+=fb(188,342,190,56,C[3],"Agent Loop","plan/act/observe")
+    for y in [139,216,294,370]: s+=ar(163,y,188,y,"white")
+    s+=sf(410,88,240,340,"LLM CORE",C[4])
+    s+=fb(422,108,210,62,C[4],"Tokenizer","BPE encoding")
+    s+=fb(422,185,210,62,C[5],"Transformer","32 attn heads")
+    s+=fb(422,263,210,62,C[0],"FFN + Norm","feed-forward layers")
+    s+=fb(422,342,210,56,C[1],"Sampler","temp/top-p/top-k")
+    for y in [139,216,294,370]: s+=ar(378,y,422,y,"#94A3B8")
+    for y in [170,247,325]: s+=ar(527,y,527,y+15,"#60A5FA","",True)
+    s+=sf(665,88,215,340,"OUTPUT",C[2])
+    s+=fb(675,108,190,62,C[2],"Streaming","SSE / tokens")
+    s+=fb(675,185,190,62,C[3],"Structured","JSON / XML")
+    s+=fb(675,263,190,62,C[4],"Tool Calls","function results")
+    s+=fb(675,342,190,56,C[5],"Audit Log","trace/eval")
+    for y in [139,216,294,370]: s+=ar(632,y,675,y,"white")
+    s+=sf(15,442,865,58,"RAG LAYER",C[3])
+    for i,(lbl,sub,col) in enumerate([("Vector DB","Pinecone",C[3]),("Chunker","512 tok",C[4]),("Embedder","text-embed-3",C[5]),("Re-ranker","cross-encoder",C[0]),("Eval","RAGAS",C[1])]):
+        x=20+i*172
+        s+=fb(x,454,162,36,col,lbl,sub,6)
+    for x in [182,354,526,698]: s+=ar(x,472,x+10,472,"white")
+    return s,"Architecture Diagram"
 
-# ─── CI/CD ───────────────────────────────────────────────────────────────────
 def make_cicd(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Top pipeline flow
-    stages = [
-        (55, "💻","Code","git push",c),
-        (170,"🔍","Lint+Test","pytest/jest",s),
-        (285,"🏗️","Build","docker build",a),
-        (400,"🛡️","Scan","trivy/snyk",d),
-        (515,"📦","Artifact","ECR/registry",i),
-        (630,"🚀","Deploy","helm upgrade",c),
-        (745,"✅","Verify","smoke tests",s),
-    ]
+    C=p["c"]; s=""
+    stages=[(75,"💻","Code","git push",C[0]),(195,"🔍","Lint+Test","pytest/jest",C[1]),(315,"🏗️","Build","docker build",C[2]),(435,"🛡️","Scan","trivy/snyk",C[3]),(555,"📦","Artifact","ECR/registry",C[4]),(675,"🚀","Deploy","helm upgrade",C[5]),(795,"✅","Verify","smoke tests",C[0])]
     for x,ico,lbl,sub,col in stages:
-        svg += f'<circle cx="{x+45}" cy="155" r="36" fill="{col}" fill-opacity="0.12" stroke="{col}" stroke-width="2"/>'
-        svg += f'<text x="{x+45}" y="148" text-anchor="middle" font-size="20" font-family="Arial,sans-serif">{ico}</text>'
-        svg += f'<text x="{x+45}" y="166" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{x+45}" y="178" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-        if x < 745:
-            svg += arr(x+81,155,x+119,155,col)
-    # Environments row
-    svg += section(20,210,270,120,"ENVIRONMENTS",i)
-    svg += box(35,230,115,40,"Development","feature branches",i)
-    svg += box(35,280,115,40,"Staging","pre-production",a)
-    svg += box(160,230,115,40,"Production","blue/green",c)
-    svg += box(160,280,115,40,"DR","failover region",d)
-    svg += arr(150,250,160,250,i)
-    svg += arr(150,300,160,300,a)
-    # Quality Gates
-    svg += section(305,210,270,120,"QUALITY GATES",a)
-    svg += box(320,230,110,40,"Coverage","greater 80 pct",c)
-    svg += box(320,280,110,40,"Perf Budget","LCP less 2.5s",a)
-    svg += box(445,230,110,40,"SAST/DAST","sec scan",d)
-    svg += box(445,280,110,40,"Load Test","k6/Gatling",s)
-    # Rollout strategies
-    svg += section(590,210,290,120,"ROLLOUT STRATEGY",c)
-    svg += box(605,230,120,40,"Canary","5 pct to 100 pct",c)
-    svg += box(605,280,120,40,"Blue/Green","instant switch",s)
-    svg += box(740,230,120,40,"Feature Flag","LaunchDarkly",a)
-    svg += box(740,280,120,40,"A/B Test","traffic split",i)
-    # Observability
-    svg += section(20,348,860,90,"OBSERVABILITY AND ALERTING",d)
-    tools = [("📊","Prometheus","metrics",50,d),("📈","Grafana","dashboards",180,s),
-             ("🔍","Jaeger","tracing",310,i),("📋","ELK Stack","logs",440,a),
-             ("🚨","PagerDuty","alerts",570,d),("💬","Slack","notify",700,c),("📝","JIRA","tickets",830,s)]
-    for ico,lbl,sub,x,col in tools:
-        svg += f'<text x="{x}" y="385" text-anchor="middle" font-size="16" font-family="Arial,sans-serif">{ico}</text>'
-        svg += f'<text x="{x}" y="400" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{x}" y="413" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-    # Rollback flow
-    svg += section(20,450,860,48,"AUTO-ROLLBACK: Error rate greater 1pct  ➜  PagerDuty alert  ➜  Helm rollback  ➜  DNS failover  ➜  Incident ticket",d)
-    return svg, "Pipeline Architecture"
+        s+=f'<circle cx="{x}" cy="155" r="38" fill="{col}"/>'
+        s+=f'<circle cx="{x}" cy="155" r="38" fill="none" stroke="white" stroke-width="2" opacity="0.2"/>'
+        s+=f'<text x="{x}" y="148" text-anchor="middle" font-size="22" font-family="Arial,sans-serif">{ico}</text>'
+        s+=f'<text x="{x}" y="166" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s+=f'<text x="{x}" y="179" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+        if x<795: s+=ar(x+38,155,x+82,155,"white")
+    s+=sf(20,205,280,125,"ENVIRONMENTS",C[1])
+    s+=fb(30,222,125,46,C[1],"Development","feature branches")
+    s+=fb(30,276,125,46,C[2],"Staging","pre-production")
+    s+=fb(165,222,125,46,C[0],"Production","blue/green")
+    s+=fb(165,276,125,46,C[3],"DR Region","failover")
+    s+=sf(315,205,270,125,"QUALITY GATES",C[2])
+    s+=fb(325,222,115,46,C[2],"Coverage",">80% req")
+    s+=fb(325,276,115,46,C[3],"Perf Budget","LCP < 2.5s")
+    s+=fb(450,222,125,46,C[4],"SAST/DAST","sec scan")
+    s+=fb(450,276,125,46,C[5],"Load Test","k6/Gatling")
+    s+=sf(600,205,280,125,"ROLLOUT STRATEGY",C[4])
+    s+=fb(610,222,125,46,C[4],"Canary","5% to 100%")
+    s+=fb(610,276,125,46,C[0],"Blue/Green","instant switch")
+    s+=fb(745,222,125,46,C[1],"Feature Flag","LaunchDarkly")
+    s+=fb(745,276,125,46,C[5],"A/B Test","traffic split")
+    s+=sf(20,345,860,95,"OBSERVABILITY AND ALERTING",C[3])
+    obs=[("📊","Prometheus","metrics",C[3]),("📈","Grafana","dashboards",C[0]),("🔍","Jaeger","tracing",C[1]),("📋","ELK Stack","logs",C[2]),("🚨","PagerDuty","alerts",C[3]),("💬","Slack","notify",C[4]),("📝","JIRA","tickets",C[5])]
+    w=860//len(obs)
+    for i,(ico,lbl,sub,col) in enumerate(obs):
+        cx=20+i*w+w//2
+        s+=f'<text x="{cx}" y="380" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
+        s+=f'<text x="{cx}" y="398" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s+=f'<text x="{cx}" y="412" text-anchor="middle" fill="#94A3B8" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+    s+=f'<rect x="20" y="452" width="860" height="38" rx="8" fill="{C[3]}" opacity="0.15" stroke="{C[3]}" stroke-width="1.5"/>'
+    s+=f'<text x="450" y="476" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">AUTO-ROLLBACK: Error &gt; 1%  &#8594;  Alert  &#8594;  Helm rollback  &#8594;  DNS failover  &#8594;  Incident</text>'
+    return s,"Pipeline Architecture"
 
-# ─── RAG ─────────────────────────────────────────────────────────────────────
-def make_rag(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Sources
-    svg += section(15,85,145,340,"DATA SOURCES",s)
-    sources = [(108,115,"📄","PDFs"),(108,170,"🌐","Web"),(108,225,"🗄️","Databases"),(108,280,"📧","Email"),(108,335,"🎥","Media")]
-    for x,y,ico,lbl in sources:
-        svg += f'<circle cx="{x}" cy="{y}" r="20" fill="{s}" fill-opacity="0.12" stroke="{s}" stroke-width="1.5"/>'
-        svg += f'<text x="{x}" y="{y+5}" text-anchor="middle" font-size="14" font-family="Arial,sans-serif">{ico}</text>'
-        svg += f'<text x="{x}" y="{y+32}" text-anchor="middle" fill="white" font-size="9" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += arr(128,y,165,y,s,"ingest")
-    # Ingestion pipeline
-    svg += section(165,85,220,340,"INGESTION",a)
-    svg += box(178,105,190,60,"Chunker","512 tok, 50 overlap",a)
-    svg += box(178,183,190,60,"Embedder","text-embed-3-large",a)
-    svg += box(178,261,190,60,"Metadata","source/date/type",a)
-    svg += box(178,339,190,55,"Dedup","hash-based",a)
-    svg += arr(273,165,273,183,a)
-    svg += arr(273,243,273,261,a)
-    svg += arr(273,321,273,339,a)
-    # Vector Store
-    svg += section(400,85,170,340,"VECTOR STORE",c)
-    svg += box(415,105,140,60,"Index","HNSW graph",c)
-    svg += box(415,183,140,60,"Vector DB","Pinecone/Weaviate",c)
-    svg += box(415,261,140,60,"BM25 Index","sparse vectors",c)
-    svg += box(415,339,140,55,"Cache","query results",i)
-    svg += arr(368,135,415,135,a,"store")
-    svg += arr(368,213,415,213,a,"index")
-    svg += arr(368,291,415,291,a,"sparse")
-    # Retrieval
-    svg += section(585,85,175,340,"RETRIEVAL",d)
-    svg += box(600,105,145,60,"Query Analyzer","intent+expansion",d)
-    svg += box(600,183,145,60,"HyDE","hypothetical doc",d)
-    svg += box(600,261,145,60,"ANN Search","cosine similarity",d)
-    svg += box(600,339,145,55,"Re-ranker","cross-encoder",d)
-    svg += arr(555,135,600,135,c,"query")
-    svg += arr(555,213,600,213,c,"expand")
-    svg += arr(555,291,600,291,c,"search")
-    svg += arr(555,366,600,366,c,"rank")
-    svg += arr(672,165,672,183,d)
-    svg += arr(672,243,672,261,d)
-    svg += arr(672,321,672,339,d)
-    # Generation
-    svg += section(775,85,110,340,"GENERATION",i)
-    svg += box(783,105,95,60,"LLM","GPT-4/Claude",i)
-    svg += box(783,183,95,60,"Guardrails","safety filter",i)
-    svg += box(783,261,95,60,"Citations","source refs",i)
-    svg += box(783,339,95,55,"Feedback","RLHF loop",s)
-    svg += arr(745,135,783,135,d,"context")
-    svg += arr(745,213,783,213,d)
-    svg += arr(745,291,783,291,d)
-    svg += arr(745,366,783,366,d)
-    # Eval bar
-    svg += section(15,440,870,55,"EVALUATION: Faithfulness | Answer Relevance | Context Recall | RAGAS Score | Latency p95 | Hallucination Rate",c)
-    return svg, "System Architecture"
-
-# ─── KAFKA ───────────────────────────────────────────────────────────────────
 def make_kafka(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Producers
-    svg += section(15,85,155,180,"PRODUCERS",s)
-    svg += box(25,105,130,40,"App Server","REST events",s)
-    svg += box(25,155,130,40,"IoT Sensors","MQTT bridge",s)
-    svg += box(25,205,130,40,"DB CDC","Debezium",a)
-    for y in [125,175,225]:
-        svg += arr(155,y,210,y,s,"produce")
-    # Kafka Cluster
-    svg += section(210,85,310,180,"KAFKA CLUSTER",c)
-    svg += box(225,105,85,160,"Broker 1","leader",c)
-    svg += box(320,105,85,160,"Broker 2","follower",c)
-    svg += box(415,105,85,160,"Broker 3","follower",c)
-    svg += f'<text x="365" y="220" text-anchor="middle" fill="{a}" font-size="9" font-weight="bold" font-family="Arial,sans-serif">Replication factor: 3</text>'
-    svg += f'<text x="365" y="233" text-anchor="middle" fill="#475569" font-size="8" font-family="Arial,sans-serif">6 partitions | retention: 7d</text>'
-    # Schema Registry
-    svg += box(530,85,120,60,"Schema Reg","Avro/Protobuf",i)
-    svg += box(530,155,120,60,"Kafka Connect","source/sink",i)
-    svg += box(530,225,120,40,"Kafka UI","monitor",a)
-    svg += arr(500,165,530,165,c,"validate")
-    # Stream Processing
-    svg += section(670,85,215,180,"STREAM PROCESSING",a)
-    svg += box(685,105,185,50,"Apache Flink","stateful streaming",a)
-    svg += box(685,165,185,50,"Spark Streaming","micro-batch 1s",a)
-    svg += box(685,225,185,40,"KSQL","SQL on Kafka",i)
-    svg += arr(660,135,685,135,c,"consume")
-    svg += arr(660,190,685,190,c,"consume")
-    # Consumers/Sinks
-    svg += section(15,285,870,100,"CONSUMER GROUPS AND SINKS",d)
-    sinks = [(60,"🏞️","Data Lake","S3/GCS",d),(190,"📊","ClickHouse","analytics",d),
-             (320,"🔍","OpenSearch","full-text",s),(450,"🤖","ML Platform","features",a),
-             (580,"📡","Real-time","dashboards",i),(710,"🚨","Alerting","PagerDuty",d),(840,"⚡","Cache","Redis",c)]
-    for x,ico,lbl,sub,col in sinks:
-        svg += f'<text x="{x}" y="315" text-anchor="middle" font-size="16" font-family="Arial,sans-serif">{ico}</text>'
-        svg += f'<text x="{x}" y="333" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{x}" y="346" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-        svg += arr(x,362,x,380,col,"",True)
-    # Ops bar
-    svg += section(15,400,870,90,"OPERATIONS",s)
-    ops = [(100,"📊","Burrow","lag monitor"),(250,"🔐","mTLS","encryption"),(400,"📏","Quotas","throttle"),(550,"🔄","MirrorMaker","geo-replicate"),(700,"📋","Audit","compliance"),(830,"💰","Cost","optimization")]
-    for x,ico,lbl,sub in ops:
-        svg += f'<text x="{x}" y="430" text-anchor="middle" font-size="14">{ico}</text>'
-        svg += f'<text x="{x}" y="448" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{x}" y="461" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-    return svg, "Streaming Architecture"
+    C=p["c"]; s=""
+    s+=sf(15,88,155,195,"PRODUCERS",C[1])
+    s+=fb(25,106,130,50,C[1],"App Server","REST events")
+    s+=fb(25,166,130,50,C[2],"IoT Sensors","MQTT bridge")
+    s+=fb(25,226,130,50,C[3],"DB CDC","Debezium")
+    for y in [131,191,251]: s+=ar(155,y,205,y,"white","produce")
+    s+=sf(205,88,305,195,"KAFKA CLUSTER",C[0])
+    for i,(lbl,role) in enumerate([("Broker 1","leader"),("Broker 2","follower"),("Broker 3","follower")]):
+        s+=fb(215+i*97,106,87,165,C[i],lbl,role)
+    s+=f'<text x="357" y="288" text-anchor="middle" fill="#94A3B8" font-size="9" font-family="Arial,sans-serif">RF:3 | 6 partitions | 7d retention</text>'
+    s+=sf(525,88,145,195,"SCHEMA+CONNECT",C[4])
+    s+=fb(535,106,125,70,C[4],"Schema Reg","Avro/Protobuf")
+    s+=fb(535,185,125,70,C[5],"Kafka Connect","source+sink")
+    s+=ar(510,140,535,140,"white","validate")
+    s+=ar(510,220,535,220,"white","stream")
+    s+=sf(685,88,200,195,"STREAM PROC",C[2])
+    s+=fb(695,106,180,55,C[2],"Apache Flink","stateful streaming")
+    s+=fb(695,170,180,55,C[3],"Spark Streaming","micro-batch 1s")
+    s+=fb(695,233,180,42,C[4],"KSQL","SQL on Kafka")
+    s+=ar(670,140,695,140,"white","consume")
+    s+=ar(670,200,695,200,"white","consume")
+    s+=sf(15,297,865,105,"CONSUMER GROUPS AND SINKS",C[3])
+    sinks=[("🏞️","Data Lake","S3/GCS",C[3]),("📊","ClickHouse","analytics",C[4]),("🔍","OpenSearch","full-text",C[5]),("🤖","ML Platform","features",C[0]),("📡","Real-time","dashboards",C[1]),("🚨","Alerting","PagerDuty",C[2]),("⚡","Cache","Redis",C[3])]
+    w=860//len(sinks)
+    for i,(ico,lbl,sub,col) in enumerate(sinks):
+        cx=20+i*w+w//2
+        s+=f'<text x="{cx}" y="326" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
+        s+=fb(cx-50,340,100,48,col,lbl,sub,7)
+    s+=sf(15,415,865,80,"OPERATIONS",C[5])
+    ops=[("📊","Burrow","lag"),("🔐","mTLS","encrypt"),("📏","Quotas","throttle"),("🔄","MirrorMaker","geo-rep"),("📋","Audit","compliance"),("💰","Cost","optimize")]
+    w2=860//len(ops)
+    for i,(ico,lbl,sub) in enumerate(ops):
+        cx=20+i*w2+w2//2
+        s+=f'<text x="{cx}" y="447" text-anchor="middle" font-size="16" font-family="Arial,sans-serif">{ico}</text>'
+        s+=f'<text x="{cx}" y="463" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s+=f'<text x="{cx}" y="477" text-anchor="middle" fill="#94A3B8" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+    return s,"Streaming Architecture"
 
-# ─── ZERO TRUST ──────────────────────────────────────────────────────────────
 def make_zero_trust(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Policy Engine center
-    svg += f'<circle cx="450" cy="270" r="65" fill="{d}" fill-opacity="0.08" stroke="{d}" stroke-width="2" stroke-dasharray="6,3"/>'
-    svg += f'<circle cx="450" cy="270" r="45" fill="{d}" fill-opacity="0.12" stroke="{d}" stroke-width="1.5"/>'
-    svg += f'<text x="450" y="263" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">Policy</text>'
-    svg += f'<text x="450" y="278" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">Engine</text>'
-    svg += f'<text x="450" y="292" text-anchor="middle" fill="{d}" font-size="8" font-family="Arial,sans-serif">PDP / PEP</text>'
-    # Surrounding nodes
-    nodes = [
-        (450,110,"🔑","Identity","SSO/MFA/RBAC",s,450,205),
-        (700,175,"💻","Device Trust","MDM/posture check",a,515,235),
-        (750,310,"🌐","Network","microsegmentation",i,515,280),
-        (600,440,"📱","Workload","container/function",c,490,325),
-        (300,440,"🔐","Data","classify/encrypt",a,410,325),
-        (150,310,"⚔️","WAF/Firewall","L7 inspection",s,385,280),
-        (200,175,"📡","Monitoring","SIEM/SOAR",i,385,235),
-    ]
+    C=p["c"]; s=""; cx,cy=450,275
+    s+=f'<circle cx="{cx}" cy="{cy}" r="70" fill="{C[0]}"/>'
+    s+=f'<circle cx="{cx}" cy="{cy}" r="70" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>'
+    s+=f'<text x="{cx}" y="{cy-10}" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="Arial,sans-serif">Policy</text>'
+    s+=f'<text x="{cx}" y="{cy+8}" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="Arial,sans-serif">Engine</text>'
+    s+=f'<text x="{cx}" y="{cy+26}" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Arial,sans-serif">PDP / PEP</text>'
+    nodes=[(450,108,"🔑","Identity","SSO/MFA/RBAC",C[1],450,205),(710,170,"💻","Device Trust","MDM/posture",C[2],522,238),(755,310,"🌐","Network","microsegment",C[3],520,282),(605,435,"📱","Workload","containers",C[4],492,330),(295,435,"🔐","Data","classify+encrypt",C[5],408,330),(145,310,"⚔️","WAF","L7 inspect",C[1],380,282),(200,170,"📡","Monitoring","SIEM/SOAR",C[2],378,238)]
     for nx,ny,ico,lbl,sub,col,ax,ay in nodes:
-        svg += f'<circle cx="{nx}" cy="{ny}" r="50" fill="{col}" fill-opacity="0.08" stroke="{col}" stroke-width="1.5"/>'
-        svg += f'<text x="{nx}" y="{ny-8}" text-anchor="middle" font-size="20" font-family="Arial,sans-serif">{ico}</text>'
-        svg += f'<text x="{nx}" y="{ny+10}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{nx}" y="{ny+24}" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-        svg += arr(ax,ay,450,270,col,"verify",True)
-    # Banner
-    svg += section(15,490,870,45,"PRINCIPLE: Never Trust, Always Verify   |   Least Privilege Access   |   Assume Breach   |   Continuous Monitoring",d)
-    return svg, "Security Architecture"
+        s+=f'<circle cx="{nx}" cy="{ny}" r="52" fill="{col}"/>'
+        s+=f'<circle cx="{nx}" cy="{ny}" r="52" fill="none" stroke="white" stroke-width="1.5" opacity="0.2"/>'
+        s+=f'<text x="{nx}" y="{ny-8}" text-anchor="middle" font-size="20" font-family="Arial,sans-serif">{ico}</text>'
+        s+=f'<text x="{nx}" y="{ny+10}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s+=f'<text x="{nx}" y="{ny+24}" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+        s+=ar(ax,ay,cx-12,cy-12,"#94A3B8","verify",True)
+    s+=f'<rect x="15" y="495" width="865" height="40" rx="8" fill="{C[0]}" opacity="0.15" stroke="{C[0]}" stroke-width="1.5"/>'
+    s+=f'<text x="450" y="520" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">Never Trust, Always Verify | Least Privilege | Assume Breach | Continuous Monitoring</text>'
+    return s,"Security Architecture"
 
-# ─── AWS ─────────────────────────────────────────────────────────────────────
 def make_aws(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Client
-    svg += section(15,85,870,55,"CLIENT",i)
-    for x,ico,lbl in [(80,"🌐","Browser"),(220,"📱","Mobile"),(360,"💻","CLI/SDK"),(500,"🤝","Partners"),(640,"🤖","IoT"),(780,"🔌","Webhooks")]:
-        svg += f'<text x="{x}" y="108" text-anchor="middle" font-size="16">{ico}</text>'
-        svg += f'<text x="{x}" y="126" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-    # Edge
-    svg += section(15,150,870,65,"EDGE LAYER",s)
-    svg += box(25,162,155,42,"CloudFront","global CDN / PoPs",s)
-    svg += box(190,162,130,42,"Route 53","DNS + health check",s)
-    svg += box(330,162,130,42,"WAF + Shield","DDoS L3/L7",d)
-    svg += box(470,162,130,42,"ACM","TLS certificates",a)
-    svg += box(610,162,150,42,"API Gateway","REST/WS/HTTP",s)
-    svg += box(770,162,110,42,"Cognito","auth/federation",i)
-    svg += arr(180,183,190,183,s)
-    svg += arr(320,183,330,183,s)
-    svg += arr(460,183,470,183,d)
-    svg += arr(600,183,610,183,a)
-    svg += arr(760,183,770,183,s)
-    # Compute
-    svg += section(15,228,430,130,"COMPUTE",c)
-    svg += box(25,248,125,45,"Lambda","serverless FaaS",c)
-    svg += box(160,248,130,45,"ECS/Fargate","containers",c)
-    svg += box(300,248,135,45,"EKS","managed K8s",c)
-    svg += box(25,303,125,45,"Step Functions","orchestration",a)
-    svg += box(160,303,130,45,"App Runner","web services",a)
-    svg += box(300,303,135,45,"Batch","job queues",a)
-    # Messaging
-    svg += section(455,228,435,130,"MESSAGING",s)
-    svg += box(465,248,125,45,"SQS","queue/decouple",s)
-    svg += box(600,248,120,45,"SNS","pub/sub",s)
-    svg += box(730,248,145,45,"EventBridge","event bus",s)
-    svg += box(465,303,125,45,"Kinesis","data streams",i)
-    svg += box(600,303,120,45,"MSK","managed Kafka",i)
-    svg += box(730,303,145,45,"SES","email service",a)
-    svg += arr(450,275,465,275,c,"events")
-    # Data
-    svg += section(15,370,430,115,"DATA AND STORAGE",d)
-    svg += box(25,388,95,42,"S3","object store",d)
-    svg += box(130,388,100,42,"DynamoDB","NoSQL/DAX",d)
-    svg += box(240,388,100,42,"RDS Aurora","MySQL/PG",d)
-    svg += box(350,388,85,42,"ElastiCache","Redis",d)
-    svg += box(25,438,95,38,"Redshift","warehouse",a)
-    svg += box(130,438,100,38,"OpenSearch","search",a)
-    svg += box(240,438,100,38,"Timestream","time series",a)
-    svg += box(350,438,85,38,"Glue","ETL catalog",a)
-    # Security
-    svg += section(455,370,435,115,"SECURITY AND OBSERVABILITY",i)
-    svg += box(465,388,95,42,"IAM","access ctrl",d)
-    svg += box(570,388,95,42,"CloudWatch","metrics/logs",i)
-    svg += box(675,388,95,42,"CloudTrail","audit",i)
-    svg += box(780,388,100,42,"GuardDuty","threat detect",d)
-    svg += box(465,438,95,38,"Secrets Mgr","creds rotate",a)
-    svg += box(570,438,95,38,"X-Ray","tracing",i)
-    svg += box(675,438,95,38,"Config","compliance",s)
-    svg += box(780,438,100,38,"Macie","data security",a)
-    return svg, "Cloud Architecture"
+    C=p["c"]; s=""
+    s+=sf(15,88,865,55,"CLIENT LAYER",C[1])
+    for x,ico,lbl in [(80,"🌐","Browser"),(210,"📱","Mobile"),(340,"💻","CLI/SDK"),(470,"🤝","Partners"),(600,"🤖","IoT"),(730,"🔌","Webhooks")]:
+        s+=f'<text x="{x}" y="110" text-anchor="middle" font-size="16" font-family="Arial,sans-serif">{ico}</text>'
+        s+=f'<text x="{x}" y="128" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+    s+=sf(15,155,865,55,"EDGE LAYER",C[0])
+    for i,(x,lbl,sub,col) in enumerate([(30,"CloudFront","CDN/PoPs",C[0]),(185,"Route 53","DNS+health",C[1]),(330,"WAF+Shield","DDoS L3/L7",C[3]),(475,"ACM","TLS certs",C[2]),(620,"API Gateway","REST/WS",C[4]),(765,"Cognito","auth/federation",C[5])]):
+        s+=fb(x,162,145,40,col,lbl,sub,7)
+    for x in [175,320,465,610,755]: s+=ar(x,182,x+10,182,"white")
+    s+=sf(15,222,425,115,"COMPUTE",C[2])
+    for i,(x,lbl,sub,col) in enumerate([(25,"Lambda","serverless",C[2]),(165,"ECS/Fargate","containers",C[0]),(305,"EKS","managed K8s",C[1]),(25,"Step Func","orchestrate",C[3]),(165,"App Runner","web svcs",C[4]),(305,"Batch","job queues",C[5])]):
+        s+=fb(x,238 if i<3 else 285,130,40,col,lbl,sub,7)
+    s+=sf(450,222,430,115,"MESSAGING",C[4])
+    for i,(x,lbl,sub,col) in enumerate([(460,"SQS","queues",C[4]),(595,"SNS","pub/sub",C[5]),(730,"EventBridge","event bus",C[0]),(460,"Kinesis","streaming",C[1]),(595,"MSK","Kafka",C[2]),(730,"SES","email",C[3])]):
+        s+=fb(x,238 if i<3 else 285,125,40,col,lbl,sub,7)
+    s+=sf(15,350,425,130,"DATA AND STORAGE",C[3])
+    for i,(x,lbl,sub,col) in enumerate([(25,"S3","object store",C[3]),(130,"DynamoDB","NoSQL",C[4]),(235,"RDS Aurora","MySQL/PG",C[5]),(340,"ElastiCache","Redis",C[0]),(25,"Redshift","warehouse",C[1]),(130,"OpenSearch","search",C[2]),(235,"Timestream","time-series",C[3]),(340,"Glue","ETL",C[4])]):
+        s+=fb(x,365 if i<4 else 410,100,40,col,lbl,sub,6)
+    s+=sf(450,350,430,130,"SECURITY AND OBS",C[5])
+    for i,(x,lbl,sub,col) in enumerate([(460,"IAM","access ctrl",C[5]),(570,"CloudWatch","metrics",C[0]),(680,"CloudTrail","audit",C[1]),(790,"GuardDuty","threats",C[2]),(460,"Secrets Mgr","creds",C[3]),(570,"X-Ray","tracing",C[4]),(680,"Config","compliance",C[5]),(790,"Macie","data sec",C[0])]):
+        s+=fb(x,365 if i<4 else 410,100,40,col,lbl,sub,6)
+    return s,"Cloud Architecture"
 
-# ─── DEVSECOPS ────────────────────────────────────────────────────────────────
-def make_devsecops(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    phases = [
-        (50,"IDE","Pre-commit","git-secrets\ngit-leaks","💻",c),
-        (175,"SCM","Code Review","SAST\nSemgrep","📝",s),
-        (300,"Build","Compile","Dependency\nSCA check","🏗️",a),
-        (425,"Test","Quality","DAST\nZAP scan","🧪",i),
-        (550,"Artifact","Registry","Container\nScan: Trivy","📦",d),
-        (675,"Staging","Deploy","IaC Scan\nTerraform","🚀",c),
-        (800,"Prod","Monitor","Runtime\nFalco/SIEM","🛡️",s),
-    ]
-    for x,env,phase,tools,ico,col in phases:
-        svg += f'<rect x="{x}" y="88" width="100" height="200" rx="10" fill="{col}" fill-opacity="0.06" stroke="{col}" stroke-width="1.5"/>'
-        svg += f'<rect x="{x}" y="88" width="100" height="28" rx="8" fill="{col}" fill-opacity="0.3"/>'
-        svg += f'<text x="{x+50}" y="106" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{env}</text>'
-        svg += f'<text x="{x+50}" y="140" text-anchor="middle" font-size="24" font-family="Arial,sans-serif">{ico}</text>'
-        svg += f'<text x="{x+50}" y="162" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{phase}</text>'
-        for li,t in enumerate(tools.split("\n")):
-            svg += f'<text x="{x+50}" y="{198+li*18}" text-anchor="middle" fill="{col}" font-size="9" font-family="Arial,sans-serif">{t}</text>'
-        if x < 800:
-            svg += arr(x+100,188,x+125,188,col)
-    # Gates row
-    svg += section(15,305,870,80,"SECURITY GATES — Fail pipeline on critical findings",d)
-    gates = [(80,"🔴","Critical CVE","block merge"),(220,"🟠","Secrets","block build"),
-             (360,"🟡","OWASP Top10","block deploy"),(500,"🔵","Compliance","block release"),
-             (640,"🟢","Pen Test","quarterly"),(780,"⚪","Audit Log","always")]
-    for x,ico,lbl,action in gates:
-        svg += f'<text x="{x}" y="335" text-anchor="middle" font-size="16">{ico}</text>'
-        svg += f'<text x="{x}" y="353" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{x}" y="368" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{action}</text>'
-    # SIEM/Response
-    svg += section(15,400,430,90,"SIEM AND INCIDENT RESPONSE",d)
-    svg += box(25,420,120,55,"SIEM","Splunk/Sentinel",d)
-    svg += box(155,420,120,55,"SOAR","auto-remediate",s)
-    svg += box(285,420,120,55,"Threat Intel","feeds/IOCs",a)
-    svg += box(415,420,20,55,"","",d)
-    svg += arr(145,447,155,447,d,"correlate")
-    svg += arr(275,447,285,447,s,"respond")
-    svg += section(455,400,430,90,"COMPLIANCE AND POLICY",i)
-    svg += box(465,420,120,55,"CIS Benchmarks","hardening",i)
-    svg += box(595,420,120,55,"SOC2/ISO27001","audit ready",i)
-    svg += box(725,420,145,55,"OPA/Rego","policy as code",a)
-    return svg, "Security Pipeline"
-
-# ─── SYSTEM DESIGN ────────────────────────────────────────────────────────────
-def make_system_design(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Client
-    svg += section(15,85,870,55,"CLIENTS",i)
-    for x,lbl in [(100,"Web Browser"),(280,"Mobile App"),(460,"Desktop App"),(640,"Third-party API"),(820,"IoT Device")]:
-        svg += f'<text x="{x}" y="118" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-    # CDN + LB
-    svg += section(15,150,430,65,"EDGE",s)
-    svg += box(25,163,200,42,"CDN","CloudFront/Akamai",s)
-    svg += box(235,163,200,42,"Load Balancer","L7/health checks",s)
-    svg += arr(225,184,235,184,s,"cache")
-    svg += section(455,150,430,65,"AUTH",d)
-    svg += box(465,163,190,42,"API Gateway","rate limit/route",d)
-    svg += box(665,163,205,42,"Auth Service","OAuth2/JWT/SSO",d)
-    svg += arr(655,184,665,184,d,"auth")
-    # Services
-    svg += section(15,228,870,120,"MICROSERVICES LAYER",c)
-    services = [(40,"User Service","CRUD/profile"),(170,"Order Service","cart/checkout"),(300,"Payment Service","Stripe/PCI"),(430,"Notification","email/SMS/push"),(560,"Search Service","Elasticsearch"),(690,"Recommend","ML-powered"),(820,"Analytics","events/metrics")]
-    for x,lbl,sub in services:
-        svg += box(x,245,115,85,lbl,sub,c)
-    for x in [155,285,415,545,675,805]:
-        svg += arr(x,287,x+15,287,c)
-    # Message Queue
-    svg += section(15,362,870,60,"MESSAGE BROKER",a)
-    svg += box(30,375,150,38,"Kafka","event streaming",a)
-    svg += box(195,375,150,38,"RabbitMQ","task queues",a)
-    svg += box(360,375,150,38,"Redis Pub/Sub","real-time events",i)
-    svg += box(525,375,160,38,"Dead Letter Q","failed messages",d)
-    svg += box(700,375,165,38,"Event Sourcing","audit stream",s)
-    # Data
-    svg += section(15,435,870,55,"DATA LAYER",d)
-    data = [(65,"PostgreSQL","primary OLTP"),(200,"Redis","cache/session"),(335,"MongoDB","document store"),(470,"S3","blob/media"),(605,"Elasticsearch","search index"),(740,"ClickHouse","analytics OLAP"),(875,"Snowflake","data warehouse")]
-    for x,lbl,sub in data:
-        if x < 880:
-            svg += f'<text x="{x}" y="458" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-            svg += f'<text x="{x}" y="472" text-anchor="middle" fill="{d}" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-    return svg, "System Architecture"
-
-# ─── MLOPS ────────────────────────────────────────────────────────────────────
 def make_mlops(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    # Data pipeline
-    svg += section(15,85,870,100,"DATA PIPELINE",s)
-    svg += box(25,100,140,65,"Data Sources","S3/DB/APIs",s)
-    svg += box(180,100,140,65,"Feature Store","Feast/Tecton",s)
-    svg += box(335,100,140,65,"Data Validation","Great Expectations",a)
-    svg += box(490,100,140,65,"Feature Eng","Spark/dbt",a)
-    svg += box(645,100,120,65,"Data Version","DVC/Delta",i)
-    svg += box(780,100,100,65,"Monitoring","data drift",d)
-    svg += arr(165,132,180,132,s,"ingest")
-    svg += arr(320,132,335,132,s,"validate")
-    svg += arr(475,132,490,132,a,"engineer")
-    svg += arr(630,132,645,132,a,"version")
-    svg += arr(765,132,780,132,i,"monitor")
-    # Training
-    svg += section(15,198,870,100,"TRAINING AND EXPERIMENTATION",c)
-    svg += box(25,213,140,65,"Experiment","MLflow/W and B",c)
-    svg += box(180,213,140,65,"Training","GPU cluster",c)
-    svg += box(335,213,140,65,"Hyperparams","Optuna/Ray",c)
-    svg += box(490,213,140,65,"Eval Metrics","F1/AUC/BLEU",a)
-    svg += box(645,213,120,65,"Model Reg","MLflow/HF Hub",i)
-    svg += box(780,213,100,65,"A/B Testing","champion/chall",d)
-    svg += arr(165,245,180,245,c,"track")
-    svg += arr(320,245,335,245,c,"tune")
-    svg += arr(475,245,490,245,c,"evaluate")
-    svg += arr(630,245,645,245,a,"register")
-    svg += arr(765,245,780,245,i,"compare")
-    # Serving
-    svg += section(15,311,870,100,"MODEL SERVING",d)
-    svg += box(25,326,140,65,"Online Serving","FastAPI/TorchServe",d)
-    svg += box(180,326,140,65,"Batch Inference","Spark/Ray",d)
-    svg += box(335,326,140,65,"Streaming","Kafka+Model",d)
-    svg += box(490,326,140,65,"Edge Deploy","ONNX/TFLite",a)
-    svg += box(645,326,120,65,"A/B Shadow","canary model",i)
-    svg += box(780,326,100,65,"Rollback","auto revert",s)
-    svg += arr(165,358,180,358,d,"serve")
-    svg += arr(320,358,335,358,d)
-    svg += arr(475,358,490,358,d)
-    svg += arr(630,358,645,358,a)
-    svg += arr(765,358,780,358,i)
-    # Monitoring
-    svg += section(15,424,870,65,"MONITORING AND FEEDBACK",i)
-    mon = [(80,"Data Drift","PSI/KS test"),(220,"Model Perf","accuracy/F1"),(360,"Latency","p50/p95/p99"),
-           (500,"Concept Drift","retraining trigger"),(640,"Explainability","SHAP/LIME"),(780,"Cost","GPU/token spend")]
-    for x,lbl,sub in mon:
-        svg += f'<text x="{x}" y="450" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{x}" y="464" text-anchor="middle" fill="{i}" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-    svg += curve(850,424,850,85,i,"retrain",True)
-    return svg, "MLOps Pipeline"
+    C=p["c"]; s=""
+    rows=[
+        ("DATA PIPELINE",C[0],[("Data Sources","S3/DB/APIs",C[0]),("Feature Store","Feast/Tecton",C[1]),("Validation","Great Expect",C[2]),("Feature Eng","Spark/dbt",C[3]),("Data Version","DVC/Delta",C[4]),("Data Monitor","drift detect",C[5])]),
+        ("TRAINING",C[1],[("Experiment","MLflow/W&B",C[1]),("Training","GPU cluster",C[2]),("Hyperparam","Optuna/Ray",C[3]),("Eval Metrics","F1/AUC/BLEU",C[4]),("Model Reg","HuggingFace",C[5]),("A/B Testing","champion/chall",C[0])]),
+        ("SERVING",C[2],[("Online Serve","FastAPI/Triton",C[2]),("Batch Infer","Spark/Ray",C[3]),("Streaming","Kafka+Model",C[4]),("Edge Deploy","ONNX/TFLite",C[5]),("Shadow Test","canary model",C[0]),("Rollback","auto revert",C[1])]),
+        ("MONITORING",C[3],[("Data Drift","PSI/KS test",C[3]),("Model Perf","accuracy/F1",C[4]),("Latency","p50/p95/p99",C[5]),("Concept Drift","retrain trig",C[0]),("Explainability","SHAP/LIME",C[1]),("Cost","GPU/token $",C[2])]),
+    ]
+    for ri,(label,col,items) in enumerate(rows):
+        y=88+ri*107
+        s+=sf(15,y,865,95,label,col)
+        for ci,(lbl,sub,ic) in enumerate(items):
+            s+=fb(20+ci*143,y+14,133,68,ic,lbl,sub,8)
+        for x in [153,296,439,582,725]: s+=ar(x,y+48,x+10,y+48,"white")
+    return s,"MLOps Pipeline"
 
-# ─── DATA LAKEHOUSE ───────────────────────────────────────────────────────────
 def make_lakehouse(p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    svg += section(15,85,870,80,"INGESTION",s)
-    sources = [(60,"📊","Batch ETL","Airflow/Glue"),(180,"🌊","Streaming","Kafka/Kinesis"),(300,"🔌","CDC","Debezium"),(420,"📡","API Pull","REST/GraphQL"),(540,"📂","File Drop","S3 trigger"),(660,"🤖","IoT","MQTT bridge"),(790,"📱","App Events","SDK capture")]
-    for x,ico,lbl,sub in sources:
-        svg += f'<text x="{x}" y="115" text-anchor="middle" font-size="18">{ico}</text>'
-        svg += f'<text x="{x}" y="133" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{x}" y="147" text-anchor="middle" fill="{s}" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-        svg += arr(x,162,x,178,s,"",True)
-    svg += section(15,178,870,100,"OPEN TABLE FORMAT LAYER",c)
-    svg += box(30,193,200,70,"Delta Lake","ACID + time travel",c)
-    svg += box(245,193,200,70,"Apache Iceberg","schema evolution",c)
-    svg += box(460,193,200,70,"Apache Hudi","upserts/deletes",c)
-    svg += box(675,193,200,70,"Metadata Catalog","Glue/Hive Metastore",a)
-    svg += arr(230,228,245,228,c,"or")
-    svg += arr(445,228,460,228,c,"or")
-    svg += arr(660,228,675,228,a,"catalog")
-    svg += section(15,292,870,100,"COMPUTE ENGINE",a)
-    svg += box(30,307,190,70,"Apache Spark","SQL/ML/streaming",a)
-    svg += box(235,307,170,70,"Trino/Presto","interactive SQL",a)
-    svg += box(420,307,170,70,"dbt","transform/test",a)
-    svg += box(605,307,170,70,"Ray","ML distributed",i)
-    svg += box(790,307,90,70,"Flink","stream proc",i)
-    svg += section(15,405,870,80,"CONSUMPTION LAYER",d)
-    consumers = [(80,"📊","BI Tools","Tableau/Superset"),(230,"🤖","ML Platform","SageMaker/Vertex"),(380,"🔍","Ad-hoc SQL","Athena/BigQuery"),(530,"📈","Dashboards","Grafana/Looker"),(680,"📡","Data APIs","REST/GraphQL"),(820,"⚡","Streaming","real-time feeds")]
-    for x,ico,lbl,sub in consumers:
-        svg += f'<text x="{x}" y="433" text-anchor="middle" font-size="16">{ico}</text>'
-        svg += f'<text x="{x}" y="451" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        svg += f'<text x="{x}" y="465" text-anchor="middle" fill="{d}" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-    return svg, "Data Architecture"
+    C=p["c"]; s=""
+    s+=sf(15,88,865,75,"INGESTION SOURCES",C[0])
+    srcs=[("📊","Batch ETL","Airflow",C[0]),("🌊","Streaming","Kafka/Kinesis",C[1]),("🔌","CDC","Debezium",C[2]),("📡","API Pull","REST",C[3]),("📂","File Drop","S3 trigger",C[4]),("🤖","IoT","MQTT",C[5]),("📱","App Events","SDK",C[0])]
+    w=860//len(srcs)
+    for i,(ico,lbl,sub,col) in enumerate(srcs):
+        s+=fb(20+i*w,95,w-8,60,col,f"{ico} {lbl}",sub,8)
+    for x in [140,262,384,506,628,750]: s+=ar(x,125,x+8,125,"white")
+    s+=sf(15,175,865,80,"OPEN TABLE FORMAT",C[1])
+    s+=fb(20,188,200,58,C[1],"Delta Lake","ACID + time travel")
+    s+=fb(235,188,200,58,C[2],"Apache Iceberg","schema evolution")
+    s+=fb(450,188,200,58,C[3],"Apache Hudi","upserts/deletes")
+    s+=fb(665,188,200,58,C[4],"Metadata Catalog","Glue/Hive Metastore")
+    for x in [220,435,650]: s+=ar(x,217,x+15,217,"white","or")
+    s+=sf(15,267,865,80,"COMPUTE ENGINE",C[2])
+    s+=fb(20,280,195,58,C[2],"Apache Spark","SQL/ML/streaming")
+    s+=fb(230,280,180,58,C[3],"Trino/Presto","interactive SQL")
+    s+=fb(425,280,180,58,C[4],"dbt","transform/test")
+    s+=fb(620,280,175,58,C[5],"Ray","ML distributed")
+    s+=fb(810,280,60,58,C[0],"Flink","stream")
+    for x in [215,410,605,795]: s+=ar(x,309,x+15,309,"white")
+    s+=sf(15,360,865,75,"CONSUMPTION LAYER",C[3])
+    cons=[("📊","BI Tools","Tableau",C[3]),("🤖","ML Platform","SageMaker",C[4]),("🔍","Ad-hoc SQL","Athena/BQ",C[5]),("📈","Dashboards","Grafana",C[0]),("📡","Data APIs","REST",C[1]),("⚡","Streaming","real-time",C[2])]
+    w2=860//len(cons)
+    for i,(ico,lbl,sub,col) in enumerate(cons):
+        s+=fb(20+i*w2,372,w2-10,55,col,f"{ico} {lbl}",sub,8)
+    s+=f'<rect x="15" y="447" width="865" height="45" rx="10" fill="{C[4]}" opacity="0.12" stroke="{C[4]}" stroke-width="1.5"/>'
+    s+=f'<text x="450" y="475" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">GOVERNANCE: Data Catalog | Column Lineage | Row-level Security | GDPR | Cost Optimization</text>'
+    return s,"Data Architecture"
 
-# ─── GENERIC FALLBACK ────────────────────────────────────────────────────────
-def make_generic(topic_name, p):
-    c,s,a,d,i = p["p"],p["s"],p["a"],p["d"],p["i"]
-    svg = ""
-    svg += section(15,85,870,60,"CLIENT AND EDGE",i)
-    for x,lbl,sub in [(90,"Web/Mobile","React/Native"),(260,"CDN","CloudFront"),(430,"API Gateway","rate limit"),(600,"Auth","OAuth2/JWT"),(770,"DNS","Route 53")]:
-        svg += box(x-70,98,140,38,lbl,sub,i)
-        if x < 770: svg += arr(x+70,117,x+90,117,i)
-    svg += section(15,160,430,130,"MICROSERVICES",c)
-    for y,lbl,sub in [(178,"User Service","auth/profile"),(228,"Order Service","cart/payment"),(278,"Notification","email/SMS/push")]:
-        svg += box(25,y,185,42,lbl,sub,c)
-        svg += box(225,y,205,42,lbl.replace("Service","Worker"),"async processing",a)
-        svg += arr(210,y+21,225,y+21,c,"async")
-    svg += section(455,160,430,130,"DATA SERVICES",d)
-    for y,lbl,sub in [(178,"Search","Elasticsearch"),(228,"Analytics","ClickHouse"),(278,"ML/AI","model serving")]:
-        svg += box(465,y,195,42,lbl,sub,d)
-        svg += box(670,y,200,42,sub.split("/")[0],"primary store",s)
-        svg += arr(660,y+21,670,y+21,d,"query")
-    svg += section(15,305,870,80,"MESSAGE LAYER",a)
-    for x,lbl,sub in [(90,"Kafka","event stream"),(260,"RabbitMQ","task queue"),(430,"Redis","cache/pub-sub"),(600,"SQS","managed queue"),(770,"EventBridge","event bus")]:
-        svg += box(x-70,320,140,52,lbl,sub,a)
-        if x < 770: svg += arr(x+70,346,x+90,346,a)
-    svg += section(15,400,870,90,"DATA STORES",d)
-    for x,lbl,sub in [(90,"PostgreSQL","OLTP/primary"),(240,"Redis","sessions"),(390,"MongoDB","documents"),(540,"S3","blobs/media"),(690,"Redshift","analytics"),(830,"Cassandra","time-series")]:
-        svg += box(x-65,415,130,65,lbl,sub,d)
-    return svg, "System Architecture"
+def make_devsecops(p):
+    C=p["c"]; s=""
+    phases=[("IDE","💻","Pre-commit","git-secrets",C[0]),("SCM","📝","Code Review","SAST/Semgrep",C[1]),("Build","🏗️","Compile","Dep SCA check",C[2]),("Test","🧪","Quality","DAST/ZAP scan",C[3]),("Artifact","📦","Registry","Container Trivy",C[4]),("Staging","🚀","Deploy","IaC/Terraform",C[5]),("Prod","🛡️","Monitor","Falco/SIEM",C[0])]
+    pw=120
+    for i,(env,ico,phase,tools,col) in enumerate(phases):
+        x=15+i*(pw+5)
+        s+=f'<rect x="{x}" y="88" width="{pw}" height="215" rx="10" fill="{col}" fill-opacity="0.1" stroke="{col}" stroke-width="2"/>'
+        s+=f'<rect x="{x}" y="88" width="{pw}" height="28" rx="8" fill="{col}"/>'
+        s+=f'<text x="{x+pw//2}" y="107" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{env}</text>'
+        s+=f'<text x="{x+pw//2}" y="148" text-anchor="middle" font-size="24" font-family="Arial,sans-serif">{ico}</text>'
+        s+=f'<text x="{x+pw//2}" y="168" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{phase}</text>'
+        s+=f'<text x="{x+pw//2}" y="200" text-anchor="middle" fill="{col}" font-size="9" font-family="Arial,sans-serif">{tools}</text>'
+        if i<len(phases)-1: s+=ar(x+pw,195,x+pw+5+2,195,"white")
+    s+=sf(15,316,865,75,"SECURITY GATES",C[3])
+    gates=[("🔴","Critical CVE","block merge",C[3]),("🟠","Secrets","block build",C[4]),("🟡","OWASP","block deploy",C[5]),("🔵","Compliance","block release",C[0]),("🟢","Pen Test","quarterly",C[1]),("⚪","Audit Log","always",C[2])]
+    gw=860//len(gates)
+    for i,(ico,lbl,action,col) in enumerate(gates):
+        cx=20+i*gw+gw//2
+        s+=f'<text x="{cx}" y="345" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
+        s+=f'<text x="{cx}" y="363" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s+=f'<text x="{cx}" y="377" text-anchor="middle" fill="#94A3B8" font-size="8" font-family="Arial,sans-serif">{action}</text>'
+    s+=sf(15,403,420,85,"SIEM AND RESPONSE",C[4])
+    s+=fb(25,418,120,58,C[4],"SIEM","Splunk/Sentinel")
+    s+=fb(155,418,120,58,C[5],"SOAR","auto-remediate")
+    s+=fb(285,418,140,58,C[0],"Threat Intel","feeds/IOCs")
+    s+=ar(145,447,155,447,"white","correlate")
+    s+=ar(275,447,285,447,"white","respond")
+    s+=sf(445,403,435,85,"COMPLIANCE",C[1])
+    s+=fb(455,418,125,58,C[1],"CIS Benchmarks","hardening")
+    s+=fb(590,418,130,58,C[2],"SOC2/ISO27001","audit ready")
+    s+=fb(730,418,140,58,C[3],"OPA/Rego","policy as code")
+    return s,"Security Pipeline"
 
-# ─── MAIN ────────────────────────────────────────────────────────────────────
-def make_diagram(topic_name, topic_id, diagram_type):
-    p = get_palette(topic_id)
-    tid = topic_id.lower()
-    now = datetime.now().strftime("%B %Y")
+def make_rag(p):
+    C=p["c"]; s=""
+    s+=sf(15,88,140,340,"SOURCES",C[1])
+    for cx,cy,ico,lbl in [(87,118,"📄","PDFs"),(87,178,"🌐","Web"),(87,238,"🗄️","DB"),(87,298,"📧","Email"),(87,355,"🎥","Media")]:
+        s+=f'<circle cx="{cx}" cy="{cy}" r="22" fill="{C[1]}"/>'
+        s+=f'<text x="{cx}" y="{cy+6}" text-anchor="middle" font-size="14" font-family="Arial,sans-serif">{ico}</text>'
+        s+=f'<text x="{cx}" y="{cy+36}" text-anchor="middle" fill="white" font-size="9" font-family="Arial,sans-serif">{lbl}</text>'
+        s+=ar(109,cy,158,cy,"white","ingest")
+    s+=sf(158,88,200,340,"INGESTION",C[2])
+    s+=fb(168,108,178,68,C[2],"Chunker","512 tok, 50 overlap")
+    s+=fb(168,190,178,68,C[3],"Embedder","text-embed-3-large")
+    s+=fb(168,272,178,68,C[4],"Metadata","source/date/type")
+    s+=fb(168,354,178,62,C[5],"Dedup","hash-based filter")
+    for y in [176,258,340]: s+=ar(257,y,257,y+14,"white")
+    s+=sf(372,88,170,340,"VECTOR STORE",C[0])
+    s+=fb(382,108,150,68,C[0],"HNSW Index","graph ANN")
+    s+=fb(382,190,150,68,C[1],"Vector DB","Pinecone/Weaviate")
+    s+=fb(382,272,150,68,C[2],"BM25 Index","sparse vectors")
+    s+=fb(382,354,150,62,C[3],"Query Cache","result caching")
+    for y in [142,224,306]: s+=ar(457,y,457,y+14,"white")
+    for y in [142,224,306,385]: s+=ar(346,y,382,y,"white","store")
+    s+=sf(556,88,165,340,"RETRIEVAL",C[4])
+    s+=fb(566,108,145,68,C[4],"Query Analyzer","intent + expand")
+    s+=fb(566,190,145,68,C[5],"HyDE","hypothetical doc")
+    s+=fb(566,272,145,68,C[0],"ANN Search","cosine similarity")
+    s+=fb(566,354,145,62,C[1],"Re-ranker","cross-encoder")
+    for y in [142,224,306]: s+=ar(638,y,638,y+14,"white")
+    for y in [142,224,306,385]: s+=ar(532,y,566,y,"white","query")
+    s+=sf(735,88,145,340,"GENERATION",C[5])
+    s+=fb(745,108,125,68,C[5],"LLM","GPT-4/Claude")
+    s+=fb(745,190,125,68,C[0],"Guardrails","safety filter")
+    s+=fb(745,272,125,68,C[1],"Citations","source refs")
+    s+=fb(745,354,125,62,C[2],"Feedback","RLHF loop")
+    for y in [142,224,306,385]: s+=ar(721,y,745,y,"white","ctx")
+    s+=f'<rect x="15" y="440" width="865" height="50" rx="10" fill="{C[3]}" opacity="0.12" stroke="{C[3]}" stroke-width="1.5"/>'
+    s+=f'<text x="450" y="470" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">EVALUATION: Faithfulness | Answer Relevance | Context Recall | RAGAS Score | Hallucination Rate</text>'
+    return s,"System Architecture"
 
-    if "kube" in tid: content, subtitle = make_kubernetes(p)
-    elif "llm" in tid or "agent" in tid: content, subtitle = make_llm(p)
-    elif "cicd" in tid: content, subtitle = make_cicd(p)
-    elif "kafka" in tid: content, subtitle = make_kafka(p)
-    elif "zero" in tid: content, subtitle = make_zero_trust(p)
-    elif "aws" in tid: content, subtitle = make_aws(p)
-    elif "devsec" in tid: content, subtitle = make_devsecops(p)
-    elif "system" in tid: content, subtitle = make_system_design(p)
-    elif "mlops" in tid: content, subtitle = make_mlops(p)
-    elif "lake" in tid or "data" in tid: content, subtitle = make_lakehouse(p)
-    elif "rag" in tid: content, subtitle = make_rag(p)
-    else: content, subtitle = make_generic(topic_name, p)
+def make_system_design(p):
+    C=p["c"]; s=""
+    s+=sf(15,88,865,50,"CLIENTS",C[0])
+    for x,lbl in [(100,"Web Browser"),(280,"Mobile App"),(460,"Desktop"),(640,"Third-party API"),(820,"IoT Device")]:
+        s+=f'<text x="{x}" y="118" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+    s+=sf(15,150,865,55,"EDGE AND AUTH",C[1])
+    for i,(x,lbl,sub,col) in enumerate([(20,"CDN","CloudFront",C[1]),(180,"Load Balancer","L7/health",C[2]),(340,"API Gateway","rate limit",C[3]),(500,"Auth Service","OAuth2/JWT",C[4]),(660,"WAF","L7 protect",C[0]),(800,"Rate Limiter","throttle",C[5])]):
+        s+=fb(x,158,150,38,col,lbl,sub,7)
+    for x in [170,330,490,650,790]: s+=ar(x,177,x+10,177,"white")
+    s+=sf(15,218,865,105,"MICROSERVICES",C[2])
+    for x,lbl,sub,col in [(20,"User Service","CRUD/profile",C[2]),(145,"Order Service","cart/checkout",C[3]),(270,"Payment","Stripe/PCI",C[4]),(395,"Notification","email/SMS",C[5]),(520,"Search","Elasticsearch",C[0]),(645,"Recommend","ML-powered",C[1]),(770,"Analytics","events",C[2])]:
+        s+=fb(x,232,120,80,col,lbl,sub)
+    for x in [140,265,390,515,640,765]: s+=ar(x,272,x+5,272,"white")
+    s+=sf(15,336,865,55,"MESSAGE BROKER",C[3])
+    for x,lbl,sub,col in [(20,"Kafka","event stream",C[3]),(190,"RabbitMQ","task queues",C[4]),(360,"Redis PubSub","real-time",C[5]),(530,"Dead Letter Q","failed msgs",C[0]),(700,"Event Source","audit stream",C[1])]:
+        s+=fb(x,344,160,38,col,lbl,sub,7)
+    s+=sf(15,405,865,85,"DATA LAYER",C[4])
+    for x,lbl,sub,col in [(20,"PostgreSQL","OLTP",C[4]),(165,"Redis","cache",C[5]),(310,"MongoDB","documents",C[0]),(455,"S3","blob/media",C[1]),(600,"Elasticsearch","search",C[2]),(745,"ClickHouse","analytics",C[3])]:
+        s+=fb(x,416,140,65,col,lbl,sub)
+    return s,"System Architecture"
 
-    all_colors = [p["p"],p["s"],p["a"],p["d"],p["i"]]
-    return wrap_svg(content, topic_name, subtitle, p["p"], now, all_colors)
+def make_generic(topic_name,p):
+    C=p["c"]; s=""
+    s+=sf(15,88,865,55,"CLIENT AND EDGE",C[0])
+    for x,lbl,sub,col in [(20,"Web/Mobile","React/Native",C[0]),(185,"CDN","CloudFront",C[1]),(350,"API Gateway","rate limit",C[2]),(515,"Auth","OAuth2/JWT",C[3]),(680,"DNS","Route 53",C[4])]:
+        s+=fb(x,96,155,38,col,lbl,sub,7)
+    for x in [175,340,505,670]: s+=ar(x,115,x+10,115,"white")
+    s+=sf(15,155,430,120,"MICROSERVICES",C[1])
+    for y,lbl,sub,col in [(170,"User Service","auth/profile",C[1]),(220,"Order Service","cart/payment",C[2]),(270,"Notification","email/SMS/push",C[3])]:
+        s+=fb(25,y,190,42,col,lbl,sub,7)
+        s+=fb(225,y,210,42,lbl+" Worker","async processing",C[4])
+        s+=ar(215,y+21,225,y+21,"white","async")
+    s+=sf(455,155,425,120,"DATA SERVICES",C[2])
+    for y,lbl,sub,col in [(170,"Search","Elasticsearch",C[2]),(220,"Analytics","ClickHouse",C[3]),(270,"ML/AI","model serving",C[4])]:
+        s+=fb(465,y,195,42,col,lbl,sub,7)
+        s+=fb(670,y,200,42,sub.split("/")[0],"primary store",C[5])
+        s+=ar(660,y+21,670,y+21,"white","query")
+    s+=sf(15,288,865,65,"MESSAGE LAYER",C[3])
+    for x,lbl,sub,col in [(20,"Kafka","event stream",C[3]),(195,"RabbitMQ","task queue",C[4]),(370,"Redis","cache/pub-sub",C[5]),(545,"SQS","managed queue",C[0]),(720,"EventBridge","event bus",C[1])]:
+        s+=fb(x,298,165,46,col,lbl,sub,7)
+    s+=sf(15,366,865,120,"DATA STORES",C[4])
+    for x,lbl,sub,col in [(20,"PostgreSQL","OLTP",C[4]),(165,"Redis","sessions",C[5]),(310,"MongoDB","documents",C[0]),(455,"S3","blobs",C[1]),(600,"Redshift","analytics",C[2]),(745,"Cassandra","time-series",C[3])]:
+        s+=fb(x,378,140,95,col,lbl,sub)
+    return s,"System Architecture"
 
+def make_diagram(topic_name,topic_id,diagram_type):
+    p=get_pal(topic_id)
+    now=datetime.now().strftime("%B %Y")
+    accent=p["c"][0]
+    tid=topic_id.lower()
+    if "kube" in tid:        content,subtitle=make_kubernetes(p)
+    elif any(x in tid for x in ["llm","agent"]): content,subtitle=make_llm(p)
+    elif "cicd" in tid:      content,subtitle=make_cicd(p)
+    elif "kafka" in tid:     content,subtitle=make_kafka(p)
+    elif "zero" in tid:      content,subtitle=make_zero_trust(p)
+    elif "aws" in tid:       content,subtitle=make_aws(p)
+    elif "devsec" in tid:    content,subtitle=make_devsecops(p)
+    elif "system" in tid:    content,subtitle=make_system_design(p)
+    elif "mlops" in tid:     content,subtitle=make_mlops(p)
+    elif any(x in tid for x in ["lake","data"]): content,subtitle=make_lakehouse(p)
+    elif "rag" in tid:       content,subtitle=make_rag(p)
+    else:                    content,subtitle=make_generic(topic_name,p)
+    return wrap(content,topic_name,subtitle,accent,now)
 
 class DiagramGenerator:
     def __init__(self):
         Path(OUTPUT_DIR).mkdir(exist_ok=True)
-        log.info("Diagram output directory: " + OUTPUT_DIR + "/")
-
-    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram"):
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = OUTPUT_DIR + "/" + topic_id + "_" + timestamp + ".svg"
-        svg = make_diagram(topic_name or topic_id, topic_id, diagram_type)
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(svg)
-        size_kb = os.path.getsize(filename) / 1024
-        log.info("Diagram saved: " + filename + " (" + str(round(size_kb, 1)) + " KB)")
+        log.info("Diagram output dir: "+OUTPUT_DIR+"/")
+    def save_svg(self,svg_content,topic_id,topic_name="",diagram_type="Architecture Diagram"):
+        timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename=OUTPUT_DIR+"/"+topic_id+"_"+timestamp+".svg"
+        svg=make_diagram(topic_name or topic_id,topic_id,diagram_type)
+        with open(filename,"w",encoding="utf-8") as f: f.write(svg)
+        size_kb=os.path.getsize(filename)/1024
+        log.info("Diagram saved: "+filename+" ("+str(round(size_kb,1))+" KB)")
         return filename
