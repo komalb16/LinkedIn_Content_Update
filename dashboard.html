@@ -1,1128 +1,536 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>LinkedIn Agent — Komal Batra</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+[data-theme="dark"]{--bg:#0b0f19;--bg2:#111827;--bg3:#1a2235;--sur:#151c2c;--sur2:#1e2a3d;--bd:rgba(255,255,255,0.07);--bds:rgba(14,165,233,0.25);--tx:#f1f5f9;--txm:#94a3b8;--txd:#475569;--sh:0 4px 24px rgba(0,0,0,0.4);--gl:0 0 40px rgba(14,165,233,0.07)}
+[data-theme="medium"]{--bg:#1a1f2e;--bg2:#222840;--bg3:#2a3350;--sur:#222840;--sur2:#2a3350;--bd:rgba(255,255,255,0.1);--bds:rgba(14,165,233,0.3);--tx:#e8edf5;--txm:#a0aec0;--txd:#607080;--sh:0 4px 20px rgba(0,0,0,0.3);--gl:0 0 40px rgba(14,165,233,0.1)}
+[data-theme="light"]{--bg:#f0f4f8;--bg2:#e2e8f0;--bg3:#cbd5e1;--sur:#ffffff;--sur2:#f8fafc;--bd:rgba(0,0,0,0.08);--bds:rgba(2,132,199,0.35);--tx:#0f172a;--txm:#475569;--txd:#94a3b8;--sh:0 4px 20px rgba(0,0,0,0.08);--gl:none;--acc:#0284c7;--acc2:#7c3aed}
 
-:root {
-  --bg: #080C14;
-  --surface: #0D1420;
-  --surface2: #131B2E;
-  --border: rgba(255,255,255,0.06);
-  --border-hover: rgba(99,202,183,0.3);
-  --primary: #63CAB7;
-  --primary-dim: rgba(99,202,183,0.12);
-  --purple: #A78BFA;
-  --purple-dim: rgba(167,139,250,0.12);
-  --orange: #FB923C;
-  --orange-dim: rgba(251,146,60,0.12);
-  --red: #F87171;
-  --red-dim: rgba(248,113,113,0.12);
-  --green: #4ADE80;
-  --green-dim: rgba(74,222,128,0.12);
-  --text: #E2E8F0;
-  --text-dim: #64748B;
-  --text-mid: #94A3B8;
-  --mono: 'Space Mono', monospace;
-  --sans: 'DM Sans', sans-serif;
-}
+:root{--acc:#0ea5e9;--acc2:#8b5cf6;--grn:#22c55e;--red:#ef4444;--org:#f97316;--r:14px;--rs:9px;--tr:0.25s cubic-bezier(0.4,0,0.2,1);--fh:'Syne',sans-serif;--fb:'Instrument Sans',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh;transition:background var(--tr),color var(--tr)}
+[data-theme="dark"] body::before,[data-theme="medium"] body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── CONNECT SCREEN ── */
+#cs{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative;z-index:1}
+.cc{background:var(--sur);border:1px solid var(--bd);border-radius:24px;padding:48px 44px;width:100%;max-width:460px;box-shadow:var(--sh),var(--gl);animation:up .5s ease}
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.clogo{display:flex;align-items:center;gap:14px;margin-bottom:36px}
+.clogo-ic{width:48px;height:48px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 24px rgba(14,165,233,0.3)}
+.clogo h1{font-family:var(--fh);font-size:18px;font-weight:700}
+.clogo p{font-size:12px;color:var(--txd);margin-top:2px}
+.cc>h2{font-family:var(--fh);font-size:22px;font-weight:700;margin-bottom:8px}
+.cc>p{font-size:14px;color:var(--txm);margin-bottom:24px;line-height:1.6}
+.smini{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;padding:16px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--bd)}
+.sm{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--txm);line-height:1.5}
+.smn{width:20px;height:20px;min-width:20px;background:var(--acc);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:1px}
+.hint{font-size:11px;color:var(--txd);margin-top:10px;line-height:1.6}
+.hint code{font-family:monospace;background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--acc)}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Grid background */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: 
-    linear-gradient(rgba(99,202,183,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99,202,183,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Glow orbs */
-body::after {
-  content: '';
-  position: fixed;
-  top: -200px; right: -200px;
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(99,202,183,0.06) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glow-orb-2 {
-  position: fixed;
-  bottom: -200px; left: -100px;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.app { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; }
+/* ── DASHBOARD ── */
+#db{display:none}
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px 80px}
 
 /* ── HEADER ── */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 28px 0 32px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 32px;
-}
+header{display:flex;align-items:center;justify-content:space-between;padding:24px 0 20px;border-bottom:1px solid var(--bd);margin-bottom:28px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-ic{width:38px;height:38px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo h1{font-family:var(--fh);font-size:15px;font-weight:700}
+.logo p{font-size:11px;color:var(--txd);margin-top:1px}
+.hright{display:flex;align-items:center;gap:10px}
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+/* Theme switcher */
+.tsw{display:flex;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:3px;gap:2px}
+.tbtn{padding:5px 12px;border-radius:100px;border:none;font-size:11px;font-family:var(--fb);font-weight:500;cursor:pointer;color:var(--txd);background:transparent;transition:all var(--tr);display:flex;align-items:center;gap:5px}
+.tbtn.act{background:var(--sur);color:var(--tx);box-shadow:var(--sh)}
+[data-theme="light"] .tbtn.act{background:white}
 
-.logo-icon {
-  width: 44px; height: 44px;
-  background: linear-gradient(135deg, var(--primary), var(--purple));
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  box-shadow: 0 0 20px rgba(99,202,183,0.3);
-}
+.cpill{display:flex;align-items:center;gap:7px;padding:6px 12px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:100px;font-size:11px;color:var(--grn);font-family:monospace;cursor:pointer;transition:all var(--tr)}
+.cpill:hover{background:rgba(34,197,94,0.15)}
+.dot{width:6px;height:6px;background:var(--grn);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 
-.logo-text h1 {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
+/* ── STATS ── */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);padding:20px;transition:border-color var(--tr),transform var(--tr)}
+.stat:hover{border-color:var(--bds);transform:translateY(-2px)}
+.slbl{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--txd);font-family:monospace;margin-bottom:10px}
+.sval{font-family:var(--fh);font-size:28px;font-weight:800;line-height:1;margin-bottom:4px}
+.ssub{font-size:11px;color:var(--txd)}
 
-.logo-text p {
-  font-size: 12px;
-  color: var(--text-dim);
-  font-family: var(--mono);
-  margin-top: 2px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.status-pill {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
-  background: var(--green-dim);
-  border: 1px solid rgba(74,222,128,0.2);
-  border-radius: 100px;
-  font-size: 12px;
-  font-family: var(--mono);
-  color: var(--green);
-}
-
-.status-dot {
-  width: 7px; height: 7px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
-}
-
-/* ── SETUP BANNER ── */
-.setup-banner {
-  background: linear-gradient(135deg, rgba(251,146,60,0.1), rgba(248,113,113,0.08));
-  border: 1px solid rgba(251,146,60,0.25);
-  border-radius: 14px;
-  padding: 18px 22px;
-  margin-bottom: 28px;
-  display: none;
-  align-items: flex-start;
-  gap: 14px;
-}
-
-.setup-banner.show { display: flex; }
-.setup-banner .icon { font-size: 22px; margin-top: 1px; }
-.setup-banner h3 { font-size: 14px; font-weight: 600; color: var(--orange); margin-bottom: 6px; }
-.setup-banner p { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
-.setup-banner code {
-  font-family: var(--mono);
-  background: rgba(0,0,0,0.3);
-  padding: 2px 7px;
-  border-radius: 4px;
-  font-size: 11px;
-  color: var(--primary);
-}
+/* ── POST BANNER ── */
+.pb{background:linear-gradient(135deg,var(--sur),var(--bg2));border:1px solid var(--bd);border-radius:18px;padding:24px 28px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.pb-l h2{font-family:var(--fh);font-size:17px;font-weight:700;margin-bottom:5px}
+.pb-l p{font-size:13px;color:var(--txm)}
+.pb-r{display:flex;align-items:center;gap:10px;flex-shrink:0}
 
 /* ── GRID ── */
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
 
-/* ── STAT CARDS ── */
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 22px 24px;
-  transition: border-color 0.2s, transform 0.2s;
-  cursor: default;
-}
+/* ── CARDS ── */
+.card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:border-color var(--tr)}
+.card:hover{border-color:var(--bds)}
+.ch{padding:18px 22px 0;display:flex;align-items:center;justify-content:space-between}
+.ct{font-family:var(--fh);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--txm)}
+.cb{padding:16px 22px 22px}
 
-.stat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+/* ── INPUTS & BUTTONS ── */
+.inp{width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px;color:var(--tx);font-family:monospace;font-size:13px;outline:none;transition:border-color var(--tr)}
+.inp:focus{border-color:var(--acc)}
+.inp::placeholder{color:var(--txd)}
+.btn{padding:11px 20px;border-radius:var(--rs);border:none;font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--tr);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.bp{background:var(--acc);color:white}
+.bp:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 16px rgba(14,165,233,0.3)}
+.bg{background:transparent;border:1px solid var(--bd);color:var(--txm)}
+.bg:hover{border-color:var(--bds);color:var(--acc);background:rgba(14,165,233,0.06)}
+.blg{padding:13px 26px;font-size:14px;border-radius:var(--r)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 
-.stat-label {
-  font-size: 11px;
-  color: var(--text-dim);
-  font-family: var(--mono);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  font-family: var(--mono);
-  line-height: 1;
-  margin-bottom: 6px;
-}
-
-.stat-sub {
-  font-size: 12px;
-  color: var(--text-dim);
-}
-
-/* ── CARD ── */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  overflow: hidden;
-}
-
-.card-header {
-  padding: 20px 24px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.card-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-mid);
-  font-family: var(--mono);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.card-body { padding: 20px 24px 24px; }
-
-/* ── CONNECT FORM ── */
-.connect-form {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 0;
-}
-
-.input {
-  flex: 1;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 11px 14px;
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 12px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.input:focus { border-color: var(--primary); }
-.input::placeholder { color: var(--text-dim); }
-
-/* ── BUTTONS ── */
-.btn {
-  padding: 11px 20px;
-  border-radius: 10px;
-  border: none;
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: #0D1420;
-}
-.btn-primary:hover { background: #7DDBCA; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,202,183,0.3); }
-.btn-primary:active { transform: translateY(0); }
-
-.btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-mid);
-}
-.btn-ghost:hover { border-color: var(--border-hover); color: var(--primary); background: var(--primary-dim); }
-
-.btn-danger {
-  background: var(--red-dim);
-  border: 1px solid rgba(248,113,113,0.2);
-  color: var(--red);
-}
-.btn-danger:hover { background: rgba(248,113,113,0.2); }
-
-.btn-purple {
-  background: var(--purple-dim);
-  border: 1px solid rgba(167,139,250,0.2);
-  color: var(--purple);
-}
-.btn-purple:hover { background: rgba(167,139,250,0.2); }
-
-.btn-lg {
-  padding: 15px 28px;
-  font-size: 15px;
-  border-radius: 14px;
-}
-
-.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+/* Dry toggle */
+.dry{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 16px;background:var(--sur2);border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;color:var(--txm);user-select:none;transition:all var(--tr)}
+.dry.on{background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.3);color:var(--org)}
+.sw{width:30px;height:17px;background:var(--bg3);border-radius:100px;position:relative;border:1px solid var(--bd);transition:all .2s}
+.sw::after{content:'';position:absolute;width:11px;height:11px;background:var(--txd);border-radius:50%;top:2px;left:2px;transition:all .2s}
+.dry.on .sw{background:var(--org);border-color:var(--org)}
+.dry.on .sw::after{background:white;transform:translateX(13px)}
 
 /* ── SCHEDULER ── */
-.scheduler {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+.trow{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.tbig{font-family:var(--fh);font-size:46px;font-weight:800;color:var(--acc);letter-spacing:-1px;line-height:1;text-shadow:0 0 30px rgba(14,165,233,0.3)}
+.tctrls{display:flex;gap:14px}
+.tunit{display:flex;flex-direction:column;align-items:center;gap:4px}
+.tbtn2{width:30px;height:30px;background:var(--sur2);border:1px solid var(--bd);border-radius:8px;color:var(--txm);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--tr)}
+.tbtn2:hover{background:rgba(14,165,233,0.1);border-color:var(--acc);color:var(--acc)}
+.tlbl{font-size:9px;color:var(--txd);font-family:monospace;letter-spacing:1px}
+.tzb{padding:5px 10px;background:var(--sur2);border:1px solid var(--bd);border-radius:6px;font-size:10px;font-family:monospace;color:var(--txd);align-self:flex-end}
+.cronbox{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.cronval{font-family:monospace;font-size:13px;color:var(--acc)}
+.cronsub{font-size:11px;color:var(--txd);text-align:right}
+.nrbox{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.15);border-radius:var(--rs);margin-bottom:16px}
+.nrbox h4{font-size:12px;font-weight:600;color:var(--acc);margin-bottom:2px}
+.nrbox p{font-size:11px;color:var(--txd)}
+.cdt{font-family:var(--fh);font-size:18px;font-weight:800;color:var(--acc);margin-left:auto}
 
-.time-picker {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+/* ── TOPIC ── */
+.typerow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.tc{padding:7px 13px;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;font-size:12px;font-weight:500;cursor:pointer;color:var(--txm);transition:all var(--tr);display:flex;align-items:center;gap:5px}
+.tc:hover{color:var(--tx);border-color:var(--bds)}
+.tc.sa{background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.35);color:var(--acc2)}
+.tc.sn{background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.35);color:var(--org)}
+.tc.st{background:rgba(14,165,233,0.1);border-color:rgba(14,165,233,0.35);color:var(--acc)}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:340px;overflow-y:auto}
+.tgrid::-webkit-scrollbar{width:4px}
+.tgrid::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+.tch{padding:9px 12px;background:var(--sur2);border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--txm);transition:all var(--tr)}
+.tch:hover{border-color:var(--bds);color:var(--acc);background:rgba(14,165,233,0.06)}
+.tch.sel{border-color:var(--acc);color:var(--acc);background:rgba(14,165,233,0.08)}
+.tch.ach{border-style:dashed;border-color:rgba(139,92,246,0.3);color:var(--acc2)}
+.tch.ach.sel,.tch.ach:hover{background:rgba(139,92,246,0.08);color:var(--acc2);border-color:var(--acc2)}
 
-.time-display {
-  font-family: var(--mono);
-  font-size: 44px;
-  font-weight: 700;
-  color: var(--primary);
-  text-shadow: 0 0 30px rgba(99,202,183,0.4);
-  letter-spacing: 2px;
-  line-height: 1;
-}
+/* ── RUNS ── */
+.ri{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd);animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.ri:last-child{border-bottom:none}
+.ric{width:34px;height:34px;min-width:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;margin-top:1px}
+.ok{background:rgba(34,197,94,0.1)}.fail{background:rgba(239,68,68,0.1)}.run{background:rgba(249,115,22,0.1);animation:blink 1.5s infinite}.oth{background:var(--sur2)}
+.rib{flex:1;min-width:0}
+.rit{font-size:13px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtopic{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.15);border-radius:100px;font-size:10px;color:var(--acc);font-family:monospace;margin-bottom:4px}
+.rmode{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);border-radius:100px;font-size:10px;color:var(--acc2);font-family:monospace;margin-bottom:4px;margin-left:4px}
+.rimeta{font-size:11px;color:var(--txd);font-family:monospace}
+.rright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.rbadge{padding:3px 9px;border-radius:100px;font-size:10px;font-family:monospace}
+.bsch{background:rgba(14,165,233,0.1);color:var(--acc)}
+.bman{background:rgba(139,92,246,0.1);color:var(--acc2)}
+.bdry{background:rgba(249,115,22,0.1);color:var(--org)}
+.rdur{font-size:10px;color:var(--txd);font-family:monospace}
 
-.time-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+/* ── SPIN & TOAST ── */
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;display:none}
+.spin.on{display:block}
+@keyframes rot{to{transform:rotate(360deg)}}
+.toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:999}
+.toast{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;max-width:300px;box-shadow:var(--sh);animation:tin .3s ease,tout .3s ease 3.7s forwards}
+.toast.ok{border-color:rgba(34,197,94,0.3)}.toast.err{border-color:rgba(239,68,68,0.3)}.toast.info{border-color:rgba(14,165,233,0.3)}
+@keyframes tin{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes tout{to{transform:translateX(110%);opacity:0}}
 
-.time-unit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
+.xl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--txd);font-family:monospace;margin-bottom:10px}
 
-.time-btn {
-  width: 32px; height: 32px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-mid);
-  font-size: 14px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s;
-  font-family: var(--sans);
-}
-.time-btn:hover { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
-
-.time-unit-label { font-size: 10px; color: var(--text-dim); font-family: var(--mono); }
-
-.timezone-badge {
-  padding: 5px 10px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--text-dim);
-  align-self: flex-end;
-  margin-bottom: 4px;
-}
-
-.cron-preview {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-family: var(--mono);
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.cron-preview .label { color: var(--text-dim); font-size: 11px; }
-.cron-preview .value { color: var(--primary); }
-
-/* ── TOPIC PICKER ── */
-.topic-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.topic-chip {
-  padding: 10px 14px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.15s;
-  font-family: var(--sans);
-  color: var(--text-mid);
-  text-align: left;
-}
-
-.topic-chip:hover { border-color: var(--border-hover); color: var(--primary); background: var(--primary-dim); }
-.topic-chip.selected { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
-.topic-chip.auto { border-style: dashed; color: var(--purple); border-color: rgba(167,139,250,0.3); }
-.topic-chip.auto.selected, .topic-chip.auto:hover { background: var(--purple-dim); color: var(--purple); border-color: var(--purple); }
-.topic-chip .chip-icon { font-size: 14px; flex-shrink: 0; }
-
-/* ── POST TYPE TOGGLE ── */
-.post-type-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.type-chip {
-  padding: 8px 14px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s;
-  color: var(--text-mid);
-  font-weight: 500;
-}
-
-.type-chip:hover { border-color: var(--border-hover); color: var(--text); }
-.type-chip.selected { color: white; }
-.type-chip.t-auto.selected { background: var(--purple-dim); border-color: var(--purple); color: var(--purple); }
-.type-chip.t-news.selected { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
-.type-chip.t-topic.selected { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
-
-/* ── RUN NOW SECTION ── */
-.run-section {
-  background: linear-gradient(135deg, var(--surface), #111827);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 28px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.run-left h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-.run-left p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
-
-.run-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.dry-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 8px 14px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  transition: all 0.15s;
-  user-select: none;
-  font-size: 12px;
-  color: var(--text-mid);
-}
-
-.dry-toggle.active { background: var(--orange-dim); border-color: rgba(251,146,60,0.3); color: var(--orange); }
-
-.toggle-switch {
-  width: 32px; height: 18px;
-  background: var(--surface2);
-  border-radius: 100px;
-  position: relative;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-}
-
-.toggle-switch::after {
-  content: '';
-  position: absolute;
-  width: 12px; height: 12px;
-  background: var(--text-dim);
-  border-radius: 50%;
-  top: 2px; left: 2px;
-  transition: all 0.2s;
-}
-
-.dry-toggle.active .toggle-switch { background: var(--orange); border-color: var(--orange); }
-.dry-toggle.active .toggle-switch::after { background: white; transform: translateX(14px); }
-
-/* ── RUNS LOG ── */
-.run-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border);
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-
-.run-item:last-child { border-bottom: none; }
-
-.run-status {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.run-status.success { background: var(--green-dim); }
-.run-status.failed { background: var(--red-dim); }
-.run-status.running { background: var(--orange-dim); animation: pulse 1.5s infinite; }
-.run-status.dry { background: var(--purple-dim); }
-
-.run-info { flex: 1; min-width: 0; }
-.run-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.run-meta { font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
-
-.run-badge {
-  padding: 4px 10px;
-  border-radius: 100px;
-  font-size: 11px;
-  font-family: var(--mono);
-  flex-shrink: 0;
-}
-
-.badge-schedule { background: var(--primary-dim); color: var(--primary); }
-.badge-manual { background: var(--purple-dim); color: var(--purple); }
-.badge-dry { background: var(--orange-dim); color: var(--orange); }
-
-/* ── NEXT RUN BANNER ── */
-.next-run {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
-  background: var(--primary-dim);
-  border: 1px solid rgba(99,202,183,0.2);
-  border-radius: 12px;
-  margin-bottom: 8px;
-}
-
-.next-run-icon { font-size: 22px; }
-.next-run-info { flex: 1; }
-.next-run-info h4 { font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 2px; }
-.next-run-info p { font-size: 12px; color: var(--text-dim); }
-.countdown { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--primary); }
-
-/* ── LOADING SPINNER ── */
-.spinner {
-  width: 18px; height: 18px;
-  border: 2px solid rgba(255,255,255,0.2);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  display: none;
-}
-.spinner.show { display: block; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── TOAST ── */
-.toast-container {
-  position: fixed;
-  bottom: 24px; right: 24px;
-  display: flex; flex-direction: column; gap: 10px;
-  z-index: 100;
-}
-
-.toast {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 18px;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  animation: slideIn 0.3s ease, slideOut 0.3s ease 3.7s forwards;
-  max-width: 320px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-}
-
-.toast.success { border-color: rgba(74,222,128,0.3); }
-.toast.error { border-color: rgba(248,113,113,0.3); }
-.toast.info { border-color: rgba(99,202,183,0.3); }
-
-@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes slideOut { to { transform: translateX(120%); opacity: 0; } }
-
-/* ── DIVIDER ── */
-.divider { height: 1px; background: var(--border); margin: 4px 0 20px; }
-
-/* ── SECTION LABEL ── */
-.section-label {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--text-dim);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-/* ── DEPLOY INSTRUCTIONS ── */
-.deploy-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.deploy-step {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-}
-
-.step-num {
-  width: 26px; height: 26px;
-  background: var(--primary-dim);
-  border: 1px solid rgba(99,202,183,0.3);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--primary);
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.deploy-step-content h4 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
-.deploy-step-content p { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
-.deploy-step-content code {
-  font-family: var(--mono);
-  font-size: 11px;
-  background: rgba(0,0,0,0.3);
-  padding: 2px 7px;
-  border-radius: 4px;
-  color: var(--primary);
-}
-
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  .grid-3 { grid-template-columns: 1fr 1fr; }
-  .grid-2 { grid-template-columns: 1fr; }
-  .run-section { flex-direction: column; align-items: flex-start; }
-  .topic-grid { grid-template-columns: 1fr; }
-}
+@media(max-width:768px){.srow{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.pb{flex-direction:column;align-items:flex-start}.tgrid{grid-template-columns:1fr}.cc{padding:32px 24px}}
 </style>
 </head>
 <body>
-<div class="glow-orb-2"></div>
 
-<div class="app">
-  <!-- HEADER -->
-  <header>
-    <div class="logo">
-      <div class="logo-icon">🤖</div>
-      <div class="logo-text">
+<!-- CONNECT SCREEN -->
+<div id="cs">
+  <div class="cc">
+    <div class="clogo">
+      <div class="clogo-ic">🤖</div>
+      <div>
         <h1>LinkedIn Agent</h1>
-        <p>komal-batra / LinkedIn_Content_Update</p>
+        <p>Komal Batra · Content Dashboard</p>
       </div>
     </div>
-    <div class="header-right">
-      <div class="status-pill" id="connectionStatus">
-        <div class="status-dot"></div>
-        <span id="statusText">Not connected</span>
+    <h2>Connect GitHub</h2>
+    <p>Enter your Personal Access Token to manage posts, view run history, and trigger posts.</p>
+    <div class="smini">
+      <div class="sm"><div class="smn">1</div><span>Go to <code>github.com → Settings → Developer Settings → Personal Access Tokens → Tokens (classic)</code></span></div>
+      <div class="sm"><div class="smn">2</div><span>Click <code>Generate new token</code> → check <code>repo</code> and <code>workflow</code> scopes → set expiry to <code>No expiration</code></span></div>
+      <div class="sm"><div class="smn">3</div><span>Copy the <code>ghp_xxx...</code> token and paste below</span></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <input class="inp" id="tokenInput" type="password" placeholder="ghp_your_token_here" style="flex:1" onkeydown="if(event.key==='Enter')connect()"/>
+      <button class="btn bp" onclick="connect()" id="conBtn">
+        <span id="conTxt">Connect</span>
+        <div class="spin" id="conSpin"></div>
+      </button>
+    </div>
+    <p class="hint">🔒 Token saved in your browser only — sent directly to GitHub API, never stored elsewhere.</p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="db">
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <div class="logo-ic">🤖</div>
+      <div>
+        <h1>LinkedIn Agent</h1>
+        <p>komalb16 / LinkedIn_Content_Update</p>
+      </div>
+    </div>
+    <div class="hright">
+      <div class="tsw">
+        <button class="tbtn" onclick="setTheme('light',this)">☀️ Light</button>
+        <button class="tbtn" onclick="setTheme('medium',this)">🌤 Medium</button>
+        <button class="tbtn act" onclick="setTheme('dark',this)">🌙 Dark</button>
+      </div>
+      <div class="cpill" onclick="disconnect()" title="Click to disconnect">
+        <div class="dot"></div>
+        <span id="connUser">Connected</span>
+        <span style="opacity:.5">✕</span>
       </div>
     </div>
   </header>
 
-  <!-- SETUP BANNER -->
-  <div class="setup-banner show" id="setupBanner">
-    <div class="icon">🔑</div>
-    <div>
-      <h3>Connect your GitHub account to get started</h3>
-      <p>You need a GitHub Personal Access Token with <code>repo</code> and <code>actions:write</code> permissions. 
-      Generate one at <code>github.com → Settings → Developer Settings → Tokens (classic)</code></p>
-    </div>
-  </div>
-
-  <!-- CONNECT -->
-  <div class="card" style="margin-bottom:24px">
-    <div class="card-header"><span class="card-title">GitHub Connection</span></div>
-    <div class="card-body">
-      <div class="connect-form">
-        <input class="input" id="tokenInput" type="password" placeholder="ghp_your_github_personal_access_token"/>
-        <button class="btn btn-primary" onclick="connect()">
-          <span id="connectBtnText">Connect</span>
-          <div class="spinner" id="connectSpinner"></div>
-        </button>
-      </div>
-      <p style="font-size:11px;color:var(--text-dim);margin-top:10px;font-family:var(--mono)">Token is stored in your browser only. Never sent anywhere except GitHub API.</p>
-    </div>
-  </div>
-
   <!-- STATS -->
-  <div class="grid-3" id="statsRow" style="display:none">
-    <div class="stat-card">
-      <div class="stat-label">Total Posts</div>
-      <div class="stat-value" style="color:var(--primary)" id="statTotal">—</div>
-      <div class="stat-sub">all time runs</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">This Week</div>
-      <div class="stat-value" style="color:var(--purple)" id="statWeek">—</div>
-      <div class="stat-sub">successful posts</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Last Post</div>
-      <div class="stat-value" style="color:var(--orange); font-size:18px; padding-top:8px" id="statLast">—</div>
-      <div class="stat-sub" id="statLastSub">—</div>
-    </div>
+  <div class="srow">
+    <div class="stat"><div class="slbl">Total Runs</div><div class="sval" style="color:var(--acc)" id="s1">—</div><div class="ssub">all time</div></div>
+    <div class="stat"><div class="slbl">Successful</div><div class="sval" style="color:var(--grn)" id="s2">—</div><div class="ssub">posts live</div></div>
+    <div class="stat"><div class="slbl">This Week</div><div class="sval" style="color:var(--acc2)" id="s3">—</div><div class="ssub">successful</div></div>
+    <div class="stat"><div class="slbl">Last Post</div><div class="sval" style="color:var(--org);font-size:16px;padding-top:6px" id="s4">—</div><div class="ssub" id="s4b">—</div></div>
   </div>
 
-  <!-- RUN NOW -->
-  <div class="run-section" id="runSection" style="display:none">
-    <div class="run-left">
-      <h2>🚀 Post to LinkedIn</h2>
-      <p>Trigger a post right now. Choose topic type and toggle dry run to preview without posting.</p>
+  <!-- POST NOW -->
+  <div class="pb">
+    <div class="pb-l">
+      <h2>🚀 Post to LinkedIn Now</h2>
+      <p>Trigger a post immediately. Toggle dry run to preview without publishing.</p>
     </div>
-    <div class="run-controls">
-      <div class="dry-toggle" id="dryToggle" onclick="toggleDry()">
-        <div class="toggle-switch"></div>
-        <span>Dry Run</span>
+    <div class="pb-r">
+      <div class="dry" id="dryBtn" onclick="toggleDry()">
+        <div class="sw"></div>
+        <span id="dryLbl">Dry Run</span>
       </div>
-      <button class="btn btn-primary btn-lg" onclick="runNow()" id="runBtn">
-        <span id="runBtnText">▶ Post Now</span>
-        <div class="spinner" id="runSpinner"></div>
+      <button class="btn bp blg" onclick="runNow()" id="runBtn">
+        <span id="runTxt">▶ Post Now</span>
+        <div class="spin" id="runSpin"></div>
       </button>
     </div>
   </div>
 
-  <!-- MAIN GRID -->
-  <div class="grid-2" id="mainGrid" style="display:none">
-
-    <!-- SCHEDULER -->
+  <!-- GRID -->
+  <div class="g2">
+    <!-- SCHEDULE -->
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">⏰ Schedule</span>
-        <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px" onclick="saveSchedule()" id="saveBtn">Save Schedule</button>
-      </div>
-      <div class="card-body">
-        <div class="next-run" id="nextRunBanner">
-          <div class="next-run-icon">📅</div>
-          <div class="next-run-info">
-            <h4>Next scheduled post</h4>
-            <p id="nextRunTime">Loading...</p>
-          </div>
-          <div class="countdown" id="countdown">—</div>
+      <div class="ch"><span class="ct">⏰ Schedule</span><button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="copyCron()">Copy Cron</button></div>
+      <div class="cb">
+        <div class="nrbox">
+          <div><h4>Next scheduled post</h4><p id="nxt">Calculating...</p></div>
+          <div class="cdt" id="cdt">—</div>
         </div>
-
-        <div class="section-label">Posting time (IST)</div>
-        <div class="scheduler">
-          <div class="time-picker">
-            <div class="time-display" id="timeDisplay">10:00</div>
-            <div style="display:flex;gap:16px">
-              <div class="time-unit">
-                <button class="time-btn" onclick="adjustTime('hour',1)">▲</button>
-                <span class="time-unit-label">HR</span>
-                <button class="time-btn" onclick="adjustTime('hour',-1)">▼</button>
-              </div>
-              <div class="time-unit">
-                <button class="time-btn" onclick="adjustTime('min',15)">▲</button>
-                <span class="time-unit-label">MIN</span>
-                <button class="time-btn" onclick="adjustTime('min',-15)">▼</button>
-              </div>
-            </div>
-            <div class="timezone-badge">IST (UTC+5:30)</div>
+        <div class="xl">Posting time — IST</div>
+        <div class="trow">
+          <div class="tbig" id="tdisp">10:00</div>
+          <div class="tctrls">
+            <div class="tunit"><button class="tbtn2" onclick="adj('h',1)">▲</button><span class="tlbl">HR</span><button class="tbtn2" onclick="adj('h',-1)">▼</button></div>
+            <div class="tunit"><button class="tbtn2" onclick="adj('m',15)">▲</button><span class="tlbl">MIN</span><button class="tbtn2" onclick="adj('m',-15)">▼</button></div>
           </div>
-
-          <div class="cron-preview">
-            <div>
-              <div class="label">Cron expression</div>
-              <div class="value" id="cronPreview" style="margin-top:4px">30 4 * * *</div>
-            </div>
-            <div style="font-size:11px;color:var(--text-dim);text-align:right">
-              <div id="utcPreview">4:30 AM UTC</div>
-              <div style="margin-top:2px">every day</div>
-            </div>
-          </div>
+          <div class="tzb">IST +5:30</div>
+        </div>
+        <div class="cronbox">
+          <div><div style="font-size:10px;color:var(--txd);margin-bottom:4px;font-family:monospace">CRON EXPRESSION</div><div class="cronval" id="cronv">30 4 * * *</div></div>
+          <div class="cronsub"><div id="utcv">04:30 UTC</div><div style="margin-top:2px">every day</div></div>
         </div>
       </div>
     </div>
 
-    <!-- TOPIC PICKER -->
+    <!-- TOPIC -->
     <div class="card">
-      <div class="card-header"><span class="card-title">🎯 Topic for Next Post</span></div>
-      <div class="card-body">
-        <div class="section-label" style="margin-bottom:10px">Post type</div>
-        <div class="post-type-row" style="margin-bottom:20px">
-          <div class="type-chip t-auto selected" onclick="selectType('auto',this)">🎲 Auto-mix</div>
-          <div class="type-chip t-news" onclick="selectType('news',this)">📰 News post</div>
-          <div class="type-chip t-topic" onclick="selectType('topic',this)">🔧 Tech topic</div>
+      <div class="ch"><span class="ct">🎯 Topic</span></div>
+      <div class="cb">
+        <div class="xl">Post type</div>
+        <div class="typerow">
+          <div class="tc sa" onclick="selType('a',this)">🎲 Auto-mix</div>
+          <div class="tc" onclick="selType('n',this)">📰 News</div>
+          <div class="tc" onclick="selType('t',this)">🔧 Tech Topic</div>
         </div>
-
-        <div class="section-label">Specific topic (optional)</div>
-        <div class="topic-grid" id="topicGrid">
-          <div class="topic-chip auto selected" data-id="" onclick="selectTopic(this)">
-            <span class="chip-icon">🎲</span> Auto-select
-          </div>
-          <div class="topic-chip" data-id="llm-architecture" onclick="selectTopic(this)"><span class="chip-icon">🤖</span> LLM Architecture</div>
-          <div class="topic-chip" data-id="ai-agents-2025" onclick="selectTopic(this)"><span class="chip-icon">🤖</span> AI Agents</div>
-          <div class="topic-chip" data-id="mlops-pipeline" onclick="selectTopic(this)"><span class="chip-icon">⚙️</span> MLOps Pipeline</div>
-          <div class="topic-chip" data-id="rag-systems" onclick="selectTopic(this)"><span class="chip-icon">🔍</span> RAG Systems</div>
-          <div class="topic-chip" data-id="kubernetes-mastery" onclick="selectTopic(this)"><span class="chip-icon">☸️</span> Kubernetes</div>
-          <div class="topic-chip" data-id="docker-cheatsheet" onclick="selectTopic(this)"><span class="chip-icon">🐳</span> Docker</div>
-          <div class="topic-chip" data-id="aws-architecture" onclick="selectTopic(this)"><span class="chip-icon">☁️</span> AWS Architecture</div>
-          <div class="topic-chip" data-id="cicd-pipelines" onclick="selectTopic(this)"><span class="chip-icon">🚀</span> CI/CD</div>
-          <div class="topic-chip" data-id="system-design" onclick="selectTopic(this)"><span class="chip-icon">🏗️</span> System Design</div>
-          <div class="topic-chip" data-id="api-design" onclick="selectTopic(this)"><span class="chip-icon">🔌</span> API Design</div>
-          <div class="topic-chip" data-id="git-workflow" onclick="selectTopic(this)"><span class="chip-icon">🌿</span> Git Workflow</div>
-          <div class="topic-chip" data-id="solid-principles" onclick="selectTopic(this)"><span class="chip-icon">📐</span> SOLID</div>
-          <div class="topic-chip" data-id="zero-trust" onclick="selectTopic(this)"><span class="chip-icon">🔐</span> Zero Trust</div>
-          <div class="topic-chip" data-id="devsecops" onclick="selectTopic(this)"><span class="chip-icon">🛡️</span> DevSecOps</div>
-          <div class="topic-chip" data-id="data-lakehouse" onclick="selectTopic(this)"><span class="chip-icon">📊</span> Data Lakehouse</div>
-          <div class="topic-chip" data-id="kafka-streaming" onclick="selectTopic(this)"><span class="chip-icon">🌊</span> Kafka</div>
+        <div class="xl">Specific topic (optional)</div>
+        <div class="tgrid" id="tgrid">
+          <div class="tch ach sel" data-id="" onclick="selTopic(this)">🎲 Auto-select</div>
+          <div class="tch" data-id="llm-architecture" onclick="selTopic(this)">🤖 LLM Architecture</div>
+          <div class="tch" data-id="ai-agents-2025" onclick="selTopic(this)">🤖 AI Agents 2025</div>
+          <div class="tch" data-id="mlops-pipeline" onclick="selTopic(this)">⚙️ MLOps Pipeline</div>
+          <div class="tch" data-id="rag-systems" onclick="selTopic(this)">🔍 RAG Systems</div>
+          <div class="tch" data-id="kubernetes-mastery" onclick="selTopic(this)">☸️ Kubernetes</div>
+          <div class="tch" data-id="docker-cheatsheet" onclick="selTopic(this)">🐳 Docker</div>
+          <div class="tch" data-id="aws-architecture" onclick="selTopic(this)">☁️ AWS Architecture</div>
+          <div class="tch" data-id="cicd-pipelines" onclick="selTopic(this)">🚀 CI/CD Pipelines</div>
+          <div class="tch" data-id="system-design" onclick="selTopic(this)">🏗️ System Design</div>
+          <div class="tch" data-id="api-design" onclick="selTopic(this)">🔌 API Design</div>
+          <div class="tch" data-id="git-workflow" onclick="selTopic(this)">🌿 Git Workflow</div>
+          <div class="tch" data-id="solid-principles" onclick="selTopic(this)">📐 SOLID Principles</div>
+          <div class="tch" data-id="zero-trust" onclick="selTopic(this)">🔐 Zero Trust</div>
+          <div class="tch" data-id="devsecops" onclick="selTopic(this)">🛡️ DevSecOps</div>
+          <div class="tch" data-id="data-lakehouse" onclick="selTopic(this)">📊 Data Lakehouse</div>
+          <div class="tch" data-id="kafka-streaming" onclick="selTopic(this)">🌊 Kafka Streaming</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- RUNS LOG -->
-  <div class="card" id="runsCard" style="display:none">
-    <div class="card-header">
-      <span class="card-title">📋 Recent Runs</span>
-      <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px" onclick="loadRuns()">↻ Refresh</button>
-    </div>
-    <div class="card-body" id="runsList">
-      <p style="color:var(--text-dim);font-size:13px">Loading runs...</p>
-    </div>
+  <!-- RUNS -->
+  <div class="card">
+    <div class="ch"><span class="ct">📋 Run History</span><button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button></div>
+    <div class="cb" id="runsList"><p style="color:var(--txd);font-size:13px">Loading...</p></div>
   </div>
 
-  <!-- DEPLOY GUIDE -->
-  <div class="card" style="margin-top:24px" id="deployCard">
-    <div class="card-header"><span class="card-title">📖 How to use this dashboard</span></div>
-    <div class="card-body">
-      <div class="deploy-steps">
-        <div class="deploy-step">
-          <div class="step-num">1</div>
-          <div class="deploy-step-content">
-            <h4>Generate a GitHub Token</h4>
-            <p>Go to <code>github.com → Settings → Developer Settings → Personal access tokens → Tokens (classic)</code> → Generate new token → Check <code>repo</code> and <code>workflow</code> scopes → Copy the token.</p>
-          </div>
-        </div>
-        <div class="deploy-step">
-          <div class="step-num">2</div>
-          <div class="deploy-step-content">
-            <h4>Paste token above and click Connect</h4>
-            <p>The token stays in your browser only. Once connected, your run history and controls will appear.</p>
-          </div>
-        </div>
-        <div class="deploy-step">
-          <div class="step-num">3</div>
-          <div class="deploy-step-content">
-            <h4>Host this dashboard on GitHub Pages</h4>
-            <p>Upload <code>dashboard.html</code> to your repo → Go to <code>Settings → Pages → Source: main branch → /root</code> → Your dashboard will be live at <code>komalb16.github.io/LinkedIn_Content_Update/dashboard.html</code></p>
-          </div>
-        </div>
-        <div class="deploy-step">
-          <div class="step-num">4</div>
-          <div class="deploy-step-content">
-            <h4>Use the dashboard to manage posts</h4>
-            <p>Pick a time → hit Save Schedule → pick a topic → hit Post Now. No cron knowledge needed!</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
 </div>
 
-<!-- TOAST CONTAINER -->
-<div class="toast-container" id="toasts"></div>
+<div class="toasts" id="toasts"></div>
 
 <script>
-const REPO = 'komalb16/LinkedIn_Content_Update';
-const WORKFLOW_ID = 'Linkedin_Content_Update.yml';
+const REPO='komalb16/LinkedIn_Content_Update', WF='Linkedin_Content_Update.yml';
+const TNAMES={'llm-architecture':'LLM Architecture','ai-agents-2025':'AI Agents 2025','mlops-pipeline':'MLOps Pipeline','rag-systems':'RAG Systems','kubernetes-mastery':'Kubernetes','docker-cheatsheet':'Docker','aws-architecture':'AWS Architecture','cicd-pipelines':'CI/CD','system-design':'System Design','api-design':'API Design','git-workflow':'Git Workflow','solid-principles':'SOLID','zero-trust':'Zero Trust','devsecops':'DevSecOps','data-lakehouse':'Data Lakehouse','kafka-streaming':'Kafka'};
+let token=localStorage.getItem('gh_token')||'', isDry=false, topicId='', schedH=10, schedM=0;
 
-let token = localStorage.getItem('gh_token') || '';
-let isDryRun = false;
-let selectedTopic = '';
-let selectedType = 'auto';
-let schedHour = 10;
-let schedMin = 0;
-
-// ── INIT ──────────────────────────────────────────────────────────────
-window.onload = () => {
-  if (token) {
-    document.getElementById('tokenInput').placeholder = 'Token saved ✓ click Connect';
-    document.getElementById('tokenInput').value = '';
-  }
-  updateTimeDisplay();
-  startCountdown();
+window.onload=()=>{
+  const t=localStorage.getItem('gh_token');
+  const th=localStorage.getItem('theme')||'dark';
+  applyTheme(th);
+  if(t){token=t;silentConn();}
+  updTime(); setInterval(updNext,60000);
 };
 
-// ── CONNECTION ────────────────────────────────────────────────────────
-async function connect() {
-  const inputVal = document.getElementById('tokenInput').value.trim();
-  // Only update token if it looks like a real token (not masked bullets)
-  if (inputVal && inputVal.startsWith('ghp_')) {
-    token = inputVal;
-    localStorage.setItem('gh_token', token);
-  }
-  // Load from storage if input is masked or empty
-  if (!token || token.includes('•')) {
-    token = localStorage.getItem('gh_token') || '';
-  }
-  if (!token) { toast('Enter your GitHub token first', 'error'); return; }
-
-  setLoading('connectSpinner', 'connectBtnText', true, 'Connecting...');
-  try {
-    const res = await ghFetch(`/repos/${REPO}`);
-    if (!res.ok) throw new Error('Invalid token or repo not found');
-    localStorage.setItem('gh_token', token);
-    document.getElementById('setupBanner').classList.remove('show');
-    document.getElementById('connectionStatus').style.background = 'var(--green-dim)';
-    document.getElementById('connectionStatus').style.borderColor = 'rgba(74,222,128,0.2)';
-    document.getElementById('statusText').textContent = 'Connected';
-    document.getElementById('statusText').style.color = 'var(--green)';
-    document.getElementById('statusDot')?.style && (document.getElementById('statusDot').style.background = 'var(--green)');
-    document.getElementById('statsRow').style.display = 'grid';
-    document.getElementById('runSection').style.display = 'flex';
-    document.getElementById('mainGrid').style.display = 'grid';
-    document.getElementById('runsCard').style.display = 'block';
-    toast('Connected to GitHub ✓', 'success');
-    await loadRuns();
-    await loadStats();
-  } catch(e) {
-    toast('Connection failed: ' + e.message, 'error');
-  } finally {
-    setLoading('connectSpinner', 'connectBtnText', false, 'Reconnect');
-  }
-}
-
-// ── GITHUB API ────────────────────────────────────────────────────────
-function ghFetch(path, opts={}) {
-  return fetch('https://api.github.com' + path, {
-    ...opts,
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      ...opts.headers
-    }
+// THEME
+function setTheme(t,btn){applyTheme(t);localStorage.setItem('theme',t);}
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.tbtn').forEach(b=>{
+    const labels={'light':'light','medium':'medium','dark':'dark'};
+    b.classList.toggle('act',b.textContent.toLowerCase().includes(t));
   });
 }
 
-// ── LOAD RUNS ─────────────────────────────────────────────────────────
-async function loadRuns() {
-  try {
-    const res = await ghFetch(`/repos/${REPO}/actions/runs?per_page=15`);
-    const data = await res.json();
-    renderRuns(data.workflow_runs || []);
-  } catch(e) {
-    document.getElementById('runsList').innerHTML = '<p style="color:var(--text-dim);font-size:13px">Could not load runs.</p>';
-  }
+// CONNECT
+async function connect(){
+  const v=document.getElementById('tokenInput').value.trim();
+  if(!v||!v.startsWith('ghp_')){toast('Enter a valid token starting with ghp_','err');return;}
+  token=v;
+  setLoad('conSpin','conTxt',true,'Connecting...');
+  try{
+    const r=await gh('/user');
+    if(!r.ok)throw new Error('Invalid token');
+    const u=await r.json();
+    localStorage.setItem('gh_token',token);
+    show(u.login);
+    await Promise.all([loadRuns(),loadStats()]);
+    toast('Connected as '+u.login+' ✓','ok');
+  }catch(e){toast('Failed: '+e.message,'err');}
+  finally{setLoad('conSpin','conTxt',false,'Connect');}
 }
 
-function renderRuns(runs) {
-  const el = document.getElementById('runsList');
-  if (!runs.length) { el.innerHTML = '<p style="color:var(--text-dim);font-size:13px">No runs yet.</p>'; return; }
-  el.innerHTML = runs.slice(0,10).map(r => {
-    const icon = r.conclusion === 'success' ? '✅' : r.conclusion === 'failure' ? '❌' : r.status === 'in_progress' ? '⏳' : '⚪';
-    const statusClass = r.conclusion === 'success' ? 'success' : r.conclusion === 'failure' ? 'failed' : r.status === 'in_progress' ? 'running' : 'dry';
-    const trigger = r.event === 'schedule' ? 'schedule' : r.event === 'workflow_dispatch' ? 'manual' : r.event;
-    const badgeClass = trigger === 'schedule' ? 'badge-schedule' : trigger === 'manual' ? 'badge-manual' : 'badge-dry';
-    const time = new Date(r.created_at);
-    const timeStr = time.toLocaleString('en-IN', {timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    const duration = r.updated_at ? Math.round((new Date(r.updated_at) - new Date(r.created_at))/1000) : '—';
-    return `<div class="run-item">
-      <div class="run-status ${statusClass}">${icon}</div>
-      <div class="run-info">
-        <div class="run-title">${r.display_title || r.name}</div>
-        <div class="run-meta">${timeStr} IST · ${typeof duration === 'number' ? duration+'s' : duration} · #${r.run_number}</div>
+async function silentConn(){
+  try{
+    const r=await gh('/user');
+    if(!r.ok){localStorage.removeItem('gh_token');token='';return;}
+    const u=await r.json();
+    show(u.login);
+    await Promise.all([loadRuns(),loadStats()]);
+  }catch(e){localStorage.removeItem('gh_token');token='';}
+}
+
+function show(u){
+  document.getElementById('cs').style.display='none';
+  document.getElementById('db').style.display='block';
+  document.getElementById('connUser').textContent=u;
+}
+
+function disconnect(){
+  if(!confirm('Disconnect?'))return;
+  localStorage.removeItem('gh_token');token='';
+  document.getElementById('cs').style.display='flex';
+  document.getElementById('db').style.display='none';
+  document.getElementById('tokenInput').value='';
+  toast('Disconnected','info');
+}
+
+// GH API
+function gh(p,o={}){
+  return fetch('https://api.github.com'+p,{...o,headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json',...(o.headers||{})}});
+}
+
+// RUNS
+async function loadRuns(){
+  try{
+    const r=await gh('/repos/'+REPO+'/actions/runs?per_page=20');
+    const d=await r.json();
+    renderRuns(d.workflow_runs||[]);
+  }catch(e){document.getElementById('runsList').innerHTML='<p style="color:var(--txd);font-size:13px">Could not load runs.</p>';}
+}
+
+function renderRuns(runs){
+  const el=document.getElementById('runsList');
+  if(!runs.length){el.innerHTML='<p style="color:var(--txd);font-size:13px">No runs yet.</p>';return;}
+  el.innerHTML=runs.slice(0,12).map(r=>{
+    const ok=r.conclusion==='success', fail=r.conclusion==='failure', running=r.status==='in_progress'||r.status==='queued';
+    const ico=ok?'✅':fail?'❌':running?'⏳':'⚪';
+    const icls=ok?'ok':fail?'fail':running?'run':'oth';
+    const trig=r.event==='schedule'?'schedule':r.event==='workflow_dispatch'?'manual':r.event;
+    const bcls=trig==='schedule'?'bsch':trig==='manual'?'bman':'bdry';
+    const t=new Date(r.created_at);
+    const ts=t.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const dur=r.updated_at?Math.round((new Date(r.updated_at)-t)/1000):null;
+    const ds=dur?(dur>60?Math.floor(dur/60)+'m '+dur%60+'s':dur+'s'):'—';
+    const topic=getTopicFromRun(r);
+    const mode=getModeFromRun(r);
+    const topicHtml=topic?`<div class="rtopic">🎯 ${topic}</div>`:(trig==='schedule'?'<div class="rtopic">🎲 Auto</div>':'');
+    const modeHtml=mode?`<div class="rmode">${mode}</div>`:'';
+    return `<div class="ri">
+      <div class="ric ${icls}">${ico}</div>
+      <div class="rib">
+        <div class="rit">${r.display_title||r.name||'Run #'+r.run_number}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:3px">${topicHtml}${modeHtml}</div>
+        <div class="rimeta">${ts} IST · #${r.run_number}</div>
       </div>
-      <div class="run-badge ${badgeClass}">${trigger}</div>
+      <div class="rright">
+        <div class="rbadge ${bcls}">${trig}</div>
+        <div class="rdur">${ds}</div>
+      </div>
     </div>`;
   }).join('');
 }
 
-// ── LOAD STATS ────────────────────────────────────────────────────────
-async function loadStats() {
-  try {
-    const res = await ghFetch(`/repos/${REPO}/actions/runs?per_page=100`);
-    const data = await res.json();
-    const runs = data.workflow_runs || [];
-    const successful = runs.filter(r => r.conclusion === 'success');
-    const weekAgo = new Date(Date.now() - 7*24*60*60*1000);
-    const thisWeek = successful.filter(r => new Date(r.created_at) > weekAgo);
-    document.getElementById('statTotal').textContent = successful.length;
-    document.getElementById('statWeek').textContent = thisWeek.length;
-    if (successful.length > 0) {
-      const last = successful[0];
-      const t = new Date(last.created_at);
-      const diff = Math.floor((Date.now() - t) / (1000*60*60));
-      document.getElementById('statLast').textContent = diff < 24 ? diff+'h ago' : Math.floor(diff/24)+'d ago';
-      document.getElementById('statLastSub').textContent = t.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' IST';
-    }
-  } catch(e) {}
-}
-
-// ── RUN NOW ───────────────────────────────────────────────────────────
-async function runNow() {
-  setLoading('runSpinner', 'runBtnText', true, 'Triggering...');
-  try {
-    const inputs = { dry_run: isDryRun ? 'true' : 'false' };
-    if (selectedTopic) inputs.topic_id = selectedTopic;
-    const res = await ghFetch(`/repos/${REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`, {
-      method: 'POST',
-      body: JSON.stringify({ ref: 'main', inputs })
-    });
-    if (res.status === 204) {
-      toast(isDryRun ? '🧪 Dry run triggered!' : '🚀 Post triggered!', 'success');
-      setTimeout(loadRuns, 3000);
-      setTimeout(loadStats, 5000);
-    } else {
-      const err = await res.json();
-      throw new Error(err.message || 'Failed');
-    }
-  } catch(e) {
-    toast('Error: ' + e.message, 'error');
-  } finally {
-    setLoading('runSpinner', 'runBtnText', false, '▶ Post Now');
+function getTopicFromRun(r){
+  const title=(r.display_title||r.name||'').toLowerCase();
+  for(const[id,name]of Object.entries(TNAMES)){
+    if(title.includes(id)||title.includes(name.toLowerCase()))return name;
   }
+  return null;
 }
 
-// ── SCHEDULE ──────────────────────────────────────────────────────────
-function adjustTime(unit, delta) {
-  if (unit === 'hour') { schedHour = (schedHour + delta + 24) % 24; }
-  if (unit === 'min') { schedMin = (schedMin + delta + 60) % 60; }
-  updateTimeDisplay();
+function getModeFromRun(r){
+  const title=(r.display_title||r.name||'').toLowerCase();
+  if(title.includes('news')||title.includes('layoff'))return '📰 News';
+  if(title.includes('tool'))return '🔧 Tools';
+  if(title.includes('dry'))return '🧪 Dry';
+  return null;
 }
 
-function updateTimeDisplay() {
-  const h = String(schedHour).padStart(2,'0');
-  const m = String(schedMin).padStart(2,'0');
-  document.getElementById('timeDisplay').textContent = h + ':' + m;
-  // IST to UTC: subtract 5h30m
-  const utcMin = (schedHour * 60 + schedMin - 330 + 1440) % 1440;
-  const utcH = Math.floor(utcMin / 60);
-  const utcM = utcMin % 60;
-  const cronExpr = `${utcM} ${utcH} * * *`;
-  document.getElementById('cronPreview').textContent = cronExpr;
-  document.getElementById('utcPreview').textContent = `${String(utcH).padStart(2,'0')}:${String(utcM).padStart(2,'0')} UTC`;
-  updateNextRun();
+// STATS
+async function loadStats(){
+  try{
+    const r=await gh('/repos/'+REPO+'/actions/runs?per_page=100');
+    const d=await r.json();
+    const runs=d.workflow_runs||[];
+    const succ=runs.filter(r=>r.conclusion==='success');
+    const wk=new Date(Date.now()-7*24*60*60*1000);
+    const tw=succ.filter(r=>new Date(r.created_at)>wk);
+    document.getElementById('s1').textContent=runs.length;
+    document.getElementById('s2').textContent=succ.length;
+    document.getElementById('s3').textContent=tw.length;
+    if(succ.length>0){
+      const last=succ[0], diff=Math.floor((Date.now()-new Date(last.created_at))/(1000*60*60));
+      document.getElementById('s4').textContent=diff<1?'Just now':diff<24?diff+'h ago':Math.floor(diff/24)+'d ago';
+      document.getElementById('s4b').textContent=new Date(last.created_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' IST';
+    }
+  }catch(e){}
 }
 
-function updateNextRun() {
-  const now = new Date();
-  const ist = new Date(now.toLocaleString('en-US', {timeZone:'Asia/Kolkata'}));
-  const next = new Date(ist);
-  next.setHours(schedHour, schedMin, 0, 0);
-  if (next <= ist) next.setDate(next.getDate() + 1);
-  const diffMs = next - ist;
-  const diffH = Math.floor(diffMs / (1000*60*60));
-  const diffM = Math.floor((diffMs % (1000*60*60)) / (1000*60));
-  document.getElementById('nextRunTime').textContent = 
-    next.toLocaleString('en-IN', {weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) + ' IST';
-  document.getElementById('countdown').textContent = diffH + 'h ' + diffM + 'm';
+// RUN NOW
+async function runNow(){
+  setLoad('runSpin','runTxt',true,'Triggering...');
+  try{
+    const inp={dry_run:isDry?'true':'false'};
+    if(topicId)inp.topic_id=topicId;
+    const r=await gh('/repos/'+REPO+'/actions/workflows/'+WF+'/dispatches',{method:'POST',body:JSON.stringify({ref:'main',inputs:inp})});
+    if(r.status===204){
+      toast(isDry?'🧪 Dry run triggered!':'🚀 Post triggered! Check LinkedIn in ~2 min','ok');
+      setTimeout(loadRuns,4000); setTimeout(loadStats,6000);
+    }else{const e=await r.json();throw new Error(e.message||'Failed');}
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{setLoad('runSpin','runTxt',false,isDry?'🧪 Dry Run':'▶ Post Now');}
 }
 
-function startCountdown() {
-  setInterval(updateNextRun, 60000);
+// SCHEDULE
+function adj(u,d){if(u==='h')schedH=(schedH+d+24)%24;else schedM=(schedM+d+60)%60;updTime();}
+function updTime(){
+  const h=String(schedH).padStart(2,'0'),m=String(schedM).padStart(2,'0');
+  document.getElementById('tdisp').textContent=h+':'+m;
+  const um=(schedH*60+schedM-330+1440)%1440, uh=Math.floor(um/60), umm=um%60;
+  document.getElementById('cronv').textContent=umm+' '+uh+' * * *';
+  document.getElementById('utcv').textContent=String(uh).padStart(2,'0')+':'+String(umm).padStart(2,'0')+' UTC';
+  updNext();
+}
+function updNext(){
+  const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+  const nx=new Date(ist); nx.setHours(schedH,schedM,0,0);
+  if(nx<=ist)nx.setDate(nx.getDate()+1);
+  const df=nx-ist, dh=Math.floor(df/(1000*60*60)), dm=Math.floor((df%(1000*60*60))/(1000*60));
+  document.getElementById('nxt').textContent=nx.toLocaleString('en-IN',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' IST';
+  document.getElementById('cdt').textContent=dh+'h '+dm+'m';
+}
+function copyCron(){
+  const c=document.getElementById('cronv').textContent;
+  navigator.clipboard?.writeText(c).then(()=>toast('Copied: '+c,'ok')).catch(()=>toast('Cron: '+c,'info'));
 }
 
-async function saveSchedule() {
-  toast('To apply schedule changes, update the cron in your workflow file:\n' + document.getElementById('cronPreview').textContent, 'info');
-  // In future: could auto-update via GitHub API file edit
+// TOPIC / TYPE
+function selTopic(el){document.querySelectorAll('.tch').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');topicId=el.dataset.id;}
+function selType(t,el){
+  document.querySelectorAll('.tc').forEach(c=>{c.className='tc';});
+  el.classList.add('s'+t);
 }
 
-// ── TOPIC SELECTION ───────────────────────────────────────────────────
-function selectTopic(el) {
-  document.querySelectorAll('.topic-chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedTopic = el.dataset.id;
+// DRY
+function toggleDry(){
+  isDry=!isDry;
+  document.getElementById('dryBtn').classList.toggle('on',isDry);
+  document.getElementById('runTxt').textContent=isDry?'🧪 Dry Run':'▶ Post Now';
 }
 
-function selectType(type, el) {
-  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedType = type;
+// HELPERS
+function setLoad(sid,tid,l,t){
+  document.getElementById(sid).classList.toggle('on',l);
+  document.getElementById(tid).textContent=t;
+  const b=document.getElementById(sid).closest('button');
+  if(b)b.disabled=l;
 }
-
-// ── DRY RUN ───────────────────────────────────────────────────────────
-function toggleDry() {
-  isDryRun = !isDryRun;
-  const el = document.getElementById('dryToggle');
-  el.classList.toggle('active', isDryRun);
-  document.getElementById('runBtnText').textContent = isDryRun ? '🧪 Dry Run' : '▶ Post Now';
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────────
-function setLoading(spinnerId, textId, loading, text) {
-  document.getElementById(spinnerId).classList.toggle('show', loading);
-  document.getElementById(textId).textContent = loading ? text : text;
-  const btn = document.getElementById(spinnerId).closest('button');
-  if (btn) btn.disabled = loading;
-}
-
-function toast(msg, type='info') {
-  const icons = {success:'✅', error:'❌', info:'ℹ️'};
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+function toast(m,t='info'){
+  const i={ok:'✅',err:'❌',info:'ℹ️'};
+  const el=document.createElement('div');
+  el.className='toast '+t;
+  el.innerHTML=`<span>${i[t]||'ℹ️'}</span><span>${m}</span>`;
   document.getElementById('toasts').appendChild(el);
-  setTimeout(() => el.remove(), 4200);
+  setTimeout(()=>el.remove(),4200);
 }
 </script>
 </body>
