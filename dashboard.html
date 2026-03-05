@@ -905,8 +905,8 @@ let schedMin = 0;
 // ── INIT ──────────────────────────────────────────────────────────────
 window.onload = () => {
   if (token) {
-    document.getElementById('tokenInput').value = '••••••••••••••••';
-    connect();
+    document.getElementById('tokenInput').placeholder = 'Token saved ✓ click Connect';
+    document.getElementById('tokenInput').value = '';
   }
   updateTimeDisplay();
   startCountdown();
@@ -915,7 +915,15 @@ window.onload = () => {
 // ── CONNECTION ────────────────────────────────────────────────────────
 async function connect() {
   const inputVal = document.getElementById('tokenInput').value.trim();
-  if (inputVal && !inputVal.startsWith('•')) token = inputVal;
+  // Only update token if it looks like a real token (not masked bullets)
+  if (inputVal && inputVal.startsWith('ghp_')) {
+    token = inputVal;
+    localStorage.setItem('gh_token', token);
+  }
+  // Load from storage if input is masked or empty
+  if (!token || token.includes('•')) {
+    token = localStorage.getItem('gh_token') || '';
+  }
   if (!token) { toast('Enter your GitHub token first', 'error'); return; }
 
   setLoading('connectSpinner', 'connectBtnText', true, 'Connecting...');
