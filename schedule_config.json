@@ -24,7 +24,7 @@
     },
     "sat": {
       "enabled": true,
-      "time_ist": "03:45"
+      "time_ist": "02:00"
     },
     "sun": {
       "enabled": false,
@@ -33,5 +33,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-06T20:14:49.236Z"
+  "updated_at": "2026-03-06T20:15:18.131Z"
 }
