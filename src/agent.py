@@ -206,6 +206,32 @@ def get_post_mode():
         return "topic"
 
 
+
+def write_github_summary(topic_name, mode, post_preview, dry_run=False):
+    """Write job summary to GitHub Actions step summary file."""
+    summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary_file:
+        return  # not running in GitHub Actions
+    try:
+        preview = post_preview[:300].replace("\n", "\n> ") if post_preview else "—"
+        status  = "🧪 Dry Run" if dry_run else "✅ Published"
+        lines = [
+            f"## {status} — LinkedIn Post",
+            f"| Field | Value |",
+            f"|-------|-------|",
+            f"| **Topic** | {topic_name} |",
+            f"| **Mode** | {mode} |",
+            f"| **Dry Run** | {'Yes' if dry_run else 'No'} |",
+            f"",
+            f"### Post Preview",
+            f"> {preview}",
+        ]
+        with open(summary_file, "a") as f:
+            f.write("\n".join(lines) + "\n")
+        log.info("GitHub step summary written")
+    except Exception as e:
+        log.warning(f"Could not write step summary: {e}")
+
 def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False):
     log.info("=" * 60)
     log.info("LinkedIn Agent — Komal Batra — " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -316,6 +342,7 @@ Do NOT mention current month or year."""
     if dry_run:
         with open("output_post_" + topic["id"] + ".txt", "w") as f:
             f.write(post_text)
+        write_github_summary(topic["name"], mode, post_text, dry_run=True)
         log.info("DRY RUN complete. Post saved.")
         return
 
@@ -327,6 +354,7 @@ Do NOT mention current month or year."""
     )
     if result.get("success"):
         log.info("Posted! ID: " + str(result.get("post_id")))
+        write_github_summary(topic["name"], mode, post_text, dry_run=False)
         topic_mgr.save_run_history({
             "timestamp": datetime.now().isoformat(),
             "topic_id": topic["id"],

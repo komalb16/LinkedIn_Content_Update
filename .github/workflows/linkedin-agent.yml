@@ -1,4 +1,5 @@
 name: LinkedIn Content Agent
+run-name: "LinkedIn Agent · ${{ github.event_name == 'workflow_dispatch' && 'Manual' || 'Scheduled' }} · ${{ github.event.inputs.topic_id || 'auto-topic' }}"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Runs once daily. The workflow cron fires at 3:00 AM UTC (8:30 AM IST).
@@ -27,6 +28,7 @@ on:
 jobs:
   post:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository

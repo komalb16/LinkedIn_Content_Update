@@ -197,10 +197,15 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .run-detail-footer{padding:14px 24px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--bg2)}
 
 /* ── EXPORT BAR ── */
-.export-bar{display:flex;align-items:center;gap:8px;padding:10px 22px;border-top:1px solid var(--bd);background:var(--sur2);flex-wrap:wrap}
-.export-bar span{font-size:11px;color:var(--txd);font-family:var(--fm)}
-.xbtn{padding:5px 13px;border-radius:100px;font-size:11px;font-weight:600;font-family:var(--fm);cursor:pointer;border:1.5px solid var(--bd);color:var(--txm);background:var(--sur);transition:all var(--tr)}
-.xbtn:hover{border-color:var(--bds);color:var(--acc);background:rgba(79,156,249,.08)}
+/* export-bar styles moved to dropdown */
+
+
+/* ── EXPORT DROPDOWN MENU ── */
+.export-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--sur);border:1.5px solid var(--bd);border-radius:12px;box-shadow:var(--shh);padding:6px;min-width:180px;z-index:200;display:none;flex-direction:column;gap:1px;animation:up .15s ease}
+.export-menu.open{display:flex}
+.export-menu button{padding:8px 12px;text-align:left;font-size:12px;font-family:var(--fb);color:var(--tx);background:none;border:none;border-radius:8px;cursor:pointer;transition:background var(--tr);white-space:nowrap}
+.export-menu button:hover{background:rgba(79,156,249,.1);color:var(--acc)}
+.em-label{font-size:10px;font-family:var(--fm);color:var(--txd);padding:6px 12px 2px;text-transform:uppercase;letter-spacing:.8px}
 
 /* ── RUN HISTORY FILTER BAR ── */
 .run-filter-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:14px 22px 10px;border-bottom:1px solid var(--bd)}
@@ -634,7 +639,23 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   <div class="card">
     <div class="ch">
       <span class="ct">📋 Run History</span>
-      <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button>
+      <div style="display:flex;align-items:center;gap:8px;position:relative">
+        <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button>
+        <div style="position:relative">
+          <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="toggleExportMenu(event)">⬇ Export ▾</button>
+          <div class="export-menu" id="exportMenu">
+            <div class="em-label">Spreadsheet</div>
+            <button onclick="exportRuns('csv');closeExportMenu()">📊 CSV</button>
+            <button onclick="exportRuns('xlsx');closeExportMenu()">📗 Excel (XLSX)</button>
+            <button onclick="exportRuns('tsv');closeExportMenu()">📋 TSV</button>
+            <div class="em-label">Document</div>
+            <button onclick="exportRuns('json');closeExportMenu()">🗂️ JSON</button>
+            <button onclick="exportRuns('md');closeExportMenu()">📝 Markdown</button>
+            <button onclick="exportRuns('txt');closeExportMenu()">📄 Plain Text</button>
+            <button onclick="exportRuns('html');closeExportMenu()">🌐 HTML Table</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- DATE FILTER BAR -->
@@ -657,13 +678,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     </div>
 
     <div id="runsList"><div class="run-empty"><div class="run-empty-ico">🔄</div><span>Loading runs...</span></div></div>
-    <div class="export-bar">
-      <span>Export:</span>
-      <button class="xbtn" onclick="exportRuns('csv')">⬇ CSV</button>
-      <button class="xbtn" onclick="exportRuns('json')">⬇ JSON</button>
-      <button class="xbtn" onclick="exportRuns('tsv')">⬇ TSV</button>
-      <button class="xbtn" onclick="exportRuns('md')">⬇ Markdown</button>
-    </div>
+
   </div>
 
 </div>
@@ -845,6 +860,41 @@ function closeRunDetail(e) {
 }
 
 // ── EXPORT ────────────────────────────────────────────────────────────────────
+function toggleExportMenu(e) {
+  e.stopPropagation();
+  const m = document.getElementById('exportMenu');
+  m.classList.toggle('open');
+  if (m.classList.contains('open')) {
+    // Close on outside click
+    setTimeout(() => document.addEventListener('click', closeExportMenu, {once:true}), 0);
+  }
+}
+function closeExportMenu() {
+  document.getElementById('exportMenu')?.classList.remove('open');
+}
+
+
+async function _exportXlsx(rows, tz) {
+  // Lazy-load SheetJS from CDN
+  if (!window.XLSX) {
+    try {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    } catch(e) { toast('Could not load Excel library — try CSV instead', 'err'); return; }
+  }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  // Column widths
+  ws['!cols'] = [6,12,12,25,15,22,10,12,50].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Run History');
+  XLSX.writeFile(wb, `linkedin-runs-${new Date().toISOString().split('T')[0]}.xlsx`);
+  toast(`Downloaded ${rows.length} runs as .XLSX`, 'ok');
+}
+
 function exportRuns(fmt) {
   const { from, to } = getFilterRange();
   let filtered = allRuns;
@@ -887,6 +937,24 @@ function exportRuns(fmt) {
     const dataRows = rows.map(r => '| ' + mdKeys.map((k,i) => pad(r[k]??'',widths[i])).join(' | ') + ' |');
     content = `# LinkedIn Agent — Run History\n> Exported ${new Date().toLocaleDateString()} · Timezone: ${userTZ}\n\n${header}\n|${hr}|\n${dataRows.join('\n')}\n`;
     mime = 'text/markdown'; ext = 'md';
+  } else if (fmt === 'txt') {
+    const w = [8,10,12,20,12,18,10];
+    const pad = (s,n) => String(s??'').padEnd(n).slice(0,n);
+    const hdrs = ['Run#','Status','Trigger','Topic','Mode','Started','Duration'];
+    const keys = ['run_number','status','trigger','topic','mode','started_local','duration_s'];
+    const line = '+' + w.map(n=>'-'.repeat(n+2)).join('+') + '+';
+    const row  = r => '| ' + keys.map((k,i)=>pad(r[k],w[i])).join(' | ') + ' |';
+    content = `LinkedIn Agent — Run History\nExported: ${new Date().toLocaleDateString()} | TZ: ${userTZ}\n\n${line}\n| ${hdrs.map((h,i)=>pad(h,w[i])).join(' | ')} |\n${line}\n${rows.map(row).join('\n')}\n${line}\n`;
+    mime = 'text/plain'; ext = 'txt';
+  } else if (fmt === 'html') {
+    const hdrs = ['Run #','Status','Trigger','Topic','Mode','Started ('+userTZ+')','Duration','Link'];
+    const trs  = rows.map(r => `<tr><td>${r.run_number}</td><td>${r.status}</td><td>${r.trigger}</td><td>${r.topic}</td><td>${r.mode}</td><td>${r.started_local}</td><td>${r.duration_s}s</td><td><a href="${r.github_url}" target="_blank">View</a></td></tr>`).join('');
+    content = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>LinkedIn Run History</title><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px 12px;text-align:left}th{background:#f0f4ff}tr:nth-child(even){background:#f9f9f9}</style></head><body><h2>LinkedIn Agent — Run History</h2><p>Exported ${new Date().toLocaleDateString()} · Timezone: ${userTZ}</p><table><thead><tr>${hdrs.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table></body></html>`;
+    mime = 'text/html'; ext = 'html';
+  } else if (fmt === 'xlsx') {
+    // Build XLSX using SheetJS (loaded from CDN only if needed)
+    _exportXlsx(rows, userTZ);
+    return;
   }
 
   const blob = new Blob([content], {type: mime});
@@ -1318,11 +1386,22 @@ function renderRuns(runs) {
 }
 
 function getTopicFromRun(r) {
-  const title = (r.display_title || r.name || '').toLowerCase();
+  // Priority 1: run-name set by YAML e.g. "LinkedIn Agent · Manual · kubernetes"
+  const runName = r.name || r.display_title || '';
+  const parts   = runName.split('·').map(s => s.trim());
+  const topicPart = parts.length >= 3 ? parts[parts.length - 1] : '';
+  if (topicPart && topicPart !== 'auto-topic' && topicPart.length > 2) {
+    // Prettify known IDs
+    for (const [id, name] of Object.entries(TNAMES)) {
+      if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
+    }
+    return topicPart.charAt(0).toUpperCase() + topicPart.slice(1);
+  }
+  // Priority 2: scan full title against known topic IDs/names
+  const title = runName.toLowerCase();
   for (const [id, name] of Object.entries(TNAMES)) {
     if (title.includes(id) || title.includes(name.toLowerCase())) return name;
   }
-  // Check custom topics
   const custom = getCustomTopics();
   for (const ct of custom) {
     if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
