@@ -5,7 +5,6 @@ import json
 import random
 import argparse
 import requests
-import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from topic_manager import TopicManager
@@ -209,12 +208,20 @@ def get_post_mode():
 
 def run_agent(manual_topic_id=None, dry_run=False, force_news=None):
     log.info("=" * 60)
-    # Add jitter only for scheduled runs, not dry runs
-    if not dry_run:
-        jitter = random.randint(0, 300)
-        log.info("Waiting " + str(jitter) + " seconds before posting...")
-        time.sleep(jitter)
     log.info("LinkedIn Agent — Komal Batra — " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    log.info("Mode: " + ("DRY RUN" if dry_run else "LIVE"))
+    log.info("=" * 60)
+
+    # ── CHECK SCHEDULE ────────────────────────────────────────────────────────
+    # Reads schedule_config.json. Exits cleanly if today is paused/skipped.
+    # Sleeps until configured IST time if triggered before scheduled time.
+    try:
+        from schedule_checker import check_and_wait
+        check_and_wait(dry_run=dry_run)
+    except SystemExit:
+        raise  # clean skip — propagate so GH Actions marks as success
+    except Exception as e:
+        log.warning(f"schedule_checker error (non-fatal, continuing): {e}")
 
     topic_mgr = TopicManager()
     diagram_gen = DiagramGenerator()
@@ -326,6 +333,16 @@ Do NOT mention current month or year."""
             "mode": mode,
             "status": "success"
         })
+        # Send notifications (email / WhatsApp / Telegram)
+        try:
+            from notifier import notify_all
+            notify_all(
+                topic=topic["name"],
+                post_preview=post_text,
+                is_dry_run=dry_run
+            )
+        except Exception as e:
+            log.warning("Notification error (non-fatal): " + str(e))
     else:
         log.error("Failed: " + str(result.get("error")))
         sys.exit(1)
