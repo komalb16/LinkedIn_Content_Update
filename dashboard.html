@@ -4,14 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>LinkedIn Agent — Komal Batra</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-[data-theme="dark"]{--bg:#0b0f19;--bg2:#111827;--bg3:#1a2235;--sur:#151c2c;--sur2:#1e2a3d;--bd:rgba(255,255,255,0.07);--bds:rgba(14,165,233,0.25);--tx:#f1f5f9;--txm:#94a3b8;--txd:#475569;--sh:0 4px 24px rgba(0,0,0,0.4);--gl:0 0 40px rgba(14,165,233,0.07)}
-[data-theme="medium"]{--bg:#1a1f2e;--bg2:#222840;--bg3:#2a3350;--sur:#222840;--sur2:#2a3350;--bd:rgba(255,255,255,0.1);--bds:rgba(14,165,233,0.3);--tx:#e8edf5;--txm:#a0aec0;--txd:#607080;--sh:0 4px 20px rgba(0,0,0,0.3);--gl:0 0 40px rgba(14,165,233,0.1)}
-[data-theme="light"]{--bg:#f0f4f8;--bg2:#e2e8f0;--bg3:#cbd5e1;--sur:#ffffff;--sur2:#f8fafc;--bd:rgba(0,0,0,0.08);--bds:rgba(2,132,199,0.35);--tx:#0f172a;--txm:#475569;--txd:#94a3b8;--sh:0 4px 20px rgba(0,0,0,0.08);--gl:none;--acc:#0284c7;--acc2:#7c3aed}
-:root{--acc:#0ea5e9;--acc2:#8b5cf6;--grn:#22c55e;--red:#ef4444;--org:#f97316;--r:14px;--rs:9px;--tr:0.25s cubic-bezier(0.4,0,0.2,1);--fh:'Syne',sans-serif;--fb:'Instrument Sans',sans-serif}
+[data-theme="dark"]{--bg:#0e1220;--bg2:#131929;--bg3:#1c2540;--sur:#161f35;--sur2:#1e2a45;--sur3:#253255;--bd:rgba(255,255,255,0.08);--bds:rgba(99,171,255,0.35);--tx:#eaf0ff;--txm:#7e9bbf;--txd:#3d5070;--sh:0 2px 14px rgba(0,0,0,0.5);--gl:0 0 40px rgba(79,156,249,0.08);--acc:#4f9cf9;--acc2:#a78bfa;--grn:#34d399;--red:#f87171;--org:#fb923c}
+[data-theme="medium"]{--bg:#1e2744;--bg2:#263156;--bg3:#2f3c68;--sur:#263156;--sur2:#2f3c68;--sur3:#38477a;--bd:rgba(255,255,255,0.09);--bds:rgba(129,200,255,0.4);--tx:#dce8ff;--txm:#8daad0;--txd:#4a6090;--sh:0 2px 14px rgba(0,0,0,0.35);--gl:0 0 40px rgba(99,184,248,0.1);--acc:#63b8f8;--acc2:#c4b5fd;--grn:#4ade80;--red:#f87171;--org:#fb923c}
+[data-theme="light"]{--bg:#f2f5fc;--bg2:#e8edf8;--bg3:#dce3f5;--sur:#ffffff;--sur2:#f8faff;--sur3:#eef2fc;--bd:rgba(0,0,0,0.07);--bds:rgba(37,99,235,0.3);--tx:#0f172a;--txm:#4b5d78;--txd:#9eafc5;--sh:0 1px 6px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);--gl:none;--acc:#2563eb;--acc2:#7c3aed;--grn:#059669;--red:#dc2626;--org:#d97706}
+:root{--r:14px;--rs:10px;--tr:0.2s cubic-bezier(.4,0,.2,1);--fh:'DM Sans',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh;transition:background var(--tr),color var(--tr)}
+body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh;transition:background var(--tr),color var(--tr);font-size:14px;line-height:1.5}
 [data-theme="dark"] body::before,[data-theme="medium"] body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
 
 /* ── CONNECT ── */
@@ -32,10 +32,10 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh
 
 /* ── DASHBOARD ── */
 #db{display:none}
-.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px 80px}
+.wrap{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:0 28px 60px}
 
 /* ── HEADER ── */
-header{display:flex;align-items:center;justify-content:space-between;padding:24px 0 20px;border-bottom:1px solid var(--bd);margin-bottom:28px}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 16px;border-bottom:1px solid var(--bd);margin-bottom:22px}
 .logo{display:flex;align-items:center;gap:12px}
 .logo-ic{width:38px;height:38px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px}
 .logo h1{font-family:var(--fh);font-size:15px;font-weight:700}
@@ -43,8 +43,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .hright{display:flex;align-items:center;gap:10px}
 .tsw{display:flex;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:3px;gap:2px}
 .tbtn{padding:5px 12px;border-radius:100px;border:none;font-size:11px;font-family:var(--fb);font-weight:500;cursor:pointer;color:var(--txd);background:transparent;transition:all var(--tr)}
-.tbtn.act{background:var(--sur);color:var(--tx);box-shadow:var(--sh)}
-[data-theme="light"] .tbtn.act{background:white}
+.tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(79,156,249,.4)}
+[data-theme="light"] .tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.25)}
 .cpill{display:flex;align-items:center;gap:7px;padding:6px 12px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:100px;font-size:11px;color:var(--grn);font-family:monospace;cursor:pointer;transition:all var(--tr)}
 .cpill:hover{background:rgba(34,197,94,0.15)}
 .dot{width:6px;height:6px;background:var(--grn);border-radius:50%;animation:blink 2s infinite}
@@ -53,17 +53,21 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .gear-btn:hover{border-color:var(--bds);background:rgba(14,165,233,0.08)}
 
 /* ── STATS ── */
-.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
-.stat{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);padding:24px 22px;transition:border-color var(--tr),transform var(--tr);position:relative;overflow:hidden}
-.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
-.stat:nth-child(1)::before{background:var(--acc)}
-.stat:nth-child(2)::before{background:var(--grn)}
-.stat:nth-child(3)::before{background:var(--acc2)}
-.stat:nth-child(4)::before{background:var(--org)}
-.stat:hover{border-color:var(--bds);transform:translateY(-2px)}
-.slbl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--txd);font-family:monospace;margin-bottom:14px;font-weight:600}
-.snum{font-family:var(--fh);font-size:52px;font-weight:800;line-height:1;margin-bottom:8px;letter-spacing:-2px}
-.snum.sm{font-size:26px;letter-spacing:-0.5px;line-height:1.2;padding-top:4px}
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.stat{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);padding:20px 22px 18px;transition:border-color var(--tr),transform var(--tr),box-shadow var(--tr);position:relative;overflow:hidden}
+.stat:hover{border-color:var(--bds);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.stat:nth-child(1) .stat-icon{background:rgba(79,156,249,.14)}
+.stat:nth-child(2) .stat-icon{background:rgba(52,211,153,.14)}
+.stat:nth-child(3) .stat-icon{background:rgba(167,139,250,.14)}
+.stat:nth-child(4) .stat-icon{background:rgba(251,146,60,.14)}
+[data-theme="light"] .stat:nth-child(1) .stat-icon{background:rgba(37,99,235,.08)}
+[data-theme="light"] .stat:nth-child(2) .stat-icon{background:rgba(5,150,105,.08)}
+[data-theme="light"] .stat:nth-child(3) .stat-icon{background:rgba(124,58,237,.08)}
+[data-theme="light"] .stat:nth-child(4) .stat-icon{background:rgba(217,119,6,.08)}
+.slbl{font-size:11px;color:var(--txd);font-family:var(--fm);letter-spacing:.4px;margin-bottom:6px}
+.snum{font-family:var(--fh);font-size:38px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-1.5px}
+.snum.sm{font-size:20px;letter-spacing:-.3px;line-height:1.3;padding-top:0}
 .ssub{font-size:12px;color:var(--txd);margin-top:4px}
 
 /* ── POST BANNER ── */
@@ -135,12 +139,14 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .day-toggle{width:36px;height:36px;border-radius:50%;border:2px solid var(--bd);background:var(--bg2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);color:var(--txd)}
 .day-toggle.on{border-color:var(--acc);background:rgba(14,165,233,0.12);color:var(--acc)}
 .day-toggle:hover{border-color:var(--bds)}
-.time-mini{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%}
-.tm-up,.tm-dn{width:28px;height:18px;background:var(--sur2);border:1px solid var(--bd);border-radius:5px;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txm);transition:all var(--tr)}
-.tm-up:hover,.tm-dn:hover{background:rgba(14,165,233,0.1);border-color:var(--acc);color:var(--acc)}
-.tm-val{font-size:10px;font-family:monospace;color:var(--tx);font-weight:600;padding:3px 4px;background:var(--bg2);border-radius:4px;width:100%;text-align:center}
-.day-col.disabled .tm-val{color:var(--txd);opacity:.5}
-.day-col.disabled .tm-up,.day-col.disabled .tm-dn{opacity:.3;pointer-events:none}
+/* ── TIME CONTROL (clean & readable on all themes) ── */
+.time-ctrl{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%}
+.time-btn{width:28px;height:20px;background:var(--sur3);border:1.5px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txm);transition:all var(--tr);padding:0;line-height:1}
+.time-btn:hover{background:rgba(79,156,249,.2);border-color:var(--acc);color:var(--acc)}
+.time-val{font-size:12px;font-family:var(--fm);font-weight:500;color:var(--tx);background:var(--sur3);border:1.5px solid var(--bd);border-radius:7px;padding:4px 5px;width:100%;text-align:center;letter-spacing:.3px;line-height:1.2;transition:border-color var(--tr)}
+.day-col.disabled .time-val{color:var(--txd)}
+.day-col.disabled .time-btn{pointer-events:none;opacity:.4}
+[data-theme="light"] .time-val{background:#fff;border-color:var(--bd);color:var(--tx)}
 
 /* Override dates */
 .override-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
@@ -164,23 +170,27 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .sleg{display:flex;gap:12px;font-size:10px;color:var(--txd);margin-top:10px}
 .sleg span{display:flex;align-items:center;gap:4px}
 .ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+/* ── NEXT POST ROW ── */
+.next-post-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(79,156,249,.06);border:1px solid rgba(79,156,249,.14);border-radius:var(--rs)}
+[data-theme="light"] .next-post-row{background:rgba(37,99,235,.05);border-color:rgba(37,99,235,.12)}
+.np-cdt{font-family:var(--fm);font-size:18px;font-weight:700;color:var(--acc);margin-left:auto;letter-spacing:-.5px}
 
-/* ── SCHEDULER (legacy, kept) ── */
-.trow{display:flex;align-items:center;gap:16px;margin-bottom:16px}
-.tbig{font-family:var(--fh);font-size:46px;font-weight:800;color:var(--acc);letter-spacing:-1px;line-height:1;text-shadow:0 0 30px rgba(14,165,233,0.3)}
-.tctrls{display:flex;gap:14px}
-.tunit{display:flex;flex-direction:column;align-items:center;gap:4px}
-.tbtn2{width:30px;height:30px;background:var(--sur2);border:1px solid var(--bd);border-radius:8px;color:var(--txm);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--tr)}
-.tbtn2:hover{background:rgba(14,165,233,0.1);border-color:var(--acc);color:var(--acc)}
-.tlbl{font-size:9px;color:var(--txd);font-family:monospace;letter-spacing:1px}
-.tzb{padding:5px 10px;background:var(--sur2);border:1px solid var(--bd);border-radius:6px;font-size:10px;font-family:monospace;color:var(--txd);align-self:flex-end}
-.cronbox{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
-.cronval{font-family:monospace;font-size:13px;color:var(--acc)}
-.cronsub{font-size:11px;color:var(--txd);text-align:right}
-.nrbox{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.15);border-radius:var(--rs);margin-bottom:16px}
-.nrbox h4{font-size:12px;font-weight:600;color:var(--acc);margin-bottom:2px}
-.nrbox p{font-size:11px;color:var(--txd)}
-.cdt{font-family:var(--fh);font-size:18px;font-weight:800;color:var(--acc);margin-left:auto}
+/* ── RUN HISTORY FILTER BAR ── */
+.run-filter-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:14px 22px 10px;border-bottom:1px solid var(--bd)}
+.rfp{padding:5px 13px;border-radius:100px;font-size:11px;font-weight:600;font-family:monospace;cursor:pointer;border:1.5px solid var(--bd);color:var(--txd);background:var(--sur2);transition:all var(--tr);white-space:nowrap}
+.rfp:hover{color:var(--txm);border-color:var(--bds)}
+.rfp.act{background:rgba(79,156,249,.14);border-color:var(--acc);color:var(--acc)}
+[data-theme="light"] .rfp.act{background:rgba(37,99,235,.08)}
+.run-total{font-size:11px;color:var(--txd);font-family:monospace;margin-left:auto;white-space:nowrap}
+.custom-range{display:none;align-items:center;gap:8px;padding:10px 22px;border-bottom:1px solid var(--bd);background:var(--sur2);flex-wrap:wrap}
+.custom-range.show{display:flex}
+.custom-range span{font-size:11px;color:var(--txd);font-family:monospace}
+.cr-inp{background:var(--sur);border:1.5px solid var(--bd);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:12px;font-family:monospace;outline:none;transition:border-color var(--tr)}
+.cr-inp:focus{border-color:var(--acc)}
+[data-theme="dark"] .cr-inp,[data-theme="medium"] .cr-inp{color-scheme:dark}
+.run-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:36px 20px;color:var(--txd);font-size:13px}
+.run-empty-ico{font-size:36px;opacity:.4}
+
 
 /* ── TOPIC PICKER ── */
 .typerow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
@@ -211,7 +221,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .add-btn:hover{background:rgba(34,197,94,0.18)}
 
 /* ── RUNS ── */
-.ri{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd);animation:fi .3s ease}
+.ri{display:flex;align-items:flex-start;gap:12px;padding:12px 22px;border-bottom:1px solid var(--bd);animation:fi .3s ease;transition:background var(--tr)}
+.ri:hover{background:rgba(79,156,249,.03)}
+[data-theme="light"] .ri:hover{background:rgba(37,99,235,.02)}
 @keyframes fi{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .ri:last-child{border-bottom:none}
 .ric{width:34px;height:34px;min-width:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;margin-top:1px}
@@ -287,7 +299,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 @keyframes tout{to{transform:translateX(110%);opacity:0}}
 .xl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--txd);font-family:monospace;margin-bottom:10px}
 
-@media(max-width:768px){.srow{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.pb{flex-direction:column;align-items:flex-start}.tgrid{grid-template-columns:1fr}.cc{padding:32px 24px}.preview-body{grid-template-columns:1fr}.preview-diagram{border-top:1px solid var(--bd)}}
+@media(max-width:960px){.srow{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.pb{flex-direction:column;align-items:flex-start}.tgrid{grid-template-columns:1fr}.cc{padding:32px 24px}.preview-body{grid-template-columns:1fr}.preview-diagram{border-top:1px solid var(--bd)}.wrap{padding:0 16px 60px}}
+@media(max-width:600px){.srow{grid-template-columns:1fr 1fr}.day-grid{gap:6px}.rfp{font-size:10px;padding:4px 10px}}
 </style>
 </head>
 <body>
@@ -419,10 +432,30 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 
   <!-- STATS -->
   <div class="srow">
-    <div class="stat"><div class="slbl">Total Runs</div><div class="snum" style="color:var(--acc)" id="s1">—</div><div class="ssub">all time</div></div>
-    <div class="stat"><div class="slbl">Successful</div><div class="snum" style="color:var(--grn)" id="s2">—</div><div class="ssub">posts live on LinkedIn</div></div>
-    <div class="stat"><div class="slbl">This Week</div><div class="snum" style="color:var(--acc2)" id="s3">—</div><div class="ssub">successful posts</div></div>
-    <div class="stat"><div class="slbl">Last Post</div><div class="snum sm" style="color:var(--org)" id="s4">—</div><div class="ssub" id="s4b">—</div></div>
+    <div class="stat">
+      <div class="stat-icon">🚀</div>
+      <div class="slbl">Total Runs</div>
+      <div class="snum" style="color:var(--acc)" id="s1">—</div>
+      <div class="ssub">all time</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">✅</div>
+      <div class="slbl">Successful</div>
+      <div class="snum" style="color:var(--grn)" id="s2">—</div>
+      <div class="ssub">posts live on LinkedIn</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">📅</div>
+      <div class="slbl">This Week</div>
+      <div class="snum" style="color:var(--acc2)" id="s3">—</div>
+      <div class="ssub">successful posts</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">🕐</div>
+      <div class="slbl">Last Post</div>
+      <div class="snum sm" style="color:var(--org)" id="s4">—</div>
+      <div class="ssub" id="s4b">—</div>
+    </div>
   </div>
 
   <!-- POST NOW -->
@@ -568,8 +601,31 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 
   <!-- RUNS LOG -->
   <div class="card">
-    <div class="ch"><span class="ct">📋 Run History</span><button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button></div>
-    <div class="cb" id="runsList"><p style="color:var(--txd);font-size:13px">Loading...</p></div>
+    <div class="ch">
+      <span class="ct">📋 Run History</span>
+      <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button>
+    </div>
+
+    <!-- DATE FILTER BAR -->
+    <div class="run-filter-bar">
+      <button class="rfp" onclick="setRunFilter('7d',this)">7 Days</button>
+      <button class="rfp act" onclick="setRunFilter('30d',this)">30 Days</button>
+      <button class="rfp" onclick="setRunFilter('90d',this)">Quarter</button>
+      <button class="rfp" onclick="setRunFilter('ytd',this)">YTD</button>
+      <button class="rfp" onclick="setRunFilter('1yr',this)">1 Year</button>
+      <button class="rfp" onclick="setRunFilter('custom',this)">Custom ▾</button>
+      <span class="run-total" id="runTotal"></span>
+    </div>
+
+    <!-- CUSTOM RANGE (shown when Custom selected) -->
+    <div class="custom-range" id="customRange">
+      <span>From</span>
+      <input type="date" class="cr-inp" id="crFrom" onchange="applyRunFilter()"/>
+      <span>To</span>
+      <input type="date" class="cr-inp" id="crTo" onchange="applyRunFilter()"/>
+    </div>
+
+    <div id="runsList"><div class="run-empty"><div class="run-empty-ico">🔄</div><span>Loading runs...</span></div></div>
   </div>
 
 </div>
@@ -610,6 +666,11 @@ window.onload = () => {
   loadSettings();
   if (token) silentConn();
   setInterval(updNext, 60000);
+  // Init custom range to last 30 days
+  const today = new Date();
+  const from30 = new Date(today - 30*864e5);
+  document.getElementById('crTo').value   = today.toISOString().split('T')[0];
+  document.getElementById('crFrom').value = from30.toISOString().split('T')[0];
 };
 
 // ── THEME ─────────────────────────────────────────────────────────────────────
@@ -914,40 +975,94 @@ async function runNow() {
 }
 
 // ── RUNS ──────────────────────────────────────────────────────────────────────
+let allRuns  = [];   // all fetched agent runs
+let runFilter = '30d';
+
 async function loadRuns() {
+  document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">🔄</div><span>Loading...</span></div>';
   try {
-    const r = await gh('/repos/' + REPO + '/actions/runs?per_page=20');
-    const d = await r.json();
-    renderRuns(d.workflow_runs || []);
+    // Workflow-specific endpoint — excludes pages/deploy runs automatically
+    const [rc, ri, rq] = await Promise.all([
+      gh('/repos/'+REPO+'/actions/workflows/'+WF+'/runs?per_page=100&status=completed'),
+      gh('/repos/'+REPO+'/actions/workflows/'+WF+'/runs?per_page=10&status=in_progress'),
+      gh('/repos/'+REPO+'/actions/workflows/'+WF+'/runs?per_page=10&status=queued'),
+    ]);
+    const dc = rc.ok ? await rc.json() : {workflow_runs:[]};
+    const di = ri.ok ? await ri.json() : {workflow_runs:[]};
+    const dq = rq.ok ? await rq.json() : {workflow_runs:[]};
+    const seen = new Set();
+    allRuns = [...(di.workflow_runs||[]),...(dq.workflow_runs||[]),...(dc.workflow_runs||[])]
+      .filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; })
+      .sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
+    applyRunFilter();
   } catch(e) {
-    document.getElementById('runsList').innerHTML = '<p style="color:var(--txd);font-size:13px">Could not load runs.</p>';
+    document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">❌</div><span>Could not load runs: '+e.message+'</span></div>';
   }
+}
+
+function setRunFilter(key, btn) {
+  runFilter = key;
+  document.querySelectorAll('.rfp').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  const cr = document.getElementById('customRange');
+  if (key === 'custom') cr.classList.add('show'); else cr.classList.remove('show');
+  applyRunFilter();
+}
+
+function getFilterRange() {
+  const now = new Date();
+  let from = null, to = now;
+  if      (runFilter==='7d')    from = new Date(now - 7*864e5);
+  else if (runFilter==='30d')   from = new Date(now - 30*864e5);
+  else if (runFilter==='90d')   from = new Date(now - 90*864e5);
+  else if (runFilter==='1yr')   from = new Date(now - 365*864e5);
+  else if (runFilter==='ytd')   from = new Date(now.getFullYear(), 0, 1);
+  else if (runFilter==='custom') {
+    const fv = document.getElementById('crFrom').value;
+    const tv = document.getElementById('crTo').value;
+    from = fv ? new Date(fv+'T00:00:00') : null;
+    to   = tv ? new Date(tv+'T23:59:59') : now;
+  }
+  return { from, to };
+}
+
+function applyRunFilter() {
+  const { from, to } = getFilterRange();
+  let filtered = allRuns;
+  if (from) filtered = filtered.filter(r => {
+    const d = new Date(r.created_at);
+    return d >= from && d <= to;
+  });
+  const totalEl = document.getElementById('runTotal');
+  if (totalEl) totalEl.textContent = filtered.length + (filtered.length===1?' run':' runs');
+  renderRuns(filtered);
 }
 
 function renderRuns(runs) {
   const el = document.getElementById('runsList');
-  if (!runs.length) { el.innerHTML = '<p style="color:var(--txd);font-size:13px">No runs yet.</p>'; return; }
-  el.innerHTML = runs.slice(0,12).map(r => {
-    const ok = r.conclusion==='success', fail = r.conclusion==='failure';
+  if (!runs.length) {
+    el.innerHTML = '<div class="run-empty"><div class="run-empty-ico">📭</div><span>No runs found for this period</span></div>';
+    return;
+  }
+  el.innerHTML = runs.map(r => {
+    const ok      = r.conclusion==='success', fail = r.conclusion==='failure';
     const running = r.status==='in_progress' || r.status==='queued';
-    const ico = ok ? '✅' : fail ? '❌' : running ? '⏳' : '⚪';
-    const icls = ok ? 'ok' : fail ? 'fail' : running ? 'run' : 'oth';
-    const trig = r.event==='schedule' ? 'schedule' : r.event==='workflow_dispatch' ? 'manual' : r.event;
-    const bcls = trig==='schedule' ? 'bsch' : trig==='manual' ? 'bman' : 'bdry';
-    const t = new Date(r.created_at);
-    const ts = t.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    const dur = r.updated_at ? Math.round((new Date(r.updated_at) - t) / 1000) : null;
-    const ds = dur ? (dur > 60 ? Math.floor(dur/60)+'m '+dur%60+'s' : dur+'s') : '—';
-    const topic = getTopicFromRun(r);
-    const mode = getModeFromRun(r);
-    const isDryRun = (r.display_title||r.name||'').toLowerCase().includes('dry');
-
+    const ico     = ok ? '✅' : fail ? '❌' : running ? '⏳' : '⚪';
+    const icls    = ok ? 'ok' : fail ? 'fail' : running ? 'run' : 'oth';
+    const trig    = r.event==='schedule' ? 'schedule' : r.event==='workflow_dispatch' ? 'manual' : r.event;
+    const bcls    = trig==='schedule' ? 'bsch' : trig==='manual' ? 'bman' : 'bdry';
+    const t       = new Date(r.created_at);
+    const ts      = t.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const dur     = r.updated_at ? Math.round((new Date(r.updated_at) - t) / 1000) : null;
+    const ds      = dur ? (dur > 60 ? Math.floor(dur/60)+'m '+dur%60+'s' : dur+'s') : '—';
+    const topic   = getTopicFromRun(r);
+    const mode    = getModeFromRun(r);
+    const isDryRun= (r.display_title||r.name||'').toLowerCase().includes('dry');
     let tags = '';
-    if (topic) tags += `<span class="rtag rtag-topic">🎯 ${topic}</span>`;
+    if (topic)  tags += `<span class="rtag rtag-topic">🎯 ${topic}</span>`;
     else if (trig === 'schedule') tags += `<span class="rtag rtag-topic">🎲 Auto</span>`;
-    if (mode) tags += `<span class="rtag rtag-mode">${mode}</span>`;
+    if (mode)   tags += `<span class="rtag rtag-mode">${mode}</span>`;
     if (isDryRun) tags += `<span class="rtag rtag-dry">🧪 dry run</span>`;
-
     return `<div class="ri">
       <div class="ric ${icls}">${ico}</div>
       <div class="rib">
@@ -985,7 +1100,7 @@ function getModeFromRun(r) {
 // ── STATS ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
   try {
-    const r = await gh('/repos/' + REPO + '/actions/runs?per_page=100');
+    const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100');
     const d = await r.json();
     const runs = d.workflow_runs || [];
     const succ = runs.filter(r => r.conclusion === 'success');
@@ -995,9 +1110,17 @@ async function loadStats() {
     document.getElementById('s2').textContent = succ.length;
     document.getElementById('s3').textContent = tw.length;
     if (succ.length > 0) {
-      const last = succ[0];
-      const diff = Math.floor((Date.now() - new Date(last.created_at)) / (1000*60*60));
-      document.getElementById('s4').textContent = diff < 1 ? 'Just now' : diff < 24 ? diff + 'h ago' : Math.floor(diff/24) + 'd ago';
+      const last    = succ[0];
+      const diffMs  = Date.now() - new Date(last.created_at);
+      const diffMin = Math.floor(diffMs / 60000);
+      const diffHr  = Math.floor(diffMs / 3600000);
+      const diffDay = Math.floor(diffMs / 86400000);
+      let ago;
+      if (diffMin < 1)       ago = 'Just now';
+      else if (diffMin < 60) ago = diffMin + ' min ago';
+      else if (diffHr < 24)  ago = diffHr + 'h ' + (diffMin % 60) + 'm ago';
+      else                   ago = diffDay + 'd ' + (diffHr % 24) + 'h ago';
+      document.getElementById('s4').textContent = ago;
       document.getElementById('s4b').textContent = new Date(last.created_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' IST';
     }
   } catch(e) {}
@@ -1096,10 +1219,10 @@ function buildDayGrid() {
       <button class="day-toggle ${cfg.enabled ? 'on' : ''}" id="daytog-${day}" onclick="toggleDay('${day}')" title="${cfg.enabled ? 'Click to disable' : 'Click to enable'}">
         ${cfg.enabled ? '✓' : '✕'}
       </button>
-      <div class="time-mini">
-        <button class="tm-up" onclick="adjDayTime('${day}',15)">▲</button>
-        <div class="tm-val" id="tmval-${day}">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</div>
-        <button class="tm-dn" onclick="adjDayTime('${day}',-15)">▼</button>
+      <div class="time-ctrl">
+        <button class="time-btn" onclick="adjDayTime('${day}',15)">▲</button>
+        <div class="time-val" id="tmval-${day}">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</div>
+        <button class="time-btn" onclick="adjDayTime('${day}',-15)">▼</button>
       </div>`;
     grid.appendChild(col);
   });

@@ -1,17 +1,16 @@
 name: LinkedIn Content Agent
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Runs once daily at 9:30 AM IST (4:00 AM UTC).
-# Supports manual trigger with optional topic and dry-run override.
+# Runs once daily. The workflow cron fires at 3:00 AM UTC (8:30 AM IST).
+# schedule_checker.py then sleeps until the per-day time in schedule_config.json.
+# Supports manual trigger with optional topic and dry-run.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    # 3:00 AM UTC = 8:30 AM IST
-    # Fires early enough to cover any per-day time set in schedule_config.json.
-    # The schedule_checker.py in agent.py then sleeps until the exact
-    # configured time for today (up to ~4 hours).
-    # ⚠️  Only ONE cron entry — two entries = two posts per day.
+    # 3:00 AM UTC = 8:30 AM IST — fires early so schedule_checker can sleep
+    # until your configured time (e.g. 09:30 IST = 04:00 UTC).
+    # ⚠️  Keep only ONE cron entry — two entries = two posts per day.
     - cron: '0 3 * * *'
 
   workflow_dispatch:
@@ -21,7 +20,7 @@ on:
         required: false
         default: ''
       dry_run:
-        description: 'Dry run — generate without posting'
+        description: 'Dry run — generate without posting (true/false)'
         required: false
         default: 'false'
 
@@ -46,7 +45,6 @@ jobs:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_URN:   ${{ secrets.LINKEDIN_PERSON_URN }}
           ANTHROPIC_API_KEY:     ${{ secrets.ANTHROPIC_API_KEY }}
-          # ── Notification secrets (optional — add these to enable alerts) ──
           NOTIFY_EMAIL:          ${{ secrets.NOTIFY_EMAIL }}
           NOTIFY_EMAIL_PASSWORD: ${{ secrets.NOTIFY_EMAIL_PASSWORD }}
           NOTIFY_TO_EMAIL:       ${{ secrets.NOTIFY_TO_EMAIL }}
@@ -55,6 +53,19 @@ jobs:
           TELEGRAM_BOT_TOKEN:    ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          python src/agent.py \
-            --topic "${{ github.event.inputs.topic_id || '' }}" \
-            --dry-run "${{ github.event.inputs.dry_run || 'false' }}"
+          # ── Build argument list safely ────────────────────────────────────
+          # CRITICAL: Never pass --dry-run "false" — argparse store_true does
+          # not accept a value, causing "unrecognized arguments: false" crash.
+          # The fix: only include --dry-run flag when explicitly set to "true".
+          ARGS=""
+
+          TOPIC="${{ github.event.inputs.topic_id }}"
+          if [ -n "$TOPIC" ]; then
+            ARGS="$ARGS --topic $TOPIC"
+          fi
+
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          python src/agent.py $ARGS
