@@ -1,101 +1,60 @@
-name: LinkedIn Agent Komal Batra
+name: LinkedIn Content Agent
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Runs once daily at 9:30 AM IST (4:00 AM UTC).
+# Supports manual trigger with optional topic and dry-run override.
+# ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    - cron: "30 4 * * *"
+    # 3:00 AM UTC = 8:30 AM IST
+    # Fires early enough to cover any per-day time set in schedule_config.json.
+    # The schedule_checker.py in agent.py then sleeps until the exact
+    # configured time for today (up to ~4 hours).
+    # ⚠️  Only ONE cron entry — two entries = two posts per day.
+    - cron: '0 3 * * *'
+
   workflow_dispatch:
     inputs:
       topic_id:
-        description: "Topic ID (blank for auto)"
+        description: 'Topic ID (leave blank for auto-select)'
         required: false
-        default: ""
-        type: choice
-        options:
-          - ""
-          - llm-architecture
-          - ai-agents-2025
-          - mlops-pipeline
-          - rag-systems
-          - kubernetes-mastery
-          - docker-cheatsheet
-          - aws-architecture
-          - cicd-pipelines
-          - system-design
-          - api-design
-          - git-workflow
-          - solid-principles
-          - zero-trust
-          - devsecops
-          - data-lakehouse
-          - kafka-streaming
+        default: ''
       dry_run:
-        description: "Dry run"
+        description: 'Dry run — generate without posting'
         required: false
-        default: "false"
-        type: choice
-        options:
-          - "false"
-          - "true"
+        default: 'false'
 
 jobs:
-  post-to-linkedin:
-    name: Generate and Post Content
+  post:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Python
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
-      - name: Install system deps
-        run: sudo apt-get update -q && sudo apt-get install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests cairosvg schedule
+        run: pip install -r requirements.txt
 
-      - name: Run Agent
-        working-directory: src
+      - name: Run LinkedIn Agent
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
-          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
-          TOPIC_ID: ${{ github.event.inputs.topic_id }}
-          DRY_RUN: ${{ github.event.inputs.dry_run }}
+          LINKEDIN_PERSON_URN:   ${{ secrets.LINKEDIN_PERSON_URN }}
+          ANTHROPIC_API_KEY:     ${{ secrets.ANTHROPIC_API_KEY }}
+          # ── Notification secrets (optional — add these to enable alerts) ──
+          NOTIFY_EMAIL:          ${{ secrets.NOTIFY_EMAIL }}
+          NOTIFY_EMAIL_PASSWORD: ${{ secrets.NOTIFY_EMAIL_PASSWORD }}
+          NOTIFY_TO_EMAIL:       ${{ secrets.NOTIFY_TO_EMAIL }}
+          CALLMEBOT_PHONE:       ${{ secrets.CALLMEBOT_PHONE }}
+          CALLMEBOT_APIKEY:      ${{ secrets.CALLMEBOT_APIKEY }}
+          TELEGRAM_BOT_TOKEN:    ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          ARGS=""
-          if [ -n "$TOPIC_ID" ]; then ARGS="$ARGS --topic $TOPIC_ID"; fi
-          if [ "$DRY_RUN" = "true" ]; then ARGS="$ARGS --dry-run"; fi
-          python agent.py $ARGS
-
-      - name: Save Topic History
-        if: always()
-        run: |
-          git config user.name "LinkedIn Agent Bot"
-          git config user.email "agent@github-actions.com"
-          git add src/.topic_history.json || true
-          git diff --staged --quiet || git commit -m "chore: update topic history [skip ci]"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || true
-
-      - name: Upload Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: run-${{ github.run_number }}
-          path: |
-            src/diagrams/
-            src/output_post_*.txt
-            src/agent.log
-          retention-days: 30
-
-  keep-alive:
-    name: Keep Workflow Active
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Keep alive
-        run: echo "Keeping workflow active — $(date)"
+          python src/agent.py \
+            --topic "${{ github.event.inputs.topic_id || '' }}" \
+            --dry-run "${{ github.event.inputs.dry_run || 'false' }}"
