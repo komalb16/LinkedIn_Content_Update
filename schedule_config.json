@@ -2,15 +2,36 @@
   "paused": false,
   "pause_until": null,
   "weekly": {
-    "mon": { "enabled": true,  "time_ist": "09:30" },
-    "tue": { "enabled": true,  "time_ist": "09:30" },
-    "wed": { "enabled": true,  "time_ist": "09:30" },
-    "thu": { "enabled": true,  "time_ist": "09:30" },
-    "fri": { "enabled": true,  "time_ist": "09:30" },
-    "sat": { "enabled": false, "time_ist": "10:00" },
-    "sun": { "enabled": false, "time_ist": "10:00" }
+    "mon": {
+      "enabled": true,
+      "time_ist": "10:00"
+    },
+    "tue": {
+      "enabled": true,
+      "time_ist": "09:30"
+    },
+    "wed": {
+      "enabled": true,
+      "time_ist": "09:30"
+    },
+    "thu": {
+      "enabled": true,
+      "time_ist": "09:30"
+    },
+    "fri": {
+      "enabled": true,
+      "time_ist": "09:30"
+    },
+    "sat": {
+      "enabled": false,
+      "time_ist": "10:00"
+    },
+    "sun": {
+      "enabled": false,
+      "time_ist": "10:00"
+    }
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": null
+  "updated_at": "2026-03-06T04:23:30.598Z"
 }
