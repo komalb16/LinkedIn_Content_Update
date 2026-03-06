@@ -89,18 +89,19 @@ def ist_now() -> datetime:
     return datetime.utcnow() + timedelta(hours=5, minutes=30)
 
 
-def check_and_wait(dry_run: bool = False) -> None:
+def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     """
-    Main entry point — called by agent.py.
-    Exits cleanly (sys.exit(0)) if today should be skipped.
-    Sleeps until the configured IST time before returning.
+    manual=True  → workflow_dispatch: skip sleep, run immediately.
+    dry_run=True → also skips sleep.
+    Cron (scheduled) triggers: sleep until configured time.
     """
     cfg     = load_config()
     now     = ist_now()
     today   = now.strftime("%Y-%m-%d")
     day_key = DAYS[now.weekday()]   # 0=Mon … 6=Sun
 
-    info(f"Schedule check — {today} ({day_key.upper()}) — IST {now.strftime('%H:%M')}")
+    trigger = "MANUAL" if manual else ("DRY-RUN" if dry_run else "SCHEDULED")
+    info(f"Schedule check — {today} ({day_key.upper()}) — IST {now.strftime('%H:%M')} — trigger: {trigger}")
 
     # ── 1. PAUSE CHECK ────────────────────────────────────────────────────────
     if cfg["paused"]:
@@ -128,9 +129,9 @@ def check_and_wait(dry_run: bool = False) -> None:
         info(f"📅 {day_key.capitalize()} is disabled in weekly schedule. Exiting cleanly.")
         sys.exit(0)
 
-    # ── 5. SLEEP UNTIL SCHEDULED TIME ────────────────────────────────────────
-    if dry_run:
-        info("Dry run — skipping time-of-day check, proceeding immediately")
+    # ── 5. SLEEP UNTIL SCHEDULED TIME (only for cron triggers) ─────────────────
+    if dry_run or manual:
+        info(f"Skipping time-of-day sleep ({trigger}) — running immediately")
         return
 
     time_ist = day_cfg.get("time_ist", "09:30")

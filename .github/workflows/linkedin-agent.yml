@@ -68,4 +68,9 @@ jobs:
             ARGS="$ARGS --dry-run"
           fi
 
+          # Manual (workflow_dispatch) triggers skip the scheduled sleep
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ARGS="$ARGS --manual"
+          fi
+
           python src/agent.py $ARGS

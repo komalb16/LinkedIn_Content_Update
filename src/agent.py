@@ -206,7 +206,7 @@ def get_post_mode():
         return "topic"
 
 
-def run_agent(manual_topic_id=None, dry_run=False, force_news=None):
+def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False):
     log.info("=" * 60)
     log.info("LinkedIn Agent — Komal Batra — " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     log.info("Mode: " + ("DRY RUN" if dry_run else "LIVE"))
@@ -217,7 +217,7 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None):
     # Sleeps until configured IST time if triggered before scheduled time.
     try:
         from schedule_checker import check_and_wait
-        check_and_wait(dry_run=dry_run)
+        check_and_wait(dry_run=dry_run, manual=manual)
     except SystemExit:
         raise  # clean skip — propagate so GH Actions marks as success
     except Exception as e:
@@ -352,10 +352,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--topic", type=str, default=None)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--manual", action="store_true", help="Manual trigger: skip schedule sleep, run immediately")
     parser.add_argument("--news", type=str, default=None, help="Force news mode: ai_news, layoff_news, tools_news, tech_news")
     parser.add_argument("--list-topics", action="store_true")
     args = parser.parse_args()
     if args.list_topics:
         TopicManager().list_topics()
         sys.exit(0)
-    run_agent(manual_topic_id=args.topic, dry_run=args.dry_run, force_news=args.news)
+    run_agent(manual_topic_id=args.topic, dry_run=args.dry_run, force_news=args.news, manual=args.manual)

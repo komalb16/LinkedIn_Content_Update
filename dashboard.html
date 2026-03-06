@@ -143,10 +143,13 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .time-ctrl{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%}
 .time-btn{width:28px;height:20px;background:var(--sur3);border:1.5px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txm);transition:all var(--tr);padding:0;line-height:1}
 .time-btn:hover{background:rgba(79,156,249,.2);border-color:var(--acc);color:var(--acc)}
-.time-val{font-size:12px;font-family:var(--fm);font-weight:500;color:var(--tx);background:var(--sur3);border:1.5px solid var(--bd);border-radius:7px;padding:4px 5px;width:100%;text-align:center;letter-spacing:.3px;line-height:1.2;transition:border-color var(--tr)}
-.day-col.disabled .time-val{color:var(--txd)}
+.time-val{font-size:12px;font-family:var(--fm);font-weight:500;color:var(--tx);background:var(--sur3);border:1.5px solid var(--bd);border-radius:7px;padding:4px 3px;width:100%;text-align:center;letter-spacing:.3px;line-height:1.2;transition:border-color var(--tr);outline:none;cursor:text;-webkit-appearance:none}
+.time-val:focus{border-color:var(--acc);background:var(--sur2);box-shadow:0 0 0 3px rgba(79,156,249,.15)}
+.time-val:hover:not(:focus){border-color:var(--bds)}
+.day-col.disabled .time-val{color:var(--txd);pointer-events:none;opacity:.5}
 .day-col.disabled .time-btn{pointer-events:none;opacity:.4}
 [data-theme="light"] .time-val{background:#fff;border-color:var(--bd);color:var(--tx)}
+[data-theme="light"] .time-val:focus{background:#f0f6ff}
 
 /* Override dates */
 .override-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
@@ -174,6 +177,30 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .next-post-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(79,156,249,.06);border:1px solid rgba(79,156,249,.14);border-radius:var(--rs)}
 [data-theme="light"] .next-post-row{background:rgba(37,99,235,.05);border-color:rgba(37,99,235,.12)}
 .np-cdt{font-family:var(--fm);font-size:18px;font-weight:700;color:var(--acc);margin-left:auto;letter-spacing:-.5px}
+
+
+/* ── TIMEZONE SELECTOR ── */
+.tz-sel{background:var(--sur2);border:1.5px solid var(--bd);border-radius:8px;padding:5px 10px;color:var(--tx);font-size:11px;font-family:var(--fm);outline:none;cursor:pointer;transition:border-color var(--tr);max-width:200px}
+.tz-sel:focus,.tz-sel:hover{border-color:var(--bds)}
+
+/* ── RUN DETAIL MODAL ── */
+.modal-run{background:var(--sur);border:1px solid var(--bd);border-radius:20px;width:100%;max-width:580px;box-shadow:var(--shh);animation:up .3s ease;overflow:hidden}
+.run-detail-head{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.run-detail-head h3{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.run-detail-body{padding:0 24px 24px;display:flex;flex-direction:column;gap:12px}
+.rdt{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--sur2);border:1px solid var(--bd);border-radius:var(--rs)}
+.rdt-ico{font-size:20px;flex-shrink:0;margin-top:1px}
+.rdt-info{flex:1;min-width:0}
+.rdt-label{font-size:10px;font-family:var(--fm);color:var(--txd);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.rdt-val{font-size:13px;font-weight:600;word-break:break-word}
+.rdt-val.ok{color:var(--grn)}.rdt-val.fail{color:var(--red)}.rdt-val.run{color:var(--org)}
+.run-detail-footer{padding:14px 24px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--bg2)}
+
+/* ── EXPORT BAR ── */
+.export-bar{display:flex;align-items:center;gap:8px;padding:10px 22px;border-top:1px solid var(--bd);background:var(--sur2);flex-wrap:wrap}
+.export-bar span{font-size:11px;color:var(--txd);font-family:var(--fm)}
+.xbtn{padding:5px 13px;border-radius:100px;font-size:11px;font-weight:600;font-family:var(--fm);cursor:pointer;border:1.5px solid var(--bd);color:var(--txm);background:var(--sur);transition:all var(--tr)}
+.xbtn:hover{border-color:var(--bds);color:var(--acc);background:rgba(79,156,249,.08)}
 
 /* ── RUN HISTORY FILTER BAR ── */
 .run-filter-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:14px 22px 10px;border-bottom:1px solid var(--bd)}
@@ -222,7 +249,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 /* ── RUNS ── */
 .ri{display:flex;align-items:flex-start;gap:12px;padding:12px 22px;border-bottom:1px solid var(--bd);animation:fi .3s ease;transition:background var(--tr)}
-.ri:hover{background:rgba(79,156,249,.03)}
+.ri:hover{background:rgba(79,156,249,.06);transform:translateX(2px)}
 [data-theme="light"] .ri:hover{background:rgba(37,99,235,.02)}
 @keyframes fi{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .ri:last-child{border-bottom:none}
@@ -416,6 +443,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       </div>
     </div>
     <div class="hright">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;color:var(--txd);font-family:var(--fm)">🌍</span>
+        <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Select your timezone"></select>
+      </div>
       <div class="tsw">
         <button class="tbtn" onclick="setTheme('light')">☀️ Light</button>
         <button class="tbtn" onclick="setTheme('medium')">🌤 Medium</button>
@@ -506,12 +537,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
     <!-- WEEKLY PANEL -->
     <div class="spanel show" id="panel-weekly">
-      <p style="font-size:11px;color:var(--txd);margin-bottom:14px">Toggle each day on/off and set a different posting time per day (IST). Changes are saved to <code style="font-size:10px;background:var(--bg2);padding:1px 5px;border-radius:4px">schedule_config.json</code> in your repo.</p>
+      <p style="font-size:11px;color:var(--txd);margin-bottom:14px">Toggle each day on/off and set a different posting time per day. Times are in <strong id="tzWeeklyNote">your timezone</strong>. Saved to <code style="font-size:10px;background:var(--bg2);padding:1px 5px;border-radius:4px">schedule_config.json</code> in your repo.</p>
       <div class="day-grid" id="dayGrid"><!-- built by JS --></div>
       <div class="sleg">
         <span><div class="ldot" style="background:var(--acc)"></div> Active day</span>
         <span><div class="ldot" style="background:var(--txd)"></div> Skipped day</span>
-        <span>Times shown in IST (+5:30)</span>
+        <span id="tzLegend">Times shown in IST (+5:30)</span>
       </div>
     </div>
 
@@ -626,9 +657,34 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     </div>
 
     <div id="runsList"><div class="run-empty"><div class="run-empty-ico">🔄</div><span>Loading runs...</span></div></div>
+    <div class="export-bar">
+      <span>Export:</span>
+      <button class="xbtn" onclick="exportRuns('csv')">⬇ CSV</button>
+      <button class="xbtn" onclick="exportRuns('json')">⬇ JSON</button>
+      <button class="xbtn" onclick="exportRuns('tsv')">⬇ TSV</button>
+      <button class="xbtn" onclick="exportRuns('md')">⬇ Markdown</button>
+    </div>
   </div>
 
 </div>
+</div>
+
+<!-- ══ RUN DETAIL MODAL ══ -->
+<div class="modal-bg" id="runDetailBg" onclick="closeRunDetail(event)">
+  <div class="modal-run">
+    <div class="run-detail-head">
+      <h3 id="rdTitle">Run Details</h3>
+      <div class="mclose" onclick="closeRunDetail()">✕</div>
+    </div>
+    <div class="run-detail-body" id="rdBody"></div>
+    <div class="run-detail-footer">
+      <span style="font-size:12px;color:var(--txd)">Click "View on GitHub" to see full logs</span>
+      <div style="display:flex;gap:8px">
+        <a id="rdLogsBtn" href="#" target="_blank" class="btn bg" style="font-size:12px;padding:8px 14px;text-decoration:none">📋 View Logs</a>
+        <button class="btn bg" style="font-size:12px;padding:8px 14px" onclick="closeRunDetail()">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toasts" id="toasts"></div>
@@ -653,15 +709,199 @@ const TNAMES = {
 };
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
-let token = localStorage.getItem('gh_token') || '';
-let isDry = false;
+let token  = localStorage.getItem('gh_token') || '';
+let isDry  = false;
+let userTZ = localStorage.getItem('user_tz') || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+
+// ── TIMEZONE HELPERS ──────────────────────────────────────────────────────────
+function tzNow()  { return new Date(new Date().toLocaleString('en-US', {timeZone: userTZ})); }
+function tzFmt(d, opts) { return new Date(d).toLocaleString('en-US', {timeZone: userTZ, ...opts}); }
+function tzLabel(){ const off = -new Date().getTimezoneOffset(); const h=Math.floor(Math.abs(off)/60),m=Math.abs(off)%60; return userTZ.split('/').pop().replace(/_/g,' ') + ' (UTC'+(off>=0?'+':'-')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+')'; }
+function tzOffsetMins() {
+  // Get offset of userTZ from UTC in minutes (positive = ahead)
+  const now = new Date();
+  const utcStr = now.toLocaleString('en-US',{timeZone:'UTC'});
+  const tzStr  = now.toLocaleString('en-US',{timeZone:userTZ});
+  return Math.round((new Date(tzStr) - new Date(utcStr)) / 60000);
+}
 let topicId = '';
 let topicName = 'Auto-select';
 let lastGenPost = '';
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
+
+// ── TIMEZONE ──────────────────────────────────────────────────────────────────
+const TIMEZONES = [
+  ['Asia/Kolkata','🇮🇳 India (IST +5:30)'],
+  ['America/New_York','🇺🇸 New York (ET)'],
+  ['America/Chicago','🇺🇸 Chicago (CT)'],
+  ['America/Denver','🇺🇸 Denver (MT)'],
+  ['America/Los_Angeles','🇺🇸 Los Angeles (PT)'],
+  ['Europe/London','🇬🇧 London (GMT/BST)'],
+  ['Europe/Paris','🇫🇷 Paris / Berlin (CET)'],
+  ['Europe/Moscow','🇷🇺 Moscow (MSK)'],
+  ['Asia/Dubai','🇦🇪 Dubai (GST +4)'],
+  ['Asia/Singapore','🇸🇬 Singapore (SGT +8)'],
+  ['Asia/Tokyo','🇯🇵 Tokyo (JST +9)'],
+  ['Asia/Shanghai','🇨🇳 Shanghai (CST +8)'],
+  ['Australia/Sydney','🇦🇺 Sydney (AEST)'],
+  ['Pacific/Auckland','🇳🇿 Auckland (NZST)'],
+  ['UTC','🌐 UTC'],
+];
+
+function initTzSelector() {
+  const sel = document.getElementById('tzSel');
+  if (!sel) return;
+  sel.innerHTML = TIMEZONES.map(([tz, label]) =>
+    `<option value="${tz}" ${tz===userTZ?'selected':''}>${label}</option>`
+  ).join('');
+  // If userTZ not in list, add it
+  if (!TIMEZONES.find(([tz]) => tz===userTZ)) {
+    sel.insertAdjacentHTML('afterbegin', `<option value="${userTZ}" selected>🌍 ${userTZ.replace('_',' ')}</option>`);
+  }
+  updateTzLabels();
+}
+
+function setTimezone(tz) {
+  userTZ = tz;
+  localStorage.setItem('user_tz', tz);
+  updateTzLabels();
+  updNext();
+  // Re-render runs with new timezone
+  if (allRuns.length) applyRunFilter();
+  // Re-render stats
+  loadStats();
+  toast('Timezone set to ' + tz.split('/').pop().replace(/_/g,' '), 'info');
+}
+
+function updateTzLabels() {
+  const label = tzLabel();
+  const leg = document.getElementById('tzLegend');
+  const note = document.getElementById('tzWeeklyNote');
+  if (leg)  leg.textContent  = 'Times in ' + label;
+  if (note) note.textContent = label;
+}
+
+// ── RUN DETAIL MODAL ──────────────────────────────────────────────────────────
+function openRunDetail(runId) {
+  const run = allRuns.find(r => r.id === runId);
+  if (!run) return;
+  const bg = document.getElementById('runDetailBg');
+  const body = document.getElementById('rdBody');
+  const ok   = run.conclusion === 'success';
+  const fail = run.conclusion === 'failure';
+  const inprog = run.status === 'in_progress' || run.status === 'queued';
+  const statusIcon = ok ? '✅' : fail ? '❌' : inprog ? '⏳' : '⚪';
+  const statusText = ok ? 'Success' : fail ? 'Failed' : inprog ? 'In Progress' : run.conclusion || run.status;
+  const statusCls  = ok ? 'ok' : fail ? 'fail' : inprog ? 'run' : '';
+  const trig = run.event === 'schedule' ? '⏰ Scheduled (cron)' : run.event === 'workflow_dispatch' ? '🖱️ Manual trigger' : run.event;
+  const started = tzFmt(run.created_at, {weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false,year:'numeric'});
+  const dur = run.updated_at ? Math.round((new Date(run.updated_at) - new Date(run.created_at))/1000) : null;
+  const durStr = dur ? (dur > 60 ? Math.floor(dur/60)+'m '+dur%60+'s' : dur+'s') : '—';
+  const topic = getTopicFromRun(run) || 'Auto-selected';
+  const mode  = getModeFromRun(run)  || '🔧 Tech Topic';
+
+  document.getElementById('rdTitle').textContent = `Run #${run.run_number}`;
+  document.getElementById('rdLogsBtn').href = run.html_url;
+
+  body.innerHTML = `
+    <div class="rdt">
+      <div class="rdt-ico">${statusIcon}</div>
+      <div class="rdt-info"><div class="rdt-label">Status</div><div class="rdt-val ${statusCls}">${statusText}</div></div>
+    </div>
+    <div class="rdt">
+      <div class="rdt-ico">🎯</div>
+      <div class="rdt-info"><div class="rdt-label">Topic</div><div class="rdt-val">${topic}</div></div>
+    </div>
+    <div class="rdt">
+      <div class="rdt-ico">📌</div>
+      <div class="rdt-info"><div class="rdt-label">Post Mode</div><div class="rdt-val">${mode}</div></div>
+    </div>
+    <div class="rdt">
+      <div class="rdt-ico">⚡</div>
+      <div class="rdt-info"><div class="rdt-label">Trigger</div><div class="rdt-val">${trig}</div></div>
+    </div>
+    <div class="rdt">
+      <div class="rdt-ico">🕐</div>
+      <div class="rdt-info"><div class="rdt-label">Started</div><div class="rdt-val">${started} (${tzLabel()})</div></div>
+    </div>
+    <div class="rdt">
+      <div class="rdt-ico">⏱️</div>
+      <div class="rdt-info"><div class="rdt-label">Duration</div><div class="rdt-val">${durStr}</div></div>
+    </div>
+    <div class="rdt">
+      <div class="rdt-ico">🔢</div>
+      <div class="rdt-info"><div class="rdt-label">Run Number</div><div class="rdt-val">#${run.run_number} · ID ${run.id}</div></div>
+    </div>
+    ${run.display_title ? `<div class="rdt"><div class="rdt-ico">📝</div><div class="rdt-info"><div class="rdt-label">Title</div><div class="rdt-val" style="font-size:12px;font-weight:400">${run.display_title}</div></div></div>` : ''}
+    ${fail ? `<div class="rdt" style="border-color:rgba(248,113,113,.25);background:rgba(248,113,113,.05)"><div class="rdt-ico">💡</div><div class="rdt-info"><div class="rdt-label">Next step</div><div class="rdt-val" style="font-size:12px;font-weight:400;color:var(--txm)">Click "View Logs" to see the error. Common causes: expired LinkedIn token, Groq API key issue, or schedule_checker sleeping too long.</div></div></div>` : ''}
+  `;
+  bg.classList.add('show');
+}
+
+function closeRunDetail(e) {
+  if (!e || e.target === document.getElementById('runDetailBg'))
+    document.getElementById('runDetailBg').classList.remove('show');
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportRuns(fmt) {
+  const { from, to } = getFilterRange();
+  let filtered = allRuns;
+  if (from) filtered = filtered.filter(r => { const d=new Date(r.created_at); return d>=from&&d<=to; });
+  if (!filtered.length) { toast('No runs to export in this date range', 'err'); return; }
+
+  const rows = filtered.map(r => ({
+    run_number:  r.run_number,
+    status:      r.conclusion || r.status,
+    trigger:     r.event,
+    topic:       getTopicFromRun(r) || 'auto',
+    mode:        getModeFromRun(r)  || 'topic',
+    started_utc: r.created_at,
+    started_local: tzFmt(r.created_at,{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}),
+    timezone:    userTZ,
+    duration_s:  r.updated_at ? Math.round((new Date(r.updated_at)-new Date(r.created_at))/1000) : '',
+    github_url:  r.html_url,
+  }));
+
+  let content, mime, ext;
+  const cols = Object.keys(rows[0]);
+
+  if (fmt === 'json') {
+    content = JSON.stringify(rows, null, 2);
+    mime = 'application/json'; ext = 'json';
+  } else if (fmt === 'csv') {
+    const esc = v => typeof v==='string'&&(v.includes(',')|| v.includes('"')) ? `"${v.replace(/"/g,'""')}"` : v;
+    content = [cols.join(','), ...rows.map(r => cols.map(c => esc(r[c])).join(','))].join('\n');
+    mime = 'text/csv'; ext = 'csv';
+  } else if (fmt === 'tsv') {
+    content = [cols.join('\t'), ...rows.map(r => cols.map(c => String(r[c]??'')).join('\t'))].join('\n');
+    mime = 'text/tab-separated-values'; ext = 'tsv';
+  } else if (fmt === 'md') {
+    const mdCols = ['Run','Status','Trigger','Topic','Mode','Started','Duration'];
+    const mdKeys = ['run_number','status','trigger','topic','mode','started_local','duration_s'];
+    const pad = (s,n) => String(s).padEnd(n);
+    const widths = mdKeys.map((k,i) => Math.max(mdCols[i].length, ...rows.map(r=>String(r[k]??'').length)));
+    const hr = widths.map(w => '-'.repeat(w+2)).join('|');
+    const header = '| ' + mdCols.map((c,i) => pad(c,widths[i])).join(' | ') + ' |';
+    const dataRows = rows.map(r => '| ' + mdKeys.map((k,i) => pad(r[k]??'',widths[i])).join(' | ') + ' |');
+    content = `# LinkedIn Agent — Run History\n> Exported ${new Date().toLocaleDateString()} · Timezone: ${userTZ}\n\n${header}\n|${hr}|\n${dataRows.join('\n')}\n`;
+    mime = 'text/markdown'; ext = 'md';
+  }
+
+  const blob = new Blob([content], {type: mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `linkedin-runs-${new Date().toISOString().split('T')[0]}.${ext}`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(`Downloaded ${filtered.length} runs as .${ext.toUpperCase()}`, 'ok');
+}
+
+
 window.onload = () => {
   applyTheme(localStorage.getItem('theme') || 'dark');
+  initTzSelector();
   loadCustomTopics();
   loadSettings();
   if (token) silentConn();
@@ -1052,7 +1292,7 @@ function renderRuns(runs) {
     const trig    = r.event==='schedule' ? 'schedule' : r.event==='workflow_dispatch' ? 'manual' : r.event;
     const bcls    = trig==='schedule' ? 'bsch' : trig==='manual' ? 'bman' : 'bdry';
     const t       = new Date(r.created_at);
-    const ts      = t.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const ts      = tzFmt(t,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
     const dur     = r.updated_at ? Math.round((new Date(r.updated_at) - t) / 1000) : null;
     const ds      = dur ? (dur > 60 ? Math.floor(dur/60)+'m '+dur%60+'s' : dur+'s') : '—';
     const topic   = getTopicFromRun(r);
@@ -1063,12 +1303,12 @@ function renderRuns(runs) {
     else if (trig === 'schedule') tags += `<span class="rtag rtag-topic">🎲 Auto</span>`;
     if (mode)   tags += `<span class="rtag rtag-mode">${mode}</span>`;
     if (isDryRun) tags += `<span class="rtag rtag-dry">🧪 dry run</span>`;
-    return `<div class="ri">
+    return `<div class="ri" onclick="openRunDetail(${r.id})" title="Click for details" style="cursor:pointer">
       <div class="ric ${icls}">${ico}</div>
       <div class="rib">
         <div class="rit">${r.display_title||r.name||'Run #'+r.run_number}</div>
         ${tags ? `<div class="run-tags">${tags}</div>` : ''}
-        <div class="rimeta">${ts} IST · #${r.run_number} · ${ds}</div>
+        <div class="rimeta">${ts} · #${r.run_number} · ${ds}</div>
       </div>
       <div class="rright">
         <div class="rbadge ${bcls}">${trig}</div>
@@ -1121,7 +1361,7 @@ async function loadStats() {
       else if (diffHr < 24)  ago = diffHr + 'h ' + (diffMin % 60) + 'm ago';
       else                   ago = diffDay + 'd ' + (diffHr % 24) + 'h ago';
       document.getElementById('s4').textContent = ago;
-      document.getElementById('s4b').textContent = new Date(last.created_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' IST';
+      document.getElementById('s4b').textContent = tzFmt(last.created_at,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
     }
   } catch(e) {}
 }
@@ -1221,11 +1461,63 @@ function buildDayGrid() {
       </button>
       <div class="time-ctrl">
         <button class="time-btn" onclick="adjDayTime('${day}',15)">▲</button>
-        <div class="time-val" id="tmval-${day}">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</div>
+        <input type="text" class="time-val" id="tmval-${day}" value="${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}" maxlength="5" placeholder="HH:MM" oninput="onTimeInput('${day}',this)" onblur="onTimeBlur('${day}',this)" onkeydown="onTimeKey(event,'${day}',this)" />
         <button class="time-btn" onclick="adjDayTime('${day}',-15)">▼</button>
       </div>`;
     grid.appendChild(col);
   });
+}
+
+function parseTimeInput(val) {
+  // Accept formats: "9:37", "09:37", "937", "0937", "9.37"
+  val = val.trim().replace(/[.,]/g, ':');
+  let h, m;
+  if (/^\d{1,2}:\d{2}$/.test(val)) {
+    [h, m] = val.split(':').map(Number);
+  } else if (/^\d{3,4}$/.test(val)) {
+    // "937" → 9:37, "0937" → 09:37
+    const s = val.padStart(4, '0');
+    h = parseInt(s.slice(0, 2), 10);
+    m = parseInt(s.slice(2), 10);
+  } else {
+    return null;
+  }
+  if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
+  return { h, m };
+}
+
+function onTimeInput(day, el) {
+  // Live format hint: highlight border red if invalid while typing (>3 chars)
+  const val = el.value;
+  if (val.length >= 4) {
+    const parsed = parseTimeInput(val);
+    el.style.borderColor = parsed ? '' : 'var(--red)';
+  } else {
+    el.style.borderColor = '';
+  }
+}
+
+function onTimeBlur(day, el) {
+  const parsed = parseTimeInput(el.value);
+  if (parsed) {
+    const time = String(parsed.h).padStart(2,'0') + ':' + String(parsed.m).padStart(2,'0');
+    schedConfig.weekly[day].time_ist = time;
+    el.value = time;
+    el.style.borderColor = '';
+    updNext();
+  } else {
+    // Restore last valid value
+    el.value = schedConfig.weekly[day].time_ist || '09:30';
+    el.style.borderColor = '';
+  }
+}
+
+function onTimeKey(e, day, el) {
+  if (e.key === 'Enter') { el.blur(); return; }
+  if (e.key === 'Escape') { el.value = schedConfig.weekly[day].time_ist || '09:30'; el.blur(); return; }
+  // Arrow up/down still adjusts by 15 min like the buttons
+  if (e.key === 'ArrowUp')   { e.preventDefault(); adjDayTime(day, 15);  return; }
+  if (e.key === 'ArrowDown') { e.preventDefault(); adjDayTime(day, -15); return; }
 }
 
 function toggleDay(day) {
@@ -1239,7 +1531,7 @@ function adjDayTime(day, deltaMin) {
   const total = ((h*60 + m + deltaMin) + 1440) % 1440;
   const nh = Math.floor(total/60), nm = total % 60;
   schedConfig.weekly[day].time_ist = String(nh).padStart(2,'0') + ':' + String(nm).padStart(2,'0');
-  document.getElementById('tmval-' + day).textContent = schedConfig.weekly[day].time_ist;
+  const el = document.getElementById('tmval-' + day); if (el) el.value = schedConfig.weekly[day].time_ist;
   updNext();
 }
 
@@ -1271,7 +1563,7 @@ function renderOverrides() {
     const el = document.getElementById(type + 'Chips');
     if (!arr.length) { el.innerHTML = '<span class="empty-chips">No ' + type + ' dates</span>'; return; }
     el.innerHTML = arr.map(d => {
-      const fmt = new Date(d + 'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',month:'short',day:'numeric'});
+      const fmt = new Date(d + 'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
       return `<span class="dchip dchip-${type}">${type==='skip'?'🚫':'✅'} ${fmt}<button onclick="removeOverride('${type}','${d}')">✕</button></span>`;
     }).join('');
   });
@@ -1318,7 +1610,7 @@ function renderPausePanel() {
 
 // ── NEXT POST CALCULATION ─────────────────────────────────────────────────────
 function updNext() {
-  const ist = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+  const ist = tzNow();
   const todayStr = ist.toISOString().split('T')[0];
 
   // Update cron display (earliest active time → UTC)
@@ -1327,7 +1619,8 @@ function updNext() {
     .map(d => d.time_ist || '09:30');
   const earliest = activeTimes.sort()[0] || '09:30';
   const [eh,em] = earliest.split(':').map(Number);
-  const eum = (eh*60+em-330+1440)%1440;
+  const offMins = tzOffsetMins();
+  const eum = (eh*60+em-offMins+1440)%1440;
   const euh=Math.floor(eum/60),eumm=eum%60;
   const cronEl = document.getElementById('cronv');
   const utcEl  = document.getElementById('utcv');
@@ -1337,7 +1630,7 @@ function updNext() {
   if (schedConfig.paused) {
     const resume = schedConfig.pause_until;
     document.getElementById('npLabel').textContent = 'Posting paused';
-    document.getElementById('nxt').textContent = resume ? 'Resumes ' + new Date(resume+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',month:'short',day:'numeric'}) : 'Indefinitely paused';
+    document.getElementById('nxt').textContent = resume ? 'Resumes ' + new Date(resume+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : 'Indefinitely paused';
     document.getElementById('cdt').textContent = '—';
     return;
   }
@@ -1360,7 +1653,7 @@ function updNext() {
     const df = candidate - ist;
     const dh = Math.floor(df/(1000*60*60)), dm = Math.floor((df%(1000*60*60))/(1000*60));
     document.getElementById('npLabel').textContent = 'Next scheduled post';
-    document.getElementById('nxt').textContent = candidate.toLocaleString('en-IN',{weekday:'long',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' IST'+(isForce?' 📌 forced':'');
+    document.getElementById('nxt').textContent = tzFmt(candidate,{weekday:'long',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})+(isForce?' 📌 forced':'');
     document.getElementById('cdt').textContent = dh+'h '+dm+'m';
     return;
   }
