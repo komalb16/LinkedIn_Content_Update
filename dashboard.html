@@ -9,13 +9,12 @@
 [data-theme="dark"]{--bg:#0b0f19;--bg2:#111827;--bg3:#1a2235;--sur:#151c2c;--sur2:#1e2a3d;--bd:rgba(255,255,255,0.07);--bds:rgba(14,165,233,0.25);--tx:#f1f5f9;--txm:#94a3b8;--txd:#475569;--sh:0 4px 24px rgba(0,0,0,0.4);--gl:0 0 40px rgba(14,165,233,0.07)}
 [data-theme="medium"]{--bg:#1a1f2e;--bg2:#222840;--bg3:#2a3350;--sur:#222840;--sur2:#2a3350;--bd:rgba(255,255,255,0.1);--bds:rgba(14,165,233,0.3);--tx:#e8edf5;--txm:#a0aec0;--txd:#607080;--sh:0 4px 20px rgba(0,0,0,0.3);--gl:0 0 40px rgba(14,165,233,0.1)}
 [data-theme="light"]{--bg:#f0f4f8;--bg2:#e2e8f0;--bg3:#cbd5e1;--sur:#ffffff;--sur2:#f8fafc;--bd:rgba(0,0,0,0.08);--bds:rgba(2,132,199,0.35);--tx:#0f172a;--txm:#475569;--txd:#94a3b8;--sh:0 4px 20px rgba(0,0,0,0.08);--gl:none;--acc:#0284c7;--acc2:#7c3aed}
-
 :root{--acc:#0ea5e9;--acc2:#8b5cf6;--grn:#22c55e;--red:#ef4444;--org:#f97316;--r:14px;--rs:9px;--tr:0.25s cubic-bezier(0.4,0,0.2,1);--fh:'Syne',sans-serif;--fb:'Instrument Sans',sans-serif}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh;transition:background var(--tr),color var(--tr)}
 [data-theme="dark"] body::before,[data-theme="medium"] body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
 
-/* CONNECT SCREEN */
+/* ── CONNECT ── */
 #cs{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative;z-index:1}
 .cc{background:var(--sur);border:1px solid var(--bd);border-radius:24px;padding:48px 44px;width:100%;max-width:460px;box-shadow:var(--sh),var(--gl);animation:up .5s ease}
 @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
@@ -23,19 +22,19 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh
 .clogo-ic{width:48px;height:48px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 24px rgba(14,165,233,0.3)}
 .clogo h1{font-family:var(--fh);font-size:18px;font-weight:700}
 .clogo p{font-size:12px;color:var(--txd);margin-top:2px}
-.cc>h2{font-family:var(--fh);font-size:22px;font-weight:700;margin-bottom:8px}
+.cc h2{font-family:var(--fh);font-size:22px;font-weight:700;margin-bottom:8px}
 .cc>p{font-size:14px;color:var(--txm);margin-bottom:24px;line-height:1.6}
 .smini{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;padding:16px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--bd)}
 .sm{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--txm);line-height:1.5}
 .smn{width:20px;height:20px;min-width:20px;background:var(--acc);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:1px}
 .hint{font-size:11px;color:var(--txd);margin-top:10px;line-height:1.6}
-.hint code{font-family:monospace;background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--acc)}
+.hint code,.smini code{font-family:monospace;background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--acc)}
 
-/* DASHBOARD */
+/* ── DASHBOARD ── */
 #db{display:none}
 .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px 80px}
 
-/* HEADER */
+/* ── HEADER ── */
 header{display:flex;align-items:center;justify-content:space-between;padding:24px 0 20px;border-bottom:1px solid var(--bd);margin-bottom:28px}
 .logo{display:flex;align-items:center;gap:12px}
 .logo-ic{width:38px;height:38px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px}
@@ -50,77 +49,40 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .cpill:hover{background:rgba(34,197,94,0.15)}
 .dot{width:6px;height:6px;background:var(--grn);border-radius:50%;animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.gear-btn{width:34px;height:34px;background:var(--sur2);border:1px solid var(--bd);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all var(--tr)}
+.gear-btn:hover{border-color:var(--bds);background:rgba(14,165,233,0.08)}
 
-/* ── STATS - FIXED LARGE NUMBERS ── */
+/* ── STATS ── */
 .srow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
-
-.stat{
-  background:var(--sur);
-  border:1px solid var(--bd);
-  border-radius:var(--r);
-  padding:24px 22px;
-  transition:border-color var(--tr),transform var(--tr);
-  position:relative;
-  overflow:hidden;
-}
-.stat::before{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;
-  height:3px;
-  border-radius:var(--r) var(--r) 0 0;
-}
+.stat{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);padding:24px 22px;transition:border-color var(--tr),transform var(--tr);position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
 .stat:nth-child(1)::before{background:var(--acc)}
 .stat:nth-child(2)::before{background:var(--grn)}
 .stat:nth-child(3)::before{background:var(--acc2)}
 .stat:nth-child(4)::before{background:var(--org)}
 .stat:hover{border-color:var(--bds);transform:translateY(-2px)}
+.slbl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--txd);font-family:monospace;margin-bottom:14px;font-weight:600}
+.snum{font-family:var(--fh);font-size:52px;font-weight:800;line-height:1;margin-bottom:8px;letter-spacing:-2px}
+.snum.sm{font-size:26px;letter-spacing:-0.5px;line-height:1.2;padding-top:4px}
+.ssub{font-size:12px;color:var(--txd);margin-top:4px}
 
-.stat-label{
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  color:var(--txd);
-  font-family:monospace;
-  margin-bottom:14px;
-  font-weight:600;
-}
-
-/* THE CRITICAL FIX - big readable numbers */
-.stat-num{
-  font-family:var(--fh);
-  font-size:52px;
-  font-weight:800;
-  line-height:1;
-  margin-bottom:8px;
-  letter-spacing:-2px;
-}
-.stat-num.compact{
-  font-size:26px;
-  letter-spacing:-0.5px;
-  line-height:1.2;
-  padding-top:4px;
-}
-
-.stat-sub{font-size:12px;color:var(--txd);margin-top:4px}
-
-/* POST BANNER */
+/* ── POST BANNER ── */
 .pb{background:linear-gradient(135deg,var(--sur),var(--bg2));border:1px solid var(--bd);border-radius:18px;padding:24px 28px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .pb-l h2{font-family:var(--fh);font-size:17px;font-weight:700;margin-bottom:5px}
 .pb-l p{font-size:13px;color:var(--txm)}
 .pb-r{display:flex;align-items:center;gap:10px;flex-shrink:0}
 
-/* GRID */
+/* ── GRID ── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
 
-/* CARDS */
+/* ── CARDS ── */
 .card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:border-color var(--tr)}
 .card:hover{border-color:var(--bds)}
 .ch{padding:18px 22px 0;display:flex;align-items:center;justify-content:space-between}
 .ct{font-family:var(--fh);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--txm)}
 .cb{padding:16px 22px 22px}
 
-/* INPUTS & BUTTONS */
+/* ── INPUTS & BUTTONS ── */
 .inp{width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px;color:var(--tx);font-family:monospace;font-size:13px;outline:none;transition:border-color var(--tr)}
 .inp:focus{border-color:var(--acc)}
 .inp::placeholder{color:var(--txd)}
@@ -129,6 +91,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .bp:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 16px rgba(14,165,233,0.3)}
 .bg{background:transparent;border:1px solid var(--bd);color:var(--txm)}
 .bg:hover{border-color:var(--bds);color:var(--acc);background:rgba(14,165,233,0.06)}
+.bgrn{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:var(--grn)}
+.bgrn:hover{background:rgba(34,197,94,0.18)}
 .blg{padding:13px 26px;font-size:14px;border-radius:var(--r)}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 
@@ -140,7 +104,68 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .dry.on .sw{background:var(--org);border-color:var(--org)}
 .dry.on .sw::after{background:white;transform:translateX(13px)}
 
-/* SCHEDULER */
+
+/* ── ADVANCED SCHEDULER ── */
+.sched-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:20px;transition:border-color var(--tr)}
+.sched-card:hover{border-color:var(--bds)}
+.sched-tabs{display:flex;border-bottom:1px solid var(--bd)}
+.stab{flex:1;padding:12px;font-size:11px;font-weight:600;font-family:var(--fb);text-transform:uppercase;letter-spacing:1px;color:var(--txd);background:transparent;border:none;cursor:pointer;transition:all var(--tr);border-bottom:2px solid transparent}
+.stab.act{color:var(--acc);border-bottom-color:var(--acc);background:rgba(14,165,233,0.04)}
+.stab:hover{color:var(--tx)}
+.spanel{display:none;padding:20px 22px}
+.spanel.show{display:block}
+
+/* Pause */
+.pause-banner{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--rs);border:1px solid var(--bd);background:var(--bg2);margin-bottom:16px}
+.pause-banner.paused{border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.06)}
+.pause-ico{font-size:26px;flex-shrink:0}
+.pause-info h4{font-size:13px;font-weight:700;margin-bottom:3px}
+.pause-info p{font-size:11px;color:var(--txd)}
+.pause-info.paused h4{color:var(--red)}
+.resume-row{display:flex;gap:8px;align-items:center;margin-top:10px}
+.date-inp{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:8px 12px;color:var(--tx);font-size:12px;font-family:var(--fb);outline:none;transition:border-color var(--tr)}
+.date-inp:focus{border-color:var(--acc)}
+.brec{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red)}
+.brec:hover{background:rgba(239,68,68,0.18)}
+
+/* Weekly grid */
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px}
+.day-col{display:flex;flex-direction:column;align-items:center;gap:6px}
+.day-name{font-size:10px;font-family:monospace;text-transform:uppercase;letter-spacing:1px;color:var(--txd);margin-bottom:2px}
+.day-toggle{width:36px;height:36px;border-radius:50%;border:2px solid var(--bd);background:var(--bg2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);color:var(--txd)}
+.day-toggle.on{border-color:var(--acc);background:rgba(14,165,233,0.12);color:var(--acc)}
+.day-toggle:hover{border-color:var(--bds)}
+.time-mini{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%}
+.tm-up,.tm-dn{width:28px;height:18px;background:var(--sur2);border:1px solid var(--bd);border-radius:5px;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txm);transition:all var(--tr)}
+.tm-up:hover,.tm-dn:hover{background:rgba(14,165,233,0.1);border-color:var(--acc);color:var(--acc)}
+.tm-val{font-size:10px;font-family:monospace;color:var(--tx);font-weight:600;padding:3px 4px;background:var(--bg2);border-radius:4px;width:100%;text-align:center}
+.day-col.disabled .tm-val{color:var(--txd);opacity:.5}
+.day-col.disabled .tm-up,.day-col.disabled .tm-dn{opacity:.3;pointer-events:none}
+
+/* Override dates */
+.override-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.date-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:28px}
+.dchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:100px;font-size:11px;font-family:monospace;cursor:default}
+.dchip-skip{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red)}
+.dchip-force{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:var(--grn)}
+.dchip button{background:none;border:none;cursor:pointer;color:inherit;font-size:11px;opacity:.6;padding:0;line-height:1}
+.dchip button:hover{opacity:1}
+.empty-chips{font-size:11px;color:var(--txd);font-style:italic}
+
+/* Next post countdown */
+.next-post-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(14,165,233,0.05);border:1px solid rgba(14,165,233,0.12);border-radius:var(--rs)}
+.np-ico{font-size:22px}
+.np-info h4{font-size:12px;font-weight:600;color:var(--acc);margin-bottom:2px}
+.np-info p{font-size:11px;color:var(--txd)}
+.np-cdt{font-family:var(--fh);font-size:20px;font-weight:800;color:var(--acc);margin-left:auto;letter-spacing:-0.5px}
+.save-sched-btn{width:100%;margin-top:16px}
+
+/* Status legend */
+.sleg{display:flex;gap:12px;font-size:10px;color:var(--txd);margin-top:10px}
+.sleg span{display:flex;align-items:center;gap:4px}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── SCHEDULER (legacy, kept) ── */
 .trow{display:flex;align-items:center;gap:16px;margin-bottom:16px}
 .tbig{font-family:var(--fh);font-size:46px;font-weight:800;color:var(--acc);letter-spacing:-1px;line-height:1;text-shadow:0 0 30px rgba(14,165,233,0.3)}
 .tctrls{display:flex;gap:14px}
@@ -157,32 +182,47 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .nrbox p{font-size:11px;color:var(--txd)}
 .cdt{font-family:var(--fh);font-size:18px;font-weight:800;color:var(--acc);margin-left:auto}
 
-/* TOPIC */
+/* ── TOPIC PICKER ── */
 .typerow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
 .tc{padding:7px 13px;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;font-size:12px;font-weight:500;cursor:pointer;color:var(--txm);transition:all var(--tr);display:flex;align-items:center;gap:5px}
 .tc:hover{color:var(--tx);border-color:var(--bds)}
 .tc.sa{background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.35);color:var(--acc2)}
 .tc.sn{background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.35);color:var(--org)}
 .tc.st{background:rgba(14,165,233,0.1);border-color:rgba(14,165,233,0.35);color:var(--acc)}
-.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:340px;overflow-y:auto}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:300px;overflow-y:auto;margin-bottom:12px}
 .tgrid::-webkit-scrollbar{width:4px}
 .tgrid::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
-.tch{padding:9px 12px;background:var(--sur2);border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--txm);transition:all var(--tr)}
+.tch{padding:9px 12px;background:var(--sur2);border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--txm);transition:all var(--tr);position:relative}
 .tch:hover{border-color:var(--bds);color:var(--acc);background:rgba(14,165,233,0.06)}
 .tch.sel{border-color:var(--acc);color:var(--acc);background:rgba(14,165,233,0.08)}
 .tch.ach{border-style:dashed;border-color:rgba(139,92,246,0.3);color:var(--acc2)}
 .tch.ach.sel,.tch.ach:hover{background:rgba(139,92,246,0.08);color:var(--acc2);border-color:var(--acc2)}
+.tch.custom{border-color:rgba(34,197,94,0.3);color:var(--grn)}
+.tch.custom:hover,.tch.custom.sel{background:rgba(34,197,94,0.08);border-color:var(--grn);color:var(--grn)}
+.del-chip{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:16px;height:16px;background:rgba(239,68,68,0.15);border:none;border-radius:50%;color:var(--red);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.tch:hover .del-chip{opacity:1}
 
-/* RUNS */
+/* Add topic row */
+.add-topic-row{display:flex;gap:8px;align-items:center}
+.add-topic-inp{flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:9px 12px;color:var(--tx);font-size:12px;font-family:var(--fb);outline:none;transition:border-color var(--tr)}
+.add-topic-inp:focus{border-color:var(--grn)}
+.add-topic-inp::placeholder{color:var(--txd)}
+.add-btn{padding:9px 14px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:var(--rs);color:var(--grn);font-size:12px;font-weight:600;cursor:pointer;transition:all var(--tr);white-space:nowrap}
+.add-btn:hover{background:rgba(34,197,94,0.18)}
+
+/* ── RUNS ── */
 .ri{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd);animation:fi .3s ease}
 @keyframes fi{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .ri:last-child{border-bottom:none}
 .ric{width:34px;height:34px;min-width:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;margin-top:1px}
 .ok{background:rgba(34,197,94,0.1)}.fail{background:rgba(239,68,68,0.1)}.run{background:rgba(249,115,22,0.1);animation:blink 1.5s infinite}.oth{background:var(--sur2)}
 .rib{flex:1;min-width:0}
-.rit{font-size:13px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rtopic{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.15);border-radius:100px;font-size:10px;color:var(--acc);font-family:monospace;margin-bottom:4px}
-.rmode{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);border-radius:100px;font-size:10px;color:var(--acc2);font-family:monospace;margin-bottom:4px;margin-left:4px}
+.rit{font-size:13px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.run-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+.rtag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;font-size:10px;font-family:monospace}
+.rtag-topic{background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.15);color:var(--acc)}
+.rtag-mode{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);color:var(--acc2)}
+.rtag-dry{background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.15);color:var(--org)}
 .rimeta{font-size:11px;color:var(--txd);font-family:monospace}
 .rright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
 .rbadge{padding:3px 9px;border-radius:100px;font-size:10px;font-family:monospace}
@@ -191,37 +231,79 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 .bdry{background:rgba(249,115,22,0.1);color:var(--org)}
 .rdur{font-size:10px;color:var(--txd);font-family:monospace}
 
-/* SPINNER & TOAST */
+/* ── MODALS ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.show{display:flex}
+
+/* Settings modal */
+.modal-settings{background:var(--sur);border:1px solid var(--bd);border-radius:20px;width:100%;max-width:480px;box-shadow:var(--sh);animation:up .3s ease}
+.modal-settings .mhead{padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-settings .mhead h3{font-family:var(--fh);font-size:16px;font-weight:700}
+.mclose{width:30px;height:30px;background:var(--sur2);border:1px solid var(--bd);border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--txm);transition:all var(--tr)}
+.mclose:hover{color:var(--tx);border-color:var(--bds)}
+.modal-settings .mbody{padding:0 24px 24px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;font-family:monospace;color:var(--txd);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.field .finp{width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 14px;color:var(--tx);font-family:monospace;font-size:13px;outline:none;transition:border-color var(--tr)}
+.field .finp:focus{border-color:var(--acc)}
+.field .fhint{font-size:11px;color:var(--txd);margin-top:6px;line-height:1.5}
+.field .fhint a{color:var(--acc);text-decoration:none}
+.field .fhint a:hover{text-decoration:underline}
+
+/* Preview modal */
+.modal-preview{background:var(--sur);border:1px solid var(--bd);border-radius:20px;width:100%;max-width:860px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sh);animation:up .3s ease}
+.preview-head{padding:20px 24px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.preview-head h3{font-family:var(--fh);font-size:16px;font-weight:700}
+.preview-head .tags{display:flex;gap:8px;align-items:center}
+.preview-head .tag{padding:3px 10px;border-radius:100px;font-size:11px;font-family:monospace;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);color:var(--org)}
+.preview-body{display:grid;grid-template-columns:1fr 1fr;gap:0;flex:1;overflow:hidden;min-height:0}
+.preview-post{padding:24px;border-right:1px solid var(--bd);overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.preview-post::-webkit-scrollbar{width:4px}
+.preview-post::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+.post-meta{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--bd)}
+.post-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.post-author{font-size:13px;font-weight:600}
+.post-role{font-size:11px;color:var(--txd)}
+.post-content{font-size:13px;line-height:1.75;color:var(--tx);white-space:pre-wrap;word-break:break-word}
+.post-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;height:200px}
+.post-loading .spin2{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:rot .8s linear infinite}
+.post-loading p{font-size:13px;color:var(--txm)}
+.preview-diagram{padding:20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;background:var(--bg2)}
+.preview-diagram h4{font-family:var(--fh);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--txd)}
+.preview-diagram svg{width:100%;height:auto;border-radius:10px}
+.preview-foot{padding:16px 24px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg2)}
+.preview-foot .note{font-size:12px;color:var(--txd)}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ── SPINNER ── */
 .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;display:none}
 .spin.on{display:block}
-@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ── TOASTS ── */
 .toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:999}
-.toast{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;max-width:300px;box-shadow:var(--sh);animation:tin .3s ease,tout .3s ease 3.7s forwards}
+.toast{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;max-width:320px;box-shadow:var(--sh);animation:tin .3s ease,tout .3s ease 3.7s forwards}
 .toast.ok{border-color:rgba(34,197,94,0.3)}.toast.err{border-color:rgba(239,68,68,0.3)}.toast.info{border-color:rgba(14,165,233,0.3)}
 @keyframes tin{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes tout{to{transform:translateX(110%);opacity:0}}
 .xl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--txd);font-family:monospace;margin-bottom:10px}
 
-@media(max-width:768px){.srow{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.pb{flex-direction:column;align-items:flex-start}.tgrid{grid-template-columns:1fr}.cc{padding:32px 24px}}
+@media(max-width:768px){.srow{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.pb{flex-direction:column;align-items:flex-start}.tgrid{grid-template-columns:1fr}.cc{padding:32px 24px}.preview-body{grid-template-columns:1fr}.preview-diagram{border-top:1px solid var(--bd)}}
 </style>
 </head>
 <body>
 
-<!-- CONNECT SCREEN -->
+<!-- ══ CONNECT SCREEN ══ -->
 <div id="cs">
   <div class="cc">
     <div class="clogo">
       <div class="clogo-ic">🤖</div>
-      <div>
-        <h1>LinkedIn Agent</h1>
-        <p>Komal Batra · Content Dashboard</p>
-      </div>
+      <div><h1>LinkedIn Agent</h1><p>Komal Batra · Content Dashboard</p></div>
     </div>
     <h2>Connect GitHub</h2>
-    <p>Enter your Personal Access Token to manage posts, view run history, and trigger posts.</p>
+    <p>Enter your Personal Access Token to manage posts, view run history, and preview content before publishing.</p>
     <div class="smini">
       <div class="sm"><div class="smn">1</div><span>Go to <code>github.com → Settings → Developer Settings → Personal Access Tokens → Tokens (classic)</code></span></div>
-      <div class="sm"><div class="smn">2</div><span>Click <code>Generate new token</code> → check <code>repo</code> and <code>workflow</code> → set expiry <code>No expiration</code></span></div>
+      <div class="sm"><div class="smn">2</div><span>Click <code>Generate new token</code> → check <code>repo</code> and <code>workflow</code> → set expiry to <code>No expiration</code></span></div>
       <div class="sm"><div class="smn">3</div><span>Copy the <code>ghp_xxx...</code> token and paste below</span></div>
     </div>
     <div style="display:flex;gap:10px;margin-bottom:12px">
@@ -235,7 +317,80 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
   </div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- ══ SETTINGS MODAL ══ -->
+<div class="modal-bg" id="settingsBg" onclick="closeSettings(event)">
+  <div class="modal-settings">
+    <div class="mhead">
+      <h3>⚙️ Settings</h3>
+      <div class="mclose" onclick="closeSettings()">✕</div>
+    </div>
+    <div class="mbody">
+      <div class="field">
+        <label>Groq API Key (for Dry Run Preview)</label>
+        <input class="finp" id="groqKeyInput" type="password" placeholder="gsk_your_groq_api_key_here"/>
+        <p class="fhint">Used only for generating post previews in your browser. Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys. Never sent anywhere except Groq's API directly.</p>
+      </div>
+      <div class="field">
+        <label>Your Name (shown in post preview)</label>
+        <input class="finp" id="authorNameInput" type="text" placeholder="e.g. Komal Batra"/>
+      </div>
+      <div class="field">
+        <label>Your Role (shown in post preview)</label>
+        <input class="finp" id="authorRoleInput" type="text" placeholder="e.g. Software Engineer at Microsoft"/>
+      </div>
+      <button class="btn bp" style="width:100%" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DRY RUN PREVIEW MODAL ══ -->
+<div class="modal-bg" id="previewBg" onclick="closePreview(event)">
+  <div class="modal-preview">
+    <div class="preview-head">
+      <div>
+        <h3>🧪 Dry Run Preview</h3>
+        <p style="font-size:12px;color:var(--txd);margin-top:3px">This post will NOT be published to LinkedIn</p>
+      </div>
+      <div class="tags">
+        <div class="tag" id="previewTopicTag">Auto</div>
+        <div class="mclose" onclick="closePreview()">✕</div>
+      </div>
+    </div>
+    <div class="preview-body">
+      <!-- Post content -->
+      <div class="preview-post" id="previewPostArea">
+        <div class="post-loading" id="postLoading">
+          <div class="spin2"></div>
+          <p id="loadingMsg">Generating post with AI...</p>
+        </div>
+        <div id="postContentArea" style="display:none">
+          <div class="post-meta">
+            <div class="post-avatar">👤</div>
+            <div>
+              <div class="post-author" id="previewAuthor">Komal Batra</div>
+              <div class="post-role" id="previewRole">Software Engineer at Microsoft</div>
+            </div>
+          </div>
+          <div class="post-content" id="postText"></div>
+        </div>
+      </div>
+      <!-- Diagram -->
+      <div class="preview-diagram">
+        <h4>📊 Architecture Diagram</h4>
+        <div id="previewDiagram"></div>
+      </div>
+    </div>
+    <div class="preview-foot">
+      <span class="note">✅ Happy with this? Click Post Now (without Dry Run) to publish</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn bg" onclick="regeneratePost()">↻ Regenerate</button>
+        <button class="btn bg" onclick="closePreview()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
 <div id="db">
 <div class="wrap">
 
@@ -249,10 +404,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
     </div>
     <div class="hright">
       <div class="tsw">
-        <button class="tbtn" onclick="setTheme('light',this)">☀️ Light</button>
-        <button class="tbtn" onclick="setTheme('medium',this)">🌤 Medium</button>
-        <button class="tbtn act" onclick="setTheme('dark',this)">🌙 Dark</button>
+        <button class="tbtn" onclick="setTheme('light')">☀️ Light</button>
+        <button class="tbtn" onclick="setTheme('medium')">🌤 Medium</button>
+        <button class="tbtn act" onclick="setTheme('dark')">🌙 Dark</button>
       </div>
+      <div class="gear-btn" onclick="openSettings()" title="Settings">⚙️</div>
       <div class="cpill" onclick="disconnect()" title="Click to disconnect">
         <div class="dot"></div>
         <span id="connUser">Connected</span>
@@ -261,75 +417,116 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
     </div>
   </header>
 
-  <!-- STATS — large readable numbers -->
+  <!-- STATS -->
   <div class="srow">
-    <div class="stat">
-      <div class="stat-label">Total Runs</div>
-      <div class="stat-num" style="color:var(--acc)" id="s1">—</div>
-      <div class="stat-sub">all time</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Successful</div>
-      <div class="stat-num" style="color:var(--grn)" id="s2">—</div>
-      <div class="stat-sub">posts live on LinkedIn</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">This Week</div>
-      <div class="stat-num" style="color:var(--acc2)" id="s3">—</div>
-      <div class="stat-sub">successful posts</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Last Post</div>
-      <div class="stat-num compact" style="color:var(--org)" id="s4">—</div>
-      <div class="stat-sub" id="s4b">—</div>
-    </div>
+    <div class="stat"><div class="slbl">Total Runs</div><div class="snum" style="color:var(--acc)" id="s1">—</div><div class="ssub">all time</div></div>
+    <div class="stat"><div class="slbl">Successful</div><div class="snum" style="color:var(--grn)" id="s2">—</div><div class="ssub">posts live on LinkedIn</div></div>
+    <div class="stat"><div class="slbl">This Week</div><div class="snum" style="color:var(--acc2)" id="s3">—</div><div class="ssub">successful posts</div></div>
+    <div class="stat"><div class="slbl">Last Post</div><div class="snum sm" style="color:var(--org)" id="s4">—</div><div class="ssub" id="s4b">—</div></div>
   </div>
 
   <!-- POST NOW -->
   <div class="pb">
     <div class="pb-l">
-      <h2>🚀 Post to LinkedIn Now</h2>
-      <p>Trigger a post immediately. Toggle dry run to preview without publishing.</p>
+      <h2>🚀 Post to LinkedIn</h2>
+      <p>Enable Dry Run to preview the generated post and diagram before publishing.</p>
     </div>
     <div class="pb-r">
       <div class="dry" id="dryBtn" onclick="toggleDry()">
         <div class="sw"></div>
         <span id="dryLbl">Dry Run</span>
       </div>
-      <button class="btn bp blg" onclick="runNow()" id="runBtn">
+      <button class="btn bp blg" onclick="handlePost()" id="runBtn">
         <span id="runTxt">▶ Post Now</span>
         <div class="spin" id="runSpin"></div>
       </button>
     </div>
   </div>
 
-  <!-- GRID -->
+  <!-- TOPIC + RUNS GRID -->
   <div class="g2">
-    <!-- SCHEDULE -->
-    <div class="card">
-      <div class="ch"><span class="ct">⏰ Schedule</span><button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="copyCron()">Copy Cron</button></div>
-      <div class="cb">
-        <div class="nrbox">
-          <div><h4>Next scheduled post</h4><p id="nxt">Calculating...</p></div>
-          <div class="cdt" id="cdt">—</div>
-        </div>
-        <div class="xl">Posting time — IST</div>
-        <div class="trow">
-          <div class="tbig" id="tdisp">10:00</div>
-          <div class="tctrls">
-            <div class="tunit"><button class="tbtn2" onclick="adj('h',1)">▲</button><span class="tlbl">HR</span><button class="tbtn2" onclick="adj('h',-1)">▼</button></div>
-            <div class="tunit"><button class="tbtn2" onclick="adj('m',15)">▲</button><span class="tlbl">MIN</span><button class="tbtn2" onclick="adj('m',-15)">▼</button></div>
-          </div>
-          <div class="tzb">IST +5:30</div>
-        </div>
-        <div class="cronbox">
-          <div><div style="font-size:10px;color:var(--txd);margin-bottom:4px;font-family:monospace">CRON EXPRESSION</div><div class="cronval" id="cronv">30 4 * * *</div></div>
-          <div class="cronsub"><div id="utcv">04:30 UTC</div><div style="margin-top:2px">every day</div></div>
-        </div>
+  <!-- ADVANCED SCHEDULE CARD — full width -->
+  <div class="sched-card">
+    <div class="ch" style="padding:16px 22px 0;display:flex;align-items:center;justify-content:space-between">
+      <span class="ct">⏰ Schedule Control</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="copyCron()">Copy Cron</button>
+        <button class="btn bp" style="font-size:11px;padding:5px 14px" onclick="saveSchedule()" id="saveSchedBtn">💾 Save Schedule</button>
       </div>
     </div>
 
-    <!-- TOPIC -->
+    <!-- Next post banner -->
+    <div style="padding:14px 22px 0">
+      <div class="next-post-row">
+        <div class="np-ico">🗓️</div>
+        <div class="np-info"><h4 id="npLabel">Next scheduled post</h4><p id="nxt">Calculating...</p></div>
+        <div class="np-cdt" id="cdt">—</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="sched-tabs" style="margin-top:14px">
+      <button class="stab act" onclick="showTab('weekly',this)">📅 Weekly Schedule</button>
+      <button class="stab" onclick="showTab('overrides',this)">📌 Date Overrides</button>
+      <button class="stab" onclick="showTab('pause',this)" id="pauseTab">⏸️ Pause</button>
+    </div>
+
+    <!-- WEEKLY PANEL -->
+    <div class="spanel show" id="panel-weekly">
+      <p style="font-size:11px;color:var(--txd);margin-bottom:14px">Toggle each day on/off and set a different posting time per day (IST). Changes are saved to <code style="font-size:10px;background:var(--bg2);padding:1px 5px;border-radius:4px">schedule_config.json</code> in your repo.</p>
+      <div class="day-grid" id="dayGrid"><!-- built by JS --></div>
+      <div class="sleg">
+        <span><div class="ldot" style="background:var(--acc)"></div> Active day</span>
+        <span><div class="ldot" style="background:var(--txd)"></div> Skipped day</span>
+        <span>Times shown in IST (+5:30)</span>
+      </div>
+    </div>
+
+    <!-- DATE OVERRIDES PANEL -->
+    <div class="spanel" id="panel-overrides">
+      <p style="font-size:11px;color:var(--txd);margin-bottom:14px">Force-run or skip on specific dates, regardless of the weekly schedule above.</p>
+
+      <div class="xl" style="margin-bottom:8px">🚫 Skip these dates (no post even if day is active)</div>
+      <div class="override-row">
+        <input type="date" class="date-inp" id="skipDateInp"/>
+        <button class="btn bg" onclick="addOverride('skip')" style="font-size:12px;padding:8px 14px">＋ Add skip date</button>
+      </div>
+      <div class="date-chips" id="skipChips"><span class="empty-chips">No skip dates</span></div>
+
+      <div style="height:1px;background:var(--bd);margin:16px 0"></div>
+
+      <div class="xl" style="margin-bottom:8px">✅ Force-run on these dates (post even if day is disabled)</div>
+      <div class="override-row">
+        <input type="date" class="date-inp" id="forceDateInp"/>
+        <button class="btn bgrn" onclick="addOverride('force')" style="font-size:12px;padding:8px 14px">＋ Add force date</button>
+      </div>
+      <div class="date-chips" id="forceChips"><span class="empty-chips">No force dates</span></div>
+    </div>
+
+    <!-- PAUSE PANEL -->
+    <div class="spanel" id="panel-pause">
+      <div class="pause-banner" id="pauseBanner">
+        <div class="pause-ico">▶️</div>
+        <div class="pause-info" id="pauseInfo">
+          <h4>Posting is active</h4>
+          <p>Your agent posts on the days and times configured in the Weekly Schedule tab.</p>
+        </div>
+        <div style="margin-left:auto;display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <button class="btn" id="pauseBtn" onclick="togglePause()" style="font-size:12px;padding:9px 16px">⏸️ Pause posting</button>
+        </div>
+      </div>
+      <div id="pauseResumeRow" style="display:none;margin-top:10px">
+        <div class="xl" style="margin-bottom:8px">Auto-resume on date (IST)</div>
+        <div class="resume-row">
+          <input type="date" class="date-inp" id="pauseUntilInp" style="flex:1"/>
+          <button class="btn bg" onclick="clearPauseDate()" style="font-size:12px;padding:8px 12px">✕ No resume date</button>
+        </div>
+        <p style="font-size:11px;color:var(--txd);margin-top:8px">Leave blank to pause indefinitely. Click Save Schedule to apply.</p>
+      </div>
+    </div>
+  </div>
+
+    <!-- TOPIC PICKER -->
     <div class="card">
       <div class="ch"><span class="ct">🎯 Topic</span></div>
       <div class="cb">
@@ -339,31 +536,37 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
           <div class="tc" onclick="selType('n',this)">📰 News</div>
           <div class="tc" onclick="selType('t',this)">🔧 Tech Topic</div>
         </div>
-        <div class="xl">Specific topic (optional)</div>
+        <div class="xl">Select topic (or add your own)</div>
         <div class="tgrid" id="tgrid">
-          <div class="tch ach sel" data-id="" onclick="selTopic(this)">🎲 Auto-select</div>
-          <div class="tch" data-id="llm-architecture" onclick="selTopic(this)">🤖 LLM Architecture</div>
-          <div class="tch" data-id="ai-agents-2025" onclick="selTopic(this)">🤖 AI Agents 2025</div>
-          <div class="tch" data-id="mlops-pipeline" onclick="selTopic(this)">⚙️ MLOps Pipeline</div>
-          <div class="tch" data-id="rag-systems" onclick="selTopic(this)">🔍 RAG Systems</div>
-          <div class="tch" data-id="kubernetes-mastery" onclick="selTopic(this)">☸️ Kubernetes</div>
-          <div class="tch" data-id="docker-cheatsheet" onclick="selTopic(this)">🐳 Docker</div>
-          <div class="tch" data-id="aws-architecture" onclick="selTopic(this)">☁️ AWS Architecture</div>
-          <div class="tch" data-id="cicd-pipelines" onclick="selTopic(this)">🚀 CI/CD Pipelines</div>
-          <div class="tch" data-id="system-design" onclick="selTopic(this)">🏗️ System Design</div>
-          <div class="tch" data-id="api-design" onclick="selTopic(this)">🔌 API Design</div>
-          <div class="tch" data-id="git-workflow" onclick="selTopic(this)">🌿 Git Workflow</div>
-          <div class="tch" data-id="solid-principles" onclick="selTopic(this)">📐 SOLID Principles</div>
-          <div class="tch" data-id="zero-trust" onclick="selTopic(this)">🔐 Zero Trust</div>
-          <div class="tch" data-id="devsecops" onclick="selTopic(this)">🛡️ DevSecOps</div>
-          <div class="tch" data-id="data-lakehouse" onclick="selTopic(this)">📊 Data Lakehouse</div>
-          <div class="tch" data-id="kafka-streaming" onclick="selTopic(this)">🌊 Kafka Streaming</div>
+          <div class="tch ach sel" data-id="" data-name="Auto-select" onclick="selTopic(this)">🎲 Auto-select</div>
+          <div class="tch" data-id="llm-architecture" data-name="LLM Architecture" onclick="selTopic(this)">🤖 LLM Architecture</div>
+          <div class="tch" data-id="ai-agents-2025" data-name="AI Agents 2025" onclick="selTopic(this)">🤖 AI Agents 2025</div>
+          <div class="tch" data-id="mlops-pipeline" data-name="MLOps Pipeline" onclick="selTopic(this)">⚙️ MLOps Pipeline</div>
+          <div class="tch" data-id="rag-systems" data-name="RAG Systems" onclick="selTopic(this)">🔍 RAG Systems</div>
+          <div class="tch" data-id="kubernetes-mastery" data-name="Kubernetes" onclick="selTopic(this)">☸️ Kubernetes</div>
+          <div class="tch" data-id="docker-cheatsheet" data-name="Docker" onclick="selTopic(this)">🐳 Docker</div>
+          <div class="tch" data-id="aws-architecture" data-name="AWS Architecture" onclick="selTopic(this)">☁️ AWS Architecture</div>
+          <div class="tch" data-id="cicd-pipelines" data-name="CI/CD Pipelines" onclick="selTopic(this)">🚀 CI/CD Pipelines</div>
+          <div class="tch" data-id="system-design" data-name="System Design" onclick="selTopic(this)">🏗️ System Design</div>
+          <div class="tch" data-id="api-design" data-name="API Design" onclick="selTopic(this)">🔌 API Design</div>
+          <div class="tch" data-id="git-workflow" data-name="Git Workflow" onclick="selTopic(this)">🌿 Git Workflow</div>
+          <div class="tch" data-id="solid-principles" data-name="SOLID Principles" onclick="selTopic(this)">📐 SOLID Principles</div>
+          <div class="tch" data-id="zero-trust" data-name="Zero Trust" onclick="selTopic(this)">🔐 Zero Trust</div>
+          <div class="tch" data-id="devsecops" data-name="DevSecOps" onclick="selTopic(this)">🛡️ DevSecOps</div>
+          <div class="tch" data-id="data-lakehouse" data-name="Data Lakehouse" onclick="selTopic(this)">📊 Data Lakehouse</div>
+          <div class="tch" data-id="kafka-streaming" data-name="Kafka Streaming" onclick="selTopic(this)">🌊 Kafka Streaming</div>
         </div>
+        <!-- Add custom topic -->
+        <div class="add-topic-row">
+          <input class="add-topic-inp" id="customTopicInp" placeholder="Add your own topic e.g. GraphQL APIs..." onkeydown="if(event.key==='Enter')addCustomTopic()"/>
+          <button class="add-btn" onclick="addCustomTopic()">＋ Add</button>
+        </div>
+        <p style="font-size:11px;color:var(--txd);margin-top:8px">Custom topics are saved permanently and added to your rotation list.</p>
       </div>
     </div>
   </div>
 
-  <!-- RUNS -->
+  <!-- RUNS LOG -->
   <div class="card">
     <div class="ch"><span class="ct">📋 Run History</span><button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button></div>
     <div class="cb" id="runsList"><p style="color:var(--txd);font-size:13px">Loading...</p></div>
@@ -375,198 +578,766 @@ header{display:flex;align-items:center;justify-content:space-between;padding:24p
 <div class="toasts" id="toasts"></div>
 
 <script>
-const REPO='komalb16/LinkedIn_Content_Update',WF='Linkedin_Content_Update.yml';
-const TNAMES={'llm-architecture':'LLM Architecture','ai-agents-2025':'AI Agents 2025','mlops-pipeline':'MLOps Pipeline','rag-systems':'RAG Systems','kubernetes-mastery':'Kubernetes','docker-cheatsheet':'Docker','aws-architecture':'AWS Architecture','cicd-pipelines':'CI/CD','system-design':'System Design','api-design':'API Design','git-workflow':'Git Workflow','solid-principles':'SOLID','zero-trust':'Zero Trust','devsecops':'DevSecOps','data-lakehouse':'Data Lakehouse','kafka-streaming':'Kafka'};
-let token=localStorage.getItem('gh_token')||'',isDry=false,topicId='',schedH=10,schedM=0;
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const REPO = 'komalb16/LinkedIn_Content_Update';
+const WF   = 'Linkedin_Content_Update.yml';
+const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
-window.onload=()=>{
-  const t=localStorage.getItem('gh_token');
-  applyTheme(localStorage.getItem('theme')||'dark');
-  if(t){token=t;silentConn();}
-  updTime();setInterval(updNext,60000);
+// Topic id → display name map
+const TNAMES = {
+  'llm-architecture':'LLM Architecture','ai-agents-2025':'AI Agents 2025',
+  'mlops-pipeline':'MLOps Pipeline','rag-systems':'RAG Systems',
+  'kubernetes-mastery':'Kubernetes','docker-cheatsheet':'Docker',
+  'aws-architecture':'AWS Architecture','cicd-pipelines':'CI/CD',
+  'system-design':'System Design','api-design':'API Design',
+  'git-workflow':'Git Workflow','solid-principles':'SOLID',
+  'zero-trust':'Zero Trust','devsecops':'DevSecOps',
+  'data-lakehouse':'Data Lakehouse','kafka-streaming':'Kafka'
 };
 
-function setTheme(t){applyTheme(t);localStorage.setItem('theme',t);}
-function applyTheme(t){
-  document.documentElement.setAttribute('data-theme',t);
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('act',b.textContent.toLowerCase().includes(t==='medium'?'medium':t==='light'?'light':'dark')));
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let token = localStorage.getItem('gh_token') || '';
+let isDry = false;
+let topicId = '';
+let topicName = 'Auto-select';
+let lastGenPost = '';
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  applyTheme(localStorage.getItem('theme') || 'dark');
+  loadCustomTopics();
+  loadSettings();
+  if (token) silentConn();
+  setInterval(updNext, 60000);
+};
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function setTheme(t) {
+  applyTheme(t); localStorage.setItem('theme', t);
+}
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.querySelectorAll('.tbtn').forEach(b => {
+    b.classList.toggle('act',
+      (t==='light' && b.textContent.includes('Light')) ||
+      (t==='medium' && b.textContent.includes('Medium')) ||
+      (t==='dark' && b.textContent.includes('Dark'))
+    );
+  });
 }
 
-async function connect(){
-  const v=document.getElementById('tokenInput').value.trim();
-  if(!v||!v.startsWith('ghp_')){toast('Enter a valid token starting with ghp_','err');return;}
-  token=v;
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+function openSettings() { document.getElementById('settingsBg').classList.add('show'); }
+function closeSettings(e) {
+  if (!e || e.target === document.getElementById('settingsBg')) {
+    document.getElementById('settingsBg').classList.remove('show');
+  }
+}
+function saveSettings() {
+  localStorage.setItem('groq_key', document.getElementById('groqKeyInput').value.trim());
+  localStorage.setItem('author_name', document.getElementById('authorNameInput').value.trim() || 'Komal Batra');
+  localStorage.setItem('author_role', document.getElementById('authorRoleInput').value.trim() || 'Software Engineer at Microsoft');
+  closeSettings();
+  toast('Settings saved ✓', 'ok');
+}
+function loadSettings() {
+  const gk = localStorage.getItem('groq_key') || '';
+  const an = localStorage.getItem('author_name') || '';
+  const ar = localStorage.getItem('author_role') || '';
+  if (gk) document.getElementById('groqKeyInput').value = gk;
+  if (an) document.getElementById('authorNameInput').value = an;
+  if (ar) document.getElementById('authorRoleInput').value = ar;
+}
+
+// ── CONNECT ───────────────────────────────────────────────────────────────────
+async function connect() {
+  const v = document.getElementById('tokenInput').value.trim();
+  if (!v || !v.startsWith('ghp_')) { toast('Enter a valid token starting with ghp_', 'err'); return; }
+  token = v;
   setLoad('conSpin','conTxt',true,'Connecting...');
-  try{
-    const r=await gh('/user');
-    if(!r.ok)throw new Error('Invalid token');
-    const u=await r.json();
-    localStorage.setItem('gh_token',token);
-    show(u.login);
-    await Promise.all([loadRuns(),loadStats()]);
-    toast('Connected as '+u.login+' ✓','ok');
-  }catch(e){toast('Failed: '+e.message,'err');}
-  finally{setLoad('conSpin','conTxt',false,'Connect');}
+  try {
+    const r = await gh('/user');
+    if (!r.ok) throw new Error('Invalid token');
+    const u = await r.json();
+    localStorage.setItem('gh_token', token);
+    showDash(u.login);
+    await Promise.all([loadRuns(), loadStats(), loadSchedule()]);
+    toast('Connected as ' + u.login + ' ✓', 'ok');
+  } catch(e) { toast('Failed: ' + e.message, 'err'); }
+  finally { setLoad('conSpin','conTxt',false,'Connect'); }
 }
 
-async function silentConn(){
-  try{
-    const r=await gh('/user');
-    if(!r.ok){localStorage.removeItem('gh_token');token='';return;}
-    const u=await r.json();
-    show(u.login);
-    await Promise.all([loadRuns(),loadStats()]);
-  }catch(e){localStorage.removeItem('gh_token');token='';}
+async function silentConn() {
+  try {
+    const r = await gh('/user');
+    if (!r.ok) { localStorage.removeItem('gh_token'); token = ''; return; }
+    const u = await r.json();
+    showDash(u.login);
+    await Promise.all([loadRuns(), loadStats(), loadSchedule()]);
+  } catch(e) { localStorage.removeItem('gh_token'); token = ''; }
 }
 
-function show(u){
-  document.getElementById('cs').style.display='none';
-  document.getElementById('db').style.display='block';
-  document.getElementById('connUser').textContent=u;
+function showDash(u) {
+  document.getElementById('cs').style.display = 'none';
+  document.getElementById('db').style.display = 'block';
+  document.getElementById('connUser').textContent = u;
 }
 
-function disconnect(){
-  if(!confirm('Disconnect?'))return;
-  localStorage.removeItem('gh_token');token='';
-  document.getElementById('cs').style.display='flex';
-  document.getElementById('db').style.display='none';
-  document.getElementById('tokenInput').value='';
-  toast('Disconnected','info');
+function disconnect() {
+  if (!confirm('Disconnect?')) return;
+  localStorage.removeItem('gh_token'); token = '';
+  document.getElementById('cs').style.display = 'flex';
+  document.getElementById('db').style.display = 'none';
+  document.getElementById('tokenInput').value = '';
+  toast('Disconnected', 'info');
 }
 
-function gh(p,o={}){
-  return fetch('https://api.github.com'+p,{...o,headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json',...(o.headers||{})}});
+// ── GITHUB API ────────────────────────────────────────────────────────────────
+function gh(p, o = {}) {
+  return fetch('https://api.github.com' + p, {
+    ...o,
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json',
+      ...(o.headers || {})
+    }
+  });
 }
 
-async function loadRuns(){
-  try{
-    const r=await gh('/repos/'+REPO+'/actions/runs?per_page=20');
-    const d=await r.json();renderRuns(d.workflow_runs||[]);
-  }catch(e){document.getElementById('runsList').innerHTML='<p style="color:var(--txd);font-size:13px">Could not load runs.</p>';}
+// ── HANDLE POST (dry run or live) ─────────────────────────────────────────────
+async function handlePost() {
+  if (isDry) {
+    await showDryRunPreview();
+  } else {
+    await runNow();
+  }
 }
 
-function renderRuns(runs){
-  const el=document.getElementById('runsList');
-  if(!runs.length){el.innerHTML='<p style="color:var(--txd);font-size:13px">No runs yet.</p>';return;}
-  el.innerHTML=runs.slice(0,12).map(r=>{
-    const ok=r.conclusion==='success',fail=r.conclusion==='failure',running=r.status==='in_progress'||r.status==='queued';
-    const ico=ok?'✅':fail?'❌':running?'⏳':'⚪';
-    const icls=ok?'ok':fail?'fail':running?'run':'oth';
-    const trig=r.event==='schedule'?'schedule':r.event==='workflow_dispatch'?'manual':r.event;
-    const bcls=trig==='schedule'?'bsch':trig==='manual'?'bman':'bdry';
-    const t=new Date(r.created_at);
-    const ts=t.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    const dur=r.updated_at?Math.round((new Date(r.updated_at)-t)/1000):null;
-    const ds=dur?(dur>60?Math.floor(dur/60)+'m '+dur%60+'s':dur+'s'):'—';
-    const topic=getTopicFromRun(r);
-    const mode=getModeFromRun(r);
-    const topicHtml=topic?`<div class="rtopic">🎯 ${topic}</div>`:(trig==='schedule'?'<div class="rtopic">🎲 Auto</div>':'');
-    const modeHtml=mode?`<div class="rmode">${mode}</div>`:'';
+// ── DRY RUN PREVIEW ───────────────────────────────────────────────────────────
+async function showDryRunPreview() {
+  const groqKey = localStorage.getItem('groq_key') || '';
+  if (!groqKey) {
+    toast('Add your Groq API key in ⚙️ Settings to use Dry Run preview', 'err');
+    openSettings();
+    return;
+  }
+
+  // Open modal
+  document.getElementById('previewBg').classList.add('show');
+  document.getElementById('postLoading').style.display = 'flex';
+  document.getElementById('postContentArea').style.display = 'none';
+  document.getElementById('previewDiagram').innerHTML = '';
+  document.getElementById('previewTopicTag').textContent = topicName || 'Auto';
+  document.getElementById('loadingMsg').textContent = 'Generating post with AI...';
+
+  // Set author
+  document.getElementById('previewAuthor').textContent = localStorage.getItem('author_name') || 'Komal Batra';
+  document.getElementById('previewRole').textContent = localStorage.getItem('author_role') || 'Software Engineer at Microsoft';
+
+  await generatePreviewPost(groqKey);
+}
+
+async function generatePreviewPost(groqKey) {
+  const topic = topicName && topicName !== 'Auto-select' ? topicName : pickRandomTopic();
+  const hooks = [
+    'Start with a shocking/surprising statistic about the topic.',
+    'Start with a bold controversial opinion about the topic.',
+    'Start with a relatable scenario in 2 sentences max.',
+    'Start with a direct provocative question about the topic.',
+    'Start with a counterintuitive insight that challenges assumptions.',
+    'Start with a hot take that most engineers would debate.',
+    'Start with "3 things nobody tells you about [topic]:"',
+  ];
+  const hook = hooks[Math.floor(Math.random() * hooks.length)];
+
+  const systemPrompt = `You are a senior software engineer writing LinkedIn posts. 
+Rules:
+- ${hook}
+- Write about: ${topic}
+- 150-250 words
+- Use 3-5 relevant emojis naturally
+- Write in first person ("I've seen", "In my experience")
+- Include specific technical examples, numbers, or commands
+- End with 1 engaging question for readers
+- Add 3-5 relevant hashtags at the end
+- NEVER start with "As we dive into", "In today's world", or mention months/years
+- Sound human and opinionated, not like a textbook`;
+
+  try {
+    const res = await fetch(GROQ_API, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + groqKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        max_tokens: 600,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Write a LinkedIn post about: ${topic}` }
+        ]
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'Groq API error');
+    }
+    const data = await res.json();
+    lastGenPost = data.choices[0].message.content;
+
+    // Show content
+    document.getElementById('postLoading').style.display = 'none';
+    document.getElementById('postContentArea').style.display = 'block';
+    document.getElementById('postText').textContent = lastGenPost;
+
+    // Generate diagram
+    const svg = generatePreviewSVG(topic);
+    document.getElementById('previewDiagram').innerHTML = svg;
+  } catch(e) {
+    document.getElementById('loadingMsg').textContent = 'Error: ' + e.message + '. Check your Groq key in Settings.';
+    toast('Groq error: ' + e.message, 'err');
+  }
+}
+
+async function regeneratePost() {
+  const groqKey = localStorage.getItem('groq_key') || '';
+  if (!groqKey) { toast('Add Groq API key in ⚙️ Settings', 'err'); return; }
+  document.getElementById('postLoading').style.display = 'flex';
+  document.getElementById('postContentArea').style.display = 'none';
+  document.getElementById('loadingMsg').textContent = 'Regenerating...';
+  await generatePreviewPost(groqKey);
+}
+
+function closePreview(e) {
+  if (!e || e.target === document.getElementById('previewBg')) {
+    document.getElementById('previewBg').classList.remove('show');
+  }
+}
+
+// ── INLINE SVG DIAGRAM FOR PREVIEW ───────────────────────────────────────────
+function generatePreviewSVG(topic) {
+  const t = topic.toLowerCase();
+  const palettes = {
+    ai: ['#7C3AED','#2563EB','#0891B2','#059669','#D97706','#DC2626'],
+    cloud: ['#1D4ED8','#0891B2','#047857','#B45309','#7C3AED','#BE185D'],
+    security: ['#DC2626','#D97706','#7C3AED','#0891B2','#047857','#1D4ED8'],
+    data: ['#7C3AED','#1D4ED8','#0891B2','#047857','#D97706','#DC2626'],
+    default: ['#1D4ED8','#7C3AED','#047857','#D97706','#DC2626','#0891B2'],
+  };
+  let C = palettes.default;
+  if (/llm|rag|agent|mlops/.test(t)) C = palettes.ai;
+  else if (/kube|docker|aws|cicd/.test(t)) C = palettes.cloud;
+  else if (/zero|devsec/.test(t)) C = palettes.security;
+  else if (/kafka|data|lake/.test(t)) C = palettes.data;
+
+  // Generate a compact architecture diagram
+  const boxes = getTopicBoxes(topic);
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280" width="400" height="280">
+    <rect width="400" height="280" fill="#0F172A" rx="10"/>
+    <rect width="400" height="3" fill="${C[0]}" rx="2"/>
+    <text x="200" y="22" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">${topic.toUpperCase()}</text>`;
+
+  const rows = Math.ceil(boxes.length / 3);
+  const cols = Math.min(boxes.length, 3);
+  const bw = Math.floor(360 / cols) - 6;
+  const bh = Math.floor(220 / rows) - 8;
+
+  boxes.forEach((box, i) => {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const x = 20 + col * (bw + 8);
+    const y = 34 + row * (bh + 8);
+    const color = C[i % C.length];
+    svg += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="8" fill="${color}"/>`;
+    svg += `<rect x="${x}" y="${y}" width="${bw}" height="3" rx="4" fill="white" opacity="0.2"/>`;
+    svg += `<text x="${x + bw/2}" y="${y + bh/2 - 4}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">${box.title}</text>`;
+    svg += `<text x="${x + bw/2}" y="${y + bh/2 + 8}" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="7" font-family="Arial,sans-serif">${box.sub}</text>`;
+    if (col < cols - 1 && i < boxes.length - 1 && row === Math.floor((i+1)/3)) {
+      const nx = x + bw; const ny = y + bh/2;
+      svg += `<line x1="${nx}" y1="${ny}" x2="${nx+8}" y2="${ny}" stroke="white" stroke-width="1.5" opacity="0.4"/>`;
+      svg += `<path d="M${nx+8},${ny-3} L${nx+14},${ny} L${nx+8},${ny+3} Z" fill="white" opacity="0.4"/>`;
+    }
+  });
+
+  svg += `<text x="200" y="270" text-anchor="middle" fill="#334155" font-size="8" font-family="Arial,sans-serif">Preview diagram • © Komal Batra</text>`;
+  svg += `</svg>`;
+  return svg;
+}
+
+function getTopicBoxes(topic) {
+  const t = topic.toLowerCase();
+  const maps = {
+    'llm': [{title:'User Input',sub:'prompt'},{title:'Tokenizer',sub:'BPE'},{title:'Transformer',sub:'attn heads'},{title:'Context',sub:'RAG/memory'},{title:'Guardrails',sub:'safety'},{title:'Output',sub:'stream'}],
+    'kubernetes': [{title:'API Server',sub:'control plane'},{title:'Scheduler',sub:'node select'},{title:'etcd',sub:'state store'},{title:'Kubelet',sub:'node agent'},{title:'Pods',sub:'containers'},{title:'Ingress',sub:'LB'}],
+    'docker': [{title:'Dockerfile',sub:'build def'},{title:'Image',sub:'immutable'},{title:'Registry',sub:'ECR/Docker Hub'},{title:'Container',sub:'runtime'},{title:'Network',sub:'bridge/overlay'},{title:'Volume',sub:'data persist'}],
+    'cicd': [{title:'Code Push',sub:'git trigger'},{title:'Lint+Test',sub:'quality'},{title:'Build',sub:'docker build'},{title:'Scan',sub:'trivy/snyk'},{title:'Stage',sub:'deploy'},{title:'Prod',sub:'blue/green'}],
+    'kafka': [{title:'Producer',sub:'events'},{title:'Broker',sub:'3x replica'},{title:'Partitions',sub:'6x shards'},{title:'Consumer',sub:'groups'},{title:'Schema Reg',sub:'Avro'},{title:'Sink',sub:'DB/lake'}],
+    'aws': [{title:'CloudFront',sub:'CDN/edge'},{title:'API GW',sub:'REST/WS'},{title:'Lambda',sub:'serverless'},{title:'S3',sub:'objects'},{title:'RDS',sub:'Aurora PG'},{title:'CloudWatch',sub:'observe'}],
+    'rag': [{title:'Documents',sub:'ingest'},{title:'Chunker',sub:'512 tok'},{title:'Embedder',sub:'vectors'},{title:'Vector DB',sub:'Pinecone'},{title:'Retriever',sub:'ANN search'},{title:'LLM',sub:'generate'}],
+    'zero trust': [{title:'Identity',sub:'MFA/SSO'},{title:'Device',sub:'posture'},{title:'Policy',sub:'PDP/PEP'},{title:'Network',sub:'microseg'},{title:'Data',sub:'classify'},{title:'Monitor',sub:'SIEM'}],
+    'mlops': [{title:'Data Prep',sub:'feature eng'},{title:'Training',sub:'GPU cluster'},{title:'Registry',sub:'model store'},{title:'Serving',sub:'FastAPI'},{title:'Monitor',sub:'drift detect'},{title:'Retrain',sub:'auto trigger'}],
+    'system design': [{title:'Client',sub:'web/mobile'},{title:'CDN',sub:'edge cache'},{title:'API GW',sub:'rate limit'},{title:'Services',sub:'microsvcs'},{title:'Cache',sub:'Redis'},{title:'DB',sub:'PostgreSQL'}],
+    'devsecops': [{title:'IDE',sub:'pre-commit'},{title:'SAST',sub:'code scan'},{title:'Build',sub:'compile'},{title:'DAST',sub:'runtime'},{title:'Artifact',sub:'trivy scan'},{title:'Monitor',sub:'Falco'}],
+    'data lakehouse': [{title:'Ingest',sub:'batch/stream'},{title:'Bronze',sub:'raw data'},{title:'Silver',sub:'cleaned'},{title:'Gold',sub:'curated'},{title:'Analytics',sub:'Spark/SQL'},{title:'BI',sub:'dashboards'}],
+    'api design': [{title:'Client',sub:'REST/GraphQL'},{title:'Auth',sub:'JWT/OAuth2'},{title:'Gateway',sub:'rate limit'},{title:'Service',sub:'business logic'},{title:'Cache',sub:'Redis'},{title:'DB',sub:'data store'}],
+  };
+  for (const [key, boxes] of Object.entries(maps)) {
+    if (t.includes(key)) return boxes;
+  }
+  return [{title:'Client',sub:'users'},{title:'API Layer',sub:'gateway'},{title:'Services',sub:'logic'},{title:'Queue',sub:'async'},{title:'Cache',sub:'Redis'},{title:'Database',sub:'storage'}];
+}
+
+function pickRandomTopic() {
+  const topics = Object.values(TNAMES);
+  return topics[Math.floor(Math.random() * topics.length)];
+}
+
+// ── LIVE POST ─────────────────────────────────────────────────────────────────
+async function runNow() {
+  setLoad('runSpin','runTxt',true,'Triggering...');
+  try {
+    const inp = { dry_run: 'false' };
+    if (topicId) inp.topic_id = topicId;
+    const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/dispatches', {
+      method: 'POST',
+      body: JSON.stringify({ ref: 'main', inputs: inp })
+    });
+    if (r.status === 204) {
+      toast('🚀 Post triggered! Check LinkedIn in ~2 min', 'ok');
+      setTimeout(loadRuns, 4000); setTimeout(loadStats, 6000);
+    } else {
+      const e = await r.json(); throw new Error(e.message || 'Failed');
+    }
+  } catch(e) { toast('Error: ' + e.message, 'err'); }
+  finally { setLoad('runSpin','runTxt',false,'▶ Post Now'); }
+}
+
+// ── RUNS ──────────────────────────────────────────────────────────────────────
+async function loadRuns() {
+  try {
+    const r = await gh('/repos/' + REPO + '/actions/runs?per_page=20');
+    const d = await r.json();
+    renderRuns(d.workflow_runs || []);
+  } catch(e) {
+    document.getElementById('runsList').innerHTML = '<p style="color:var(--txd);font-size:13px">Could not load runs.</p>';
+  }
+}
+
+function renderRuns(runs) {
+  const el = document.getElementById('runsList');
+  if (!runs.length) { el.innerHTML = '<p style="color:var(--txd);font-size:13px">No runs yet.</p>'; return; }
+  el.innerHTML = runs.slice(0,12).map(r => {
+    const ok = r.conclusion==='success', fail = r.conclusion==='failure';
+    const running = r.status==='in_progress' || r.status==='queued';
+    const ico = ok ? '✅' : fail ? '❌' : running ? '⏳' : '⚪';
+    const icls = ok ? 'ok' : fail ? 'fail' : running ? 'run' : 'oth';
+    const trig = r.event==='schedule' ? 'schedule' : r.event==='workflow_dispatch' ? 'manual' : r.event;
+    const bcls = trig==='schedule' ? 'bsch' : trig==='manual' ? 'bman' : 'bdry';
+    const t = new Date(r.created_at);
+    const ts = t.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const dur = r.updated_at ? Math.round((new Date(r.updated_at) - t) / 1000) : null;
+    const ds = dur ? (dur > 60 ? Math.floor(dur/60)+'m '+dur%60+'s' : dur+'s') : '—';
+    const topic = getTopicFromRun(r);
+    const mode = getModeFromRun(r);
+    const isDryRun = (r.display_title||r.name||'').toLowerCase().includes('dry');
+
+    let tags = '';
+    if (topic) tags += `<span class="rtag rtag-topic">🎯 ${topic}</span>`;
+    else if (trig === 'schedule') tags += `<span class="rtag rtag-topic">🎲 Auto</span>`;
+    if (mode) tags += `<span class="rtag rtag-mode">${mode}</span>`;
+    if (isDryRun) tags += `<span class="rtag rtag-dry">🧪 dry run</span>`;
+
     return `<div class="ri">
       <div class="ric ${icls}">${ico}</div>
       <div class="rib">
         <div class="rit">${r.display_title||r.name||'Run #'+r.run_number}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:3px">${topicHtml}${modeHtml}</div>
-        <div class="rimeta">${ts} IST · #${r.run_number}</div>
+        ${tags ? `<div class="run-tags">${tags}</div>` : ''}
+        <div class="rimeta">${ts} IST · #${r.run_number} · ${ds}</div>
       </div>
       <div class="rright">
         <div class="rbadge ${bcls}">${trig}</div>
-        <div class="rdur">${ds}</div>
       </div>
     </div>`;
   }).join('');
 }
 
-function getTopicFromRun(r){
-  const title=(r.display_title||r.name||'').toLowerCase();
-  for(const[id,name]of Object.entries(TNAMES)){if(title.includes(id)||title.includes(name.toLowerCase()))return name;}
+function getTopicFromRun(r) {
+  const title = (r.display_title || r.name || '').toLowerCase();
+  for (const [id, name] of Object.entries(TNAMES)) {
+    if (title.includes(id) || title.includes(name.toLowerCase())) return name;
+  }
+  // Check custom topics
+  const custom = getCustomTopics();
+  for (const ct of custom) {
+    if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
+  }
   return null;
 }
 
-function getModeFromRun(r){
-  const title=(r.display_title||r.name||'').toLowerCase();
-  if(title.includes('news')||title.includes('layoff'))return '📰 News';
-  if(title.includes('tool'))return '🔧 Tools';
-  if(title.includes('dry'))return '🧪 Dry';
+function getModeFromRun(r) {
+  const title = (r.display_title || r.name || '').toLowerCase();
+  if (title.includes('news') || title.includes('layoff')) return '📰 News';
+  if (title.includes('tool') || title.includes('launch')) return '🔧 Tools';
   return null;
 }
 
-async function loadStats(){
-  try{
-    const r=await gh('/repos/'+REPO+'/actions/runs?per_page=100');
-    const d=await r.json();
-    const runs=d.workflow_runs||[];
-    const succ=runs.filter(r=>r.conclusion==='success');
-    const wk=new Date(Date.now()-7*24*60*60*1000);
-    const tw=succ.filter(r=>new Date(r.created_at)>wk);
-    document.getElementById('s1').textContent=runs.length;
-    document.getElementById('s2').textContent=succ.length;
-    document.getElementById('s3').textContent=tw.length;
-    if(succ.length>0){
-      const last=succ[0],diff=Math.floor((Date.now()-new Date(last.created_at))/(1000*60*60));
-      document.getElementById('s4').textContent=diff<1?'Just now':diff<24?diff+'h ago':Math.floor(diff/24)+'d ago';
-      document.getElementById('s4b').textContent=new Date(last.created_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' IST';
+// ── STATS ─────────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await gh('/repos/' + REPO + '/actions/runs?per_page=100');
+    const d = await r.json();
+    const runs = d.workflow_runs || [];
+    const succ = runs.filter(r => r.conclusion === 'success');
+    const wk = new Date(Date.now() - 7*24*60*60*1000);
+    const tw = succ.filter(r => new Date(r.created_at) > wk);
+    document.getElementById('s1').textContent = runs.length;
+    document.getElementById('s2').textContent = succ.length;
+    document.getElementById('s3').textContent = tw.length;
+    if (succ.length > 0) {
+      const last = succ[0];
+      const diff = Math.floor((Date.now() - new Date(last.created_at)) / (1000*60*60));
+      document.getElementById('s4').textContent = diff < 1 ? 'Just now' : diff < 24 ? diff + 'h ago' : Math.floor(diff/24) + 'd ago';
+      document.getElementById('s4b').textContent = new Date(last.created_at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' IST';
     }
-  }catch(e){}
+  } catch(e) {}
 }
 
-async function runNow(){
-  setLoad('runSpin','runTxt',true,'Triggering...');
-  try{
-    const inp={dry_run:isDry?'true':'false'};
-    if(topicId)inp.topic_id=topicId;
-    const r=await gh('/repos/'+REPO+'/actions/workflows/'+WF+'/dispatches',{method:'POST',body:JSON.stringify({ref:'main',inputs:inp})});
-    if(r.status===204){
-      toast(isDry?'🧪 Dry run triggered!':'🚀 Post triggered! Check LinkedIn in ~2 min','ok');
-      setTimeout(loadRuns,4000);setTimeout(loadStats,6000);
-    }else{const e=await r.json();throw new Error(e.message||'Failed');}
-  }catch(e){toast('Error: '+e.message,'err');}
-  finally{setLoad('runSpin','runTxt',false,isDry?'🧪 Dry Run':'▶ Post Now');}
+// ── ADVANCED SCHEDULE ─────────────────────────────────────────────────────────
+const DAYS = ['sun','mon','tue','wed','thu','fri','sat'];
+const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAY_ICONS  = ['☀️','🌙','🌙','🌙','🌙','🌙','🎉'];
+
+// Default schedule config
+let schedConfig = {
+  paused: false,
+  pause_until: null,
+  weekly: {
+    mon:{enabled:true, time_ist:'09:30'},
+    tue:{enabled:true, time_ist:'09:30'},
+    wed:{enabled:true, time_ist:'09:30'},
+    thu:{enabled:true, time_ist:'09:30'},
+    fri:{enabled:true, time_ist:'09:30'},
+    sat:{enabled:false,time_ist:'10:00'},
+    sun:{enabled:false,time_ist:'10:00'},
+  },
+  skip_dates: [],
+  force_dates: [],
+  updated_at: null
+};
+
+// ── TAB SWITCHER ──────────────────────────────────────────────────────────────
+function showTab(name, btn) {
+  document.querySelectorAll('.spanel').forEach(p => p.classList.remove('show'));
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('act'));
+  document.getElementById('panel-' + name).classList.add('show');
+  btn.classList.add('act');
 }
 
-function adj(u,d){if(u==='h')schedH=(schedH+d+24)%24;else schedM=(schedM+d+60)%60;updTime();}
-function updTime(){
-  const h=String(schedH).padStart(2,'0'),m=String(schedM).padStart(2,'0');
-  document.getElementById('tdisp').textContent=h+':'+m;
-  const um=(schedH*60+schedM-330+1440)%1440,uh=Math.floor(um/60),umm=um%60;
-  document.getElementById('cronv').textContent=umm+' '+uh+' * * *';
-  document.getElementById('utcv').textContent=String(uh).padStart(2,'0')+':'+String(umm).padStart(2,'0')+' UTC';
+// ── LOAD SCHEDULE FROM REPO ───────────────────────────────────────────────────
+async function loadSchedule() {
+  try {
+    const r = await gh('/repos/' + REPO + '/contents/schedule_config.json');
+    if (!r.ok) { buildDayGrid(); renderOverrides(); renderPausePanel(); updNext(); return; }
+    const d = await r.json();
+    const cfg = JSON.parse(atob(d.content));
+    schedConfig = {...schedConfig, ...cfg};
+  } catch(e) { /* file may not exist yet, use defaults */ }
+  buildDayGrid();
+  renderOverrides();
+  renderPausePanel();
   updNext();
 }
-function updNext(){
-  const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
-  const nx=new Date(ist);nx.setHours(schedH,schedM,0,0);
-  if(nx<=ist)nx.setDate(nx.getDate()+1);
-  const df=nx-ist,dh=Math.floor(df/(1000*60*60)),dm=Math.floor((df%(1000*60*60))/(1000*60));
-  document.getElementById('nxt').textContent=nx.toLocaleString('en-IN',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' IST';
-  document.getElementById('cdt').textContent=dh+'h '+dm+'m';
-}
-function copyCron(){
-  const c=document.getElementById('cronv').textContent;
-  navigator.clipboard?.writeText(c).then(()=>toast('Copied: '+c,'ok')).catch(()=>toast('Cron: '+c,'info'));
+
+// ── SAVE SCHEDULE TO REPO ─────────────────────────────────────────────────────
+async function saveSchedule() {
+  const btn = document.getElementById('saveSchedBtn');
+  btn.disabled = true; btn.textContent = '💾 Saving...';
+  try {
+    schedConfig.updated_at = new Date().toISOString();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(schedConfig, null, 2))));
+    // Get current SHA if file exists
+    let sha = '';
+    try {
+      const ex = await gh('/repos/' + REPO + '/contents/schedule_config.json');
+      if (ex.ok) { const ed = await ex.json(); sha = ed.sha; }
+    } catch(e) {}
+    const body = {
+      message: 'chore: update schedule_config [dashboard]',
+      content,
+      ...(sha ? {sha} : {})
+    };
+    const r = await gh('/repos/' + REPO + '/contents/schedule_config.json', {
+      method: 'PUT', body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      toast('✅ Schedule saved to repo', 'ok');
+      updNext();
+    } else {
+      const e = await r.json(); throw new Error(e.message);
+    }
+  } catch(e) { toast('Save failed: ' + e.message, 'err'); }
+  finally { btn.disabled = false; btn.textContent = '💾 Save Schedule'; }
 }
 
-function selTopic(el){document.querySelectorAll('.tch').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');topicId=el.dataset.id;}
-function selType(t,el){document.querySelectorAll('.tc').forEach(c=>{c.className='tc';});el.classList.add('s'+t);}
-function toggleDry(){
-  isDry=!isDry;
-  document.getElementById('dryBtn').classList.toggle('on',isDry);
-  document.getElementById('runTxt').textContent=isDry?'🧪 Dry Run':'▶ Post Now';
+// ── DAY GRID ─────────────────────────────────────────────────────────────────
+function buildDayGrid() {
+  const grid = document.getElementById('dayGrid');
+  grid.innerHTML = '';
+  DAYS.forEach((day, i) => {
+    const cfg = schedConfig.weekly[day] || {enabled: true, time_ist: '09:30'};
+    const on = cfg.enabled && !schedConfig.paused;
+    const [h, m] = (cfg.time_ist || '09:30').split(':').map(Number);
+    const col = document.createElement('div');
+    col.className = 'day-col' + (cfg.enabled ? '' : ' disabled');
+    col.id = 'daycol-' + day;
+    col.innerHTML = `
+      <div class="day-name">${DAY_LABELS[i]}</div>
+      <button class="day-toggle ${cfg.enabled ? 'on' : ''}" id="daytog-${day}" onclick="toggleDay('${day}')" title="${cfg.enabled ? 'Click to disable' : 'Click to enable'}">
+        ${cfg.enabled ? '✓' : '✕'}
+      </button>
+      <div class="time-mini">
+        <button class="tm-up" onclick="adjDayTime('${day}',15)">▲</button>
+        <div class="tm-val" id="tmval-${day}">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</div>
+        <button class="tm-dn" onclick="adjDayTime('${day}',-15)">▼</button>
+      </div>`;
+    grid.appendChild(col);
+  });
 }
 
-function setLoad(sid,tid,l,t){
-  document.getElementById(sid).classList.toggle('on',l);
-  document.getElementById(tid).textContent=t;
-  const b=document.getElementById(sid).closest('button');
-  if(b)b.disabled=l;
+function toggleDay(day) {
+  schedConfig.weekly[day].enabled = !schedConfig.weekly[day].enabled;
+  buildDayGrid();
+  updNext();
 }
-function toast(m,t='info'){
-  const i={ok:'✅',err:'❌',info:'ℹ️'};
-  const el=document.createElement('div');
-  el.className='toast '+t;
-  el.innerHTML=`<span>${i[t]||'ℹ️'}</span><span>${m}</span>`;
+
+function adjDayTime(day, deltaMin) {
+  const [h, m] = (schedConfig.weekly[day].time_ist || '09:30').split(':').map(Number);
+  const total = ((h*60 + m + deltaMin) + 1440) % 1440;
+  const nh = Math.floor(total/60), nm = total % 60;
+  schedConfig.weekly[day].time_ist = String(nh).padStart(2,'0') + ':' + String(nm).padStart(2,'0');
+  document.getElementById('tmval-' + day).textContent = schedConfig.weekly[day].time_ist;
+  updNext();
+}
+
+// ── OVERRIDES ─────────────────────────────────────────────────────────────────
+function addOverride(type) {
+  const inp = document.getElementById(type + 'DateInp');
+  const val = inp.value;
+  if (!val) { toast('Pick a date first', 'err'); return; }
+  const arr = type === 'skip' ? schedConfig.skip_dates : schedConfig.force_dates;
+  if (arr.includes(val)) { toast('Date already added', 'err'); return; }
+  arr.push(val);
+  arr.sort();
+  inp.value = '';
+  renderOverrides();
+  updNext();
+  toast((type === 'skip' ? '🚫 Skip' : '✅ Force') + ' date added: ' + val, 'ok');
+}
+
+function removeOverride(type, val) {
+  if (type === 'skip') schedConfig.skip_dates = schedConfig.skip_dates.filter(d => d !== val);
+  else schedConfig.force_dates = schedConfig.force_dates.filter(d => d !== val);
+  renderOverrides();
+  updNext();
+}
+
+function renderOverrides() {
+  ['skip','force'].forEach(type => {
+    const arr = type === 'skip' ? schedConfig.skip_dates : schedConfig.force_dates;
+    const el = document.getElementById(type + 'Chips');
+    if (!arr.length) { el.innerHTML = '<span class="empty-chips">No ' + type + ' dates</span>'; return; }
+    el.innerHTML = arr.map(d => {
+      const fmt = new Date(d + 'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',month:'short',day:'numeric'});
+      return `<span class="dchip dchip-${type}">${type==='skip'?'🚫':'✅'} ${fmt}<button onclick="removeOverride('${type}','${d}')">✕</button></span>`;
+    }).join('');
+  });
+}
+
+// ── PAUSE ─────────────────────────────────────────────────────────────────────
+function togglePause() {
+  schedConfig.paused = !schedConfig.paused;
+  if (!schedConfig.paused) schedConfig.pause_until = null;
+  renderPausePanel();
+  buildDayGrid();
+  updNext();
+}
+
+function clearPauseDate() {
+  schedConfig.pause_until = null;
+  document.getElementById('pauseUntilInp').value = '';
+}
+
+function renderPausePanel() {
+  const paused = schedConfig.paused;
+  const banner = document.getElementById('pauseBanner');
+  const info   = document.getElementById('pauseInfo');
+  const btn    = document.getElementById('pauseBtn');
+  const row    = document.getElementById('pauseResumeRow');
+  const tab    = document.getElementById('pauseTab');
+  banner.className = 'pause-banner' + (paused ? ' paused' : '');
+  info.className   = 'pause-info'   + (paused ? ' paused' : '');
+  info.querySelector('h4').textContent = paused ? '⏸️ Posting is PAUSED' : '▶️ Posting is active';
+  info.querySelector('p').textContent  = paused
+    ? (schedConfig.pause_until ? 'Will auto-resume on ' + schedConfig.pause_until : 'Paused indefinitely. Click Resume to restart.')
+    : 'Your agent posts on the days and times configured in the Weekly Schedule tab.';
+  btn.className = paused ? 'btn bgrn' : 'btn brec';
+  btn.textContent = paused ? '▶️ Resume posting' : '⏸️ Pause posting';
+  row.style.display = paused ? 'block' : 'none';
+  tab.textContent = paused ? '⏸️ Paused ⚠️' : '⏸️ Pause';
+  if (paused && schedConfig.pause_until) {
+    document.getElementById('pauseUntilInp').value = schedConfig.pause_until;
+  }
+  // Sync pause_until from input on change
+  const inp = document.getElementById('pauseUntilInp');
+  inp.onchange = () => { schedConfig.pause_until = inp.value || null; renderPausePanel(); };
+}
+
+// ── NEXT POST CALCULATION ─────────────────────────────────────────────────────
+function updNext() {
+  const ist = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+  const todayStr = ist.toISOString().split('T')[0];
+
+  // Update cron display (earliest active time → UTC)
+  const activeTimes = DAYS.map(d => schedConfig.weekly[d])
+    .filter(d => d.enabled)
+    .map(d => d.time_ist || '09:30');
+  const earliest = activeTimes.sort()[0] || '09:30';
+  const [eh,em] = earliest.split(':').map(Number);
+  const eum = (eh*60+em-330+1440)%1440;
+  const euh=Math.floor(eum/60),eumm=eum%60;
+  const cronEl = document.getElementById('cronv');
+  const utcEl  = document.getElementById('utcv');
+  if (cronEl) cronEl.textContent = eumm+' '+euh+' * * *';
+  if (utcEl)  utcEl.textContent  = String(euh).padStart(2,'0')+':'+String(eumm).padStart(2,'0')+' UTC';
+
+  if (schedConfig.paused) {
+    const resume = schedConfig.pause_until;
+    document.getElementById('npLabel').textContent = 'Posting paused';
+    document.getElementById('nxt').textContent = resume ? 'Resumes ' + new Date(resume+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',month:'short',day:'numeric'}) : 'Indefinitely paused';
+    document.getElementById('cdt').textContent = '—';
+    return;
+  }
+
+  // Walk forward up to 14 days to find next active slot
+  for (let offset = 0; offset < 14; offset++) {
+    const d = new Date(ist);
+    d.setDate(d.getDate() + offset);
+    const ds = d.toISOString().split('T')[0];
+    const dayKey = DAYS[d.getDay()];
+    const cfg = schedConfig.weekly[dayKey] || {};
+    const isForce = schedConfig.force_dates.includes(ds);
+    const isSkip  = schedConfig.skip_dates.includes(ds);
+    if (isSkip && !isForce) continue;
+    if (!cfg.enabled && !isForce) continue;
+    const [ph,pm] = (cfg.time_ist || '09:30').split(':').map(Number);
+    const candidate = new Date(d);
+    candidate.setHours(ph, pm, 0, 0);
+    if (candidate <= ist) continue;
+    const df = candidate - ist;
+    const dh = Math.floor(df/(1000*60*60)), dm = Math.floor((df%(1000*60*60))/(1000*60));
+    document.getElementById('npLabel').textContent = 'Next scheduled post';
+    document.getElementById('nxt').textContent = candidate.toLocaleString('en-IN',{weekday:'long',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' IST'+(isForce?' 📌 forced':'');
+    document.getElementById('cdt').textContent = dh+'h '+dm+'m';
+    return;
+  }
+  document.getElementById('nxt').textContent = 'No active days in next 14 days';
+  document.getElementById('cdt').textContent = '—';
+}
+
+function copyCron() {
+  const c = document.getElementById('cronv')?.textContent || '0 4 * * *';
+  navigator.clipboard?.writeText(c).then(() => toast('Copied: ' + c, 'ok')).catch(() => toast('Cron: ' + c, 'info'));
+}
+
+// ── TOPIC / TYPE ──────────────────────────────────────────────────────────────
+function selTopic(el) {
+  document.querySelectorAll('.tch').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  topicId = el.dataset.id;
+  topicName = el.dataset.name;
+}
+function selType(t, el) {
+  document.querySelectorAll('.tc').forEach(c => { c.className = 'tc'; });
+  el.classList.add('s' + t);
+}
+
+// ── DRY TOGGLE ────────────────────────────────────────────────────────────────
+function toggleDry() {
+  isDry = !isDry;
+  document.getElementById('dryBtn').classList.toggle('on', isDry);
+  document.getElementById('runTxt').textContent = isDry ? '🧪 Preview Post' : '▶ Post Now';
+}
+
+// ── CUSTOM TOPICS ─────────────────────────────────────────────────────────────
+function getCustomTopics() {
+  try { return JSON.parse(localStorage.getItem('custom_topics') || '[]'); } catch(e) { return []; }
+}
+
+function saveCustomTopics(topics) {
+  localStorage.setItem('custom_topics', JSON.stringify(topics));
+}
+
+function loadCustomTopics() {
+  const custom = getCustomTopics();
+  const grid = document.getElementById('tgrid');
+  custom.forEach(ct => {
+    if (!document.querySelector(`.tch[data-id="${ct.id}"]`)) {
+      addCustomChip(ct.id, ct.name, grid);
+    }
+  });
+}
+
+function addCustomTopic() {
+  const inp = document.getElementById('customTopicInp');
+  const name = inp.value.trim();
+  if (!name) { toast('Enter a topic name', 'err'); return; }
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  if (document.querySelector(`.tch[data-id="${id}"]`)) {
+    toast('Topic already exists', 'err'); return;
+  }
+  const grid = document.getElementById('tgrid');
+  addCustomChip(id, name, grid);
+  // Save to localStorage
+  const custom = getCustomTopics();
+  custom.push({id, name});
+  saveCustomTopics(custom);
+  inp.value = '';
+  toast(`✅ "${name}" added to your topic list permanently`, 'ok');
+}
+
+function addCustomChip(id, name, grid) {
+  const chip = document.createElement('div');
+  chip.className = 'tch custom';
+  chip.dataset.id = id;
+  chip.dataset.name = name;
+  chip.onclick = function() { selTopic(this); };
+  chip.innerHTML = `✏️ ${name}<button class="del-chip" onclick="event.stopPropagation();removeCustomTopic('${id}',this.parentElement)" title="Remove">✕</button>`;
+  grid.appendChild(chip);
+}
+
+function removeCustomTopic(id, el) {
+  if (!confirm(`Remove "${el.dataset.name}" from your topic list?`)) return;
+  el.remove();
+  const custom = getCustomTopics().filter(c => c.id !== id);
+  saveCustomTopics(custom);
+  toast('Topic removed', 'info');
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function setLoad(sid, tid, l, t) {
+  document.getElementById(sid).classList.toggle('on', l);
+  document.getElementById(tid).textContent = t;
+  const b = document.getElementById(sid).closest('button');
+  if (b) b.disabled = l;
+}
+function toast(m, t = 'info') {
+  const icons = {ok:'✅', err:'❌', info:'ℹ️'};
+  const el = document.createElement('div');
+  el.className = 'toast ' + t;
+  el.innerHTML = `<span>${icons[t]||'ℹ️'}</span><span>${m}</span>`;
   document.getElementById('toasts').appendChild(el);
-  setTimeout(()=>el.remove(),4200);
+  setTimeout(() => el.remove(), 4200);
 }
 </script>
 </body>
