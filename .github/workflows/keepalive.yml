@@ -1,19 +1,43 @@
 name: Keepalive
 
+# ─────────────────────────────────────────────────────────────────────────────
+# PURPOSE: GitHub disables scheduled workflows after 60 days of no activity.
+# This workflow runs every Sunday and makes a harmless commit to keep the
+# repo "active" so the main LinkedIn agent never gets disabled.
+#
+# ⚠️  This workflow ONLY touches keepalive.txt — it NEVER triggers the main
+#     LinkedIn agent. The 30-min-before-post double-fire issue was caused by
+#     this workflow accidentally dispatching the main workflow. Fixed below.
+# ─────────────────────────────────────────────────────────────────────────────
+
 on:
   schedule:
-    - cron: "25 4 * * *"
+    # Every Sunday at 3:00 AM UTC (8:30 AM IST) — well away from the
+    # main agent's 4:00 AM UTC (9:30 AM IST) schedule
+    - cron: '0 3 * * 0'
+
+  # Allow manual trigger for testing
   workflow_dispatch:
 
 jobs:
   keepalive:
     runs-on: ubuntu-latest
     permissions:
-      actions: write
-      contents: write
+      contents: write   # needed to push the commit
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Keep workflows active
-        uses: gautamkrishnar/keepalive-workflow@v2
-        with:
-          time_elapsed: 20
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update keepalive timestamp
+        run: |
+          echo "Last keepalive: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > keepalive.txt
+          echo "This file is updated weekly to prevent GitHub from disabling scheduled workflows." >> keepalive.txt
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add keepalive.txt
+          git diff --staged --quiet || git commit -m "chore: keepalive $(date -u '+%Y-%m-%d')"
+          git push
