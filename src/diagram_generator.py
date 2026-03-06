@@ -6,13 +6,14 @@ from logger import get_logger
 log = get_logger("diagrams")
 OUTPUT_DIR = "diagrams"
 
+# ── PALETTES ──────────────────────────────────────────────────────────────────
 PALETTES = {
-    "ai":      {"bg":"#0F172A","c":["#7C3AED","#2563EB","#0891B2","#059669","#D97706","#DC2626"]},
-    "cloud":   {"bg":"#0F172A","c":["#1D4ED8","#0891B2","#047857","#B45309","#7C3AED","#BE185D"]},
-    "security":{"bg":"#0F172A","c":["#DC2626","#D97706","#7C3AED","#0891B2","#047857","#1D4ED8"]},
-    "data":    {"bg":"#0F172A","c":["#7C3AED","#1D4ED8","#0891B2","#047857","#D97706","#DC2626"]},
-    "devops":  {"bg":"#0F172A","c":["#047857","#1D4ED8","#7C3AED","#D97706","#DC2626","#0891B2"]},
-    "default": {"bg":"#0F172A","c":["#1D4ED8","#7C3AED","#047857","#D97706","#DC2626","#0891B2"]},
+    "ai":       ["#6D28D9","#2563EB","#0891B2","#059669","#D97706","#BE185D"],
+    "cloud":    ["#1D4ED8","#0891B2","#047857","#B45309","#7C3AED","#BE185D"],
+    "security": ["#B91C1C","#C2410C","#7C3AED","#0891B2","#047857","#1D4ED8"],
+    "data":     ["#7C3AED","#1D4ED8","#0891B2","#047857","#D97706","#B91C1C"],
+    "devops":   ["#047857","#1D4ED8","#7C3AED","#D97706","#B91C1C","#0891B2"],
+    "default":  ["#1D4ED8","#7C3AED","#047857","#D97706","#B91C1C","#0891B2"],
 }
 
 def get_pal(tid):
@@ -23,453 +24,1048 @@ def get_pal(tid):
     if any(x in t for x in ["kafka","data","lake"]): return PALETTES["data"]
     return PALETTES["default"]
 
-def fb(x,y,w,h,color,title,sub="",rx=10):
+# ── PRIMITIVES ────────────────────────────────────────────────────────────────
+
+def banner_section(x, y, w, h, label, color, rx=10):
+    """Full-width solid color header bar + tinted content area — key new pattern."""
+    bh = 28  # header bar height
+    s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{color}" fill-opacity="0.07" stroke="{color}" stroke-width="1.5" stroke-opacity="0.4"/>'
+    s += f'<rect x="{x}" y="{y}" width="{w}" height="{bh}" rx="{rx}" fill="{color}"/>'
+    s += f'<rect x="{x}" y="{y+rx}" width="{w}" height="{bh-rx}" fill="{color}"/>'  # square bottom of header
+    s += f'<text x="{x+w//2}" y="{y+19}" text-anchor="middle" fill="white" font-size="12" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="0.5">{label}</text>'
+    return s
+
+def card(x, y, w, h, color, title, sub="", rx=8):
+    """Solid filled card with white title and lighter subtitle."""
     s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{color}"/>'
-    s += f'<rect x="{x}" y="{y}" width="{w}" height="4" rx="{rx}" fill="white" opacity="0.18"/>'
+    s += f'<rect x="{x}" y="{y}" width="{w}" height="3" rx="{rx}" fill="white" opacity="0.25"/>'
+    mid = y + h//2
     if sub:
-        s += f'<text x="{x+w//2}" y="{y+h//2-4}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
-        s += f'<text x="{x+w//2}" y="{y+h//2+10}" text-anchor="middle" fill="rgba(255,255,255,0.72)" font-size="9" font-family="Arial,sans-serif">{sub}</text>'
+        s += f'<text x="{x+w//2}" y="{mid-3}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
+        s += f'<text x="{x+w//2}" y="{mid+11}" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Arial,sans-serif">{sub}</text>'
     else:
-        s += f'<text x="{x+w//2}" y="{y+h//2+4}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
+        s += f'<text x="{x+w//2}" y="{mid+4}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
     return s
 
-def sf(x,y,w,h,label,color):
-    lw = len(label)*7+20
-    s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="14" fill="{color}" fill-opacity="0.08" stroke="{color}" stroke-width="2"/>'
-    s += f'<rect x="{x+12}" y="{y-12}" width="{lw}" height="22" rx="6" fill="{color}"/>'
-    s += f'<text x="{x+12+lw//2}" y="{y+5}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
-    return s
-
-def ar(x1,y1,x2,y2,color="white",label="",dashed=False):
-    dash='stroke-dasharray="6,4"' if dashed else ''
-    cid=color.replace("#","").replace("(","").replace(")","").replace(",","")[:8]
-    uid=f"{cid}{abs(x1)}{abs(y1)}"
-    mx,my=(x1+x2)//2,(y1+y2)//2
-    s =f'<defs><marker id="m{uid}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="{color}"/></marker></defs>'
-    s+=f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="2" {dash} marker-end="url(#m{uid})"/>'
+def fat_arrow_down(cx, y1, y2, color, label=""):
+    """Large fat downward arrow between sections — key new pattern."""
+    aw, ah = 14, y2 - y1
+    hw = 22  # arrowhead width
+    body_h = ah - 12
+    pts = (f"{cx-aw//2},{y1} {cx+aw//2},{y1} {cx+aw//2},{y1+body_h} "
+           f"{cx+hw//2},{y1+body_h} {cx},{y2} {cx-hw//2},{y1+body_h} {cx-aw//2},{y1+body_h}")
+    s  = f'<polygon points="{pts}" fill="{color}" opacity="0.85"/>'
     if label:
-        bw=len(label)*5+8
-        s+=f'<rect x="{mx-bw//2}" y="{my-8}" width="{bw}" height="14" rx="4" fill="#1E293B" stroke="{color}" stroke-width="0.5"/>'
-        s+=f'<text x="{mx}" y="{my+3}" text-anchor="middle" fill="{color}" font-size="8" font-family="Arial,sans-serif">{label}</text>'
+        lx, ly = cx, y1 + (ah // 2) - 2
+        bw = len(label)*6+10
+        s += f'<rect x="{lx-bw//2}" y="{ly-8}" width="{bw}" height="14" rx="4" fill="#0F172A" opacity="0.8"/>'
+        s += f'<text x="{lx}" y="{ly+3}" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
     return s
 
-def ic(cx,cy,r,icon,label,sub,color):
-    s =f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}"/>'
-    s+=f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="white" stroke-width="1.5" opacity="0.2"/>'
-    s+=f'<text x="{cx}" y="{cy+int(r*0.35)}" text-anchor="middle" font-size="{int(r*0.7)}" font-family="Arial,sans-serif">{icon}</text>'
-    s+=f'<text x="{cx}" y="{cy+r+16}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
-    if sub:
-        s+=f'<text x="{cx}" y="{cy+r+29}" text-anchor="middle" fill="#94A3B8" font-size="9" font-family="Arial,sans-serif">{sub}</text>'
+def fat_arrow_right(x1, x2, cy, color, label=""):
+    """Large fat rightward arrow."""
+    aw, aw2 = x2-x1, 14
+    body_w = aw - 12
+    ah2 = 22
+    pts = (f"{x1},{cy-aw2//2} {x1+body_w},{cy-aw2//2} {x1+body_w},{cy-ah2//2} "
+           f"{x2},{cy} {x1+body_w},{cy+ah2//2} {x1+body_w},{cy+aw2//2} {x1},{cy+aw2//2}")
+    s = f'<polygon points="{pts}" fill="{color}" opacity="0.75"/>'
+    if label:
+        mx = x1 + aw//2
+        bw = len(label)*6+10
+        s += f'<rect x="{mx-bw//2}" y="{cy-8}" width="{bw}" height="14" rx="4" fill="#0F172A" opacity="0.8"/>'
+        s += f'<text x="{mx}" y="{cy+3}" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
     return s
 
-def wrap(content,title,subtitle,accent,date_str):
-    st=title.replace("&","and").replace("<","").replace(">","")
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550" width="900" height="550">
+def thin_arrow(x1, y1, x2, y2, color="white", dashed=False):
+    """Thin connector arrow for within-section links."""
+    dash = 'stroke-dasharray="5,3"' if dashed else ''
+    uid  = f"arr{abs(x1)}{abs(y1)}{abs(x2)}{abs(y2)}"
+    s  = f'<defs><marker id="{uid}" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="{color}" opacity="0.9"/></marker></defs>'
+    s += f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="1.8" {dash} marker-end="url(#{uid})" opacity="0.7"/>'
+    return s
+
+def tool_strip(tools, y=90, accent="#0EA5E9"):
+    """Top row of tool name badges — like the Grafana/Splunk/OTel strip in reference."""
+    s = f'<rect x="15" y="{y}" width="870" height="32" rx="8" fill="white" fill-opacity="0.04" stroke="white" stroke-opacity="0.08" stroke-width="1"/>'
+    n = len(tools)
+    w = 870 // n
+    for i, (ico, name, col) in enumerate(tools):
+        cx = 15 + i*w + w//2
+        s += f'<text x="{cx-18}" y="{y+20}" text-anchor="end" font-size="15" font-family="Arial,sans-serif" opacity="0.9">{ico}</text>'
+        s += f'<text x="{cx-10}" y="{y+21}" fill="{col}" font-size="12" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="0.3">{name}</text>'
+        if i < n-1:
+            lx = 15 + (i+1)*w
+            s += f'<line x1="{lx}" y1="{y+6}" x2="{lx}" y2="{y+26}" stroke="white" stroke-width="0.5" opacity="0.15"/>'
+    return s
+
+def status_bar(items, y, h=26):
+    """Dark pill row with coloured dots — like Healthy•Degraded•Critical in reference."""
+    total_w = 870
+    s = f'<rect x="15" y="{y}" width="{total_w}" height="{h}" rx="{h//2}" fill="#0F172A" stroke="white" stroke-opacity="0.12" stroke-width="1"/>'
+    iw = total_w // len(items)
+    for i, (label, color) in enumerate(items):
+        cx = 15 + i*iw + iw//2
+        s += f'<circle cx="{cx-len(label)*4-6}" cy="{y+h//2}" r="5" fill="{color}"/>'
+        s += f'<text x="{cx-len(label)*4+2}" y="{y+h//2+4}" fill="white" font-size="11" font-weight="600" font-family="Arial,sans-serif">{label}</text>'
+    return s
+
+def two_col_header(x, y, w, h, label1, color1, label2, color2, split=0.55):
+    """Two-column split section header — like Operational Signals | AI Intelligence."""
+    w1 = int(w * split)
+    w2 = w - w1
+    rx = 10
+    s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="none" stroke="white" stroke-opacity="0.08" stroke-width="1"/>'
+    # left header
+    s += f'<rect x="{x}" y="{y}" width="{w1}" height="28" rx="{rx}" fill="{color1}"/>'
+    s += f'<rect x="{x+rx}" y="{y}" width="{w1-rx}" height="28" fill="{color1}"/>'
+    s += f'<text x="{x+w1//2}" y="{y+19}" text-anchor="middle" fill="white" font-size="12" font-weight="bold" font-family="Arial,sans-serif">{label1}</text>'
+    # right header
+    s += f'<rect x="{x+w1}" y="{y}" width="{w2}" height="28" rx="{rx}" fill="{color2}"/>'
+    s += f'<rect x="{x+w1}" y="{y}" width="{w2-rx}" height="28" fill="{color2}"/>'
+    s += f'<text x="{x+w1+w2//2}" y="{y+19}" text-anchor="middle" fill="white" font-size="12" font-weight="bold" font-family="Arial,sans-serif">{label2}</text>'
+    # divider
+    s += f'<line x1="{x+w1}" y1="{y}" x2="{x+w1}" y2="{y+h}" stroke="white" stroke-opacity="0.15" stroke-width="1" stroke-dasharray="4,3"/>'
+    # tinted backgrounds
+    s += f'<rect x="{x}" y="{y+28}" width="{w1}" height="{h-28}" rx="0" fill="{color1}" fill-opacity="0.05"/>'
+    s += f'<rect x="{x+w1}" y="{y+28}" width="{w2}" height="{h-28}" rx="0" fill="{color2}" fill-opacity="0.05"/>'
+    return s
+
+
+# ── NEW PRIMITIVES (Images 2 · 3 · 4 · 5) ────────────────────────────────────
+
+def cheatsheet_row(y, h, label, color, items):
+    """Image 2 style: left category label with accent bar → icon-card grid."""
+    s  = f'<rect x="15" y="{y}" width="870" height="{h}" rx="8" fill="{color}" fill-opacity="0.06" stroke="{color}" stroke-width="1.2" stroke-opacity="0.3"/>'
+    s += f'<rect x="15" y="{y}" width="5" height="{h}" rx="3" fill="{color}"/>'
+    lbl_end = 22 + len(label)*7
+    s += f'<text x="26" y="{y+h//2+4}" fill="{color}" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
+    ax = lbl_end + 4
+    s += f'<polygon points="{ax},{y+h//2-4} {ax+9},{y+h//2} {ax},{y+h//2+4}" fill="{color}" opacity="0.5"/>'
+    card_x = ax + 14
+    avail = 880 - card_x
+    cw = avail // len(items) - 4
+    for i, item in enumerate(items):
+        ico, title, sub = item[0], item[1], item[2] if len(item)>2 else ""
+        cx = card_x + i*(cw+4)
+        s += f'<rect x="{cx}" y="{y+4}" width="{cw}" height="{h-8}" rx="7" fill="{color}" fill-opacity="0.16" stroke="{color}" stroke-opacity="0.22" stroke-width="1"/>'
+        s += f'<text x="{cx+cw//2}" y="{y+18}" text-anchor="middle" font-size="15" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="{cx+cw//2}" y="{y+h//2+4}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{title}</text>'
+        if sub:
+            s += f'<text x="{cx+cw//2}" y="{y+h-10}" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+    return s
+
+def subsystem_group(x, y, w, h, label, color, rx=10):
+    """Image 4 style: colored-border box (NOT solid filled). Label badge on top border."""
+    lw = len(label)*7 + 20
+    s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{color}" fill-opacity="0.09" stroke="{color}" stroke-width="2"/>'
+    s += f'<rect x="{x+12}" y="{y-10}" width="{lw}" height="20" rx="10" fill="{color}"/>'
+    s += f'<text x="{x+12+lw//2}" y="{y+4}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="0.4">{label}</text>'
+    return s
+
+def stat_tile(x, y, w, h, value, label, delta="", color="#0EA5E9"):
+    """Image 5 style: KPI metric tile with large value and optional delta badge."""
+    s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{color}" fill-opacity="0.12" stroke="{color}" stroke-width="1.5"/>'
+    s += f'<rect x="{x}" y="{y}" width="{w}" height="3" rx="8" fill="{color}"/>'
+    s += f'<text x="{x+w//2}" y="{y+h//2-2}" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Arial,sans-serif">{value}</text>'
+    s += f'<text x="{x+w//2}" y="{y+h//2+16}" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Arial,sans-serif">{label}</text>'
+    if delta:
+        dcol = "#22C55E" if "+" in delta else "#EF4444"
+        s += f'<rect x="{x+w-34}" y="{y+6}" width="28" height="14" rx="7" fill="{dcol}" fill-opacity="0.2"/>'
+        s += f'<text x="{x+w-20}" y="{y+17}" text-anchor="middle" fill="{dcol}" font-size="8" font-weight="bold" font-family="Arial,sans-serif">{delta}</text>'
+    return s
+
+def mini_sparkline(x, y, w, h, points, color):
+    """Image 5 style: tiny inline sparkline."""
+    if len(points) < 2: return ""
+    mn, mx2 = min(points), max(points)
+    rng = mx2 - mn or 1
+    def px(i): return x + int(i * w / (len(points)-1))
+    def py(v): return y + h - int((v-mn)/rng * h)
+    pts = " ".join(f"{px(i)},{py(v)}" for i,v in enumerate(points))
+    area = f"{x},{y+h} " + pts + f" {x+w},{y+h}"
+    s  = f'<polygon points="{area}" fill="{color}" fill-opacity="0.18"/>'
+    s += f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+    ex, ey = px(len(points)-1), py(points[-1])
+    s += f'<circle cx="{ex}" cy="{ey}" r="3.5" fill="{color}"/>'
+    return s
+
+def roadmap_node(cx, cy, r, num, color, active=False):
+    """Image 3 style: numbered milestone circle for roadmap/journey diagrams."""
+    s  = f'<circle cx="{cx}" cy="{cy}" r="{r+8}" fill="{color}" opacity="0.12"/>'
+    s += f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}"/>'
+    if active:
+        s += f'<circle cx="{cx}" cy="{cy}" r="{r+14}" fill="none" stroke="{color}" stroke-width="2.5" opacity="0.35"/>'
+    s += f'<text x="{cx}" y="{cy+int(r*0.4)}" text-anchor="middle" fill="white" font-size="{int(r*0.75)}" font-weight="bold" font-family="Arial,sans-serif">{num}</text>'
+    return s
+
+def flow_box(x, y, w, h, label, sub, color, ico=""):
+    """Image 4/5 style: bordered flow box with optional icon — not solid filled."""
+    s  = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{color}" fill-opacity="0.1" stroke="{color}" stroke-width="1.8"/>'
+    mid = y + h//2
+    if ico:
+        s += f'<text x="{x+w//2}" y="{mid-7}" text-anchor="middle" font-size="19" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="{x+w//2}" y="{mid+9}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
+        if sub: s += f'<text x="{x+w//2}" y="{mid+22}" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+    else:
+        s += f'<text x="{x+w//2}" y="{mid-(4 if sub else -4)}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{label}</text>'
+        if sub: s += f'<text x="{x+w//2}" y="{mid+12}" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9" font-family="Arial,sans-serif">{sub}</text>'
+    return s
+
+def labeled_arrow(x1, y1, x2, y2, label="", color="white"):
+    """Image 4/5 style: arrow with optional mid-point text label."""
+    uid = f"la{abs(x1)}{abs(y1)}{abs(x2)}{abs(y2)}"
+    mx, my = (x1+x2)//2, (y1+y2)//2
+    s  = f'<defs><marker id="{uid}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="{color}" opacity="0.75"/></marker></defs>'
+    s += f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="1.5" marker-end="url(#{uid})" opacity="0.6"/>'
+    if label:
+        bw = len(label)*5+10
+        s += f'<rect x="{mx-bw//2}" y="{my-8}" width="{bw}" height="14" rx="4" fill="#0F172A" opacity="0.85"/>'
+        s += f'<text x="{mx}" y="{my+3}" text-anchor="middle" fill="{color}" font-size="8" font-family="Arial,sans-serif">{label}</text>'
+    return s
+
+# ── WRAPPER ───────────────────────────────────────────────────────────────────
+def wrap(content, title, subtitle, C, date_str):
+    accent = C[0]
+    st = title.replace("&","and").replace("<","").replace(">","")
+    # gradient stop colours
+    g1, g2 = C[0], C[1]
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 570" width="900" height="570">
   <defs>
-    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" stroke-width="0.3" opacity="0.05"/></pattern>
-    <linearGradient id="hdr" x1="0" x2="1"><stop offset="0%" stop-color="{accent}"/><stop offset="100%" stop-color="{accent}" stop-opacity="0.2"/></linearGradient>
-    <linearGradient id="sig" x1="0" x2="1"><stop offset="0%" stop-color="#0EA5E9"/><stop offset="50%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#EC4899"/></linearGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="white" opacity="0.06"/>
+    </pattern>
+    <linearGradient id="titlegrd" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="{g1}"/>
+      <stop offset="100%" stop-color="{g2}" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="headbg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#161E30"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="sig" x1="0" x2="1">
+      <stop offset="0%" stop-color="#0EA5E9"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-  <rect width="900" height="550" fill="#0F172A"/>
-  <rect width="900" height="550" fill="url(#grid)"/>
-  <rect x="0" y="0" width="900" height="5" fill="url(#hdr)"/>
-  <circle cx="820" cy="100" r="180" fill="{accent}" opacity="0.04"/>
-  <text x="20" y="36" fill="{accent}" font-size="10" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="2" opacity="0.85">{subtitle.upper()}</text>
-  <text x="450" y="68" text-anchor="middle" fill="white" font-size="22" font-weight="bold" font-family="Arial,sans-serif">{st}</text>
-  <line x1="20" y1="78" x2="880" y2="78" stroke="white" stroke-width="0.5" opacity="0.1"/>
+
+  <!-- Canvas -->
+  <rect width="900" height="570" fill="#0F172A"/>
+  <rect width="900" height="570" fill="url(#dots)"/>
+
+  <!-- Ambient glow blobs -->
+  <circle cx="830" cy="80" r="160" fill="{g1}" opacity="0.06"/>
+  <circle cx="80"  cy="500" r="120" fill="{g2}" opacity="0.05"/>
+
+  <!-- Header band -->
+  <rect x="0" y="0" width="900" height="76" fill="url(#headbg)"/>
+  <rect x="0" y="0" width="900" height="4" fill="url(#titlegrd)"/>
+  <line x1="0" y1="76" x2="900" y2="76" stroke="white" stroke-width="0.5" opacity="0.08"/>
+
+  <!-- Category label -->
+  <rect x="15" y="14" width="{len(subtitle)*7+18}" height="18" rx="9" fill="{accent}" fill-opacity="0.15" stroke="{accent}" stroke-opacity="0.4" stroke-width="1"/>
+  <text x="24" y="26" fill="{accent}" font-size="9" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="1.5">{subtitle.upper()}</text>
+
+  <!-- Title -->
+  <text x="450" y="58" text-anchor="middle" fill="white" font-size="20" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="-0.3">{st}</text>
+
+  <!-- Content -->
   {content}
-  <line x1="20" y1="515" x2="880" y2="515" stroke="white" stroke-width="0.5" opacity="0.08"/>
-  <text x="20" y="533" fill="#334155" font-size="9" font-family="Arial,sans-serif">{date_str}</text>
-  <rect x="660" y="522" width="220" height="22" rx="11" fill="url(#sig)" fill-opacity="0.15" stroke="url(#sig)" stroke-width="1"/>
-  <text x="750" y="537" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="0.5">&#10022; AI &#169; Komal Batra</text>
+
+  <!-- Footer -->
+  <line x1="15" y1="533" x2="885" y2="533" stroke="white" stroke-width="0.5" opacity="0.07"/>
+  <text x="20" y="550" fill="#334155" font-size="8" font-family="Arial,sans-serif">{date_str}</text>
+  <rect x="645" y="539" width="240" height="20" rx="10" fill="url(#sig)" fill-opacity="0.12" stroke="url(#sig)" stroke-width="0.8"/>
+  <text x="765" y="553" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="0.5">&#10022; AI &#169; Komal Batra</text>
 </svg>'''
 
-def make_kubernetes(p):
-    C=p["c"]; s=""
-    s+=sf(20,88,860,110,"CONTROL PLANE",C[0])
-    s+=fb(35,102,150,80,C[0],"API Server","entry point")
-    s+=fb(200,102,150,80,C[1],"Scheduler","filters/scores")
-    s+=fb(365,102,180,80,C[2],"Controller Mgr","reconciles state")
-    s+=fb(560,102,120,80,C[3],"etcd","key-value store")
-    s+=fb(695,102,170,80,C[4],"kubectl / UI","admin access")
-    s+=ar(185,142,200,142,"white","schedules")
-    s+=ar(350,142,365,142,"white")
-    s+=ar(540,142,560,142,"#94A3B8","stores",True)
-    s+=ar(695,142,665,142,"#94A3B8","request")
-    s+=sf(20,210,415,180,"WORKER NODE 1",C[1])
-    s+=fb(35,228,125,55,C[1],"Kubelet","node agent")
-    s+=fb(175,228,130,55,C[2],"Kube-proxy","iptables/IPVS")
-    s+=fb(35,295,90,82,C[0],"Pod A","nginx:latest")
-    s+=fb(140,295,90,82,C[3],"Pod B","app:v2")
-    s+=fb(245,295,90,82,C[4],"Pod C","worker:v1")
-    s+=fb(350,295,75,82,C[5],"CNI","Calico")
-    s+=ar(160,255,175,255,"white","manages")
-    s+=ar(110,282,110,295,"#94A3B8","runs",True)
-    s+=sf(450,210,430,180,"WORKER NODE 2",C[2])
-    s+=fb(465,228,125,55,C[1],"Kubelet","node agent")
-    s+=fb(605,228,130,55,C[2],"Kube-proxy","networking")
-    s+=fb(465,295,90,82,C[0],"Pod D","db:v3")
-    s+=fb(565,295,90,82,C[3],"Pod E","cache:v1")
-    s+=fb(665,295,90,82,C[4],"Pod F","api:v2")
-    s+=fb(770,295,95,82,C[5],"Ingress","NGINX LB")
-    s+=ar(590,255,605,255,"white","manages")
-    s+=ar(110,182,110,210,"#94A3B8","",True)
-    s+=ar(665,182,665,210,"#94A3B8","",True)
-    s+=sf(20,404,270,95,"STORAGE",C[3])
-    s+=fb(30,420,120,68,C[3],"PVC","volume claim")
-    s+=fb(158,420,120,68,C[4],"PersistentVol","StorageClass")
-    s+=ar(150,454,158,454,"white","binds")
-    s+=sf(305,404,265,95,"AUTOSCALING",C[4])
-    s+=fb(315,420,115,68,C[4],"HPA","CPU/mem based")
-    s+=fb(445,420,115,68,C[5],"VPA","right-sizing")
-    s+=ar(430,454,445,454,"white")
-    s+=sf(585,404,295,95,"MONITORING",C[0])
-    s+=fb(595,420,130,68,C[0],"Prometheus","metrics scrape")
-    s+=fb(740,420,130,68,C[2],"Grafana","dashboards")
-    s+=ar(730,454,740,454,"white","visualize")
-    return s,"Cluster Architecture"
+# ── KUBERNETES ────────────────────────────────────────────────────────────────
+def make_kubernetes(C):
+    s = ""
+    # Tool strip
+    s += tool_strip([("☸️","Kubernetes","#326CE5"),("🐳","containerd","#0891B2"),("📡","etcd","#419EDA"),("🔀","Calico","#FB923C"),("📊","Prometheus","#E6522C"),("🔒","RBAC","#7C3AED")], 82, C[0])
 
-def make_llm(p):
-    C=p["c"]; s=""
-    s+=sf(15,88,145,340,"INPUT",C[1])
-    s+=ic(87,135,28,"👤","User","queries",C[1])
-    s+=ic(87,225,24,"📄","Documents","context",C[2])
-    s+=ic(87,310,24,"🔌","APIs","tools/data",C[3])
-    s+=sf(175,88,220,340,"ORCHESTRATION",C[0])
-    s+=fb(188,108,190,62,C[0],"Prompt Manager","template/vars/history")
-    s+=fb(188,185,190,62,C[1],"Memory Store","short+long term")
-    s+=fb(188,263,190,62,C[2],"Tool Router","function calling")
-    s+=fb(188,342,190,56,C[3],"Agent Loop","plan/act/observe")
-    for y in [139,216,294,370]: s+=ar(163,y,188,y,"white")
-    s+=sf(410,88,240,340,"LLM CORE",C[4])
-    s+=fb(422,108,210,62,C[4],"Tokenizer","BPE encoding")
-    s+=fb(422,185,210,62,C[5],"Transformer","32 attn heads")
-    s+=fb(422,263,210,62,C[0],"FFN + Norm","feed-forward layers")
-    s+=fb(422,342,210,56,C[1],"Sampler","temp/top-p/top-k")
-    for y in [139,216,294,370]: s+=ar(378,y,422,y,"#94A3B8")
-    for y in [170,247,325]: s+=ar(527,y,527,y+15,"#60A5FA","",True)
-    s+=sf(665,88,215,340,"OUTPUT",C[2])
-    s+=fb(675,108,190,62,C[2],"Streaming","SSE / tokens")
-    s+=fb(675,185,190,62,C[3],"Structured","JSON / XML")
-    s+=fb(675,263,190,62,C[4],"Tool Calls","function results")
-    s+=fb(675,342,190,56,C[5],"Audit Log","trace/eval")
-    for y in [139,216,294,370]: s+=ar(632,y,675,y,"white")
-    s+=sf(15,442,865,58,"RAG LAYER",C[3])
-    for i,(lbl,sub,col) in enumerate([("Vector DB","Pinecone",C[3]),("Chunker","512 tok",C[4]),("Embedder","text-embed-3",C[5]),("Re-ranker","cross-encoder",C[0]),("Eval","RAGAS",C[1])]):
-        x=20+i*172
-        s+=fb(x,454,162,36,col,lbl,sub,6)
-    for x in [182,354,526,698]: s+=ar(x,472,x+10,472,"white")
-    return s,"Architecture Diagram"
+    # Control Plane
+    s += banner_section(15, 122, 870, 94, "CONTROL PLANE", C[0])
+    for i,(x,lbl,sub,col) in enumerate([(22,"API Server","entry point",C[0]),(198,"Scheduler","node filter/score",C[1]),(374,"Controller Mgr","reconcile state",C[2]),(558,"etcd","key-value store",C[3]),(726,"Cloud Controller","cloud provider",C[4])]):
+        s += card(x, 156, 168, 52, col, lbl, sub)
+    for x in [190,366,542,718]: s += thin_arrow(x,182,x+8,182,"white")
 
-def make_cicd(p):
-    C=p["c"]; s=""
-    stages=[(75,"💻","Code","git push",C[0]),(195,"🔍","Lint+Test","pytest/jest",C[1]),(315,"🏗️","Build","docker build",C[2]),(435,"🛡️","Scan","trivy/snyk",C[3]),(555,"📦","Artifact","ECR/registry",C[4]),(675,"🚀","Deploy","helm upgrade",C[5]),(795,"✅","Verify","smoke tests",C[0])]
-    for x,ico,lbl,sub,col in stages:
-        s+=f'<circle cx="{x}" cy="155" r="38" fill="{col}"/>'
-        s+=f'<circle cx="{x}" cy="155" r="38" fill="none" stroke="white" stroke-width="2" opacity="0.2"/>'
-        s+=f'<text x="{x}" y="148" text-anchor="middle" font-size="22" font-family="Arial,sans-serif">{ico}</text>'
-        s+=f'<text x="{x}" y="166" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        s+=f'<text x="{x}" y="179" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-        if x<795: s+=ar(x+38,155,x+82,155,"white")
-    s+=sf(20,205,280,125,"ENVIRONMENTS",C[1])
-    s+=fb(30,222,125,46,C[1],"Development","feature branches")
-    s+=fb(30,276,125,46,C[2],"Staging","pre-production")
-    s+=fb(165,222,125,46,C[0],"Production","blue/green")
-    s+=fb(165,276,125,46,C[3],"DR Region","failover")
-    s+=sf(315,205,270,125,"QUALITY GATES",C[2])
-    s+=fb(325,222,115,46,C[2],"Coverage",">80% req")
-    s+=fb(325,276,115,46,C[3],"Perf Budget","LCP < 2.5s")
-    s+=fb(450,222,125,46,C[4],"SAST/DAST","sec scan")
-    s+=fb(450,276,125,46,C[5],"Load Test","k6/Gatling")
-    s+=sf(600,205,280,125,"ROLLOUT STRATEGY",C[4])
-    s+=fb(610,222,125,46,C[4],"Canary","5% to 100%")
-    s+=fb(610,276,125,46,C[0],"Blue/Green","instant switch")
-    s+=fb(745,222,125,46,C[1],"Feature Flag","LaunchDarkly")
-    s+=fb(745,276,125,46,C[5],"A/B Test","traffic split")
-    s+=sf(20,345,860,95,"OBSERVABILITY AND ALERTING",C[3])
-    obs=[("📊","Prometheus","metrics",C[3]),("📈","Grafana","dashboards",C[0]),("🔍","Jaeger","tracing",C[1]),("📋","ELK Stack","logs",C[2]),("🚨","PagerDuty","alerts",C[3]),("💬","Slack","notify",C[4]),("📝","JIRA","tickets",C[5])]
-    w=860//len(obs)
-    for i,(ico,lbl,sub,col) in enumerate(obs):
-        cx=20+i*w+w//2
-        s+=f'<text x="{cx}" y="380" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
-        s+=f'<text x="{cx}" y="398" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        s+=f'<text x="{cx}" y="412" text-anchor="middle" fill="#94A3B8" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-    s+=f'<rect x="20" y="452" width="860" height="38" rx="8" fill="{C[3]}" opacity="0.15" stroke="{C[3]}" stroke-width="1.5"/>'
-    s+=f'<text x="450" y="476" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">AUTO-ROLLBACK: Error &gt; 1%  &#8594;  Alert  &#8594;  Helm rollback  &#8594;  DNS failover  &#8594;  Incident</text>'
-    return s,"Pipeline Architecture"
+    # Big arrow down
+    s += fat_arrow_down(450, 216, 244, C[1])
 
-def make_kafka(p):
-    C=p["c"]; s=""
-    s+=sf(15,88,155,195,"PRODUCERS",C[1])
-    s+=fb(25,106,130,50,C[1],"App Server","REST events")
-    s+=fb(25,166,130,50,C[2],"IoT Sensors","MQTT bridge")
-    s+=fb(25,226,130,50,C[3],"DB CDC","Debezium")
-    for y in [131,191,251]: s+=ar(155,y,205,y,"white","produce")
-    s+=sf(205,88,305,195,"KAFKA CLUSTER",C[0])
-    for i,(lbl,role) in enumerate([("Broker 1","leader"),("Broker 2","follower"),("Broker 3","follower")]):
-        s+=fb(215+i*97,106,87,165,C[i],lbl,role)
-    s+=f'<text x="357" y="288" text-anchor="middle" fill="#94A3B8" font-size="9" font-family="Arial,sans-serif">RF:3 | 6 partitions | 7d retention</text>'
-    s+=sf(525,88,145,195,"SCHEMA+CONNECT",C[4])
-    s+=fb(535,106,125,70,C[4],"Schema Reg","Avro/Protobuf")
-    s+=fb(535,185,125,70,C[5],"Kafka Connect","source+sink")
-    s+=ar(510,140,535,140,"white","validate")
-    s+=ar(510,220,535,220,"white","stream")
-    s+=sf(685,88,200,195,"STREAM PROC",C[2])
-    s+=fb(695,106,180,55,C[2],"Apache Flink","stateful streaming")
-    s+=fb(695,170,180,55,C[3],"Spark Streaming","micro-batch 1s")
-    s+=fb(695,233,180,42,C[4],"KSQL","SQL on Kafka")
-    s+=ar(670,140,695,140,"white","consume")
-    s+=ar(670,200,695,200,"white","consume")
-    s+=sf(15,297,865,105,"CONSUMER GROUPS AND SINKS",C[3])
-    sinks=[("🏞️","Data Lake","S3/GCS",C[3]),("📊","ClickHouse","analytics",C[4]),("🔍","OpenSearch","full-text",C[5]),("🤖","ML Platform","features",C[0]),("📡","Real-time","dashboards",C[1]),("🚨","Alerting","PagerDuty",C[2]),("⚡","Cache","Redis",C[3])]
-    w=860//len(sinks)
-    for i,(ico,lbl,sub,col) in enumerate(sinks):
-        cx=20+i*w+w//2
-        s+=f'<text x="{cx}" y="326" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
-        s+=fb(cx-50,340,100,48,col,lbl,sub,7)
-    s+=sf(15,415,865,80,"OPERATIONS",C[5])
-    ops=[("📊","Burrow","lag"),("🔐","mTLS","encrypt"),("📏","Quotas","throttle"),("🔄","MirrorMaker","geo-rep"),("📋","Audit","compliance"),("💰","Cost","optimize")]
-    w2=860//len(ops)
-    for i,(ico,lbl,sub) in enumerate(ops):
-        cx=20+i*w2+w2//2
-        s+=f'<text x="{cx}" y="447" text-anchor="middle" font-size="16" font-family="Arial,sans-serif">{ico}</text>'
-        s+=f'<text x="{cx}" y="463" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        s+=f'<text x="{cx}" y="477" text-anchor="middle" fill="#94A3B8" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-    return s,"Streaming Architecture"
+    # Workers — two column
+    s += two_col_header(15, 244, 870, 168, "WORKER NODE 1", C[1], "WORKER NODE 2", C[2])
+    # Node 1 internals
+    for x,lbl,sub,col in [(22,"Kubelet","node agent",C[1]),(188,"Kube-proxy","iptables/IPVS",C[2]),(354,"CNI Plugin","Calico/Flannel",C[3])]:
+        s += card(x, 278, 158, 44, col, lbl, sub)
+    for x in [180,346]: s += thin_arrow(x,300,x+8,300,"white")
+    for x,lbl,sub,col in [(22,"Pod: nginx","web tier",C[0]),(140,"Pod: api","app tier",C[1]),(258,"Pod: worker","background",C[2]),(376,"Pod: cache","redis",C[3])]:
+        s += card(x, 330, 110, 74, col, lbl, sub)
+    # Node 2 internals
+    for x,lbl,sub,col in [(452,"Kubelet","node agent",C[1]),(618,"Kube-proxy","networking",C[2]),(784,"Ingress","NGINX LB",C[4])]:
+        s += card(x, 278, 158, 44, col, lbl, sub)
+    for x in [610,776]: s += thin_arrow(x,300,x+8,300,"white")
+    for x,lbl,sub,col in [(452,"Pod: db","postgres",C[3]),(570,"Pod: ml","inference",C[4]),(688,"Pod: search","elastic",C[5]),(806,"Pod: mon","prometheus",C[0])]:
+        s += card(x, 330, 110, 74, col, lbl, sub)
+    # vertical control plane → node arrows
+    s += thin_arrow(200, 216, 200, 244, C[1], True)
+    s += thin_arrow(700, 216, 700, 244, C[2], True)
 
-def make_zero_trust(p):
-    C=p["c"]; s=""; cx,cy=450,275
-    s+=f'<circle cx="{cx}" cy="{cy}" r="70" fill="{C[0]}"/>'
-    s+=f'<circle cx="{cx}" cy="{cy}" r="70" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>'
-    s+=f'<text x="{cx}" y="{cy-10}" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="Arial,sans-serif">Policy</text>'
-    s+=f'<text x="{cx}" y="{cy+8}" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="Arial,sans-serif">Engine</text>'
-    s+=f'<text x="{cx}" y="{cy+26}" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Arial,sans-serif">PDP / PEP</text>'
-    nodes=[(450,108,"🔑","Identity","SSO/MFA/RBAC",C[1],450,205),(710,170,"💻","Device Trust","MDM/posture",C[2],522,238),(755,310,"🌐","Network","microsegment",C[3],520,282),(605,435,"📱","Workload","containers",C[4],492,330),(295,435,"🔐","Data","classify+encrypt",C[5],408,330),(145,310,"⚔️","WAF","L7 inspect",C[1],380,282),(200,170,"📡","Monitoring","SIEM/SOAR",C[2],378,238)]
-    for nx,ny,ico,lbl,sub,col,ax,ay in nodes:
-        s+=f'<circle cx="{nx}" cy="{ny}" r="52" fill="{col}"/>'
-        s+=f'<circle cx="{nx}" cy="{ny}" r="52" fill="none" stroke="white" stroke-width="1.5" opacity="0.2"/>'
-        s+=f'<text x="{nx}" y="{ny-8}" text-anchor="middle" font-size="20" font-family="Arial,sans-serif">{ico}</text>'
-        s+=f'<text x="{nx}" y="{ny+10}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        s+=f'<text x="{nx}" y="{ny+24}" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
-        s+=ar(ax,ay,cx-12,cy-12,"#94A3B8","verify",True)
-    s+=f'<rect x="15" y="495" width="865" height="40" rx="8" fill="{C[0]}" opacity="0.15" stroke="{C[0]}" stroke-width="1.5"/>'
-    s+=f'<text x="450" y="520" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">Never Trust, Always Verify | Least Privilege | Assume Breach | Continuous Monitoring</text>'
-    return s,"Security Architecture"
+    # Status bar
+    s += fat_arrow_down(450, 412, 436, C[3])
+    s += banner_section(15, 436, 870, 64, "CLUSTER SERVICES", C[3])
+    for x,lbl,sub,col in [(22,"HPA","auto-scale pods",C[0]),(198,"VPA","right-size pods",C[1]),(374,"PVC / PV","storage claim",C[2]),(550,"StorageClass","dynamic provision",C[3]),(726,"Cert Manager","TLS rotate",C[4])]:
+        s += card(x, 468, 168, 26, col, lbl, sub, 6)
 
-def make_aws(p):
-    C=p["c"]; s=""
-    s+=sf(15,88,865,55,"CLIENT LAYER",C[1])
-    for x,ico,lbl in [(80,"🌐","Browser"),(210,"📱","Mobile"),(340,"💻","CLI/SDK"),(470,"🤝","Partners"),(600,"🤖","IoT"),(730,"🔌","Webhooks")]:
-        s+=f'<text x="{x}" y="110" text-anchor="middle" font-size="16" font-family="Arial,sans-serif">{ico}</text>'
-        s+=f'<text x="{x}" y="128" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-    s+=sf(15,155,865,55,"EDGE LAYER",C[0])
-    for i,(x,lbl,sub,col) in enumerate([(30,"CloudFront","CDN/PoPs",C[0]),(185,"Route 53","DNS+health",C[1]),(330,"WAF+Shield","DDoS L3/L7",C[3]),(475,"ACM","TLS certs",C[2]),(620,"API Gateway","REST/WS",C[4]),(765,"Cognito","auth/federation",C[5])]):
-        s+=fb(x,162,145,40,col,lbl,sub,7)
-    for x in [175,320,465,610,755]: s+=ar(x,182,x+10,182,"white")
-    s+=sf(15,222,425,115,"COMPUTE",C[2])
-    for i,(x,lbl,sub,col) in enumerate([(25,"Lambda","serverless",C[2]),(165,"ECS/Fargate","containers",C[0]),(305,"EKS","managed K8s",C[1]),(25,"Step Func","orchestrate",C[3]),(165,"App Runner","web svcs",C[4]),(305,"Batch","job queues",C[5])]):
-        s+=fb(x,238 if i<3 else 285,130,40,col,lbl,sub,7)
-    s+=sf(450,222,430,115,"MESSAGING",C[4])
-    for i,(x,lbl,sub,col) in enumerate([(460,"SQS","queues",C[4]),(595,"SNS","pub/sub",C[5]),(730,"EventBridge","event bus",C[0]),(460,"Kinesis","streaming",C[1]),(595,"MSK","Kafka",C[2]),(730,"SES","email",C[3])]):
-        s+=fb(x,238 if i<3 else 285,125,40,col,lbl,sub,7)
-    s+=sf(15,350,425,130,"DATA AND STORAGE",C[3])
-    for i,(x,lbl,sub,col) in enumerate([(25,"S3","object store",C[3]),(130,"DynamoDB","NoSQL",C[4]),(235,"RDS Aurora","MySQL/PG",C[5]),(340,"ElastiCache","Redis",C[0]),(25,"Redshift","warehouse",C[1]),(130,"OpenSearch","search",C[2]),(235,"Timestream","time-series",C[3]),(340,"Glue","ETL",C[4])]):
-        s+=fb(x,365 if i<4 else 410,100,40,col,lbl,sub,6)
-    s+=sf(450,350,430,130,"SECURITY AND OBS",C[5])
-    for i,(x,lbl,sub,col) in enumerate([(460,"IAM","access ctrl",C[5]),(570,"CloudWatch","metrics",C[0]),(680,"CloudTrail","audit",C[1]),(790,"GuardDuty","threats",C[2]),(460,"Secrets Mgr","creds",C[3]),(570,"X-Ray","tracing",C[4]),(680,"Config","compliance",C[5]),(790,"Macie","data sec",C[0])]):
-        s+=fb(x,365 if i<4 else 410,100,40,col,lbl,sub,6)
-    return s,"Cloud Architecture"
+    return s, "Cluster Architecture"
 
-def make_mlops(p):
-    C=p["c"]; s=""
-    rows=[
-        ("DATA PIPELINE",C[0],[("Data Sources","S3/DB/APIs",C[0]),("Feature Store","Feast/Tecton",C[1]),("Validation","Great Expect",C[2]),("Feature Eng","Spark/dbt",C[3]),("Data Version","DVC/Delta",C[4]),("Data Monitor","drift detect",C[5])]),
-        ("TRAINING",C[1],[("Experiment","MLflow/W&B",C[1]),("Training","GPU cluster",C[2]),("Hyperparam","Optuna/Ray",C[3]),("Eval Metrics","F1/AUC/BLEU",C[4]),("Model Reg","HuggingFace",C[5]),("A/B Testing","champion/chall",C[0])]),
-        ("SERVING",C[2],[("Online Serve","FastAPI/Triton",C[2]),("Batch Infer","Spark/Ray",C[3]),("Streaming","Kafka+Model",C[4]),("Edge Deploy","ONNX/TFLite",C[5]),("Shadow Test","canary model",C[0]),("Rollback","auto revert",C[1])]),
-        ("MONITORING",C[3],[("Data Drift","PSI/KS test",C[3]),("Model Perf","accuracy/F1",C[4]),("Latency","p50/p95/p99",C[5]),("Concept Drift","retrain trig",C[0]),("Explainability","SHAP/LIME",C[1]),("Cost","GPU/token $",C[2])]),
+# ── LLM / AI AGENTS ──────────────────────────────────────────────────────────
+def make_llm(C):
+    s = ""
+    s += tool_strip([("🤖","LLaMA 3","#6D28D9"),("🧠","GPT-4o","#10A37F"),("☁️","Claude","#C2410C"),("🔍","RAG","#0891B2"),("🛠️","LangChain","#059669"),("📊","LangSmith","#D97706")], 82, C[0])
+
+    # Two-col: Processing | AI Models
+    s += two_col_header(15, 122, 870, 390, "PROCESSING PIPELINE", C[0], "AI PROVIDERS", C[1], 0.62)
+
+    # LEFT — pipeline rows
+    rows = [
+        (C[0], "INPUT LAYER", [(22,"User Query","natural language"),(200,"System Prompt","instructions"),(378,"History","conversation ctx"),(556,"Tools Def","function schema")]),
+        (C[2], "CONTEXT LAYER", [(22,"Chunker","512 tok split"),(200,"Embedder","text-embed-3"),(378,"Vector Store","Pinecone ANN"),(556,"Re-ranker","cross-encoder")]),
+        (C[3], "REASONING LAYER", [(22,"Planner","task decompose"),(200,"Tool Router","fn dispatch"),(378,"Memory","short+long term"),(556,"Agent Loop","plan→act→obs")]),
+        (C[4], "OUTPUT LAYER", [(22,"Tokenizer","decode tokens"),(200,"Sampler","temp/top-p"),(378,"Guardrails","safety filter"),(556,"Streamer","SSE chunks")]),
     ]
-    for ri,(label,col,items) in enumerate(rows):
-        y=88+ri*107
-        s+=sf(15,y,865,95,label,col)
-        for ci,(lbl,sub,ic) in enumerate(items):
-            s+=fb(20+ci*143,y+14,133,68,ic,lbl,sub,8)
-        for x in [153,296,439,582,725]: s+=ar(x,y+48,x+10,y+48,"white")
-    return s,"MLOps Pipeline"
+    y = 155
+    for col, label, items in rows:
+        s += f'<rect x="20" y="{y}" width="530" height="18" rx="5" fill="{col}" fill-opacity="0.25"/>'
+        s += f'<text x="285" y="{y+12}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="1">{label}</text>'
+        for j,(x,lbl,sub) in enumerate(items):
+            s += card(x, y+22, 170, 46, C[j%len(C)], lbl, sub)
+        if y < 400:
+            s += fat_arrow_down(285, y+68, y+84, col)
+        y += 84
 
-def make_lakehouse(p):
-    C=p["c"]; s=""
-    s+=sf(15,88,865,75,"INGESTION SOURCES",C[0])
-    srcs=[("📊","Batch ETL","Airflow",C[0]),("🌊","Streaming","Kafka/Kinesis",C[1]),("🔌","CDC","Debezium",C[2]),("📡","API Pull","REST",C[3]),("📂","File Drop","S3 trigger",C[4]),("🤖","IoT","MQTT",C[5]),("📱","App Events","SDK",C[0])]
-    w=860//len(srcs)
-    for i,(ico,lbl,sub,col) in enumerate(srcs):
-        s+=fb(20+i*w,95,w-8,60,col,f"{ico} {lbl}",sub,8)
-    for x in [140,262,384,506,628,750]: s+=ar(x,125,x+8,125,"white")
-    s+=sf(15,175,865,80,"OPEN TABLE FORMAT",C[1])
-    s+=fb(20,188,200,58,C[1],"Delta Lake","ACID + time travel")
-    s+=fb(235,188,200,58,C[2],"Apache Iceberg","schema evolution")
-    s+=fb(450,188,200,58,C[3],"Apache Hudi","upserts/deletes")
-    s+=fb(665,188,200,58,C[4],"Metadata Catalog","Glue/Hive Metastore")
-    for x in [220,435,650]: s+=ar(x,217,x+15,217,"white","or")
-    s+=sf(15,267,865,80,"COMPUTE ENGINE",C[2])
-    s+=fb(20,280,195,58,C[2],"Apache Spark","SQL/ML/streaming")
-    s+=fb(230,280,180,58,C[3],"Trino/Presto","interactive SQL")
-    s+=fb(425,280,180,58,C[4],"dbt","transform/test")
-    s+=fb(620,280,175,58,C[5],"Ray","ML distributed")
-    s+=fb(810,280,60,58,C[0],"Flink","stream")
-    for x in [215,410,605,795]: s+=ar(x,309,x+15,309,"white")
-    s+=sf(15,360,865,75,"CONSUMPTION LAYER",C[3])
-    cons=[("📊","BI Tools","Tableau",C[3]),("🤖","ML Platform","SageMaker",C[4]),("🔍","Ad-hoc SQL","Athena/BQ",C[5]),("📈","Dashboards","Grafana",C[0]),("📡","Data APIs","REST",C[1]),("⚡","Streaming","real-time",C[2])]
-    w2=860//len(cons)
-    for i,(ico,lbl,sub,col) in enumerate(cons):
-        s+=fb(20+i*w2,372,w2-10,55,col,f"{ico} {lbl}",sub,8)
-    s+=f'<rect x="15" y="447" width="865" height="45" rx="10" fill="{C[4]}" opacity="0.12" stroke="{C[4]}" stroke-width="1.5"/>'
-    s+=f'<text x="450" y="475" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">GOVERNANCE: Data Catalog | Column Lineage | Row-level Security | GDPR | Cost Optimization</text>'
-    return s,"Data Architecture"
+    # RIGHT — AI providers column
+    s += f'<text x="760" y="150" text-anchor="middle" fill="{C[1]}" font-size="10" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="1">AI MODELS</text>'
+    providers = [("🤖","GPT-4o","OpenAI",C[1]),("🧠","Claude 3","Anthropic",C[2]),("🦙","LLaMA 3","Meta / local",C[3]),("💎","Gemini","Google",C[4]),("⚡","Groq","fast inference",C[5])]
+    for i,(ico,nm,sub,col) in enumerate(providers):
+        cy = 162 + i*68
+        s += f'<circle cx="730" cy="{cy}" r="24" fill="{col}" opacity="0.9"/>'
+        s += f'<text x="730" y="{cy+6}" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="768" y="{cy-4}" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{nm}</text>'
+        s += f'<text x="768" y="{cy+10}" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Arial,sans-serif">{sub}</text>'
+        if i < 4: s += thin_arrow(730, cy+24, 730, cy+44, col, True)
+        s += thin_arrow(554, cy, 706, cy, "white", True)
 
-def make_devsecops(p):
-    C=p["c"]; s=""
-    phases=[("IDE","💻","Pre-commit","git-secrets",C[0]),("SCM","📝","Code Review","SAST/Semgrep",C[1]),("Build","🏗️","Compile","Dep SCA check",C[2]),("Test","🧪","Quality","DAST/ZAP scan",C[3]),("Artifact","📦","Registry","Container Trivy",C[4]),("Staging","🚀","Deploy","IaC/Terraform",C[5]),("Prod","🛡️","Monitor","Falco/SIEM",C[0])]
-    pw=120
+    # Bottom eval bar
+    s += fat_arrow_down(450, 512, 534, C[5])
+    s += banner_section(15, 534, 870, 30, "EVALUATION  ·  Faithfulness  ·  Relevance  ·  RAGAS Score  ·  Latency p95  ·  Hallucination Rate", C[5])
+
+    return s, "Architecture Diagram"
+
+# ── CI/CD ─────────────────────────────────────────────────────────────────────
+def make_cicd(C):
+    s = ""
+    s += tool_strip([("🐙","GitHub Actions","#7C3AED"),("🐳","Docker","#0891B2"),("☸️","Kubernetes","#326CE5"),("🛡️","Trivy","#D97706"),("📊","Grafana","#E6522C"),("🚨","PagerDuty","#06B6D4")], 82, C[0])
+
+    # Pipeline stages as big numbered circles
+    stages = [(75,"1","💻","Code","git push",C[0]),(195,"2","🔍","Test","pytest/jest",C[1]),(315,"3","🏗️","Build","docker build",C[2]),(435,"4","🛡️","Scan","trivy/snyk",C[3]),(555,"5","📦","Publish","push to ECR",C[4]),(675,"6","🚀","Deploy","helm upgrade",C[5]),(795,"7","✅","Verify","smoke tests",C[0])]
+    for cx,num,ico,lbl,sub,col in stages:
+        s += f'<circle cx="{cx}" cy="152" r="40" fill="{col}" opacity="0.15" stroke="{col}" stroke-width="2"/>'
+        s += f'<circle cx="{cx}" cy="152" r="32" fill="{col}"/>'
+        s += f'<text x="{cx}" y="147" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="{cx}" y="163" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s += f'<text x="{cx}" y="207" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+        # Stage number badge
+        s += f'<circle cx="{cx+24}" cy="124" r="9" fill="#0F172A" stroke="{col}" stroke-width="1.5"/>'
+        s += f'<text x="{cx+24}" y="128" text-anchor="middle" fill="{col}" font-size="8" font-weight="bold" font-family="Arial,sans-serif">{num}</text>'
+        if cx < 795: s += fat_arrow_right(cx+32, cx+83, 152, col)
+
+    # Gate status bar
+    s += status_bar([("Code Review","#22C55E"),("Unit Tests","#22C55E"),("SAST Scan","#22C55E"),("CVE Check","#F97316"),("Perf Budget","#EAB308"),("Canary","#3B82F6")], 220)
+
+    # Three columns below
+    s += two_col_header(15, 254, 425, 150, "ENVIRONMENTS", C[1], "QUALITY GATES", C[2], 0.5)
+    for y,lbl,sub,col in [(282,"Development","feature branches",C[1]),(330,"Staging","pre-production",C[2]),(378,"Production","blue/green split",C[0])]:
+        s += card(20, y, 195, 38, col, lbl, sub, 7)
+    for y,lbl,sub,col in [(282,"Coverage",">80% required",C[2]),(330,"Perf Budget","LCP < 2.5s",C[3]),(378,"DAST","OWASP ZAP",C[4])]:
+        s += card(225, y, 205, 38, col, lbl, sub, 7)
+
+    s += banner_section(450, 254, 435, 150, "ROLLOUT STRATEGY", C[4])
+    for y,lbl,sub,col in [(286,"Canary","1% → 10% → 100%",C[4]),(330,"Blue / Green","instant cutover",C[0]),(374,"Feature Flags","LaunchDarkly",C[1]),(418,"Auto-Rollback","error rate > 1%",C[3])]:
+        s += card(458, y, 419, 36, col, lbl, sub, 7)
+
+    # Observability row
+    s += fat_arrow_down(450, 404, 424, C[3])
+    s += banner_section(15, 424, 870, 80, "OBSERVABILITY", C[3])
+    for x,lbl,sub,col in [(22,"Prometheus","metrics",C[3]),(200,"Grafana","dashboards",C[0]),(378,"Jaeger","distributed trace",C[1]),(556,"ELK Stack","logs",C[2]),(734,"PagerDuty","alerts→oncall",C[4])]:
+        s += card(x, 456, 168, 40, col, lbl, sub, 7)
+
+    return s, "Pipeline Architecture"
+
+# ── KAFKA ─────────────────────────────────────────────────────────────────────
+def make_kafka(C):
+    s = ""
+    s += tool_strip([("🌊","Apache Kafka","#231F20"),("📋","Schema Reg","#7C3AED"),("🔌","Kafka Connect","#0891B2"),("⚡","Apache Flink","#E6522C"),("🔥","Spark","#E25A1C"),("📊","ClickHouse","#FACC15")], 82, C[0])
+
+    # Producers
+    s += banner_section(15, 122, 175, 158, "PRODUCERS", C[1])
+    for y,lbl,sub,col in [(154,"App Server","REST/gRPC events",C[1]),(206,"IoT / Edge","MQTT bridge",C[2]),(258,"DB CDC","Debezium",C[3])]:
+        s += card(22, y, 160, 44, col, lbl, sub)
+    s += fat_arrow_right(190, 210, 200, C[0])
+
+    # Kafka cluster
+    s += banner_section(210, 122, 330, 158, "KAFKA CLUSTER", C[0])
+    for i,(lbl,role,col) in enumerate([("Broker 1","partition leader",C[0]),("Broker 2","ISR follower",C[1]),("Broker 3","ISR follower",C[2])]):
+        s += card(218+i*105, 154, 97, 118, col, lbl, role)
+    s += f'<text x="375" y="287" text-anchor="middle" fill="#94A3B8" font-size="9" font-family="Arial,sans-serif">RF=3 · 12 partitions · 7d retention</text>'
+
+    # Schema + Connect
+    s += banner_section(550, 122, 175, 158, "SCHEMA + CONNECT", C[4])
+    s += card(558, 154, 158, 56, C[4], "Schema Registry", "Avro / Protobuf")
+    s += card(558, 218, 158, 56, C[5], "Kafka Connect", "source + sink")
+    s += thin_arrow(540, 200, 558, 200, "white")
+    s += thin_arrow(540, 245, 558, 245, "white")
+
+    # Stream processing
+    s += banner_section(735, 122, 150, 158, "STREAM PROC", C[2])
+    s += card(742, 154, 136, 44, C[2], "Apache Flink", "stateful / CEP")
+    s += card(742, 206, 136, 44, C[3], "Spark Streaming", "micro-batch")
+    s += card(742, 258, 136, 28, C[4], "KSQL", "SQL on Kafka")
+    s += thin_arrow(725, 180, 742, 180, "white")
+    s += thin_arrow(725, 228, 742, 228, "white")
+
+    # Big arrow down
+    s += fat_arrow_down(450, 280, 308, C[3], "consume")
+
+    # Consumers
+    s += banner_section(15, 308, 870, 90, "CONSUMER GROUPS  ·  SINKS", C[3])
+    sinks = [("🏞️","Data Lake","S3 / GCS",C[3]),("📊","ClickHouse","analytics",C[4]),("🔍","OpenSearch","full-text",C[5]),("🤖","ML Platform","features",C[0]),("📡","Real-time","dashboards",C[1]),("🚨","Alerting","PagerDuty",C[2]),("⚡","Cache","Redis",C[3])]
+    w = 870//len(sinks)
+    for i,(ico,lbl,sub,col) in enumerate(sinks):
+        cx = 15 + i*w + w//2
+        s += f'<text x="{cx}" y="334" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
+        s += card(cx-w//2+4, 346, w-8, 44, col, lbl, sub, 7)
+
+    # Ops row
+    s += fat_arrow_down(450, 398, 420, C[5])
+    s += banner_section(15, 420, 870, 64, "OPERATIONS", C[5])
+    ops=[("📊","Burrow","lag monitor"),("🔐","mTLS","auth+encrypt"),("📏","Quotas","producer throttle"),("🔄","MirrorMaker 2","geo-replicate"),("📋","Audit Log","compliance"),("💰","Cost","tier storage")]
+    w2=870//len(ops)
+    for i,(ico,lbl,sub) in enumerate(ops):
+        cx=15+i*w2+w2//2
+        s += f'<text x="{cx}" y="443" text-anchor="middle" font-size="15" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="{cx}" y="459" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s += f'<text x="{cx}" y="473" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="8" font-family="Arial,sans-serif">{sub}</text>'
+
+    return s, "Streaming Architecture"
+
+# ── ZERO TRUST ────────────────────────────────────────────────────────────────
+def make_zero_trust(C):
+    s = ""
+    s += tool_strip([("🔐","Zero Trust","#B91C1C"),("🆔","Okta / AAD","#0078D4"),("📱","MDM Intune","#7C3AED"),("🌐","Zscaler","#0091DA"),("⚔️","Cloudflare","#F48120"),("📊","Sentinel","#0EA5E9")], 82, C[0])
+
+    # Two-col: Controls | Intelligence
+    s += two_col_header(15, 122, 870, 290, "CONTROL PLANE", C[0], "INTELLIGENCE LAYER", C[1], 0.60)
+
+    # Left - pillars
+    pillars = [(C[0],"IDENTITY","MFA • SSO • RBAC • JIT access"),(C[2],"DEVICE TRUST","MDM posture • patch level • cert"),(C[3],"NETWORK","microsegment • encrypt • inspect"),(C[4],"APPLICATION","least-priv • API auth • WAAP")]
+    y = 154
+    for col,lbl,desc in pillars:
+        s += f'<rect x="20" y="{y}" width="505" height="56" rx="8" fill="{col}" fill-opacity="0.12" stroke="{col}" stroke-width="1.5"/>'
+        s += f'<rect x="20" y="{y}" width="8" height="56" rx="4" fill="{col}"/>'
+        s += f'<text x="36" y="{y+20}" fill="{col}" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s += f'<text x="36" y="{y+38}" fill="rgba(255,255,255,0.65)" font-size="10" font-family="Arial,sans-serif">{desc}</text>'
+        if y < 350: s += fat_arrow_down(272, y+56, y+66, col)
+        y += 66
+
+    # Center Policy Engine
+    s += f'<circle cx="272" cy="290" r="0" fill="none"/>'  # spacer
+
+    # Right - intelligence
+    intel = [(C[1],"Threat Intel","IOC feeds / STIX / TAXII"),(C[2],"UEBA","anomaly detect / risk score"),(C[3],"SIEM","log correlate / SOAR auto"),(C[4],"AI Analysis","converge / diverge signals")]
+    iy = 154
+    for col,lbl,desc in intel:
+        s += f'<rect x="535" y="{iy}" width="340" height="60" rx="8" fill="{col}" fill-opacity="0.12" stroke="{col}" stroke-width="1.5"/>'
+        s += f'<text x="705" y="{iy+24}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s += f'<text x="705" y="{iy+42}" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Arial,sans-serif">{desc}</text>'
+        if iy < 350: s += fat_arrow_down(705, iy+60, iy+70, col)
+        iy += 70
+
+    # Policy decision point
+    s += fat_arrow_down(450, 412, 436, C[0])
+    s += banner_section(15, 436, 870, 58, "POLICY DECISION POINT  (PDP / PEP)", C[0])
+    for x,lbl,sub,col in [(22,"Authenticate","verify identity",C[0]),(192,"Authorise","check entitlement",C[1]),(362,"Enforce","allow / deny / log",C[2]),(532,"Audit","immutable trail",C[3]),(702,"Respond","revoke / alert",C[4])]:
+        s += card(x, 468, 162, 22, col, lbl, sub, 6)
+
+    # Principles bar
+    s += status_bar([("Never Trust","#B91C1C"),("Always Verify","#D97706"),("Least Privilege","#059669"),("Assume Breach","#7C3AED"),("Continuous Monitor","#0891B2")], 504)
+
+    return s, "Security Architecture"
+
+# ── AWS ───────────────────────────────────────────────────────────────────────
+def make_aws(C):
+    s = ""
+    s += tool_strip([("☁️","AWS","#FF9900"),("🔒","IAM","#DD344C"),("🌐","CloudFront","#7C3AED"),("⚡","Lambda","#FF9900"),("🗄️","Aurora","#527FFF"),("👁️","CloudWatch","#E6522C")], 82, C[0])
+
+    # Client row
+    s += banner_section(15, 122, 870, 44, "CLIENT LAYER", C[1])
+    for x,ico,lbl in [(95,"🌐","Browser"),(230,"📱","Mobile"),(365,"💻","CLI / SDK"),(500,"🤝","Partners"),(635,"🤖","IoT"),(770,"🔌","Webhooks")]:
+        s += f'<text x="{x}" y="139" text-anchor="middle" font-size="14" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="{x}" y="156" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+
+    s += fat_arrow_down(450, 166, 186, C[0])
+
+    # Edge
+    s += banner_section(15, 186, 870, 50, "EDGE LAYER", C[0])
+    for x,lbl,sub,col in [(22,"CloudFront","CDN / PoPs",C[0]),(196,"Route 53","DNS + health",C[1]),(370,"WAF + Shield","DDoS L3/L7",C[3]),(544,"ACM","TLS certs",C[2]),(718,"API Gateway","REST / WS / gRPC",C[4])]:
+        s += card(x, 200, 166, 28, col, lbl, sub, 7)
+    for x in [188,362,536,710]: s += thin_arrow(x,214,x+8,214,"white")
+
+    s += fat_arrow_down(450, 236, 256, C[1])
+
+    # Compute + Messaging side by side
+    s += two_col_header(15, 256, 870, 118, "COMPUTE", C[2], "MESSAGING", C[4], 0.49)
+    for i,(x,lbl,sub,col) in enumerate([(22,"Lambda","serverless FaaS",C[2]),(175,"ECS / Fargate","containers",C[0]),(328,"EKS","managed K8s",C[1]),(22,"Step Functions","orchestration",C[3]),(175,"App Runner","web services",C[4]),(328,"Batch","job queues",C[5])]):
+        s += card(x, 288 if i<3 else 334, 145, 38, col, lbl, sub, 7)
+    for i,(x,lbl,sub,col) in enumerate([(450,"SQS","queues",C[4]),(600,"SNS","pub/sub",C[5]),(750,"EventBridge","event bus",C[0]),(450,"Kinesis","streaming",C[1]),(600,"MSK","Kafka mgd",C[2]),(750,"SES","email",C[3])]):
+        s += card(x, 288 if i<3 else 334, 142, 38, col, lbl, sub, 7)
+
+    s += fat_arrow_down(450, 374, 394, C[3])
+
+    # Data + Security side by side
+    s += two_col_header(15, 394, 870, 114, "DATA AND STORAGE", C[3], "SECURITY AND OBSERVABILITY", C[5], 0.49)
+    for i,(x,lbl,sub,col) in enumerate([(22,"S3","object store",C[3]),(138,"DynamoDB","NoSQL",C[4]),(254,"RDS Aurora","Postgres/MySQL",C[5]),(370,"ElastiCache","Redis",C[0]),(22,"Redshift","data warehouse",C[1]),(138,"Glue","ETL catalog",C[2]),(254,"Athena","query on S3",C[3]),(370,"Timestream","time-series",C[4])]):
+        s += card(x, 422 if i<4 else 464, 108, 34, col, lbl, sub, 6)
+    for i,(x,lbl,sub,col) in enumerate([(455,"IAM","access ctrl",C[5]),(571,"CloudWatch","metrics+logs",C[0]),(687,"CloudTrail","audit",C[1]),(803,"GuardDuty","threat detect",C[2]),(455,"Secrets Mgr","rotate creds",C[3]),(571,"X-Ray","tracing",C[4]),(687,"Config","compliance",C[5]),(803,"Macie","data sec",C[0])]):
+        s += card(x, 422 if i<4 else 464, 108, 34, col, lbl, sub, 6)
+
+    return s, "Cloud Architecture"
+
+# ── MLOPS ─────────────────────────────────────────────────────────────────────
+def make_mlops(C):
+    s = ""
+    s += tool_strip([("📊","MLflow","#0194E2"),("🔄","DVC","#945DD6"),("🏗️","Kubeflow","#326CE5"),("🤗","HuggingFace","#FF9D00"),("⚡","Ray","#028CF0"),("📡","Evidently","#ED6C47")], 82, C[0])
+
+    rows = [
+        (C[0],"DATA PIPELINE",[("Data Sources","S3/DB/APIs"),("Feature Eng","Spark/dbt"),("Validation","Great Expect"),("Feature Store","Feast/Tecton"),("Versioning","DVC / Delta"),("Monitoring","drift detect")]),
+        (C[1],"MODEL TRAINING",[("Experiment","MLflow/W&B"),("Training","GPU cluster"),("Hyperparam","Optuna/Ray"),("Evaluation","F1/AUC/BLEU"),("Registry","HuggingFace Hub"),("A/B Baseline","champion vs chall")]),
+        (C[2],"MODEL SERVING",[("Online Serve","FastAPI/Triton"),("Batch Infer","Spark/Ray"),("Streaming","Kafka+Model"),("Edge Deploy","ONNX/TFLite"),("Shadow Mode","traffic mirror"),("Rollback","auto revert")]),
+        (C[3],"MONITORING",[("Data Drift","PSI/KS-test"),("Model Perf","acc/F1 degrad"),("Latency","p50/p95/p99"),("Concept Drift","retrain trigger"),("Explain","SHAP/LIME"),("Cost","GPU/token $")]),
+    ]
+    y = 122
+    for col,label,items in rows:
+        s += banner_section(15, y, 870, 78, label, col)
+        n = len(items)
+        w = 860//n
+        for i,(lbl,sub) in enumerate(items):
+            x = 20 + i*w
+            s += card(x, y+32, w-8, 38, C[i%len(C)], lbl, sub, 7)
+        if y < 380:
+            s += fat_arrow_down(450, y+78, y+96, col)
+            y += 96
+        else:
+            y += 78
+            # Final status bar
+            s += fat_arrow_down(450, y, y+22, C[4])
+            s += status_bar([("Experiment Tracking","#6D28D9"),("Model Versioned","#1D4ED8"),("Tests Passed","#059669"),("Serving Live","#0891B2"),("Alerts Active","#D97706")], y+22)
+
+    return s, "MLOps Pipeline"
+
+# ── RAG ───────────────────────────────────────────────────────────────────────
+def make_rag(C):
+    s = ""
+    s += tool_strip([("📄","LangChain","#1C3C3C"),("🔍","Pinecone","#000000"),("🧠","OpenAI","#10A37F"),("🤗","HuggingFace","#FF9D00"),("📊","RAGAS","#7C3AED"),("⚡","Weaviate","#F93E3E")], 82, C[0])
+
+    # Two-col: Ingestion | Retrieval
+    s += two_col_header(15, 122, 870, 290, "INGESTION PIPELINE", C[1], "RETRIEVAL + GENERATION", C[4], 0.48)
+
+    # LEFT — ingestion
+    ing_rows = [
+        (C[1],"SOURCES",[("📄 PDFs","unstructured"),("🌐 Web","scraped"),("🗄️ DB","SQL/NoSQL"),("📧 Email","attachments")]),
+        (C[2],"CHUNKING",[("Recursive","512 tok split"),("Semantic","sentence-aware"),("Token Aware","model specific"),("Overlap","50 tok slide")]),
+        (C[3],"EMBEDDING",[("text-embed-3","OpenAI large"),("E5-large","MTEB top"),("BGE-M3","multilingual"),("Cohere","rerank ready")]),
+    ]
+    ly = 154
+    for col,label,items in ing_rows:
+        s += f'<rect x="18" y="{ly}" width="405" height="16" rx="5" fill="{col}" fill-opacity="0.3"/>'
+        s += f'<text x="220" y="{ly+11}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="1">{label}</text>'
+        for j,(lbl,sub) in enumerate(items):
+            s += card(18+j*100, ly+20, 93, 44, C[(j+1)%len(C)], lbl, sub, 7)
+        ly += 78
+        if ly < 370: s += fat_arrow_down(220, ly, ly+12, col)
+        ly += 12
+
+    # RIGHT — retrieval
+    ret_rows = [
+        (C[4],"VECTOR STORE",[("HNSW Index","graph ANN"),("BM25 Sparse","keyword"),("Hybrid","dense+sparse"),("Metadata","filter+sort")]),
+        (C[5],"RETRIEVAL",[("Query Expand","HyDE / RAG-Fusion"),("ANN Search","cosine sim"),("Re-ranker","cross-encoder"),("Context Pack","fill window")]),
+        (C[0],"GENERATION",[("LLM Prompt","system+context"),("Guardrails","safety filter"),("Citations","source links"),("Stream Out","SSE tokens")]),
+    ]
+    ry = 154
+    for col,label,items in ret_rows:
+        s += f'<rect x="430" y="{ry}" width="440" height="16" rx="5" fill="{col}" fill-opacity="0.3"/>'
+        s += f'<text x="650" y="{ry+11}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif" letter-spacing="1">{label}</text>'
+        for j,(lbl,sub) in enumerate(items):
+            s += card(430+j*108, ry+20, 100, 44, C[(j+2)%len(C)], lbl, sub, 7)
+        ry += 78
+        if ry < 370: s += fat_arrow_down(650, ry, ry+12, col)
+        ry += 12
+
+    # Cross arrow
+    s += thin_arrow(422, 250, 430, 250, "white", True)
+
+    # Eval bar
+    s += fat_arrow_down(450, 412, 434, C[3])
+    s += banner_section(15, 434, 870, 30, "EVALUATION METRICS  ·  Faithfulness  ·  Answer Relevance  ·  Context Recall  ·  RAGAS Score  ·  Hallucination %", C[3])
+    s += status_bar([("Faithful","#22C55E"),("Relevant","#22C55E"),("No Hallucination","#22C55E"),("Fast < 2s","#EAB308"),("Citations OK","#3B82F6")], 474)
+
+    return s, "System Architecture"
+
+# ── SYSTEM DESIGN ─────────────────────────────────────────────────────────────
+def make_system_design(C):
+    s = ""
+    s += tool_strip([("🌐","React / Next","#61DAFB"),("🔀","Nginx","#009900"),("🔑","OAuth2","#7C3AED"),("🚀","Kubernetes","#326CE5"),("🗄️","PostgreSQL","#336791"),("📡","Redis","#DC382D")], 82, C[0])
+
+    s += banner_section(15, 122, 870, 36, "CLIENT LAYER", C[0])
+    for x,ico,lbl in [(100,"🌐","Web Browser"),(280,"📱","Mobile App"),(460,"💻","Desktop"),(640,"🤝","3rd Party API"),(820,"🤖","IoT")]:
+        s += f'<text x="{x}" y="135" text-anchor="middle" font-size="13" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="{x}" y="150" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9" font-family="Arial,sans-serif">{lbl}</text>'
+
+    s += fat_arrow_down(450, 158, 178, C[1])
+
+    s += banner_section(15, 178, 870, 46, "EDGE + AUTH", C[1])
+    for x,lbl,sub,col in [(22,"CDN","CloudFront/Fastly",C[1]),(195,"Load Balancer","L7 / health",C[2]),(368,"API Gateway","rate limit / route",C[3]),(541,"Auth Service","OAuth2 / JWT",C[4]),(714,"WAF","L7 protect",C[0])]:
+        s += card(x, 192, 165, 26, col, lbl, sub, 7)
+    for x in [187,360,533,706]: s += thin_arrow(x,205,x+8,205,"white")
+
+    s += fat_arrow_down(450, 224, 244, C[2])
+
+    s += banner_section(15, 244, 870, 100, "MICROSERVICES", C[2])
+    for x,lbl,sub,col in [(22,"User Svc","auth/profile",C[2]),(155,"Order Svc","cart/checkout",C[3]),(288,"Payment","Stripe/PCI",C[4]),(421,"Notification","email/SMS",C[5]),(554,"Search","Elasticsearch",C[0]),(687,"Recommend","ML-powered",C[1]),(820,"Analytics","event track",C[2])]:
+        s += card(x, 276, 125, 60, col, lbl, sub)
+    for x in [147,280,413,546,679,812]: s += thin_arrow(x,306,x+8,306,"white")
+
+    s += fat_arrow_down(450, 344, 364, C[3])
+
+    s += banner_section(15, 364, 870, 46, "MESSAGE BROKER", C[3])
+    for x,lbl,sub,col in [(22,"Kafka","event stream",C[3]),(200,"RabbitMQ","task queues",C[4]),(378,"Redis PubSub","real-time",C[5]),(556,"Dead Letter Q","failed msgs",C[0]),(734,"Event Source","audit stream",C[1])]:
+        s += card(x, 378, 168, 26, col, lbl, sub, 7)
+    for x in [190,368,546,724]: s += thin_arrow(x,391,x+8,391,"white")
+
+    s += fat_arrow_down(450, 410, 430, C[4])
+
+    s += banner_section(15, 430, 870, 74, "DATA LAYER", C[4])
+    for x,lbl,sub,col in [(22,"PostgreSQL","OLTP primary",C[4]),(178,"Redis","cache/session",C[5]),(334,"MongoDB","documents",C[0]),(490,"S3","blob/media",C[1]),(646,"Elasticsearch","search index",C[2]),(802,"ClickHouse","OLAP analytics",C[3])]:
+        s += card(x, 462, 148, 34, col, lbl, sub, 7)
+
+    return s, "System Architecture"
+
+# ── DEVSECOPS ─────────────────────────────────────────────────────────────────
+def make_devsecops(C):
+    s = ""
+    s += tool_strip([("🔒","SAST/DAST","#B91C1C"),("🐳","Trivy","#0891B2"),("☸️","Falco","#7C3AED"),("📋","Semgrep","#D97706"),("🛡️","OPA","#3B82F6"),("📊","Splunk","#EC4899")], 82, C[0])
+
+    # Phase columns (pipeline)
+    phases=[("IDE","💻","Pre-commit","git-secrets + lint",C[0]),("SCM","📝","Code Review","SAST + Semgrep",C[1]),("Build","🏗️","Compile","dep SCA + SBOM",C[2]),("Test","🧪","Quality","DAST + ZAP",C[3]),("Artifact","📦","Registry","Trivy + sign",C[4]),("Stage","🚀","Deploy","IaC scan + TF",C[5]),("Prod","🛡️","Runtime","Falco + eBPF",C[0])]
+    pw = 124
     for i,(env,ico,phase,tools,col) in enumerate(phases):
-        x=15+i*(pw+5)
-        s+=f'<rect x="{x}" y="88" width="{pw}" height="215" rx="10" fill="{col}" fill-opacity="0.1" stroke="{col}" stroke-width="2"/>'
-        s+=f'<rect x="{x}" y="88" width="{pw}" height="28" rx="8" fill="{col}"/>'
-        s+=f'<text x="{x+pw//2}" y="107" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{env}</text>'
-        s+=f'<text x="{x+pw//2}" y="148" text-anchor="middle" font-size="24" font-family="Arial,sans-serif">{ico}</text>'
-        s+=f'<text x="{x+pw//2}" y="168" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{phase}</text>'
-        s+=f'<text x="{x+pw//2}" y="200" text-anchor="middle" fill="{col}" font-size="9" font-family="Arial,sans-serif">{tools}</text>'
-        if i<len(phases)-1: s+=ar(x+pw,195,x+pw+5+2,195,"white")
-    s+=sf(15,316,865,75,"SECURITY GATES",C[3])
-    gates=[("🔴","Critical CVE","block merge",C[3]),("🟠","Secrets","block build",C[4]),("🟡","OWASP","block deploy",C[5]),("🔵","Compliance","block release",C[0]),("🟢","Pen Test","quarterly",C[1]),("⚪","Audit Log","always",C[2])]
-    gw=860//len(gates)
-    for i,(ico,lbl,action,col) in enumerate(gates):
-        cx=20+i*gw+gw//2
-        s+=f'<text x="{cx}" y="345" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">{ico}</text>'
-        s+=f'<text x="{cx}" y="363" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-        s+=f'<text x="{cx}" y="377" text-anchor="middle" fill="#94A3B8" font-size="8" font-family="Arial,sans-serif">{action}</text>'
-    s+=sf(15,403,420,85,"SIEM AND RESPONSE",C[4])
-    s+=fb(25,418,120,58,C[4],"SIEM","Splunk/Sentinel")
-    s+=fb(155,418,120,58,C[5],"SOAR","auto-remediate")
-    s+=fb(285,418,140,58,C[0],"Threat Intel","feeds/IOCs")
-    s+=ar(145,447,155,447,"white","correlate")
-    s+=ar(275,447,285,447,"white","respond")
-    s+=sf(445,403,435,85,"COMPLIANCE",C[1])
-    s+=fb(455,418,125,58,C[1],"CIS Benchmarks","hardening")
-    s+=fb(590,418,130,58,C[2],"SOC2/ISO27001","audit ready")
-    s+=fb(730,418,140,58,C[3],"OPA/Rego","policy as code")
-    return s,"Security Pipeline"
+        x = 15+i*(pw+2)
+        # column card
+        s += f'<rect x="{x}" y="122" width="{pw}" height="220" rx="8" fill="{col}" fill-opacity="0.07" stroke="{col}" stroke-width="1.5" stroke-opacity="0.5"/>'
+        # header
+        s += f'<rect x="{x}" y="122" width="{pw}" height="28" rx="8" fill="{col}"/>'
+        s += f'<rect x="{x}" y="136" width="{pw}" height="14" fill="{col}"/>'
+        s += f'<text x="{x+pw//2}" y="141" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">{env}</text>'
+        # icon
+        s += f'<text x="{x+pw//2}" y="178" text-anchor="middle" font-size="28" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="{x+pw//2}" y="200" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{phase}</text>'
+        # tools (two lines)
+        parts = tools.split("+")
+        for li,pt in enumerate(parts):
+            s += f'<text x="{x+pw//2}" y="{222+li*16}" text-anchor="middle" fill="{col}" font-size="9" font-family="Arial,sans-serif">{pt.strip()}</text>'
+        if i < len(phases)-1:
+            ax = x+pw+1
+            s += fat_arrow_right(ax, ax+2, 232, col)
 
-def make_rag(p):
-    C=p["c"]; s=""
-    s+=sf(15,88,140,340,"SOURCES",C[1])
-    for cx,cy,ico,lbl in [(87,118,"📄","PDFs"),(87,178,"🌐","Web"),(87,238,"🗄️","DB"),(87,298,"📧","Email"),(87,355,"🎥","Media")]:
-        s+=f'<circle cx="{cx}" cy="{cy}" r="22" fill="{C[1]}"/>'
-        s+=f'<text x="{cx}" y="{cy+6}" text-anchor="middle" font-size="14" font-family="Arial,sans-serif">{ico}</text>'
-        s+=f'<text x="{cx}" y="{cy+36}" text-anchor="middle" fill="white" font-size="9" font-family="Arial,sans-serif">{lbl}</text>'
-        s+=ar(109,cy,158,cy,"white","ingest")
-    s+=sf(158,88,200,340,"INGESTION",C[2])
-    s+=fb(168,108,178,68,C[2],"Chunker","512 tok, 50 overlap")
-    s+=fb(168,190,178,68,C[3],"Embedder","text-embed-3-large")
-    s+=fb(168,272,178,68,C[4],"Metadata","source/date/type")
-    s+=fb(168,354,178,62,C[5],"Dedup","hash-based filter")
-    for y in [176,258,340]: s+=ar(257,y,257,y+14,"white")
-    s+=sf(372,88,170,340,"VECTOR STORE",C[0])
-    s+=fb(382,108,150,68,C[0],"HNSW Index","graph ANN")
-    s+=fb(382,190,150,68,C[1],"Vector DB","Pinecone/Weaviate")
-    s+=fb(382,272,150,68,C[2],"BM25 Index","sparse vectors")
-    s+=fb(382,354,150,62,C[3],"Query Cache","result caching")
-    for y in [142,224,306]: s+=ar(457,y,457,y+14,"white")
-    for y in [142,224,306,385]: s+=ar(346,y,382,y,"white","store")
-    s+=sf(556,88,165,340,"RETRIEVAL",C[4])
-    s+=fb(566,108,145,68,C[4],"Query Analyzer","intent + expand")
-    s+=fb(566,190,145,68,C[5],"HyDE","hypothetical doc")
-    s+=fb(566,272,145,68,C[0],"ANN Search","cosine similarity")
-    s+=fb(566,354,145,62,C[1],"Re-ranker","cross-encoder")
-    for y in [142,224,306]: s+=ar(638,y,638,y+14,"white")
-    for y in [142,224,306,385]: s+=ar(532,y,566,y,"white","query")
-    s+=sf(735,88,145,340,"GENERATION",C[5])
-    s+=fb(745,108,125,68,C[5],"LLM","GPT-4/Claude")
-    s+=fb(745,190,125,68,C[0],"Guardrails","safety filter")
-    s+=fb(745,272,125,68,C[1],"Citations","source refs")
-    s+=fb(745,354,125,62,C[2],"Feedback","RLHF loop")
-    for y in [142,224,306,385]: s+=ar(721,y,745,y,"white","ctx")
-    s+=f'<rect x="15" y="440" width="865" height="50" rx="10" fill="{C[3]}" opacity="0.12" stroke="{C[3]}" stroke-width="1.5"/>'
-    s+=f'<text x="450" y="470" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">EVALUATION: Faithfulness | Answer Relevance | Context Recall | RAGAS Score | Hallucination Rate</text>'
-    return s,"System Architecture"
+    # Security gates
+    s += fat_arrow_down(450, 342, 362, C[3])
+    s += banner_section(15, 362, 870, 62, "SECURITY GATES", C[3])
+    gates=[("🔴","Critical CVE","block merge"),("🟠","Secrets Leak","block build"),("🟡","OWASP Top10","block deploy"),("🔵","Compliance","block release"),("🟢","Pen Test","quarterly req"),("⚪","Audit Trail","always active")]
+    gw=870//len(gates)
+    for i,(ico,lbl,action) in enumerate(gates):
+        cx=15+i*gw+gw//2
+        s += f'<text x="{cx}" y="385" text-anchor="middle" font-size="16" font-family="Arial,sans-serif">{ico}</text>'
+        s += f'<text x="{cx}" y="400" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
+        s += f'<text x="{cx}" y="414" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Arial,sans-serif">{action}</text>'
 
-def make_system_design(p):
-    C=p["c"]; s=""
-    s+=sf(15,88,865,50,"CLIENTS",C[0])
-    for x,lbl in [(100,"Web Browser"),(280,"Mobile App"),(460,"Desktop"),(640,"Third-party API"),(820,"IoT Device")]:
-        s+=f'<text x="{x}" y="118" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{lbl}</text>'
-    s+=sf(15,150,865,55,"EDGE AND AUTH",C[1])
-    for i,(x,lbl,sub,col) in enumerate([(20,"CDN","CloudFront",C[1]),(180,"Load Balancer","L7/health",C[2]),(340,"API Gateway","rate limit",C[3]),(500,"Auth Service","OAuth2/JWT",C[4]),(660,"WAF","L7 protect",C[0]),(800,"Rate Limiter","throttle",C[5])]):
-        s+=fb(x,158,150,38,col,lbl,sub,7)
-    for x in [170,330,490,650,790]: s+=ar(x,177,x+10,177,"white")
-    s+=sf(15,218,865,105,"MICROSERVICES",C[2])
-    for x,lbl,sub,col in [(20,"User Service","CRUD/profile",C[2]),(145,"Order Service","cart/checkout",C[3]),(270,"Payment","Stripe/PCI",C[4]),(395,"Notification","email/SMS",C[5]),(520,"Search","Elasticsearch",C[0]),(645,"Recommend","ML-powered",C[1]),(770,"Analytics","events",C[2])]:
-        s+=fb(x,232,120,80,col,lbl,sub)
-    for x in [140,265,390,515,640,765]: s+=ar(x,272,x+5,272,"white")
-    s+=sf(15,336,865,55,"MESSAGE BROKER",C[3])
-    for x,lbl,sub,col in [(20,"Kafka","event stream",C[3]),(190,"RabbitMQ","task queues",C[4]),(360,"Redis PubSub","real-time",C[5]),(530,"Dead Letter Q","failed msgs",C[0]),(700,"Event Source","audit stream",C[1])]:
-        s+=fb(x,344,160,38,col,lbl,sub,7)
-    s+=sf(15,405,865,85,"DATA LAYER",C[4])
-    for x,lbl,sub,col in [(20,"PostgreSQL","OLTP",C[4]),(165,"Redis","cache",C[5]),(310,"MongoDB","documents",C[0]),(455,"S3","blob/media",C[1]),(600,"Elasticsearch","search",C[2]),(745,"ClickHouse","analytics",C[3])]:
-        s+=fb(x,416,140,65,col,lbl,sub)
-    return s,"System Architecture"
+    # SIEM + Compliance
+    s += fat_arrow_down(450, 424, 444, C[4])
+    s += two_col_header(15, 444, 870, 80, "SIEM + INCIDENT RESPONSE", C[4], "COMPLIANCE + POLICY", C[1], 0.5)
+    for x,lbl,sub,col in [(22,"SIEM","Splunk/Sentinel",C[4]),(175,"SOAR","auto-remediate",C[5]),(328,"Threat Intel","feeds + IOCs",C[0])]:
+        s += card(x, 478, 145, 40, col, lbl, sub)
+    s += thin_arrow(167,498,175,498,"white"); s += thin_arrow(320,498,328,498,"white")
+    for x,lbl,sub,col in [(455,"CIS Benchmarks","hardening",C[1]),(610,"SOC2 / ISO27K","audit ready",C[2]),(765,"OPA / Rego","policy as code",C[3])]:
+        s += card(x, 478, 147, 40, col, lbl, sub)
 
-def make_generic(topic_name,p):
-    C=p["c"]; s=""
-    s+=sf(15,88,865,55,"CLIENT AND EDGE",C[0])
-    for x,lbl,sub,col in [(20,"Web/Mobile","React/Native",C[0]),(185,"CDN","CloudFront",C[1]),(350,"API Gateway","rate limit",C[2]),(515,"Auth","OAuth2/JWT",C[3]),(680,"DNS","Route 53",C[4])]:
-        s+=fb(x,96,155,38,col,lbl,sub,7)
-    for x in [175,340,505,670]: s+=ar(x,115,x+10,115,"white")
-    s+=sf(15,155,430,120,"MICROSERVICES",C[1])
-    for y,lbl,sub,col in [(170,"User Service","auth/profile",C[1]),(220,"Order Service","cart/payment",C[2]),(270,"Notification","email/SMS/push",C[3])]:
-        s+=fb(25,y,190,42,col,lbl,sub,7)
-        s+=fb(225,y,210,42,lbl+" Worker","async processing",C[4])
-        s+=ar(215,y+21,225,y+21,"white","async")
-    s+=sf(455,155,425,120,"DATA SERVICES",C[2])
-    for y,lbl,sub,col in [(170,"Search","Elasticsearch",C[2]),(220,"Analytics","ClickHouse",C[3]),(270,"ML/AI","model serving",C[4])]:
-        s+=fb(465,y,195,42,col,lbl,sub,7)
-        s+=fb(670,y,200,42,sub.split("/")[0],"primary store",C[5])
-        s+=ar(660,y+21,670,y+21,"white","query")
-    s+=sf(15,288,865,65,"MESSAGE LAYER",C[3])
-    for x,lbl,sub,col in [(20,"Kafka","event stream",C[3]),(195,"RabbitMQ","task queue",C[4]),(370,"Redis","cache/pub-sub",C[5]),(545,"SQS","managed queue",C[0]),(720,"EventBridge","event bus",C[1])]:
-        s+=fb(x,298,165,46,col,lbl,sub,7)
-    s+=sf(15,366,865,120,"DATA STORES",C[4])
-    for x,lbl,sub,col in [(20,"PostgreSQL","OLTP",C[4]),(165,"Redis","sessions",C[5]),(310,"MongoDB","documents",C[0]),(455,"S3","blobs",C[1]),(600,"Redshift","analytics",C[2]),(745,"Cassandra","time-series",C[3])]:
-        s+=fb(x,378,140,95,col,lbl,sub)
-    return s,"System Architecture"
+    return s, "Security Pipeline"
 
-def make_diagram(topic_name,topic_id,diagram_type):
-    p=get_pal(topic_id)
-    now=datetime.now().strftime("%B %Y")
-    accent=p["c"][0]
-    tid=topic_id.lower()
-    if "kube" in tid:        content,subtitle=make_kubernetes(p)
-    elif any(x in tid for x in ["llm","agent"]): content,subtitle=make_llm(p)
-    elif "cicd" in tid:      content,subtitle=make_cicd(p)
-    elif "kafka" in tid:     content,subtitle=make_kafka(p)
-    elif "zero" in tid:      content,subtitle=make_zero_trust(p)
-    elif "aws" in tid:       content,subtitle=make_aws(p)
-    elif "devsec" in tid:    content,subtitle=make_devsecops(p)
-    elif "system" in tid:    content,subtitle=make_system_design(p)
-    elif "mlops" in tid:     content,subtitle=make_mlops(p)
-    elif any(x in tid for x in ["lake","data"]): content,subtitle=make_lakehouse(p)
-    elif "rag" in tid:       content,subtitle=make_rag(p)
-    else:                    content,subtitle=make_generic(topic_name,p)
-    return wrap(content,topic_name,subtitle,accent,now)
+# ── DATA LAKEHOUSE ────────────────────────────────────────────────────────────
+def make_lakehouse(C):
+    s = ""
+    s += tool_strip([("🔥","Apache Spark","#E25A1C"),("❄️","Delta Lake","#0086F5"),("🧊","Iceberg","#3CB371"),("🌊","Apache Flink","#E6522C"),("🔵","dbt","#FF694B"),("📊","Trino","#DD00A1")], 82, C[0])
 
+    s += banner_section(15, 122, 870, 62, "INGESTION SOURCES", C[0])
+    srcs=[("📊","Batch ETL","Airflow",C[0]),("🌊","Streaming","Kafka/Kinesis",C[1]),("🔌","CDC","Debezium",C[2]),("📡","API Pull","REST / GQL",C[3]),("📂","File Drop","S3 trigger",C[4]),("🤖","IoT / MQTT","edge devices",C[5]),("📱","App Events","SDK tracking",C[0])]
+    w=870//len(srcs)
+    for i,(ico,lbl,sub,col) in enumerate(srcs):
+        s += card(20+i*w, 140, w-8, 38, col, f"{ico} {lbl}", sub, 7)
+    for x in [140,262,384,506,628,750]: s += thin_arrow(x,159,x+6,159,"white")
+
+    s += fat_arrow_down(450, 184, 204, C[1])
+
+    s += banner_section(15, 204, 870, 62, "OPEN TABLE FORMAT LAYER", C[1])
+    for x,lbl,sub,col in [(22,"Delta Lake","ACID + time travel",C[1]),(240,"Apache Iceberg","schema evolution",C[2]),(458,"Apache Hudi","upserts/deletes",C[3]),(676,"Metadata Catalog","Glue/Hive Metastore",C[4])]:
+        s += card(x, 220, 210, 40, col, lbl, sub)
+    for x in [232,450,668]: s += thin_arrow(x,240,x+8,240,"white")
+
+    s += fat_arrow_down(450, 266, 286, C[2])
+
+    s += banner_section(15, 286, 870, 62, "COMPUTE ENGINE", C[2])
+    for x,lbl,sub,col in [(22,"Apache Spark","SQL/ML/streaming",C[2]),(215,"Trino / Presto","interactive SQL",C[3]),(408,"dbt","transform/test/doc",C[4]),(601,"Ray","ML distributed",C[5]),(794,"Flink","stream proc",C[0])]:
+        s += card(x, 302, 185, 40, col, lbl, sub)
+    for x in [207,400,593,786]: s += thin_arrow(x,322,x+8,322,"white")
+
+    s += fat_arrow_down(450, 348, 368, C[3])
+
+    s += two_col_header(15, 368, 870, 96, "CONSUMPTION LAYER", C[3], "GOVERNANCE", C[5], 0.55)
+    for x,lbl,sub,col in [(22,"BI Tools","Tableau/Superset",C[3]),(180,"ML Platform","SageMaker/Vertex",C[4]),(338,"Ad-hoc SQL","Athena/BigQuery",C[5]),(496,"Real-time","Grafana/Looker",C[0])]:
+        s += card(x, 400, 150, 56, col, lbl, sub)
+    for x,lbl,sub,col in [(700,"Data Catalog","column lineage",C[5]),(820,"Row-level Sec","GDPR/RBAC",C[0])]:
+        s += card(x, 400, 112, 56, col, lbl, sub, 7)
+    s += status_bar([("Bronze","#B45309"),("Silver","#94A3B8"),("Gold","#D97706"),("Serving","#22C55E"),("Governed","#7C3AED")], 464)
+
+    return s, "Data Architecture"
+
+# ── GENERIC FALLBACK ──────────────────────────────────────────────────────────
+def make_generic(topic_name, C):
+    s = ""
+    s += tool_strip([("🌐","Web / Mobile","#0EA5E9"),("🔀","API Gateway","#7C3AED"),("⚡","Microservices","#059669"),("🚀","Queue","#D97706"),("🗄️","Database","#336791"),("📡","Cache","#DC382D")], 82, C[0])
+
+    s += banner_section(15, 122, 870, 46, "CLIENT + EDGE", C[0])
+    for x,lbl,sub,col in [(22,"Web / Mobile","React / Native",C[0]),(210,"CDN","CloudFront",C[1]),(398,"API Gateway","rate limit",C[2]),(586,"Auth Service","OAuth2 / JWT",C[3]),(774,"WAF + DNS","Route53",C[4])]:
+        s += card(x, 136, 180, 26, col, lbl, sub, 7)
+    for x in [202,390,578,766]: s += thin_arrow(x,149,x+8,149,"white")
+
+    s += fat_arrow_down(450, 168, 188, C[1])
+
+    s += two_col_header(15, 188, 870, 140, "MICROSERVICES", C[1], "SUPPORTING SERVICES", C[2], 0.5)
+    for y,lbl,sub,col in [(216,"User Service","auth / profile",C[1]),(270,"Order Service","cart / checkout",C[2]),(324,"Notification Svc","email / SMS / push",C[3])]:
+        s += card(20, y, 210, 40, col, lbl, sub, 7)
+        s += card(242, y, 188, 40, lbl+" Worker", "async process", C[4])
+        s += thin_arrow(230,y+20,242,y+20,"white")
+    for y,lbl,sub,col in [(216,"Search Svc","Elasticsearch",C[2]),(270,"Analytics Svc","ClickHouse",C[3]),(324,"ML / AI Svc","model serving",C[4])]:
+        s += card(452, y, 200, 40, col, lbl, sub, 7)
+        s += card(664, y, 214, 40, lbl.split()[0]+" Store","primary data",C[5])
+        s += thin_arrow(652,y+20,664,y+20,"white")
+
+    s += fat_arrow_down(450, 328, 348, C[3])
+
+    s += banner_section(15, 348, 870, 50, "MESSAGE LAYER", C[3])
+    for x,lbl,sub,col in [(22,"Kafka","event stream",C[3]),(200,"RabbitMQ","task queues",C[4]),(378,"Redis","cache/pub-sub",C[5]),(556,"SQS","managed queue",C[0]),(734,"EventBridge","event bus",C[1])]:
+        s += card(x, 362, 170, 30, col, lbl, sub, 7)
+    for x in [192,370,548,726]: s += thin_arrow(x,377,x+8,377,"white")
+
+    s += fat_arrow_down(450, 398, 418, C[4])
+
+    s += banner_section(15, 418, 870, 96, "DATA STORES", C[4])
+    for x,lbl,sub,col in [(22,"PostgreSQL","OLTP primary",C[4]),(178,"Redis","sessions/cache",C[5]),(334,"MongoDB","documents",C[0]),(490,"S3 / Blob","media/files",C[1]),(646,"Elasticsearch","search index",C[2]),(802,"ClickHouse","analytics OLAP",C[3])]:
+        s += card(x, 438, 148, 68, col, lbl, sub)
+
+    return s, "System Architecture"
+
+
+# ── DOCKER (Image 2 cheatsheet style) ────────────────────────────────────────
+def make_docker(C):
+    s = ""
+    s += tool_strip([("🐳","Docker Engine","#0891B2"),("📦","Docker Hub","#0052CC"),("🔧","Compose","#047857"),("🔒","Docker Scout","#7C3AED"),("☸️","Swarm","#1D4ED8"),("🏗️","Buildx","#D97706")], 82, C[0])
+    rows = [
+        (C[0],"Dockerfile", [("📝","FROM","base image"),("📋","RUN","exec cmd"),("📂","COPY / ADD","files in"),("🔌","EXPOSE","port hint"),("▶️","CMD / ENTRYPOINT","start proc"),("🏷️","LABEL / ARG","metadata")]),
+        (C[1],"Images",     [("🏗️","docker build","create image"),("📋","docker images","list local"),("🔍","docker inspect","image detail"),("🏷️","docker tag","rename"),("⬆️","docker push","to registry"),("🗑️","docker rmi","delete")]),
+        (C[2],"Containers", [("▶️","docker run","start new"),("⏸️","docker stop","graceful"),("📋","docker ps","list running"),("🔍","docker logs","stdout"),("💻","docker exec","shell in"),("🗑️","docker rm","cleanup")]),
+        (C[3],"Networking", [("🌉","bridge","default LAN"),("🏠","host","share host net"),("🔒","none","no network"),("🔗","overlay","multi-host"),("📡","macvlan","L2 assign"),("🔌","port map","-p 8080:80")]),
+        (C[4],"Volumes",    [("💾","volume","managed by Docker"),("📂","bind mount","host path"),("🧠","tmpfs","RAM only"),("📥","docker cp","copy files"),("📋","docker volume ls","list"),("🔄","backup","tar + cp")]),
+        (C[5],"Compose",    [("📄","docker-compose.yml","define stack"),("🚀","up -d","start detached"),("📋","ps","check status"),("📊","logs -f","follow logs"),("🔄","restart","cycle svc"),("🛑","down","stop + rm")]),
+    ]
+    y = 122
+    rh = 62
+    for col, label, items in rows:
+        s += cheatsheet_row(y, rh, label, col, items)
+        y += rh + 4
+    # Bottom tip bar
+    s += status_bar([("Layer Cache","#0891B2"),("Multi-stage Build","#047857"),("Non-root User","#D97706"),(".dockerignore","#7C3AED"),("Health Check","#BE185D"),("Read-only FS","#1D4ED8")], y+2)
+    return s, "Cheatsheet"
+
+# ── GIT WORKFLOW (Image 2 cheatsheet style) ───────────────────────────────────
+def make_git_workflow(C):
+    s = ""
+    s += tool_strip([("🌿","Git","#F05032"),("🐙","GitHub","#7C3AED"),("🦊","GitLab","#FC6D26"),("🪣","Bitbucket","#0052CC"),("🔄","Git Flow","#059669"),("📝","Conventional","#D97706")], 82, C[0])
+    rows = [
+        (C[0],"Setup",      [("👤","git config","name + email"),("🔑","SSH key","auth setup"),("📁","git init","new repo"),("📥","git clone","copy remote"),("🔗","git remote","add origin"),("📋","git status","see changes")]),
+        (C[1],"Branching",  [("🌿","git branch","list / create"),("🔀","git checkout","switch / new"),("🔀","git switch","modern way"),("🌊","git flow","feature branch"),("🏷️","git tag","version mark"),("🗑️","branch -d","delete branch")]),
+        (C[2],"Staging",    [("➕","git add .","stage all"),("➕","git add -p","stage hunks"),("📝","git commit","save snap"),("✏️","--amend","fix last msg"),("💾","git stash","shelve WIP"),("📋","stash pop","restore WIP")]),
+        (C[3],"Remote",     [("⬆️","git push","upload"),("⬇️","git pull","fetch+merge"),("📥","git fetch","download only"),("🔄","git rebase","linearise"),("🔃","git merge","combine"),("🍒","cherry-pick","single commit")]),
+        (C[4],"History",    [("📜","git log","see commits"),("🔍","git diff","what changed"),("🕰️","git blame","who changed"),("⏪","git reset","undo commits"),("↩️","git revert","safe undo"),("🔎","git bisect","find bug")]),
+        (C[5],"Best Practice",[("📋","Commit msg","feat: / fix: / chore:"),("🛡️","Branch protect","require PR"),("✅","PR review","2 approvers"),("🔏","Sign commits","GPG key"),("📖","CHANGELOG","keep updated"),("🤖","CI on PR","auto checks")]),
+    ]
+    y = 122
+    rh = 62
+    for col, label, items in rows:
+        s += cheatsheet_row(y, rh, label, col, items)
+        y += rh + 4
+    s += status_bar([("trunk-based dev","#F05032"),("feature flags","#7C3AED"),("atomic commits","#059669"),("no force-push main","#D97706"),("PR = 1 concern","#0891B2"),("rebase > merge","#BE185D")], y+2)
+    return s, "Cheatsheet"
+
+# ── API DESIGN (Image 2 cheatsheet + Image 4 flow hybrid) ────────────────────
+def make_api_design(C):
+    s = ""
+    s += tool_strip([("🔌","REST","#1D4ED8"),("📡","GraphQL","#E10098"),("⚡","gRPC","#244C5A"),("🌐","WebSocket","#059669"),("📋","OpenAPI","#6BA539"),("🔐","OAuth2","#7C3AED")], 82, C[0])
+
+    # Top: API types comparison (Image 4 subsystem groups)
+    for i,(x,w2,lbl,col,items) in enumerate([
+        (15,210,"REST",C[0],[("GET","read resource"),("POST","create"),("PUT/PATCH","update"),("DELETE","remove")]),
+        (232,210,"GraphQL",C[1],[("Query","fetch data"),("Mutation","write data"),("Subscription","real-time"),("Resolver","field logic")]),
+        (449,210,"gRPC",C[2],[("Unary","req→res"),("Server Stream","1→many"),("Client Stream","many→1"),("Bi-di Stream","both ways")]),
+        (666,230,"WebSocket",C[3],[("Upgrade","HTTP→WS"),("Frame","data unit"),("Ping/Pong","heartbeat"),("Close","teardown")]),
+    ]):
+        s += subsystem_group(x, 122, w2, 130, lbl, col)
+        for j,(k,v) in enumerate(items):
+            s += f'<rect x="{x+8}" y="{122+22+j*26}" width="{w2-16}" height="22" rx="5" fill="{col}" fill-opacity="0.14"/>'
+            s += f'<text x="{x+16}" y="{122+22+j*26+14}" fill="{col}" font-size="10" font-weight="bold" font-family="Arial,sans-serif">{k}</text>'
+            s += f'<text x="{x+w2-8}" y="{122+22+j*26+14}" text-anchor="end" fill="rgba(255,255,255,0.6)" font-size="9" font-family="Arial,sans-serif">{v}</text>'
+
+    # Middle: Design principles cheatsheet rows
+    mid_rows = [
+        (C[4],"Design",   [("📝","Nouns not Verbs","/users not /getUsers"),("🔢","Versioning","v1/ in URL"),("📄","Pagination","limit+offset/cursor"),("🔗","HATEOAS","links in response"),("📦","Resource Nesting","/users/123/posts")]),
+        (C[5],"Security", [("🔐","Auth","Bearer JWT / API key"),("⏱️","Rate Limit","429 Too Many Reqs"),("🔒","HTTPS","TLS 1.3 minimum"),("🛡️","Input Validate","schema + sanitise"),("📝","Audit Log","who/what/when")]),
+        (C[0],"Responses",[("✅","200 OK","success"),("➕","201 Created","POST success"),("❌","400 Bad Req","client error"),("🔐","401/403","auth/authz fail"),("💥","500 Internal","server fault")]),
+    ]
+    y = 264
+    for col, label, items in mid_rows:
+        s += cheatsheet_row(y, 60, label, col, items)
+        y += 64
+
+    # Bottom: request lifecycle flow (Image 4 style)
+    s += banner_section(15, y+4, 870, 54, "REQUEST LIFECYCLE", C[3])
+    flow = [("🌐","Client","browser/app"),("🔀","Gateway","rate limit"),("🔐","Auth","JWT verify"),("📋","Validate","schema check"),("⚙️","Handler","business logic"),("💾","Data","DB / cache"),("📤","Response","format + send")]
+    fw = 870 // len(flow)
+    for i,(ico,lbl,sub) in enumerate(flow):
+        fx = 15 + i*fw
+        s += flow_box(fx+2, y+18, fw-4, 36, lbl, sub, C[i%len(C)], ico)
+        if i < len(flow)-1: s += fat_arrow_right(fx+fw-2, fx+fw+2, y+36, C[i%len(C)])
+
+    return s, "Design Reference"
+
+# ── SOLID PRINCIPLES (Image 3 roadmap style) ──────────────────────────────────
+def make_solid(C):
+    s = ""
+    s += tool_strip([("📐","SOLID","#7C3AED"),("🏗️","Clean Code","#1D4ED8"),("🔌","OOP","#059669"),("🧪","TDD","#D97706"),("🔄","Refactor","#0891B2"),("📦","DDD","#BE185D")], 82, C[0])
+
+    principles = [
+        ("S","Single Responsibility","One class = one reason to change",C[0],
+         ["A class should do ONE thing","Separate concerns into different classes","Makes testing easier and focused","e.g. UserService vs UserEmailer"]),
+        ("O","Open / Closed","Open for extension, closed for modification",C[1],
+         ["Add behaviour via extension","Don't modify existing tested code","Use interfaces and abstractions","e.g. add PaymentMethod without touching Order"]),
+        ("L","Liskov Substitution","Subtypes must be substitutable for base types",C[2],
+         ["Child class must honour parent contract","Don't override to throw exceptions","Covariance of return types","e.g. Square should NOT extend Rectangle"]),
+        ("I","Interface Segregation","Many specific interfaces > one general",C[3],
+         ["Clients shouldn't depend on methods they don't use","Split fat interfaces into focused ones","Avoids forcing empty implementations","e.g. Printable, Scannable vs MachineInterface"]),
+        ("D","Dependency Inversion","Depend on abstractions, not concretions",C[4],
+         ["High-level modules → interfaces","Low-level modules → implementations","Inject dependencies, don't instantiate","e.g. UserService(IEmailer) not UserService(GmailSender)"]),
+    ]
+
+    card_w = 162
+    cx_positions = [15 + i*(card_w+12) for i in range(5)]
+
+    # Roadmap connecting spine
+    spine_y = 175
+    for i in range(4):
+        cx1 = cx_positions[i] + card_w
+        cx2 = cx_positions[i+1]
+        s += f'<line x1="{cx1}" y1="{spine_y}" x2="{cx2}" y2="{spine_y}" stroke="{C[i]}" stroke-width="3" stroke-dasharray="6,3" opacity="0.4"/>'
+
+    for i,(letter, name, tagline, col, bullets) in enumerate(principles):
+        cx = cx_positions[i]
+        # Numbered roadmap node
+        s += roadmap_node(cx + card_w//2, spine_y, 24, letter, col, active=(i==2))
+        # Card below node
+        card_top = spine_y + 30
+        s += f'<rect x="{cx}" y="{card_top}" width="{card_w}" height="230" rx="10" fill="{col}" fill-opacity="0.08" stroke="{col}" stroke-width="1.8"/>'
+        s += f'<rect x="{cx}" y="{card_top}" width="{card_w}" height="36" rx="10" fill="{col}"/>'
+        s += f'<rect x="{cx}" y="{card_top+20}" width="{card_w}" height="16" fill="{col}"/>'
+        s += f'<text x="{cx+card_w//2}" y="{card_top+14}" text-anchor="middle" fill="white" font-size="12" font-weight="bold" font-family="Arial,sans-serif">{name}</text>'
+        s += f'<text x="{cx+card_w//2}" y="{card_top+50}" text-anchor="middle" fill="{col}" font-size="9" font-family="Arial,sans-serif" font-style="italic">{tagline}</text>'
+        for j, b in enumerate(bullets):
+            by = card_top + 68 + j*36
+            s += f'<rect x="{cx+8}" y="{by}" width="{card_w-16}" height="28" rx="6" fill="{col}" fill-opacity="0.16"/>'
+            # Wrap long text
+            words = b.split()
+            line1 = " ".join(words[:4]); line2 = " ".join(words[4:])
+            s += f'<text x="{cx+card_w//2}" y="{by+12}" text-anchor="middle" fill="white" font-size="8.5" font-family="Arial,sans-serif">{line1}</text>'
+            if line2: s += f'<text x="{cx+card_w//2}" y="{by+23}" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="8" font-family="Arial,sans-serif">{line2}</text>'
+
+    # Bottom bar
+    s += status_bar([("Maintainable","#7C3AED"),("Testable","#1D4ED8"),("Extensible","#059669"),("Scalable","#D97706"),("Readable","#0891B2")], 508)
+    return s, "Design Principles"
+
+# ── SYSTEM DESIGN ENHANCED (Image 4 subsystem groups) ────────────────────────
+def make_canary_deploy(C):
+    """Image 4 style: AWS canary deploy with colored subsystem groups + flow arrows."""
+    s = ""
+    s += tool_strip([("🏗️","Terraform","#7B42BC"),("☸️","EKS","#326CE5"),("🔀","NGINX","#009900"),("📊","Prometheus","#E6522C"),("📈","Grafana","#E6522C"),("🚀","Helm","#277A9F")], 82, C[0])
+
+    # PROVISIONING group (top-left)
+    s += subsystem_group(15, 122, 170, 130, "PROVISIONING", C[5])
+    s += flow_box(25, 138, 150, 98, "Terraform", "provisions AWS EKS", C[5], "🏗️")
+
+    # Connection arrow
+    s += labeled_arrow(185, 187, 225, 187, "provisions AWS EKS", C[5])
+
+    # OBSERVABILITY group (center-left)
+    s += subsystem_group(225, 122, 230, 130, "OBSERVABILITY", C[3])
+    s += flow_box(235, 138, 100, 98, "Grafana", "dashboards", C[3], "📊")
+    s += flow_box(345, 138, 100, 98, "Prometheus", "scrapes metrics", C[4], "📡")
+    s += labeled_arrow(285, 187, 345, 187, "reads data", C[3])
+
+    # SRE operator
+    s += f'<circle cx="370" cy="300" r="24" fill="{C[2]}" fill-opacity="0.15" stroke="{C[2]}" stroke-width="1.5"/>'
+    s += f'<text x="370" y="296" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">👤</text>'
+    s += f'<text x="370" y="315" text-anchor="middle" fill="{C[2]}" font-size="9" font-weight="bold" font-family="Arial,sans-serif">SRE</text>'
+    s += labeled_arrow(370, 275, 370, 254, "manual canary weight / rollback", C[2])
+
+    # INGRESS + APP group (right)
+    s += subsystem_group(475, 100, 400, 270, "INGRESS + APP", C[1])
+    s += flow_box(485, 132, 110, 60, "NGINX Ingress", "traffic split", C[1], "🔀")
+    s += flow_box(620, 118, 130, 80, "Stable V1", "88% traffic", C[0], "☸️")
+    s += flow_box(760, 118, 110, 80, "", "", C[0])
+    s += f'<text x="815" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">Stable V1</text>'
+    s += f'<text x="815" y="170" text-anchor="middle" fill="{C[0]}" font-size="11" font-weight="bold" font-family="Arial,sans-serif">(88%)</text>'
+    s += flow_box(620, 222, 130, 80, "Canary V2", "12% traffic", C[2], "🌊")
+    s += flow_box(760, 222, 110, 80, "", "", C[2])
+    s += f'<text x="815" y="258" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial,sans-serif">Canary V2</text>'
+    s += f'<text x="815" y="273" text-anchor="middle" fill="{C[2]}" font-size="11" font-weight="bold" font-family="Arial,sans-serif">(12%)</text>'
+    s += labeled_arrow(595, 162, 620, 162, "", C[0])
+    s += labeled_arrow(595, 262, 620, 262, "", C[2])
+    s += thin_arrow(455, 187, 485, 162, C[1])
+
+    # User
+    s += f'<circle cx="450" cy="310" r="24" fill="{C[4]}" fill-opacity="0.15" stroke="{C[4]}" stroke-width="1.5"/>'
+    s += f'<text x="450" y="306" text-anchor="middle" font-size="18" font-family="Arial,sans-serif">👤</text>'
+    s += f'<text x="450" y="325" text-anchor="middle" fill="{C[4]}" font-size="9" font-weight="bold" font-family="Arial,sans-serif">User</text>'
+    s += labeled_arrow(450, 285, 500, 220, "request", C[4])
+
+    # Prometheus scrapes
+    s += labeled_arrow(340, 230, 380, 290, "scrapes metrics", C[3])
+
+    # Stats row
+    s += fat_arrow_down(450, 390, 410, C[0])
+    s += banner_section(15, 410, 870, 80, "DEPLOYMENT METRICS", C[0])
+    for x,val,lbl,delta,col in [(20,"99.97%","Availability","+0.02%",C[0]),(195,"12%","Canary Traffic","↑ from 5%",C[2]),(370,"1.2ms","P95 Latency","-0.3ms",C[1]),(545,"0.03%","Error Rate","-0.01%",C[4]),(720,"847","RPS","+12",C[3])]:
+        s += stat_tile(x, 420, 166, 60, val, lbl, delta, col)
+
+    return s, "Canary Deploy"
+
+# ── KUBERNETES ENHANCED (with Image 4 subsystem groups + Image 5 stats) ───────
+def make_kubernetes_ops(C):
+    s = ""
+    s += tool_strip([("☸️","Kubernetes","#326CE5"),("🔒","RBAC","#7C3AED"),("📊","Prometheus","#E6522C"),("🔀","Istio","#466BB0"),("🏗️","Helm","#277A9F"),("🚨","PagerDuty","#25C151")], 82, C[0])
+
+    # Stats row (Image 5 style)
+    for x,val,lbl,delta,col in [(15,"847","Pods Running","+12",C[0]),(185,"99.94%","Uptime","+0.01%",C[1]),(355,"23ms","API Server P95","-4ms",C[2]),(525,"68%","Node CPU","▼ -3%",C[3]),(695,"3.1GB","Mem / Node","stable",C[4])]:
+        s += stat_tile(x, 86, 160, 52, val, lbl, delta, col)
+
+    # Sparklines in stat tiles
+    s += mini_sparkline(16, 116, 158, 18, [42,38,45,50,60,58,55,62,68,72,68,72], C[0])
+    s += mini_sparkline(186, 116, 158, 18, [99.9,99.91,99.88,99.92,99.94,99.93,99.95,99.94], C[1])
+    s += mini_sparkline(356, 116, 158, 18, [35,28,30,27,26,25,24,23,22,23], C[2])
+    s += mini_sparkline(526, 116, 158, 18, [55,60,65,70,72,68,66,70,71,68], C[3])
+    s += mini_sparkline(696, 116, 158, 18, [3.0,3.1,3.2,3.1,3.0,3.1,3.1,3.1], C[4])
+
+    # Control Plane — subsystem group (Image 4 style)
+    s += subsystem_group(15, 148, 870, 90, "CONTROL PLANE", C[0])
+    for x,lbl,sub,col in [(25,"API Server","kube-apiserver",C[0]),(200,"Scheduler","filter + score",C[1]),(375,"Controller Mgr","reconcile loops",C[2]),(550,"etcd","distributed KV",C[3]),(725,"Cloud Controller","cloud provider",C[4])]:
+        s += flow_box(x, 162, 165, 68, lbl, sub, col)
+    for x in [190,365,540,715]: s += thin_arrow(x, 196, x+10, 196, "white")
+
+    s += fat_arrow_down(450, 238, 258, C[1])
+
+    # Worker nodes — two subsystem groups side by side
+    s += subsystem_group(15, 258, 425, 168, "WORKER NODE 1", C[1])
+    for x,lbl,sub,col in [(25,"Kubelet","node agent",C[1]),(160,"Kube-proxy","iptables",C[2]),(295,"Container RT","containerd",C[3])]:
+        s += flow_box(x, 272, 127, 44, lbl, sub, col)
+    for x,lbl,sub,col in [(25,"Pod: web","nginx:latest",C[0]),(160,"Pod: api","app:v3",C[1]),(295,"Pod: cache","redis:7",C[2]),(360,"Pod: bg","worker:v2",C[3])]:
+        s += flow_box(x, 324, 118, 94, lbl, sub, col)
+    s += mini_sparkline(16, 400, 423, 22, [30,45,38,50,42,48,55,52,58,60], C[1])
+
+    s += subsystem_group(450, 258, 435, 168, "WORKER NODE 2", C[2])
+    for x,lbl,sub,col in [(460,"Kubelet","node agent",C[2]),(595,"Kube-proxy","networking",C[3]),(730,"CNI Plugin","Calico",C[4])]:
+        s += flow_box(x, 272, 127, 44, lbl, sub, col)
+    for x,lbl,sub,col in [(460,"Pod: db","postgres:15",C[3]),(580,"Pod: ml","torch:2",C[4]),(700,"Pod: mon","prometheus",C[5]),(820,"Ingress","NGINX",C[0])]:
+        s += flow_box(x, 324, 112, 94, lbl, sub, col)
+    s += mini_sparkline(451, 400, 433, 22, [50,55,48,60,58,62,55,58,65,68], C[2])
+
+    # Bottom — cluster services
+    s += fat_arrow_down(450, 426, 446, C[3])
+    s += subsystem_group(15, 446, 870, 68, "CLUSTER SERVICES", C[3])
+    for x,lbl,sub,col in [(22,"HPA","pod autoscale",C[0]),(200,"VPA","resource size",C[1]),(378,"Cluster CA","node autoscale",C[2]),(556,"PVC + PV","storage mgmt",C[3]),(734,"Cert Manager","TLS rotate",C[4])]:
+        s += flow_box(x, 460, 170, 48, lbl, sub, col)
+
+    return s, "Operations Dashboard"
+
+# ── DISPATCHER ────────────────────────────────────────────────────────────────
+def make_diagram(topic_name, topic_id, diagram_type=""):
+    C   = get_pal(topic_id)
+    now = datetime.now().strftime("%B %Y")
+    tid = topic_id.lower()
+
+    if "kube-ops" in tid:                        content,sub = make_kubernetes_ops(C)
+    elif "kube" in tid:                          content,sub = make_kubernetes(C)
+    elif any(x in tid for x in ["llm","agent"]): content,sub = make_llm(C)
+    elif "cicd" in tid:                          content,sub = make_cicd(C)
+    elif "kafka" in tid:                         content,sub = make_kafka(C)
+    elif "zero" in tid:                          content,sub = make_zero_trust(C)
+    elif "aws" in tid:                           content,sub = make_aws(C)
+    elif "devsec" in tid:                        content,sub = make_devsecops(C)
+    elif "system" in tid:                        content,sub = make_system_design(C)
+    elif "mlops" in tid:                         content,sub = make_mlops(C)
+    elif any(x in tid for x in ["lake","data"]): content,sub = make_lakehouse(C)
+    elif "rag" in tid:                           content,sub = make_rag(C)
+    elif "docker" in tid:                        content,sub = make_docker(C)
+    elif "git" in tid:                           content,sub = make_git_workflow(C)
+    elif "api" in tid:                           content,sub = make_api_design(C)
+    elif "solid" in tid:                         content,sub = make_solid(C)
+    elif "canary" in tid:                        content,sub = make_canary_deploy(C)
+    else:                                        content,sub = make_generic(topic_name, C)
+
+    return wrap(content, topic_name, sub, C, now)
+
+# ── CLASS INTERFACE ───────────────────────────────────────────────────────────
 class DiagramGenerator:
     def __init__(self):
         Path(OUTPUT_DIR).mkdir(exist_ok=True)
-        log.info("Diagram output dir: "+OUTPUT_DIR+"/")
-    def save_svg(self,svg_content,topic_id,topic_name="",diagram_type="Architecture Diagram"):
-        timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename=OUTPUT_DIR+"/"+topic_id+"_"+timestamp+".svg"
-        svg=make_diagram(topic_name or topic_id,topic_id,diagram_type)
-        with open(filename,"w",encoding="utf-8") as f: f.write(svg)
-        size_kb=os.path.getsize(filename)/1024
-        log.info("Diagram saved: "+filename+" ("+str(round(size_kb,1))+" KB)")
+        log.info("Diagram output dir: " + OUTPUT_DIR + "/")
+
+    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram"):
+        ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
+        svg      = make_diagram(topic_name or topic_id, topic_id, diagram_type)
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(svg)
+        size_kb = os.path.getsize(filename) / 1024
+        log.info(f"Diagram saved: {filename} ({round(size_kb,1)} KB)")
         return filename
