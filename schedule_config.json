@@ -1,5 +1,5 @@
 {
-  "paused": false,
+  "paused": true,
   "pause_until": null,
   "weekly": {
     "mon": {
@@ -33,5 +33,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-06T04:56:32.222Z"
+  "updated_at": "2026-03-06T05:26:34.948Z"
 }
