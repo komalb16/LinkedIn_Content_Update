@@ -93,8 +93,14 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     """
     manual=True  → workflow_dispatch: skip sleep, run immediately.
     dry_run=True → also skips sleep.
-    Cron (scheduled) triggers: sleep until configured time.
+    Cron (scheduled) triggers: sleep up to 30 min then run.
+    If cron fires > 30 min early, exits cleanly (cron/config mismatch).
     """
+    # Also check env var as fallback — in case --manual flag wasn't passed
+    if not manual and os.environ.get("GH_EVENT_NAME") == "workflow_dispatch":
+        manual = True
+        info("Manual trigger detected via GH_EVENT_NAME env var")
+
     cfg     = load_config()
     now     = ist_now()
     today   = now.strftime("%Y-%m-%d")
@@ -144,10 +150,24 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     target = now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
     diff_secs = (target - now).total_seconds()
 
-    if diff_secs > 0:
+    MAX_WAIT = 30 * 60  # 30-min cap — cron should fire within 30 min of configured time
+
+    if diff_secs > MAX_WAIT:
+        # Cron fired way too early — cron time and configured time are out of sync.
+        # Exit cleanly instead of sleeping for hours and burning Actions minutes.
         wait_mins = int(diff_secs // 60)
-        info(f"⏱️  Waiting {wait_mins}m until {time_ist} IST...")
-        # Sleep in 60-second chunks so GitHub Actions logs stay alive
+        ist_utc_h  = (sched_h * 60 + sched_m - 330 + 1440) % 1440
+        utc_hh, utc_mm = divmod(ist_utc_h, 60)
+        info(f"⛔ CRON/CONFIG MISMATCH — now is {now.strftime('%H:%M')} IST, ")
+        info(f"   configured time is {time_ist} IST ({wait_mins} min away).")
+        info(f"   FIX: update the cron in .github/workflows/linkedin-agent.yml")
+        info(f"   Change it to:  cron: '{utc_mm} {utc_hh} * * *'  (= {time_ist} IST)")
+        info(f"   Exiting cleanly — will run at the correct cron time.")
+        sys.exit(0)
+    elif diff_secs > 0:
+        wait_mins = int(diff_secs // 60)
+        wait_secs = int(diff_secs % 60)
+        info(f"⏱️  Waiting {wait_mins}m {wait_secs}s until {time_ist} IST...")
         remaining = diff_secs
         while remaining > 0:
             time.sleep(min(60, remaining))
@@ -156,10 +176,9 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
                 info(f"   ... {int(remaining // 60)}m remaining until {time_ist} IST")
         info(f"✅ Reached scheduled time {time_ist} IST — starting agent")
     elif diff_secs < -3600:
-        # Triggered more than 1h late — probably a manual re-run or GitHub delay
         info(f"⚠️  Now ({now.strftime('%H:%M')} IST) is >1h past {time_ist} IST — running anyway")
     else:
-        info(f"✅ Within 1h window of {time_ist} IST — proceeding")
+        info(f"✅ Within window of {time_ist} IST — proceeding")
 
 
 # ─── Quick diagnostic (python src/schedule_checker.py) ───────────────────────

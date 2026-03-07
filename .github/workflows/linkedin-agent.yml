@@ -2,17 +2,20 @@ name: LinkedIn Content Agent
 run-name: "LinkedIn Agent · ${{ github.event_name == 'workflow_dispatch' && 'Manual' || 'Scheduled' }} · ${{ github.event.inputs.topic_id || 'auto-topic' }}"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Runs once daily. The workflow cron fires at 3:00 AM UTC (8:30 AM IST).
-# schedule_checker.py then sleeps until the per-day time in schedule_config.json.
-# Supports manual trigger with optional topic and dry-run.
+# HOW TIMING WORKS:
+#   • The cron below should fire within 30 minutes BEFORE your configured
+#     posting time (set in the dashboard or schedule_config.json).
+#   • schedule_checker.py will sleep up to 30 min to hit the exact time.
+#   • If the gap is > 30 min it exits cleanly rather than burning Actions mins.
+#
+# YOUR CURRENT CRON:  20:50 IST  =  15:20 UTC  →  cron: '20 15 * * *'
+# To change posting time: update BOTH the cron below AND your dashboard schedule.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    # 3:00 AM UTC = 8:30 AM IST — fires early so schedule_checker can sleep
-    # until your configured time (e.g. 09:30 IST = 04:00 UTC).
-    # ⚠️  Keep only ONE cron entry — two entries = two posts per day.
-    - cron: '0 3 * * *'
+    # 15:20 UTC = 20:50 IST  ← update this when you change your posting time
+    - cron: '20 15 * * *'
 
   workflow_dispatch:
     inputs:
@@ -54,11 +57,9 @@ jobs:
           CALLMEBOT_APIKEY:      ${{ secrets.CALLMEBOT_APIKEY }}
           TELEGRAM_BOT_TOKEN:    ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
+          # ── Expose event name as a real env var so shell can read it ──────
+          GH_EVENT_NAME:         ${{ github.event_name }}
         run: |
-          # ── Build argument list safely ────────────────────────────────────
-          # CRITICAL: Never pass --dry-run "false" — argparse store_true does
-          # not accept a value, causing "unrecognized arguments: false" crash.
-          # The fix: only include --dry-run flag when explicitly set to "true".
           ARGS=""
 
           TOPIC="${{ github.event.inputs.topic_id }}"
@@ -70,9 +71,14 @@ jobs:
             ARGS="$ARGS --dry-run"
           fi
 
-          # Manual (workflow_dispatch) triggers skip the scheduled sleep
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # Use the env var (not the expression) — expressions don't always
+          # evaluate inside shell if-statements reliably.
+          if [ "$GH_EVENT_NAME" = "workflow_dispatch" ]; then
             ARGS="$ARGS --manual"
+            echo "✅ Manual trigger detected — will skip schedule sleep"
+          else
+            echo "⏰ Scheduled trigger — schedule_checker will validate timing"
           fi
 
+          echo "Running: python src/agent.py $ARGS"
           python src/agent.py $ARGS
