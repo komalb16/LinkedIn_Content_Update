@@ -20,11 +20,11 @@
     },
     "fri": {
       "enabled": true,
-      "time_ist": "20:20"
+      "time_ist": "20:35"
     },
     "sat": {
       "enabled": true,
-      "time_ist": "20:20"
+      "time_ist": "20:50"
     },
     "sun": {
       "enabled": false,
@@ -33,5 +33,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-07T01:18:16.030Z"
+  "updated_at": "2026-03-07T01:33:26.104Z"
 }
