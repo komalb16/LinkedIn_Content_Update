@@ -397,10 +397,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     <div class="smini">
       <div class="sm"><div class="smn">1</div><span>Go to <code>github.com → Settings → Developer Settings → Personal Access Tokens → Tokens (classic)</code></span></div>
       <div class="sm"><div class="smn">2</div><span>Click <code>Generate new token</code> → check <code>repo</code> and <code>workflow</code> → set expiry to <code>No expiration</code></span></div>
-      <div class="sm"><div class="smn">3</div><span>Copy the <code>ghp_xxx...</code> token and paste below</span></div>
+      <div class="sm"><div class="smn">3</div><span>Copy the token (<code>ghp_xxx</code> or <code>github_pat_xxx</code>) and paste below</span></div>
     </div>
     <div style="display:flex;gap:10px;margin-bottom:12px">
-      <input class="inp" id="tokenInput" type="password" placeholder="ghp_your_token_here" style="flex:1" onkeydown="if(event.key==='Enter')connect()"/>
+      <input class="inp" id="tokenInput" type="password" placeholder="ghp_... or github_pat_..." style="flex:1" onkeydown="if(event.key==='Enter')connect()"/>
       <button class="btn bp" onclick="connect()" id="conBtn">
         <span id="conTxt">Connect</span>
         <div class="spin" id="conSpin"></div>
@@ -950,16 +950,16 @@ function exportRuns(fmt) {
   if (!filtered.length) { toast('No runs to export in this date range', 'err'); return; }
 
   const rows = filtered.map(r => ({
-    run_number:  r.run_number,
-    status:      r.conclusion || r.status,
-    trigger:     r.event,
-    topic:       getTopicFromRun(r) || 'auto',
-    mode:        getModeFromRun(r)  || 'topic',
-    started_utc: r.created_at,
+    run_number:    r.run_number,
+    status:        r.conclusion || r.status,
+    trigger:       r.event,
+    topic:         getTopicFromRun(r) || 'auto',
+    mode:          getModeFromRun(r)  || 'topic',
+    started_utc:   r.created_at,
     started_local: tzFmt(r.created_at,{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}),
-    timezone:    userTZ,
-    duration_s:  r.updated_at ? Math.round((new Date(r.updated_at)-new Date(r.created_at))/1000) : '',
-    github_url:  r.html_url,
+    timezone:      userTZ,
+    duration_s:    r.updated_at ? Math.round((new Date(r.updated_at)-new Date(r.created_at))/1000) : '',
+    github_url:    r.html_url,
   }));
 
   let content, mime, ext;
@@ -968,182 +968,71 @@ function exportRuns(fmt) {
   if (fmt === 'json') {
     content = JSON.stringify(rows, null, 2);
     mime = 'application/json'; ext = 'json';
+
   } else if (fmt === 'csv') {
-    const esc = v => typeof v==='string'&&(v.includes(',')|| v.includes('"')) ? `"${v.replace(/"/g,'""')}"` : v;
+    const esc = v => typeof v==='string' && (v.includes(',') || v.includes('"')) ? '"' + v.replace(/"/g,'""') + '"' : v;
     content = [cols.join(','), ...rows.map(r => cols.map(c => esc(r[c])).join(','))].join('\n');
     mime = 'text/csv'; ext = 'csv';
+
   } else if (fmt === 'tsv') {
     content = [cols.join('\t'), ...rows.map(r => cols.map(c => String(r[c]??'')).join('\t'))].join('\n');
     mime = 'text/tab-separated-values'; ext = 'tsv';
+
   } else if (fmt === 'md') {
     const mdCols = ['Run','Status','Trigger','Topic','Mode','Started','Duration'];
     const mdKeys = ['run_number','status','trigger','topic','mode','started_local','duration_s'];
     const pad = (s,n) => String(s).padEnd(n);
     const widths = mdKeys.map((k,i) => Math.max(mdCols[i].length, ...rows.map(r=>String(r[k]??'').length)));
-    const hr = widths.map(w => '-'.repeat(w+2)).join('|');
-    const header = '| ' + mdCols.map((c,i) => pad(c,widths[i])).join(' | ') + ' |';
+    const hr      = widths.map(w => '-'.repeat(w+2)).join('|');
+    const header  = '| ' + mdCols.map((c,i) => pad(c,widths[i])).join(' | ') + ' |';
     const dataRows = rows.map(r => '| ' + mdKeys.map((k,i) => pad(r[k]??'',widths[i])).join(' | ') + ' |');
-    content = `# LinkedIn Agent — Run History\n> Exported ${new Date().toLocaleDateString()} · Timezone: ${userTZ}\n\n${header}\n|${hr}|\n${dataRows.join('\n')}\n`;
+    content = '# LinkedIn Agent — Run History\n> Exported ' + new Date().toLocaleDateString() +
+              ' · Timezone: ' + userTZ + '\n\n' + header + '\n|' + hr + '|\n' + dataRows.join('\n') + '\n';
     mime = 'text/markdown'; ext = 'md';
+
   } else if (fmt === 'txt') {
-    const w = [8,10,12,20,12,18,10];
-    const pad = (s,n) => String(s??'').padEnd(n).slice(0,n);
+    const w    = [8,10,12,20,12,18,10];
+    const pad  = (s,n) => String(s??'').padEnd(n).slice(0,n);
     const hdrs = ['Run#','Status','Trigger','Topic','Mode','Started','Duration'];
     const keys = ['run_number','status','trigger','topic','mode','started_local','duration_s'];
     const line = '+' + w.map(n=>'-'.repeat(n+2)).join('+') + '+';
     const row  = r => '| ' + keys.map((k,i)=>pad(r[k],w[i])).join(' | ') + ' |';
-    content = `LinkedIn Agent — Run History\nExported: ${new Date().toLocaleDateString()} | TZ: ${userTZ}\n\n${line}\n| ${hdrs.map((h,i)=>pad(h,w[i])).join(' | ')} |\n${line}\n${rows.map(row).join('\n')}\n${line}\n`;
+    content = 'LinkedIn Agent — Run History\nExported: ' + new Date().toLocaleDateString() +
+              ' | TZ: ' + userTZ + '\n\n' + line + '\n| ' +
+              hdrs.map((h,i)=>pad(h,w[i])).join(' | ') + ' |\n' + line + '\n' +
+              rows.map(row).join('\n') + '\n' + line + '\n';
     mime = 'text/plain'; ext = 'txt';
+
   } else if (fmt === 'html') {
     const hdrs = ['Run #','Status','Trigger','Topic','Mode','Started ('+userTZ+')','Duration','Link'];
-    const trs  = rows.map(r => `<tr><td>${r.run_number}</td><td>${r.status}</td><td>${r.trigger}</td><td>${r.topic}</td><td>${r.mode}</td><td>${r.started_local}</td><td>${r.duration_s}s</td><td><a href="${r.github_url}" target="_blank">View</a></td></tr>`).join('');
-    content = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>LinkedIn Run History</title><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px 12px;text-align:left}th{background:#f0f4ff}tr:nth-child(even){background:#f9f9f9}</style></head><body><h2>LinkedIn Agent — Run History</h2><p>Exported ${new Date().toLocaleDateString()} · Timezone: ${userTZ}</p><table><thead><tr>${hdrs.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${trs}</tbody></table>
-<script>
-// ══ NEURAL NETWORK BACKGROUND ANIMATION ══════════════════════════════════════
-(function() {
-  const canvas = document.getElementById('neural-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  let W, H, nodes = [], mouse = {x: -999, y: -999};
-  const NODE_COUNT   = 55;
-  const CONNECT_DIST = 160;
-  const PULSE_SPEED  = 0.4;
-
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-
-  function rand(a, b) { return a + Math.random() * (b - a); }
-
-  function initNodes() {
-    nodes = [];
-    for (let i = 0; i < NODE_COUNT; i++) {
-      nodes.push({
-        x:  rand(0, W), y: rand(0, H),
-        vx: rand(-0.3, 0.3), vy: rand(-0.3, 0.3),
-        r:  rand(1.5, 3.5),
-        pulse: rand(0, Math.PI * 2),
-        color: Math.random() > 0.5 ? '#4f9cf9' : '#a78bfa',
-        glow:  rand(0.3, 1.0),
-      });
-    }
-  }
-
-  function getAccentColor() {
-    const theme = document.documentElement.getAttribute('data-theme');
-    return theme === 'light' ? '#2563eb' : '#4f9cf9';
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-
-    // Subtle radial gradient bg overlay
-    const grd = ctx.createRadialGradient(W*0.3, H*0.2, 0, W*0.3, H*0.2, W*0.7);
-    grd.addColorStop(0, 'rgba(79,156,249,0.04)');
-    grd.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, H);
-
-    const grd2 = ctx.createRadialGradient(W*0.8, H*0.8, 0, W*0.8, H*0.8, W*0.5);
-    grd2.addColorStop(0, 'rgba(167,139,250,0.04)');
-    grd2.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grd2;
-    ctx.fillRect(0, 0, W, H);
-
-    // Update + draw nodes
-    nodes.forEach(n => {
-      n.x += n.vx; n.y += n.vy;
-      if (n.x < -20) n.x = W+20; if (n.x > W+20) n.x = -20;
-      if (n.y < -20) n.y = H+20; if (n.y > H+20) n.y = -20;
-      n.pulse += 0.015;
-
-      // Mouse attraction (subtle)
-      const dx = mouse.x - n.x, dy = mouse.y - n.y;
-      const md = Math.sqrt(dx*dx + dy*dy);
-      if (md < 200) {
-        n.x += dx * 0.0008;
-        n.y += dy * 0.0008;
-      }
-
-      const alpha = 0.4 + 0.4 * Math.sin(n.pulse) * n.glow;
-      // Glow
-      const gr = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 4);
-      gr.addColorStop(0, n.color.replace(')', `,${alpha})`).replace('rgb', 'rgba'));
-      gr.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.beginPath(); ctx.arc(n.x, n.y, n.r * 4, 0, Math.PI*2);
-      ctx.fillStyle = gr; ctx.fill();
-      // Core dot
-      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
-      ctx.fillStyle = n.color;
-      ctx.globalAlpha = alpha;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    });
-
-    // Draw connections
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i+1; j < nodes.length; j++) {
-        const a = nodes[i], b = nodes[j];
-        const dx = a.x-b.x, dy = a.y-b.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < CONNECT_DIST) {
-          const alpha = (1 - dist/CONNECT_DIST) * 0.35;
-          // Animated pulse along the line
-          const pulse = 0.5 + 0.5 * Math.sin((a.pulse + b.pulse) * PULSE_SPEED);
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          // Gradient line
-          const lg = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-          lg.addColorStop(0,   a.color.replace(')', `,${alpha * pulse})`).replace('rgb','rgba'));
-          lg.addColorStop(0.5, '#ffffff20');
-          lg.addColorStop(1,   b.color.replace(')', `,${alpha * pulse})`).replace('rgb','rgba'));
-          ctx.strokeStyle = lg;
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        }
-      }
-    }
-
-    // Mouse proximity highlight
-    nodes.forEach(n => {
-      const dx = mouse.x - n.x, dy = mouse.y - n.y;
-      const d  = Math.sqrt(dx*dx + dy*dy);
-      if (d < 120) {
-        const gr = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, 40);
-        gr.addColorStop(0, 'rgba(255,255,255,0.15)');
-        gr.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.beginPath(); ctx.arc(n.x, n.y, 40, 0, Math.PI*2);
-        ctx.fillStyle = gr; ctx.fill();
-      }
-    });
-
-    requestAnimationFrame(draw);
-  }
-
-  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-  window.addEventListener('resize', () => { resize(); initNodes(); });
-  resize(); initNodes(); draw();
-})();
-</script>
-
-</body></html>`;
+    const trRows = rows.map(r =>
+      '<tr><td>' + r.run_number + '</td><td>' + r.status + '</td><td>' + r.trigger +
+      '</td><td>' + r.topic + '</td><td>' + r.mode + '</td><td>' + r.started_local +
+      '</td><td>' + r.duration_s + 's</td><td><a href="' + r.github_url + '" target="_blank">View</a></td></tr>'
+    ).join('');
+    const thRow = hdrs.map(h => '<th>' + h + '</th>').join('');
+    content = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>LinkedIn Run History</title>' +
+      '<style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}' +
+      'th,td{border:1px solid #ddd;padding:8px 12px;text-align:left}th{background:#f0f4ff}' +
+      'tr:nth-child(even){background:#f9f9f9}</style></head><body>' +
+      '<h2>LinkedIn Agent — Run History</h2>' +
+      '<p>Exported ' + new Date().toLocaleDateString() + ' · Timezone: ' + userTZ + '</p>' +
+      '<table><thead><tr>' + thRow + '</tr></thead><tbody>' + trRows + '</tbody></table>' +
+      '</body></html>';
     mime = 'text/html'; ext = 'html';
+
   } else if (fmt === 'xlsx') {
-    // Build XLSX using SheetJS (loaded from CDN only if needed)
     _exportXlsx(rows, userTZ);
     return;
   }
 
   const blob = new Blob([content], {type: mime});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `linkedin-runs-${new Date().toISOString().split('T')[0]}.${ext}`;
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'linkedin-runs-' + new Date().toISOString().split('T')[0] + '.' + ext;
   a.click();
   URL.revokeObjectURL(a.href);
-  toast(`Downloaded ${filtered.length} runs as .${ext.toUpperCase()}`, 'ok');
+  toast('Downloaded ' + filtered.length + ' runs as .' + ext.toUpperCase(), 'ok');
 }
 
 
@@ -1265,12 +1154,17 @@ function loadSettings() {
 // ── CONNECT ───────────────────────────────────────────────────────────────────
 async function connect() {
   const v = document.getElementById('tokenInput').value.trim();
-  if (!v || !v.startsWith('ghp_')) { toast('Enter a valid token starting with ghp_', 'err'); return; }
+  // Accept ghp_ (classic) and github_pat_ (fine-grained) tokens
+  const validToken = v.startsWith('ghp_') || v.startsWith('github_pat_') || v.length > 20;
+  if (!v || !validToken) { toast('Enter a valid GitHub token (ghp_... or github_pat_...)', 'err'); return; }
   token = v;
   setLoad('conSpin','conTxt',true,'Connecting...');
   try {
     const r = await gh('/user');
-    if (!r.ok) throw new Error('Invalid token');
+    if (!r.ok) {
+      const errBody = await r.json().catch(() => ({}));
+      throw new Error(errBody.message || `HTTP ${r.status} — check token permissions (needs repo + workflow scope)`);
+    }
     const u = await r.json();
     localStorage.setItem('gh_token', token);
     showDash(u.login);
@@ -2090,5 +1984,126 @@ function toast(m, t = 'info') {
 
 
 
+
+<script>
+// ══ NEURAL NETWORK BACKGROUND ANIMATION ══════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('neural-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function hexToRgba(hex, alpha) {
+    const h = hex.replace('#','');
+    const r = parseInt(h.slice(0,2),16);
+    const g = parseInt(h.slice(2,4),16);
+    const b = parseInt(h.slice(4,6),16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha.toFixed(2) + ')';
+  }
+
+  let W, H, nodes = [], mouse = {x:-999, y:-999};
+  const NODE_COUNT   = 55;
+  const CONNECT_DIST = 160;
+  const PULSE_SPEED  = 0.4;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function initNodes() {
+    nodes = [];
+    for (let i = 0; i < NODE_COUNT; i++) {
+      nodes.push({
+        x: rand(0,W), y: rand(0,H),
+        vx: rand(-0.3,0.3), vy: rand(-0.3,0.3),
+        r: rand(1.5,3.5),
+        pulse: rand(0, Math.PI*2),
+        color: Math.random() > 0.5 ? '#4f9cf9' : '#a78bfa',
+        glow:  rand(0.3, 1.0),
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Subtle background glow blobs
+    const grd = ctx.createRadialGradient(W*0.3, H*0.2, 0, W*0.3, H*0.2, W*0.7);
+    grd.addColorStop(0, 'rgba(79,156,249,0.04)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd; ctx.fillRect(0,0,W,H);
+
+    const grd2 = ctx.createRadialGradient(W*0.8, H*0.8, 0, W*0.8, H*0.8, W*0.5);
+    grd2.addColorStop(0, 'rgba(167,139,250,0.04)');
+    grd2.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd2; ctx.fillRect(0,0,W,H);
+
+    // Update + draw nodes
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < -20) n.x = W+20; if (n.x > W+20) n.x = -20;
+      if (n.y < -20) n.y = H+20; if (n.y > H+20) n.y = -20;
+      n.pulse += 0.015;
+
+      // Mouse attraction
+      const dx = mouse.x - n.x, dy = mouse.y - n.y;
+      const md = Math.sqrt(dx*dx + dy*dy);
+      if (md < 200) { n.x += dx*0.0008; n.y += dy*0.0008; }
+
+      const alpha = 0.4 + 0.4 * Math.sin(n.pulse) * n.glow;
+      const gr = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r*4);
+      gr.addColorStop(0, hexToRgba(n.color, alpha));
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r*4, 0, Math.PI*2);
+      ctx.fillStyle = gr; ctx.fill();
+
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+      ctx.fillStyle = n.color;
+      ctx.globalAlpha = alpha; ctx.fill(); ctx.globalAlpha = 1;
+    });
+
+    // Draw connections
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i+1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = a.x-b.x, dy = a.y-b.y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if (dist < CONNECT_DIST) {
+          const alpha = (1 - dist/CONNECT_DIST) * 0.35;
+          const pulse = 0.5 + 0.5*Math.sin((a.pulse+b.pulse)*PULSE_SPEED);
+          const ap = alpha * pulse;
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+          const lg = ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+          lg.addColorStop(0,   hexToRgba(a.color, ap));
+          lg.addColorStop(0.5, 'rgba(255,255,255,0.08)');
+          lg.addColorStop(1,   hexToRgba(b.color, ap));
+          ctx.strokeStyle = lg; ctx.lineWidth = 0.8; ctx.stroke();
+        }
+      }
+    }
+
+    // Mouse proximity highlight
+    nodes.forEach(n => {
+      const dx = mouse.x-n.x, dy = mouse.y-n.y;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      if (d < 120) {
+        const gr = ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,40);
+        gr.addColorStop(0, 'rgba(255,255,255,0.15)');
+        gr.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath(); ctx.arc(n.x,n.y,40,0,Math.PI*2);
+        ctx.fillStyle = gr; ctx.fill();
+      }
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  window.addEventListener('resize', () => { resize(); initNodes(); });
+  resize(); initNodes(); draw();
+})();
+</script>
 </body>
 </html>
