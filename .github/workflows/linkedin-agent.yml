@@ -96,6 +96,7 @@ jobs:
           exit 0
 
       - name: Run LinkedIn Agent
+        id: run_agent
         if: github.event_name != 'schedule' || steps.sched_check.outputs.SKIP_RUN != 'true'
         env:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
@@ -133,3 +134,8 @@ jobs:
 
           echo "Running: python src/agent.py $ARGS"
           python src/agent.py $ARGS
+
+      # ── Bookmark: topic captured in step name for dashboard display ──────────
+      - name: "TOPIC: ${{ steps.run_agent.outputs.POST_TOPIC || 'auto' }}"
+        if: always() && (github.event_name != 'schedule' || steps.sched_check.outputs.SKIP_RUN != 'true')
+        run: echo "Topic bookmark — readable by dashboard via Jobs API"

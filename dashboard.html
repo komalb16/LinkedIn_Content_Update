@@ -11,10 +11,10 @@
 [data-theme="light"]{--bg:#f2f5fc;--bg2:#e8edf8;--bg3:#dce3f5;--sur:#ffffff;--sur2:#f8faff;--sur3:#eef2fc;--bd:rgba(0,0,0,0.07);--bds:rgba(37,99,235,0.3);--tx:#0f172a;--txm:#4b5d78;--txd:#9eafc5;--sh:0 1px 6px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);--gl:none;--acc:#2563eb;--acc2:#7c3aed;--grn:#059669;--red:#dc2626;--org:#d97706}
 :root{--r:14px;--rs:10px;--tr:0.2s cubic-bezier(.4,0,.2,1);--fh:'DM Sans',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{background:transparent;color:var(--tx);font-family:var(--fb);min-height:100vh;transition:background var(--tr),color var(--tr);font-size:14px;line-height:1.5}
+body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh;transition:background var(--tr),color var(--tr);font-size:14px;line-height:1.5}
 [data-theme="dark"] body::before,[data-theme="medium"] body::before{display:none}
-#neural-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:1;background:transparent}
-[data-theme="light"] #neural-canvas{opacity:0.15}
+#neural-canvas{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:1}
+[data-theme="light"] #neural-canvas{opacity:0.12}
 /* animated glow pulse on cards */
 @keyframes card-glow{0%,100%{box-shadow:var(--sh),0 0 0px rgba(79,156,249,0)}50%{box-shadow:var(--sh),0 0 30px rgba(79,156,249,0.08)}}
 /* header gradient shimmer */
@@ -1122,16 +1122,13 @@ window.onload = () => {
     function init(){nodes=[];for(let i=0;i<55;i++)nodes.push({x:rnd(0,W),y:rnd(0,H),vx:rnd(-0.25,0.25),vy:rnd(-0.25,0.25),r:rnd(2,4.5),p:rnd(0,6.28),c:Math.random()>.5?'#60aeff':'#b89dff',g:rnd(0.5,1)});}
     function draw(){
       ctx.clearRect(0,0,W,H);
-      // Draw dark background so canvas IS the page background
-      ctx.fillStyle = document.documentElement.getAttribute('data-theme')==='light' ? '#f0f4ff' : '#080c18';
-      ctx.fillRect(0,0,W,H);
       nodes.forEach(n=>{
         n.x+=n.vx;n.y+=n.vy;
         if(n.x<-20)n.x=W+20;if(n.x>W+20)n.x=-20;if(n.y<-20)n.y=H+20;if(n.y>H+20)n.y=-20;
         n.p+=0.015;
         const dx=mouse.x-n.x,dy=mouse.y-n.y,md=Math.sqrt(dx*dx+dy*dy);
         if(md<200){n.x+=dx*8e-4;n.y+=dy*8e-4;}
-        const al=0.4+0.4*Math.sin(n.p)*n.g;
+        const al=0.5+0.45*Math.sin(n.p)*n.g;
         const gr=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r*4);
         gr.addColorStop(0,rgb(n.c,al));gr.addColorStop(1,'rgba(0,0,0,0)');
         ctx.beginPath();ctx.arc(n.x,n.y,n.r*4,0,6.28);ctx.fillStyle=gr;ctx.fill();
@@ -1139,7 +1136,7 @@ window.onload = () => {
       });
       for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
         const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);
-        if(d<180){const al=(1-d/180)*.5,pu=.5+.5*Math.sin((a.p+b.p)*.4),ap=al*pu;
+        if(d<180){const al=(1-d/180)*.4,pu=.5+.5*Math.sin((a.p+b.p)*.4),ap=al*pu;
           ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
           const lg=ctx.createLinearGradient(a.x,a.y,b.x,b.y);
           lg.addColorStop(0,rgb(a.c,ap));lg.addColorStop(.5,'rgba(255,255,255,.08)');lg.addColorStop(1,rgb(b.c,ap));
@@ -1479,6 +1476,7 @@ async function loadRuns() {
     allRuns = [...(di.workflow_runs||[]),...(dq.workflow_runs||[]),...(dc.workflow_runs||[])]
       .filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; })
       .sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
+    enrichRunTopics(allRuns.slice(0, 30)).then(() => applyRunFilter());
     applyRunFilter();
   } catch(e) {
     document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">❌</div><span>Could not load runs: '+e.message+'</span></div>';
@@ -1586,7 +1584,39 @@ function renderRuns(runs) {
   }).join('');
 }
 
+const _topicCache = {};
+
+async function enrichRunTopics(runs) {
+  const toFetch = runs.filter(r =>
+    r.conclusion === 'success' &&
+    !_topicCache[r.id] &&
+    !getTopicFromRun(r)
+  ).slice(0, 15);
+  if (!toFetch.length) return;
+  await Promise.all(toFetch.map(async r => {
+    try {
+      const resp = await gh('/repos/' + REPO + '/actions/runs/' + r.id + '/jobs');
+      if (!resp.ok) return;
+      const data = await resp.json();
+      for (const job of (data.jobs || [])) {
+        for (const step of (job.steps || [])) {
+          const sn = step.name || '';
+          // Bookmark step is named like "bookmark_pin TOPIC_NAME"
+          if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
+            const topic = sn.replace('TOPIC:', '').replace(/^bookmark_pin /, '').trim();
+            if (topic && topic !== 'auto' && topic !== 'auto-topic') {
+              _topicCache[r.id] = topic;
+            }
+          }
+        }
+      }
+    } catch(e) {}
+  }));
+  applyRunFilter();
+}
+
 function getTopicFromRun(r) {
+  if (_topicCache[r.id]) return _topicCache[r.id];
   // Priority 1: run-name set by YAML e.g. "LinkedIn Agent · Manual · kubernetes"
   const runName = r.name || r.display_title || '';
   const parts   = runName.split('·').map(s => s.trim());
