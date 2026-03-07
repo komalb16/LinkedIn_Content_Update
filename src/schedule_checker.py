@@ -27,6 +27,16 @@ from pathlib import Path
 try:
     from logger import get_logger
     log = get_logger("schedule")
+
+def _mark_skip():
+    """Write SKIP_RUN=true to GITHUB_OUTPUT so the YAML can cancel the run."""
+    gho = os.environ.get("GITHUB_OUTPUT", "")
+    if gho:
+        try:
+            with open(gho, "a") as fh:
+                fh.write("SKIP_RUN=true\n")
+        except Exception:
+            pass
     def info(msg):  log.info(msg)
     def warn(msg):  log.warning(msg)
 except Exception:
@@ -160,6 +170,7 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         # Too early — a future cron will catch the right window
         mins_away = int(diff_secs // 60)
         info(f"⏭️  Not yet time — {time_ist} IST is {mins_away}m away. Exiting (next cron will check again).")
+        _mark_skip()
         sys.exit(0)
     elif diff_secs > 0:
         # Within the window — sleep the remaining gap then post
@@ -180,6 +191,7 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         # More than 30 min past — already ran this window, skip
         mins_past = int(-diff_secs // 60)
         info(f"⏭️  {time_ist} IST was {mins_past}m ago — already handled. Exiting.")
+        _mark_skip()
         sys.exit(0)
 
 

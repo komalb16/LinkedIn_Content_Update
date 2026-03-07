@@ -47,7 +47,56 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Check schedule timing
+        id: sched_check
+        if: github.event_name == 'schedule'
+        env:
+          GH_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python - << 'PYEOF2'
+          import os, sys
+          from datetime import datetime, timezone, timedelta
+          import json, pathlib
+
+          cfg_path = pathlib.Path("schedule_config.json")
+          if not cfg_path.exists():
+              print("No schedule_config.json — skipping timing check")
+              sys.exit(0)
+
+          cfg   = json.loads(cfg_path.read_text())
+          tz_offset_mins = cfg.get("tz_offset_mins", 330)  # default IST
+          sched_time = cfg.get("time", "20:50")
+          sched_h, sched_m = map(int, sched_time.split(":"))
+
+          utc_now  = datetime.now(timezone.utc)
+          local_now = utc_now + timedelta(minutes=tz_offset_mins)
+          target    = local_now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
+          diff_secs = (target - local_now).total_seconds()
+          WINDOW    = 30 * 60
+
+          gho = os.environ.get("GITHUB_OUTPUT", "")
+          if diff_secs > WINDOW or diff_secs < -WINDOW:
+              print(f"⏭️  Not posting — diff is {int(diff_secs/60)}m (outside ±30m window). Cancelling run.")
+              if gho:
+                  open(gho,"a").write("SKIP_RUN=true\n")
+          else:
+              print(f"✅ Within window ({int(diff_secs/60)}m to go) — will post.")
+              if gho:
+                  open(gho,"a").write("SKIP_RUN=false\n")
+          PYEOF2
+
+      - name: Cancel if not posting time
+        if: github.event_name == 'schedule' && steps.sched_check.outputs.SKIP_RUN == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Not posting time — cancelling this run to keep Actions history clean."
+          gh run cancel ${{ github.run_id }} --repo ${{ github.repository }} || true
+          sleep 5
+          exit 0
+
       - name: Run LinkedIn Agent
+        if: github.event_name != 'schedule' || steps.sched_check.outputs.SKIP_RUN != 'true'
         env:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_URN:   ${{ secrets.LINKEDIN_PERSON_URN }}
