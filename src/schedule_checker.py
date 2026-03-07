@@ -93,8 +93,10 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     """
     manual=True  → workflow_dispatch: skip sleep, run immediately.
     dry_run=True → also skips sleep.
-    Cron (scheduled) triggers: sleep up to 30 min then run.
-    If cron fires > 30 min early, exits cleanly (cron/config mismatch).
+    Cron (scheduled) fires every 30 min. This function:
+      - Exits in ~2s if configured time is more than 30 min away
+      - Sleeps the gap if within 30 min of configured time, then returns
+      - Exits if more than 30 min past (already posted this window)
     """
     # Also check env var as fallback — in case --manual flag wasn't passed
     if not manual and os.environ.get("GH_EVENT_NAME") == "workflow_dispatch":
@@ -150,35 +152,35 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     target = now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
     diff_secs = (target - now).total_seconds()
 
-    MAX_WAIT = 30 * 60  # 30-min cap — cron should fire within 30 min of configured time
+    # Cron fires every 30 min. We only proceed if we're within a 30-min window
+    # of the configured time. Otherwise exit cleanly (costs ~2 sec of Actions time).
+    WINDOW = 30 * 60  # 30-minute window
 
-    if diff_secs > MAX_WAIT:
-        # Cron fired way too early — cron time and configured time are out of sync.
-        # Exit cleanly instead of sleeping for hours and burning Actions minutes.
-        wait_mins = int(diff_secs // 60)
-        ist_utc_h  = (sched_h * 60 + sched_m - 330 + 1440) % 1440
-        utc_hh, utc_mm = divmod(ist_utc_h, 60)
-        info(f"⛔ CRON/CONFIG MISMATCH — now is {now.strftime('%H:%M')} IST, ")
-        info(f"   configured time is {time_ist} IST ({wait_mins} min away).")
-        info(f"   FIX: update the cron in .github/workflows/linkedin-agent.yml")
-        info(f"   Change it to:  cron: '{utc_mm} {utc_hh} * * *'  (= {time_ist} IST)")
-        info(f"   Exiting cleanly — will run at the correct cron time.")
+    if diff_secs > WINDOW:
+        # Too early — a future cron will catch the right window
+        mins_away = int(diff_secs // 60)
+        info(f"⏭️  Not yet time — {time_ist} IST is {mins_away}m away. Exiting (next cron will check again).")
         sys.exit(0)
     elif diff_secs > 0:
+        # Within the window — sleep the remaining gap then post
         wait_mins = int(diff_secs // 60)
         wait_secs = int(diff_secs % 60)
-        info(f"⏱️  Waiting {wait_mins}m {wait_secs}s until {time_ist} IST...")
+        info(f"⏱️  Sleeping {wait_mins}m {wait_secs}s until {time_ist} IST...")
         remaining = diff_secs
         while remaining > 0:
             time.sleep(min(60, remaining))
             remaining -= 60
             if remaining > 60:
                 info(f"   ... {int(remaining // 60)}m remaining until {time_ist} IST")
-        info(f"✅ Reached scheduled time {time_ist} IST — starting agent")
-    elif diff_secs < -3600:
-        info(f"⚠️  Now ({now.strftime('%H:%M')} IST) is >1h past {time_ist} IST — running anyway")
+        info(f"✅ Reached {time_ist} IST — starting agent")
+    elif diff_secs >= -WINDOW:
+        # Slightly past the target (cron fired just after) — run immediately
+        info(f"✅ Within window of {time_ist} IST — proceeding immediately")
     else:
-        info(f"✅ Within window of {time_ist} IST — proceeding")
+        # More than 30 min past — already ran this window, skip
+        mins_past = int(-diff_secs // 60)
+        info(f"⏭️  {time_ist} IST was {mins_past}m ago — already handled. Exiting.")
+        sys.exit(0)
 
 
 # ─── Quick diagnostic (python src/schedule_checker.py) ───────────────────────

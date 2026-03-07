@@ -17,12 +17,12 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh
 [data-theme="light"] #neural-canvas{opacity:0.15}
 /* animated glow pulse on cards */
 @keyframes card-glow{0%,100%{box-shadow:var(--sh),0 0 0px rgba(79,156,249,0)}50%{box-shadow:var(--sh),0 0 30px rgba(79,156,249,0.08)}}
-.card{animation:card-glow 6s ease-in-out infinite}
 /* header gradient shimmer */
 @keyframes hdr-shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 /* stat counter animation */
 @keyframes count-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.stat-val{font-size:28px;font-weight:800;font-family:var(--fh);line-height:1;margin-bottom:4px;animation:count-up* neon border on active/accent elements */
+.stat-val{font-size:28px;font-weight:800;font-family:var(--fh);line-height:1;margin-bottom:4px}
+/* neon border on active/accent elements */
 .btn.bp{box-shadow:0 0 20px rgba(79,156,249,0.3),0 4px 14px rgba(0,0,0,0.4);transition:box-shadow 0.3s}
 .btn.bp:hover{box-shadow:0 0 40px rgba(79,156,249,0.5),0 4px 14px rgba(0,0,0,0.4)}
 /* animated accent line under header */
@@ -30,9 +30,6 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 header{position:relative}
 /* glowing dot */
 .dot{box-shadow:0 0 8px var(--grn),0 0 16px var(--grn)}
-/* card hover lift */
-.card{transition:transform 0.2s,box-shadow 0.2s}
-.card:hover{transform:translateY(-2px)}
 /* run row hover */
 .rrow:hover{background:rgba(79,156,249,0.05);border-color:rgba(79,156,249,0.2);box-shadow:inset 3px 0 0 var(--acc),0 2px 8px rgba(0,0,0,0.3)}
 /* accent glow on selected topic chip */
@@ -41,9 +38,7 @@ header{position:relative}
 
 /* ── CONNECT ── */
 #cs{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative;z-index:1}
-.cc{background:var(--sur);border:1px solid rgba(79,156,249,0.2);border-radius:24px;padding:48px 44px;width:100%;max-width:460px;box-shadow:var(--sh),var(--gl),0 0 80px rgba(79,156,249,0.1);animation:up .5s ease;position:relative}
-.cc::before{content:'';position:absolute;inset:-1px;border-radius:24px;background:linear-gradient(135deg,rgba(79,156,249,0.3),rgba(167,139,250,0.3),rgba(79,156,249,0.1));z-index:-1;animation:border-spin 4s linear infinite}
-@keyframes border-spin{0%{opacity:0.3}50%{opacity:0.7}100%{opacity:0.3}}
+.cc{background:var(--sur);border:1px solid var(--bd);border-radius:24px;padding:48px 44px;width:100%;max-width:460px;box-shadow:var(--sh),var(--gl);animation:up .5s ease}
 @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .clogo{display:flex;align-items:center;gap:14px;margin-bottom:36px}
 .clogo-ic{width:48px;height:48px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 24px rgba(14,165,233,0.3)}
@@ -82,9 +77,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 /* ── STATS ── */
 .srow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
-.stat{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);padding:20px 22px 18px;transition:border-color var(--tr),transform var(--tr),box-shadow var(--tr);position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;position:relative;overflow:hidden}
-.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--acc),var(--acc2));opacity:0.6}
-.stat:hover{transform:translateY(-3px);border-color:rgba(79,156,249,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.4),0 0 20px rgba(79,156,249,0.1)}
+.stat{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);padding:20px 22px 18px;transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;position:relative;overflow:hidden}
 .stat:hover{border-color:var(--bds);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
 .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
 .stat:nth-child(1) .stat-icon{background:rgba(79,156,249,.14)}
@@ -110,8 +103,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
 
 /* ── CARDS ── */
-.card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:border-color var(--tr)}
-.card:hover{border-color:var(--bds)}
+.card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:transform 0.2s,border-color 0.2s,box-shadow 0.2s}
+.card:hover{border-color:var(--bds);transform:translateY(-2px);box-shadow:var(--sh),0 0 24px rgba(79,156,249,0.08)}
 .ch{padding:18px 22px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);position:relative}
 .ch::after{content:'';position:absolute;bottom:-1px;left:22px;width:48px;height:2px;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:1px;opacity:0.7}
 .ct{font-family:var(--fh);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--txm)}

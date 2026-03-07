@@ -3,19 +3,21 @@ run-name: "LinkedIn Agent · ${{ github.event_name == 'workflow_dispatch' && 'Ma
 
 # ─────────────────────────────────────────────────────────────────────────────
 # HOW TIMING WORKS:
-#   • The cron below should fire within 30 minutes BEFORE your configured
-#     posting time (set in the dashboard or schedule_config.json).
-#   • schedule_checker.py will sleep up to 30 min to hit the exact time.
-#   • If the gap is > 30 min it exits cleanly rather than burning Actions mins.
+#   • The cron fires every 30 minutes (*/30 * * * *).
+#   • schedule_checker.py checks if NOW is within 30 min of your configured time.
+#   • If yes: sleeps the gap, then posts.
+#   • If no: exits in ~2 seconds (costs almost no Actions minutes).
 #
-# YOUR CURRENT CRON:  20:50 IST  =  15:20 UTC  →  cron: '20 15 * * *'
-# To change posting time: update BOTH the cron below AND your dashboard schedule.
+# TO CHANGE POSTING TIME: just update it in the dashboard — no YAML change needed.
+# The */30 cron covers any time you pick automatically.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    # 15:20 UTC = 20:50 IST  ← update this when you change your posting time
-    - cron: '20 15 * * *'
+    # Fires every 30 minutes. schedule_checker.py decides whether to post
+    # based on the time configured in your dashboard (schedule_config.json).
+    # You NEVER need to update this cron — just change the time in the dashboard.
+    - cron: '*/30 * * * *'
 
   workflow_dispatch:
     inputs:
