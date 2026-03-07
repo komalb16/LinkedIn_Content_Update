@@ -207,6 +207,19 @@ def get_post_mode():
 
 
 
+
+def write_github_output(key, value):
+    """Write key=value to GITHUB_OUTPUT for use in subsequent workflow steps."""
+    gho = os.environ.get("GITHUB_OUTPUT")
+    if not gho:
+        return
+    try:
+        with open(gho, "a") as f:
+            # Multiline safe delimiter format
+            f.write(f"{key}={value}\n")
+    except Exception as e:
+        log.warning(f"Could not write GITHUB_OUTPUT: {e}")
+
 def write_github_summary(topic_name, mode, post_preview, dry_run=False):
     """Write job summary to GitHub Actions step summary file."""
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -271,6 +284,7 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
         mode = get_post_mode()
 
     log.info("Post mode: " + mode)
+    write_github_output("POST_MODE", mode)
 
     # Generate post based on mode
     if mode == "ai_news":
@@ -325,6 +339,8 @@ Do NOT mention current month or year."""
 
     if mode == "topic" or not post_text:
         topic = topic_mgr.get_topic(manual_topic_id) if manual_topic_id else topic_mgr.get_next_topic()
+    if topic:
+        write_github_output("POST_TOPIC", topic.get("name",""))
         log.info("Topic: " + topic["name"])
         post_text = generate_topic_post(topic)
 
@@ -347,14 +363,17 @@ Do NOT mention current month or year."""
         return
 
     # Post to LinkedIn
+    # Prepend topic title as visible first line on LinkedIn
+    title_line = f"📌 {topic['name']}\n\n"
+    full_post_text = title_line + post_text if not post_text.strip().startswith("📌") else post_text
     result = poster.create_post_with_image(
-        text=post_text,
+        text=full_post_text,
         image_path=diagram_path,
         title=topic["name"],
     )
     if result.get("success"):
         log.info("Posted! ID: " + str(result.get("post_id")))
-        write_github_summary(topic["name"], mode, post_text, dry_run=False)
+        write_github_summary(topic["name"], mode, full_post_text, dry_run=False)
         topic_mgr.save_run_history({
             "timestamp": datetime.now().isoformat(),
             "topic_id": topic["id"],

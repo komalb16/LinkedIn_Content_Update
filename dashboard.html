@@ -200,6 +200,16 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 /* export-bar styles moved to dropdown */
 
 
+
+/* ── HIDDEN TOPICS ── */
+.tch.hidden-topic{opacity:0.35;border-style:dashed;border-color:var(--red)!important;color:var(--red)!important}
+.tch.hidden-topic .hide-chip{background:rgba(34,197,94,0.15);color:var(--grn)!important}
+.hide-chip{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:16px;height:16px;background:rgba(239,68,68,0.15);border:none;border-radius:50%;color:var(--red);font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;line-height:1;padding:0}
+.tch:hover .hide-chip{opacity:1}
+.restore-bar{display:flex;align-items:center;gap:8px;padding:8px 0 0;flex-wrap:wrap}
+.restore-btn{font-size:10px;padding:3px 10px;border-radius:100px;border:1px dashed var(--bd);background:none;color:var(--txd);cursor:pointer;font-family:var(--fm);transition:all var(--tr)}
+.restore-btn:hover{border-color:var(--grn);color:var(--grn)}
+
 /* ── EXPORT DROPDOWN MENU ── */
 .export-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--sur);border:1.5px solid var(--bd);border-radius:12px;box-shadow:var(--shh);padding:6px;min-width:180px;z-index:200;display:none;flex-direction:column;gap:1px;animation:up .15s ease}
 .export-menu.open{display:flex}
@@ -607,23 +617,23 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
         </div>
         <div class="xl">Select topic (or add your own)</div>
         <div class="tgrid" id="tgrid">
-          <div class="tch ach sel" data-id="" data-name="Auto-select" onclick="selTopic(this)">🎲 Auto-select</div>
-          <div class="tch" data-id="llm-architecture" data-name="LLM Architecture" onclick="selTopic(this)">🤖 LLM Architecture</div>
-          <div class="tch" data-id="ai-agents-2025" data-name="AI Agents 2025" onclick="selTopic(this)">🤖 AI Agents 2025</div>
-          <div class="tch" data-id="mlops-pipeline" data-name="MLOps Pipeline" onclick="selTopic(this)">⚙️ MLOps Pipeline</div>
-          <div class="tch" data-id="rag-systems" data-name="RAG Systems" onclick="selTopic(this)">🔍 RAG Systems</div>
-          <div class="tch" data-id="kubernetes-mastery" data-name="Kubernetes" onclick="selTopic(this)">☸️ Kubernetes</div>
-          <div class="tch" data-id="docker-cheatsheet" data-name="Docker" onclick="selTopic(this)">🐳 Docker</div>
-          <div class="tch" data-id="aws-architecture" data-name="AWS Architecture" onclick="selTopic(this)">☁️ AWS Architecture</div>
-          <div class="tch" data-id="cicd-pipelines" data-name="CI/CD Pipelines" onclick="selTopic(this)">🚀 CI/CD Pipelines</div>
-          <div class="tch" data-id="system-design" data-name="System Design" onclick="selTopic(this)">🏗️ System Design</div>
-          <div class="tch" data-id="api-design" data-name="API Design" onclick="selTopic(this)">🔌 API Design</div>
-          <div class="tch" data-id="git-workflow" data-name="Git Workflow" onclick="selTopic(this)">🌿 Git Workflow</div>
-          <div class="tch" data-id="solid-principles" data-name="SOLID Principles" onclick="selTopic(this)">📐 SOLID Principles</div>
-          <div class="tch" data-id="zero-trust" data-name="Zero Trust" onclick="selTopic(this)">🔐 Zero Trust</div>
-          <div class="tch" data-id="devsecops" data-name="DevSecOps" onclick="selTopic(this)">🛡️ DevSecOps</div>
-          <div class="tch" data-id="data-lakehouse" data-name="Data Lakehouse" onclick="selTopic(this)">📊 Data Lakehouse</div>
-          <div class="tch" data-id="kafka-streaming" data-name="Kafka Streaming" onclick="selTopic(this)">🌊 Kafka Streaming</div>
+          <div class="tch ach sel" data-id="" data-name="Auto-select" onclick="selTopic(this)" data-builtin="1">🎲 Auto-select</div>
+          <div class="tch" data-id="llm-architecture" data-name="LLM Architecture" onclick="selTopic(this)" data-builtin="1">🤖 LLM Architecture<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('llm-architecture',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="ai-agents-2025" data-name="AI Agents 2025" onclick="selTopic(this)" data-builtin="1">🤖 AI Agents 2025<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('ai-agents-2025',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="mlops-pipeline" data-name="MLOps Pipeline" onclick="selTopic(this)" data-builtin="1">⚙️ MLOps Pipeline<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('mlops-pipeline',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="rag-systems" data-name="RAG Systems" onclick="selTopic(this)" data-builtin="1">🔍 RAG Systems<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('rag-systems',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="kubernetes-mastery" data-name="Kubernetes" onclick="selTopic(this)" data-builtin="1">☸️ Kubernetes<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('kubernetes-mastery',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="docker-cheatsheet" data-name="Docker" onclick="selTopic(this)" data-builtin="1">🐳 Docker<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('docker-cheatsheet',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="aws-architecture" data-name="AWS Architecture" onclick="selTopic(this)" data-builtin="1">☁️ AWS Architecture<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('aws-architecture',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="cicd-pipelines" data-name="CI/CD Pipelines" onclick="selTopic(this)" data-builtin="1">🚀 CI/CD Pipelines<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('cicd-pipelines',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="system-design" data-name="System Design" onclick="selTopic(this)" data-builtin="1">🏗️ System Design<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('system-design',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="api-design" data-name="API Design" onclick="selTopic(this)" data-builtin="1">🔌 API Design<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('api-design',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="git-workflow" data-name="Git Workflow" onclick="selTopic(this)" data-builtin="1">🌿 Git Workflow<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('git-workflow',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="solid-principles" data-name="SOLID Principles" onclick="selTopic(this)" data-builtin="1">📐 SOLID Principles<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('solid-principles',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="zero-trust" data-name="Zero Trust" onclick="selTopic(this)" data-builtin="1">🔐 Zero Trust<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('zero-trust',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="devsecops" data-name="DevSecOps" onclick="selTopic(this)" data-builtin="1">🛡️ DevSecOps<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('devsecops',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="data-lakehouse" data-name="Data Lakehouse" onclick="selTopic(this)" data-builtin="1">📊 Data Lakehouse<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('data-lakehouse',this.parentElement)" title="Hide topic">✕</button></div>
+          <div class="tch" data-id="kafka-streaming" data-name="Kafka Streaming" onclick="selTopic(this)" data-builtin="1">🌊 Kafka Streaming<button class="del-chip hide-chip" onclick="event.stopPropagation();hideBuiltinTopic('kafka-streaming',this.parentElement)" title="Hide topic">✕</button></div>
         </div>
         <!-- Add custom topic -->
         <div class="add-topic-row">
@@ -967,9 +977,72 @@ function exportRuns(fmt) {
 }
 
 
+
+// ── TOPIC HIDE / RESTORE ─────────────────────────────────────────────────────
+function getHiddenTopics() {
+  try { return JSON.parse(localStorage.getItem('hidden_topics') || '[]'); } catch(e) { return []; }
+}
+function saveHiddenTopics(arr) { localStorage.setItem('hidden_topics', JSON.stringify(arr)); }
+
+function hideBuiltinTopic(id, el) {
+  if (!id) return;
+  const hidden = getHiddenTopics();
+  if (!hidden.includes(id)) hidden.push(id);
+  saveHiddenTopics(hidden);
+  el.classList.add('hidden-topic');
+  // Change button to restore icon
+  const btn = el.querySelector('.hide-chip');
+  if (btn) { btn.textContent = '↩'; btn.title = 'Restore topic'; btn.onclick = function(e){ e.stopPropagation(); restoreBuiltinTopic(id, el); }; }
+  updateRestoreBar();
+  toast(`"${el.dataset.name}" hidden from rotation`, 'info');
+}
+
+function restoreBuiltinTopic(id, el) {
+  const hidden = getHiddenTopics().filter(h => h !== id);
+  saveHiddenTopics(hidden);
+  el.classList.remove('hidden-topic');
+  const btn = el.querySelector('.hide-chip');
+  if (btn) { btn.textContent = '✕'; btn.title = 'Hide topic'; btn.onclick = function(e){ e.stopPropagation(); hideBuiltinTopic(id, el); }; }
+  updateRestoreBar();
+  toast(`"${el.dataset.name}" restored to rotation`, 'ok');
+}
+
+function applyHiddenTopics() {
+  const hidden = getHiddenTopics();
+  hidden.forEach(id => {
+    const el = document.querySelector(`.tch[data-id="${id}"]`);
+    if (!el) return;
+    el.classList.add('hidden-topic');
+    const btn = el.querySelector('.hide-chip');
+    if (btn) { btn.textContent = '↩'; btn.title = 'Restore topic'; btn.onclick = function(e){ e.stopPropagation(); restoreBuiltinTopic(id, el); }; }
+  });
+  updateRestoreBar();
+}
+
+function updateRestoreBar() {
+  const hidden = getHiddenTopics();
+  let bar = document.getElementById('restoreBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'restoreBar';
+    bar.className = 'restore-bar';
+    const grid = document.getElementById('tgrid');
+    grid.parentNode.insertBefore(bar, grid.nextSibling);
+  }
+  if (!hidden.length) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML = '<span style="font-size:10px;color:var(--txd);font-family:var(--fm)">Hidden:</span>' +
+    hidden.map(id => {
+      const el = document.querySelector(`.tch[data-id="${id}"]`);
+      const name = el ? el.dataset.name : id;
+      return `<button class="restore-btn" onclick="restoreBuiltinTopic('${id}', document.querySelector('.tch[data-id=\'${id}\']'))">↩ ${name}</button>`;
+    }).join('');
+}
+
 window.onload = () => {
   applyTheme(localStorage.getItem('theme') || 'dark');
   initTzSelector();
+  applyHiddenTopics();
   loadCustomTopics();
   loadSettings();
   if (token) silentConn();
@@ -1411,9 +1484,18 @@ function getTopicFromRun(r) {
 
 function getModeFromRun(r) {
   const title = (r.display_title || r.name || '').toLowerCase();
-  if (title.includes('news') || title.includes('layoff')) return '📰 News';
-  if (title.includes('tool') || title.includes('launch')) return '🔧 Tools';
-  return null;
+  // Check explicit mode markers in run title (from run-name YAML or step summary)
+  if (title.includes('ai_news') || title.includes('ai-news'))      return '🤖 AI News';
+  if (title.includes('layoff'))                                      return '💼 Layoff News';
+  if (title.includes('tools_news') || title.includes('tools-news')) return '🔧 Tools News';
+  if (title.includes('tech_news') || title.includes('tech-news'))   return '📡 Tech News';
+  if (title.includes('news'))                                        return '📰 News';
+  // If a specific topic was in run name → it was a topic post
+  const runName  = r.name || r.display_title || '';
+  const parts    = runName.split('·').map(s => s.trim());
+  const topicPart = parts.length >= 3 ? parts[parts.length-1] : '';
+  if (topicPart && topicPart !== 'auto-topic') return '🏗️ Topic Post';
+  return '🎲 Auto';
 }
 
 // ── STATS ─────────────────────────────────────────────────────────────────────

@@ -152,17 +152,21 @@ def _send_telegram(subject: str, preview: str, topic: str):
     log.info(f"Telegram: sending to chat_id={chat_id} via bot token {bot_token[:8]}...")
 
     try:
+        # Escape HTML special chars so parse_mode=HTML never breaks
+        def esc_html(s):
+            return str(s).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+
         text = (
-            f"✅ *LinkedIn Post Published*\n\n"
-            f"📌 *Topic:* {topic}\n\n"
-            f"📝 *Preview:*\n_{preview}_\n\n"
-            f"🤖 _LinkedIn Agent via GitHub Actions_"
+            f"✅ <b>LinkedIn Post Published</b>\n\n"
+            f"📌 <b>Topic:</b> {esc_html(topic)}\n\n"
+            f"📝 <b>Preview:</b>\n<i>{esc_html(preview)}</i>\n\n"
+            f"🤖 <i>LinkedIn Agent via GitHub Actions</i>"
         )
 
         payload = {
             "chat_id":                  chat_id,
             "text":                     text,
-            "parse_mode":               "Markdown",
+            "parse_mode":               "HTML",
             "disable_web_page_preview": True,
         }
 
