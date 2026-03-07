@@ -14,7 +14,7 @@
 body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh;transition:background var(--tr),color var(--tr);font-size:14px;line-height:1.5}
 [data-theme="dark"] body::before,[data-theme="medium"] body::before{display:none}
 #neural-canvas{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:1}
-[data-theme="light"] #neural-canvas{opacity:0.12}
+[data-theme="light"] #neural-canvas{opacity:0.6}
 /* animated glow pulse on cards */
 @keyframes card-glow{0%,100%{box-shadow:var(--sh),0 0 0px rgba(79,156,249,0)}50%{box-shadow:var(--sh),0 0 30px rgba(79,156,249,0.08)}}
 /* header gradient shimmer */
@@ -1119,7 +1119,7 @@ window.onload = () => {
     function rgb(hex,a){const h=hex.replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a.toFixed(2)+')';}
     function rz(){W=cnv.width=window.innerWidth;H=cnv.height=window.innerHeight;}
     function rnd(a,b){return a+Math.random()*(b-a);}
-    function init(){nodes=[];for(let i=0;i<55;i++)nodes.push({x:rnd(0,W),y:rnd(0,H),vx:rnd(-0.25,0.25),vy:rnd(-0.25,0.25),r:rnd(2,4.5),p:rnd(0,6.28),c:Math.random()>.5?'#60aeff':'#b89dff',g:rnd(0.5,1)});}
+    function init(){nodes=[];for(let i=0;i<55;i++)nodes.push({x:rnd(0,W),y:rnd(0,H),vx:rnd(-0.25,0.25),vy:rnd(-0.25,0.25),r:rnd(2,4.5),p:rnd(0,6.28),c:Math.random()>.5?(document.documentElement.getAttribute('data-theme')==='light'?'#1d4ed8':'#60aeff'):(document.documentElement.getAttribute('data-theme')==='light'?'#6d28d9':'#b89dff'),g:rnd(0.5,1)});}
     function draw(){
       ctx.clearRect(0,0,W,H);
       nodes.forEach(n=>{
