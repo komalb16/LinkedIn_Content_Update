@@ -41,6 +41,12 @@ def clamp(text, n):
 def x(t):
     return str(t).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
 
+def rgba(hex_color, alpha):
+    """Convert #RRGGBB + alpha float to rgba() — safe for all SVG renderers."""
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2],16), int(h[2:4],16), int(h[4:6],16)
+    return f"rgba({r},{g},{b},{alpha})"
+
 # ── PRIMITIVES ────────────────────────────────────────────────────────────────
 
 def section(sx, sy, sw, sh, title, color, dashed=False):
@@ -49,7 +55,7 @@ def section(sx, sy, sw, sh, title, color, dashed=False):
     lw   = min(len(title)*7 + 24, sw - 40)
     s    = f'<rect x="{sx}" y="{sy}" width="{sw}" height="{sh}" rx="10" fill="{BG2}" stroke="{color}" stroke-width="1.8" {dash} opacity="0.95"/>'
     s   += f'<rect x="{sx+14}" y="{sy-11}" width="{lw}" height="22" rx="11" fill="{color}"/>'
-    s   += f'<text x="{sx+14+lw//2}" y="{sy+5}" text-anchor="middle" fill="white" font-size="10" font-weight="700" font-family="Arial,sans-serif" letter-spacing="0.8">{x(clamp(title, lw//6+2))}</text>'
+    s   += f'<text x="{sx+14+lw//2}" y="{sy+5}" text-anchor="middle" fill="white" font-size="11" font-weight="800" font-family="Arial,sans-serif" letter-spacing="0.5">{x(clamp(title, lw//6+2))}</text>'
     return s
 
 def card(cx, cy, cw, ch, color, title, sub="", rx=8):
@@ -57,8 +63,8 @@ def card(cx, cy, cw, ch, color, title, sub="", rx=8):
     s  = f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="{rx}" fill="{BG3}" stroke="{color}" stroke-width="1.5"/>'
     iw = cw - 12
     mid = cy + ch // 2
-    tf = min(11, max(7, iw // 7))
-    sf = min(9, max(6, iw // 9))
+    tf = min(12, max(9, iw // 7))
+    sf = min(10, max(8, iw // 9))
     t  = x(clamp(title, max(3, iw // max(1, tf-2))))
     if sub:
         sv = x(clamp(sub, max(3, iw // max(1, sf-2))))
@@ -70,11 +76,11 @@ def card(cx, cy, cw, ch, color, title, sub="", rx=8):
 
 def flow_box(fx, fy, fw, fh, ico, title, sub, color):
     """Icon + label flow cell — emoji skipped, title+sub shown reliably."""
-    s  = f'<rect x="{fx}" y="{fy}" width="{fw}" height="{fh}" rx="8" fill="{color}18" stroke="{color}" stroke-width="1.5"/>'
+    s  = f'<rect x="{fx}" y="{fy}" width="{fw}" height="{fh}" rx="8" fill="{rgba(color,0.09)}" stroke="{color}" stroke-width="1.5"/>'
     iw = fw - 10
     mid = fy + fh // 2
-    tf  = min(10, max(7, iw//7))
-    sf  = min(8,  max(6, iw//9))
+    tf  = min(11, max(9, iw//7))
+    sf  = min(9,  max(8, iw//9))
     if sub:
         s += f'<text x="{fx+fw//2}" y="{mid-4}" text-anchor="middle" fill="{color}" font-size="{tf}" font-weight="700" font-family="Arial,sans-serif">{x(clamp(title,iw//5))}</text>'
         s += f'<text x="{fx+fw//2}" y="{mid+11}" text-anchor="middle" fill="{TEXT_MID}" font-size="{sf}" font-family="Arial,sans-serif">{x(clamp(sub,iw//4))}</text>'
@@ -94,7 +100,7 @@ def tool_strip(ty, tools, color):
     """Tool strip — emoji replaced with colored text pills (safe for all SVG renderers)."""
     n  = len(tools)
     tw = 870 // n
-    s  = f'<rect x="15" y="{ty}" width="870" height="26" rx="6" fill="{color}18" stroke="{color}50" stroke-width="1"/>'
+    s  = f'<rect x="15" y="{ty}" width="870" height="26" rx="6" fill="{rgba(color,0.09)}" stroke="{rgba(color,0.31)}" stroke-width="1"/>'
     for i, (ico, name) in enumerate(tools):
         cx = 15 + i*tw + tw//2
         # Skip emoji, show only the name centered — cleaner and reliable
@@ -131,15 +137,15 @@ def two_col(tx, ty, tw2, th, lbl1, col1, lbl2, col2, split=0.5):
 def cheatrow(ry, rh, label, color, items):
     lw = max(80, len(label)*8+16)
     s  = f'<rect x="15" y="{ry}" width="870" height="{rh}" rx="7" fill="{BG3}" stroke="{BORDER2}" stroke-width="1"/>'
-    s += f'<rect x="15" y="{ry}" width="{lw}" height="{rh}" rx="7" fill="{color}28" stroke="{color}" stroke-width="1"/>'
-    s += f'<rect x="{15+lw-7}" y="{ry}" width="7" height="{rh}" fill="{color}28"/>'
-    s += f'<text x="{15+lw//2}" y="{ry+rh//2+4}" text-anchor="middle" fill="{color}" font-size="{min(10,max(7,lw//9))}" font-weight="700" font-family="Arial,sans-serif">{x(clamp(label,lw//6))}</text>'
+    s += f'<rect x="15" y="{ry}" width="{lw}" height="{rh}" rx="7" fill="{rgba(color,0.16)}" stroke="{color}" stroke-width="1"/>'
+    s += f'<rect x="{15+lw-7}" y="{ry}" width="7" height="{rh}" fill="{rgba(color,0.16)}"/>'
+    s += f'<text x="{15+lw//2}" y="{ry+rh//2+4}" text-anchor="middle" fill="white" font-size="{min(10,max(8,lw//8))}" font-weight="800" font-family="Arial,sans-serif" letter-spacing="0.5">{x(clamp(label,lw//5))}</text>'
     gx = 15+lw+6; avail = 880-gx; n = len(items); cw = max(50, avail//n-4)
     for i, item in enumerate(items):
         ico = item[0] if len(item)>0 else ""; title2 = item[1] if len(item)>1 else ""; sub = item[2] if len(item)>2 else ""
         cx2 = gx+i*(cw+4)
-        s += f'<rect x="{cx2}" y="{ry+3}" width="{cw}" height="{rh-6}" rx="6" fill="{color}15" stroke="{color}40" stroke-width="1"/>'
-        s += f'<text x="{cx2+cw//2}" y="{ry+rh//2+4}" text-anchor="middle" fill="{color}" font-size="{min(9,max(6,cw//8))}" font-weight="700" font-family="Arial,sans-serif">{x(clamp(title2,cw//5))}</text>'
+        s += f'<rect x="{cx2}" y="{ry+3}" width="{cw}" height="{rh-6}" rx="6" fill="{rgba(color,0.08)}" stroke="{rgba(color,0.25)}" stroke-width="1"/>'
+        s += f'<text x="{cx2+cw//2}" y="{ry+rh//2+4}" text-anchor="middle" fill="{color}" font-size="{min(11,max(9,cw//7))}" font-weight="700" font-family="Arial,sans-serif">{x(clamp(title2,cw//4))}</text>'
         if sub and rh>=56: s += f'<text x="{cx2+cw//2}" y="{ry+rh-8}" text-anchor="middle" fill="{TEXT_MID}" font-size="{min(8,max(6,cw//9))}" font-family="Arial,sans-serif">{x(clamp(sub,cw//4))}</text>'
     return s
 
@@ -150,7 +156,7 @@ def wrap(content, title, subtitle, color, date_str):
   <defs>
     <linearGradient id="hg" x1="0" x2="1" y1="0" y2="0">
       <stop offset="0%" stop-color="{color}"/>
-      <stop offset="100%" stop-color="{color}55"/>
+      <stop offset="100%" stop-color="{rgba(color,0.33)}"/>
     </linearGradient>
   </defs>
   <rect width="900" height="580" fill="{BG}"/>
@@ -283,9 +289,9 @@ def make_cicd(C):
     pw = 870 // len(phases)
     for i,(env,ico,phase,tools) in enumerate(phases):
         col = C[i%len(C)]; bx = 15+i*pw
-        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="184" rx="8" fill="{col}12" stroke="{col}" stroke-width="1.5" stroke-dasharray="6,3"/>'
-        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="24" rx="8" fill="{col}35"/>'
-        s += f'<rect x="{bx}" y="110" width="{pw-3}" height="12" fill="{col}35"/>'
+        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="184" rx="8" fill="{rgba(col,0.07)}" stroke="{col}" stroke-width="1.5" stroke-dasharray="6,3"/>'
+        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="24" rx="8" fill="{rgba(col,0.21)}"/>'
+        s += f'<rect x="{bx}" y="110" width="{pw-3}" height="12" fill="{rgba(col,0.21)}"/>'
         s += f'<text x="{bx+(pw-3)//2}" y="{114}" text-anchor="middle" fill="white" font-size="9" font-weight="700" font-family="Arial,sans-serif" letter-spacing="0.8">{x(env)}</text>'
         s += f'<text x="{bx+(pw-3)//2}" y="{163}" text-anchor="middle" fill="{col}" font-size="22" font-weight="900" font-family="Arial,sans-serif">{i+1}</text>'
         s += f'<text x="{bx+(pw-3)//2}" y="{183}" text-anchor="middle" fill="white" font-size="9" font-weight="700" font-family="Arial,sans-serif">{x(clamp(phase,10))}</text>'
@@ -416,9 +422,9 @@ def make_devsecops(C):
     pw = 870 // len(phases)
     for i,(env,ico,phase,tools) in enumerate(phases):
         col = C[i%len(C)]; bx = 15+i*pw
-        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="178" rx="8" fill="{col}12" stroke="{col}" stroke-width="1.5" stroke-dasharray="6,3"/>'
-        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="22" rx="8" fill="{col}35"/>'
-        s += f'<rect x="{bx}" y="108" width="{pw-3}" height="12" fill="{col}35"/>'
+        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="178" rx="8" fill="{rgba(col,0.07)}" stroke="{col}" stroke-width="1.5" stroke-dasharray="6,3"/>'
+        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="22" rx="8" fill="{rgba(col,0.21)}"/>'
+        s += f'<rect x="{bx}" y="108" width="{pw-3}" height="12" fill="{rgba(col,0.21)}"/>'
         s += f'<text x="{bx+(pw-3)//2}" y="{113}" text-anchor="middle" fill="white" font-size="9" font-weight="700" font-family="Arial,sans-serif" letter-spacing="0.8">{x(env)}</text>'
         s += f'<text x="{bx+(pw-3)//2}" y="{160}" text-anchor="middle" fill="{col}" font-size="22" font-weight="900" font-family="Arial,sans-serif">{i+1}</text>'
         s += f'<text x="{bx+(pw-3)//2}" y="{174}" text-anchor="middle" fill="white" font-size="9" font-weight="700" font-family="Arial,sans-serif">{x(clamp(phase,10))}</text>'
@@ -458,7 +464,7 @@ def make_git_workflow(C):
     bw = 870 // len(branches)
     for i,(name,ico,role,deploy,col) in enumerate(branches):
         bx = 15+i*bw
-        s += f'<rect x="{bx}" y="98" width="{bw-4}" height="166" rx="8" fill="{col}12" stroke="{col}" stroke-width="1.5" stroke-dasharray="6,3"/>'
+        s += f'<rect x="{bx}" y="98" width="{bw-4}" height="166" rx="8" fill="{rgba(col,0.07)}" stroke="{col}" stroke-width="1.5" stroke-dasharray="6,3"/>'
         s += f'<text x="{bx+(bw-4)//2}" y="{134}" text-anchor="middle" fill="{col}" font-size="24" font-weight="900" font-family="Arial,sans-serif">{name[0].upper()}</text>'
         s += f'<text x="{bx+(bw-4)//2}" y="{150}" text-anchor="middle" fill="{col}" font-size="10" font-weight="700" font-family="Arial,sans-serif">{x(name)}</text>'
         s += f'<text x="{bx+(bw-4)//2}" y="{165}" text-anchor="middle" fill="{TEXT_MID}" font-size="8" font-family="Arial,sans-serif">{x(role)}</text>'
@@ -481,7 +487,7 @@ def make_api_design(C):
     pw = 870 // len(paradigms)
     for i,(name,ico,proto,use,col) in enumerate(paradigms):
         bx = 15+i*pw
-        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="110" rx="8" fill="{col}15" stroke="{col}" stroke-width="1.5"/>'
+        s += f'<rect x="{bx}" y="98" width="{pw-3}" height="110" rx="8" fill="{rgba(col,0.08)}" stroke="{col}" stroke-width="1.5"/>'
         s += f'<text x="{bx+(pw-3)//2}" y="{130}" text-anchor="middle" fill="{col}" font-size="16" font-weight="900" font-family="Arial,sans-serif">{name[:4]}</text>'
         s += f'<text x="{bx+(pw-3)//2}" y="{151}" text-anchor="middle" fill="{col}" font-size="12" font-weight="700" font-family="Arial,sans-serif">{x(name)}</text>'
         s += f'<text x="{bx+(pw-3)//2}" y="{165}" text-anchor="middle" fill="{TEXT_MID}" font-size="8" font-family="Arial,sans-serif">{x(proto)}</text>'
@@ -510,7 +516,7 @@ def make_solid(C):
     pw = 870 // len(principles)
     for i,(letter,name,rule,example,col) in enumerate(principles):
         bx = 15+i*pw
-        s += f'<rect x="{bx}" y="98" width="{pw-4}" height="220" rx="10" fill="{col}12" stroke="{col}" stroke-width="2"/>'
+        s += f'<rect x="{bx}" y="98" width="{pw-4}" height="220" rx="10" fill="{rgba(col,0.07)}" stroke="{col}" stroke-width="2"/>'
         s += f'<text x="{bx+(pw-4)//2}" y="{136}" text-anchor="middle" fill="{col}" font-size="32" font-weight="900" font-family="Arial,sans-serif">{letter}</text>'
         s += f'<text x="{bx+(pw-4)//2}" y="{156}" text-anchor="middle" fill="{col}" font-size="10" font-weight="700" font-family="Arial,sans-serif">{x(name)}</text>'
         words = rule.split(); line=""; lines_out=[]; ys=170
