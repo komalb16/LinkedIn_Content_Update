@@ -144,9 +144,11 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
 
     # ── 4. WEEKLY DAY ENABLED ─────────────────────────────────────────────────
     day_cfg = cfg["weekly"].get(day_key, {"enabled": True, "time_ist": "09:30"})
-    if not day_cfg.get("enabled", True) and not is_forced:
+    if not day_cfg.get("enabled", True) and not is_forced and not manual and not dry_run:
         info(f"📅 {day_key.capitalize()} is disabled in weekly schedule. Exiting cleanly.")
         sys.exit(0)
+    elif not day_cfg.get("enabled", True) and (manual or dry_run):
+        info(f"📅 {day_key.capitalize()} is disabled but {trigger} override — continuing")
 
     # ── 5. SLEEP UNTIL SCHEDULED TIME (only for cron triggers) ─────────────────
     if dry_run or manual:
