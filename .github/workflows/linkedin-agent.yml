@@ -34,6 +34,9 @@ jobs:
   post:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      actions: write   # needed for gh run cancel in the skip step
+      contents: read
 
     steps:
       - name: Checkout repository
