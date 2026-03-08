@@ -47,93 +47,163 @@ HOOK_STYLES = [
     "Start with a shocking or surprising metric/statistic that defies logic.",
 ]
 
+# ── WORD LIMIT NOTE ──────────────────────────────────────────────────────────
+# LinkedIn hard limit = 3000 chars ≈ 420 words.
+# Target 250-320 words so there is room for the prepended topic title.
+# Both POST_SYSTEM and prompts enforce this consistently.
+
 POST_SYSTEM = """You are a highly opinionated Staff Engineer and tech leader.
-You write aggressive, viral, scroll-stopping LinkedIn posts.
-You do NOT write academic essays. You write like a practitioner who has seen systems fail in production, but you write from a completely generic, third-person perspective.
+You write aggressive, viral, scroll-stopping LinkedIn posts that look exactly like the EXAMPLE below.
+Study the structure and reproduce it for every post.
 
-FORMATTING RULES (CRITICAL — follow these exactly):
-- Start with a BOLD HOOK LINE using 🚨 or a provocative one-liner that makes people stop scrolling
-- Follow with a 1-2 sentence context line that sets up the topic
-- Use NUMBERED SECTIONS with emoji headers: 🚀 1., 🤔 2., ⚡ 3. etc.
-- Each section should have a bold insight title followed by short explanation
-- Include COLORFUL ASCII TEXT-ART using emoji squares for flow diagrams like:
+═══════════════ EXAMPLE POST (copy this structure exactly) ═══════════════
 
-  User Request
-       │
-       ▼
-  🟦 Load Balancer
-       │
-       ▼
-  🟩 App Servers
-       │
-       ▼
-  🟨 Cache (Redis)
-       │
-       ▼
-  🟥 Database
+🚨 3 things nobody tells you about System Design
 
-- Include TEXT TABLES using arrows for scaling/comparison, like:
+Most engineers learn system design through diagrams, theory, and interview prep.
+But real-world systems teach very different lessons.
 
-  1K users     →   Single server
-  100K users   →   Load balancer + replicas
-  10M users    →   Distributed architecture
-  100M users   →   Microservices + sharding
+Here are 3 realities that experienced engineers eventually discover:
 
-- TONE: Punchy, authoritative, slightly contrarian, and extremely confident. Pick a side and defend it.
-- RHYTHM: Mix in-depth, multi-sentence analytical explanations with brutal, one-word sentences. E.g., "Period." or "It failed."
-- Write a LONG, DETAILED post. You MUST write at least 400-600 words.
-- To reach this length, expand deeply on the "Why" and "How" in your numbered sections. Do not just summarize.
-- Use Emojis as section markers and visual anchors (8-12 throughout)
-- Include ONE specific data point, real metric, or tool name.
-- End with 💬 and an engagement question.
-- Add 5-7 hashtags at the very end using ONLY # symbol like #SystemDesign #AI
+🚀 1. Scalability isn't about traffic.
+It's about growth.
+A system that works perfectly today may collapse tomorrow.
 
-STRICT BANNED WORDS (NEVER USE THESE OR YOU FAIL):
-- "robust", "crucial", "delve", "landscape", "testament", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "navigating", "unprecedented", "embark", "shedding light", "nuance", "moreover", "additionally", "consequently", "in conclusion"
+```
+1K users     →   Single server
+100K users   →   Load balancer + replicas
+10M users    →   Distributed architecture
+100M users   →   Microservices + sharding
+```
 
-STRICT PROHIBITIONS:
-- NEVER use first-person or second-person pronouns ("I", "me", "my", "we", "our", "you", "your"). Write completely in the third person.
-- NEVER start with "As we dive into", "In today's", "In the world of"
-- NEVER reference current month or year
-- NEVER write wall-of-text paragraphs — every paragraph must be 1-2 sentences
-- NEVER skip the visual elements (ASCII diagrams, tables, flow charts)
+Designing for scalability means thinking about how the system evolves, not just how it works today.
+
+🤔 2. The CAP Theorem isn't a choice.
+It's a trade-off.
+
+Every architecture decision forces a pick:
+• Consistency — every node sees the same data at the same time
+• Availability — every request gets a response
+• Partition Tolerance — the system survives network splits
+
+Distributed systems cannot guarantee all three. Every decision prioritizes what matters most.
+
+⚡ 3. Caching & load balancing decide performance.
+Often the biggest wins come from the layer before the database.
+
+```
+User Request
+     │
+     ▼
+🟦 Load Balancer
+     │
+     ▼
+🟩 Application Servers
+     │
+     ▼
+🟨 Cache Layer (Redis)
+     │
+     ▼
+🟥 Database
+```
+
+A well-designed cache can reduce latency by 90% and cut database load dramatically.
+But scaling further introduces complexity:
+• Database sharding → data distribution challenges
+• Query routing → consistency tradeoffs
+• Replication → eventual consistency risk
+
+💡 This is why engineers struggle with system design interviews.
+It's not about memorizing architectures.
+It's about understanding trade-offs, constraints, and how systems evolve.
+
+💬 What's the most overlooked system design principle in real-world systems?
+
+#SystemDesign #DistributedSystems #Scalability #SoftwareEngineering #TechArchitecture
+
+═══════════════ END EXAMPLE ═══════════════
+
+RULES (non-negotiable):
+- ALWAYS use ``` fenced blocks for tables, flow diagrams, and ASCII art
+- ALWAYS use 🟦🟩🟨🟥 emoji squares in flow diagrams with │ and ▼ connectors
+- ALWAYS use numbered sections with emoji prefix (🚀 1., 🤔 2., ⚡ 3.)
+- ALWAYS end with 💬 + engagement question + blank line + 5-7 hashtags
+- STRICT LENGTH: 280-380 words. No more.
+- Every paragraph is 1-3 sentences max. Frequent line breaks.
+- Third-person perspective only. No "I", "me", "my", "we", "you", "your"
+- Never reference current month or year
+- No banned words: "robust", "crucial", "delve", "landscape", "testament", "realm",
+  "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented"
 - Do NOT add any copyright or signature
 """
 
 NEWS_SYSTEM = """You are a highly opinionated Staff Engineer and tech leader.
-You write aggressive, viral, scroll-stopping LinkedIn posts about breaking tech news.
-You write like an insider calling out industry BS and dropping hard truths, but from a strictly generic, third-person perspective.
+You write aggressive, viral LinkedIn posts reacting to breaking tech news.
+Study this EXAMPLE and reproduce its exact structure:
 
-FORMATTING RULES (CRITICAL — follow these exactly):
-- Start with 🚨 or 🔥 and a BOLD, urgent hook about the news
-- Follow with a 1-2 sentence summary of what happened
-- Break your analysis into NUMBERED SECTIONS with emoji headers (🚀 1., 💡 2., ⚡ 3.)
-- Include at least ONE visual text element:
-  - A comparison table using → arrows
-  - An ASCII flow diagram using │ ▼ and colored emoji squares (🟦🟩🟨🟥)
-  - A before/after comparison
-- TONE: Punchy, authoritative, slightly contrarian, and extremely confident. Pick a side and defend it.
-- RHYTHM: Mix in-depth, multi-sentence analytical explanations with brutal, one-word sentences.
-- Write a LONG, DETAILED post. You MUST write at least 400-600 words.
-- To reach this length, expand deeply on the implications, the "Why", and the "What's next". Do not just summarize the news.
-- Be strongly opinionated — share a clear, bold perspective. NEVER sound neutral or academic.
-- End with 💬 and an engagement question
-- Add 5-7 relevant hashtags using ONLY # symbol like #AI #Tech
+═══════════════ EXAMPLE POST ═══════════════
 
-STRICT BANNED WORDS (NEVER USE THESE OR YOU FAIL):
-- "robust", "crucial", "delve", "landscape", "testament", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "navigating", "unprecedented", "embark", "shedding light", "nuance", "moreover", "additionally", "consequently", "in conclusion"
+🚨 [Company] just [did something that changes everything].
 
-STRICT PROHIBITIONS:
-- NEVER use first-person or second-person pronouns ("I", "me", "my", "we", "our", "you", "your"). Write completely in the third person.
-- NEVER start with "As we dive into", "In today's", "In the world of"
-- NEVER reference current month or year
-- NEVER write wall-of-text paragraphs
+Most engineers haven't processed what this actually means yet.
+
+Here's the real breakdown:
+
+🚀 1. What actually happened.
+[2-3 sentences explaining the news clearly and specifically.]
+
+```
+Before           →   After
+Old approach     →   New reality
+Previous metric  →   New metric
+```
+
+🤔 2. Why this matters more than people think.
+[2-3 punchy sentences on the deeper implication.]
+
+The real shift:
+• [Implication 1 for engineers]
+• [Implication 2 for the industry]
+• [Implication 3 for the future]
+
+⚡ 3. What smart engineers should do right now.
+[Concrete, specific action. One tool, one technique, one decision.]
+
+```
+🟦 Old Stack
+     │
+     ▼
+🟩 New Capability Added
+     │
+     ▼
+🟥 What Gets Replaced
+```
+
+💡 The bottom line: [One brutal, confident take.]
+[One more punchy sentence.]
+
+💬 [Engagement question about the news]?
+
+#[Relevant] #[Hashtags] #[Here] #[5to7] #[Total]
+
+═══════════════ END EXAMPLE ═══════════════
+
+RULES (non-negotiable):
+- ALWAYS use ``` fenced blocks for tables, comparisons, and flow diagrams
+- ALWAYS use 🟦🟩🟨🟥 in flow diagrams with │ and ▼ connectors
+- ALWAYS use numbered sections with emoji prefix
+- ALWAYS end with 💬 + question + hashtags
+- Be strongly opinionated — pick a side and defend it
+- STRICT LENGTH: 280-380 words max
+- Third-person only. No "I", "me", "my", "we", "you", "your"
+- Never reference current month or year
+- No banned words: "robust", "crucial", "delve", "landscape", "testament", "realm",
+  "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented"
 - Do NOT add any copyright or signature
 """
 
-DIAGRAM_SYSTEM = """You are a technical SVG diagram creator for Komal Batra.
-Return ONLY raw SVG code starting with <svg and ending with </svg>.
-Dark background #0D1117. Professional technical architecture diagram."""
+# DIAGRAM_SYSTEM removed — diagrams are generated locally by DiagramGenerator.
+# No LLM call is needed for diagram generation.
 
 
 def call_ai(prompt, system):
@@ -150,7 +220,7 @@ def call_ai(prompt, system):
             {"role": "system", "content": system},
             {"role": "user", "content": prompt}
         ],
-        "max_tokens": 2048,
+        "max_tokens": 1024,   # 250-320 words ≈ 400-500 tokens; 1024 is plenty
         "temperature": 0.85
     }
     resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=30)
@@ -176,7 +246,6 @@ def fetch_rss_news(category="tech", max_items=5):
                 desc = item.findtext("description", "").strip()
                 link = item.findtext("link", "").strip()
                 pub_date = item.findtext("pubDate", "").strip()
-                # Clean HTML from description
                 desc = re.sub(r'<[^>]+>', '', desc)[:300]
                 if title and len(title) > 10:
                     articles.append({
@@ -202,7 +271,6 @@ def generate_news_post(news_type="ai"):
         log.warning("No news fetched, falling back to topic post")
         return None
 
-    # Format news for prompt
     news_text = ""
     for i, a in enumerate(articles[:3]):
         news_text += f"\n{i+1}. {a['title']}\n   {a['description'][:200]}\n"
@@ -210,21 +278,20 @@ def generate_news_post(news_type="ai"):
     log.info("Fetched " + str(len(articles)) + " news articles")
 
     hook = random.choice(HOOK_STYLES)
-    prompt = f"""Here are the latest {news_type} tech news stories from today:
+    prompt = f"""Latest {news_type} tech news:
 {news_text}
 
-{hook}
+Hook style: {hook}
 
-Write a LinkedIn post reacting to ONE of these news stories (pick the most interesting/impactful one).
-Provide an expert, third-person perspective on what this means for engineers, the industry, and the future.
-Be specific — mention the actual news, companies, or numbers involved.
-Make it feel timely and urgent.
-
-IMPORTANT FORMATTING:
-- Include a COLORFUL ASCII DIAGRAM using emoji squares (🟦🟩🟨🟥) with │ and ▼ connectors showing impact flow
-- Include a comparison or before/after table using → arrows
-- Use numbered sections with emoji headers
-- Provide DEEP, DETAILED analysis for each section to ensure the post hits the 400-600 word requirement."""
+Pick the most impactful story and write a LinkedIn post reacting to it.
+Follow the EXAMPLE structure from your system prompt exactly.
+Requirements:
+- Mention the actual company, product, or number from the news
+- Include a ``` fenced comparison/before-after table using → arrows
+- Include a ``` fenced flow diagram using 🟦🟩🟨🟥 with │ and ▼ connectors
+- 3 numbered sections with emoji headers
+- Strong, opinionated take — pick a side
+- 280-380 words total"""
 
     return call_ai(prompt, NEWS_SYSTEM)
 
@@ -236,42 +303,17 @@ def generate_topic_post(topic):
     prompt = f"""Write a LinkedIn post about: {topic["prompt"]}
 Angle: {topic.get("angle", "practical insights")}
 
-{hook}
+Hook style: {hook}
 
-Provide an authoritative, objective breakdown of how these systems are actually built.
-Include ONE specific real tool, metric, or example.
-Do NOT mention the current month or year.
-
-IMPORTANT FORMATTING:
-- Include a COLORFUL ASCII FLOW DIAGRAM using emoji squares (🟦🟩🟨🟥) with │ and ▼ connectors
-  Example:
-  User Request
-       │
-       ▼
-  🟦 Load Balancer
-       │
-       ▼
-  🟩 App Servers
-       │
-       ▼
-  🟨 Cache (Redis)
-       │
-       ▼
-  🟥 Database
-
-- Include a TEXT TABLE with scaling/comparison data using → arrows
+Requirements:
+- Follow the EXAMPLE structure from your system prompt exactly
+- Include a ``` fenced flow diagram using 🟦🟩🟨🟥 squares with │ and ▼ connectors
+- Include a ``` fenced comparison table using → arrows
 - Use 3 numbered sections with emoji headers (🚀 1., 🤔 2., ⚡ 3.)
-- Each section must be highly detailed: bold title + DEEP, in-depth explanation spanning multiple paragraphs. Prove your expertise.
-- You MUST write a long-form post (400-600 words). Do not output a short summary."""
+- ONE specific real tool, metric, or example (e.g. "Redis cuts latency by 90%")
+- Do NOT mention the current month or year
+- 280-380 words total"""
     return call_ai(prompt, POST_SYSTEM)
-
-
-def generate_diagram(topic, diagram_type):
-    log.info("Generating diagram: " + diagram_type)
-    prompt = "Create a " + diagram_type + " SVG about: " + topic["diagram_subject"] + "\nReturn ONLY raw SVG code, nothing else."
-    result = call_ai(prompt, DIAGRAM_SYSTEM)
-    match = re.search(r"<svg[\s\S]*?<\/svg>", result, re.IGNORECASE)
-    return match.group(0) if match else result
 
 
 def get_post_mode():
@@ -290,8 +332,6 @@ def get_post_mode():
         return "topic"
 
 
-
-
 def write_github_output(key, value):
     """Write key=value to GITHUB_OUTPUT for use in subsequent workflow steps."""
     gho = os.environ.get("GITHUB_OUTPUT")
@@ -299,16 +339,16 @@ def write_github_output(key, value):
         return
     try:
         with open(gho, "a") as f:
-            # Multiline safe delimiter format
             f.write(f"{key}={value}\n")
     except Exception as e:
         log.warning(f"Could not write GITHUB_OUTPUT: {e}")
+
 
 def write_github_summary(topic_name, mode, post_preview, dry_run=False):
     """Write job summary to GitHub Actions step summary file."""
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
     if not summary_file:
-        return  # not running in GitHub Actions
+        return
     try:
         preview = post_preview[:300].replace("\n", "\n> ") if post_preview else "—"
         status  = "🧪 Dry Run" if dry_run else "✅ Published"
@@ -329,6 +369,7 @@ def write_github_summary(topic_name, mode, post_preview, dry_run=False):
     except Exception as e:
         log.warning(f"Could not write step summary: {e}")
 
+
 def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False):
     log.info("=" * 60)
     log.info("LinkedIn Agent — Komal Batra — " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -336,8 +377,6 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
     log.info("=" * 60)
 
     # ── CHECK SCHEDULE ────────────────────────────────────────────────────────
-    # Reads schedule_config.json. Exits cleanly if today is paused/skipped.
-    # Sleeps until configured IST time if triggered before scheduled time.
     try:
         from schedule_checker import check_and_wait
         check_and_wait(dry_run=dry_run, manual=manual)
@@ -370,7 +409,7 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
     log.info("Post mode: " + mode)
     write_github_output("POST_MODE", mode)
 
-    # Generate post based on mode
+    # ── GENERATE POST ─────────────────────────────────────────────────────────
     if mode == "ai_news":
         post_text = generate_news_post("ai")
         if not post_text:
@@ -378,8 +417,10 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
 
     elif mode == "layoff_news":
         articles = fetch_rss_news("layoffs", 5)
-        # Filter for layoff-related articles
-        layoff_articles = [a for a in articles if any(w in a["title"].lower() for w in ["layoff", "laid off", "cut", "job", "workforce", "redundan", "downsize"])]
+        layoff_articles = [a for a in articles if any(
+            w in a["title"].lower()
+            for w in ["layoff", "laid off", "cut", "job", "workforce", "redundan", "downsize"]
+        )]
         if layoff_articles:
             news_text = "\n".join([f"- {a['title']}: {a['description'][:200]}" for a in layoff_articles[:3]])
             hook = random.choice(HOOK_STYLES)
@@ -391,15 +432,18 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
 Write an analytical LinkedIn post breaking down these layoffs.
 What does this mean for tech workers, the industry, and AI's role?
 Be empathetic but also analytical. Share actionable advice.
-Do NOT mention current month or year."""
+Do NOT mention current month or year.
+STRICT: 250-320 words total."""
             post_text = call_ai(prompt, NEWS_SYSTEM)
         if not post_text:
             mode = "topic"
 
     elif mode == "tools_news":
         articles = fetch_rss_news("tools", 5)
-        # Filter for tool/product launches
-        tool_articles = [a for a in articles if any(w in a["title"].lower() for w in ["launch", "release", "new", "introduce", "tool", "platform", "open source", "github", "api", "model"])]
+        tool_articles = [a for a in articles if any(
+            w in a["title"].lower()
+            for w in ["launch", "release", "new", "introduce", "tool", "platform", "open source", "github", "api", "model"]
+        )]
         if tool_articles:
             news_text = "\n".join([f"- {a['title']}: {a['description'][:200]}" for a in tool_articles[:3]])
             hook = random.choice(HOOK_STYLES)
@@ -411,7 +455,8 @@ Do NOT mention current month or year."""
 Write a LinkedIn post about one of these new tools/launches.
 Provide an expert breakdown: Is this a game-changer? Who should care? What problem does it solve?
 Include practical use cases.
-Do NOT mention current month or year."""
+Do NOT mention current month or year.
+STRICT: 250-320 words total."""
             post_text = call_ai(prompt, NEWS_SYSTEM)
         if not post_text:
             mode = "topic"
@@ -423,20 +468,20 @@ Do NOT mention current month or year."""
 
     if mode == "topic" or not post_text:
         topic = topic_mgr.get_topic(manual_topic_id) if manual_topic_id else topic_mgr.get_next_topic()
+
     if topic:
-        write_github_output("POST_TOPIC", topic.get("name",""))
+        write_github_output("POST_TOPIC", topic.get("name", ""))
         log.info("Topic: " + topic["name"])
         post_text = generate_topic_post(topic)
 
     log.info("POST:\n" + post_text)
 
-    # Generate diagram (always use topic-based diagram)
+    # ── GENERATE DIAGRAM (local — no LLM call needed) ─────────────────────────
     if not topic:
         topic = topic_mgr.get_next_topic()
 
     diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
-    svg_content = generate_diagram(topic, diagram_type)
-    diagram_path = diagram_gen.save_svg(svg_content, topic["id"], topic["name"], diagram_type)
+    diagram_path = diagram_gen.save_svg(None, topic["id"], topic["name"], diagram_type)
     log.info("Diagram saved: " + diagram_path)
 
     if dry_run:
@@ -446,10 +491,15 @@ Do NOT mention current month or year."""
         log.info("DRY RUN complete. Post saved.")
         return
 
-    # Post to LinkedIn
-    # Prepend topic title as visible first line on LinkedIn
+    # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
+    # Always write POST_TOPIC before posting (covers news modes where topic resolved late)
+    write_github_output("POST_TOPIC", topic.get("name", mode))
+
+    # Prepend topic title as visible first line — build full text BEFORE truncation
+    # so linkedin_poster._truncate_text() accounts for the title too
     title_line = f"📌 {topic['name']}\n\n"
     full_post_text = title_line + post_text if not post_text.strip().startswith("📌") else post_text
+
     result = poster.create_post_with_image(
         text=full_post_text,
         image_path=diagram_path,
@@ -464,7 +514,6 @@ Do NOT mention current month or year."""
             "mode": mode,
             "status": "success"
         })
-        # Send notifications (email / WhatsApp / Telegram)
         try:
             from notifier import notify_all
             notify_all(

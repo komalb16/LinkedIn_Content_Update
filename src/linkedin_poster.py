@@ -74,8 +74,29 @@ class LinkedInPoster:
         log.info("Image uploaded successfully")
         return True
 
+    # LinkedIn ShareCommentary hard limit
+    MAX_POST_CHARS = 2950
+
+    def _truncate_text(self, text):
+        """Ensure post text never exceeds LinkedIn's 3000-char limit."""
+        if len(text) <= self.MAX_POST_CHARS:
+            return text
+        # Find a good break point — end of a line near the limit
+        truncated = text[:self.MAX_POST_CHARS]
+        last_nl = truncated.rfind('\n')
+        if last_nl > self.MAX_POST_CHARS - 300:  # within last 300 chars
+            truncated = truncated[:last_nl]
+        else:
+            # Fall back to last space
+            last_sp = truncated.rfind(' ')
+            if last_sp > 0:
+                truncated = truncated[:last_sp]
+        log.warning(f"Post truncated: {len(text)} -> {len(truncated)} chars")
+        return truncated + "\n\n[continued in comments...]"
+
     def _create_ugc_post(self, text, asset=None):
         """Create LinkedIn UGC post with optional image."""
+        text = self._truncate_text(text)
         url = LINKEDIN_API + "/ugcPosts"
         media = []
         if asset:
