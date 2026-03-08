@@ -26,7 +26,13 @@ from pathlib import Path
 # ─── Try to import logger, fall back to print ────────────────────────────────
 try:
     from logger import get_logger
-    log = get_logger("schedule")
+    _log = get_logger("schedule")
+    def info(msg): _log.info(msg)
+    def warn(msg): _log.warning(msg)
+except Exception:
+    def info(msg): print(f"[schedule] {msg}")
+    def warn(msg): print(f"[schedule] WARNING: {msg}")
+
 
 def _mark_skip():
     """Write SKIP_RUN=true to GITHUB_OUTPUT so the YAML can cancel the run."""
@@ -37,11 +43,6 @@ def _mark_skip():
                 fh.write("SKIP_RUN=true\n")
         except Exception:
             pass
-    def info(msg):  log.info(msg)
-    def warn(msg):  log.warning(msg)
-except Exception:
-    def info(msg):  print(f"[schedule] {msg}")
-    def warn(msg):  print(f"[schedule] WARNING: {msg}")
 
 
 DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]  # weekday() 0=Mon
