@@ -88,10 +88,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 [data-theme="light"] .stat:nth-child(2) .stat-icon{background:rgba(5,150,105,.08)}
 [data-theme="light"] .stat:nth-child(3) .stat-icon{background:rgba(124,58,237,.08)}
 [data-theme="light"] .stat:nth-child(4) .stat-icon{background:rgba(217,119,6,.08)}
-.slbl{font-size:11px;color:var(--txd);font-family:var(--fm);letter-spacing:.4px;margin-bottom:6px}
+.slbl{font-size:11.5px;color:var(--txm);font-family:var(--fm);letter-spacing:.6px;text-transform:uppercase;font-weight:600;margin-bottom:6px}
 .snum{font-family:var(--fh);font-size:38px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-1.5px}
 .snum.sm{font-size:20px;letter-spacing:-.3px;line-height:1.3;padding-top:0}
-.ssub{font-size:12px;color:var(--txd);margin-top:4px}
+.ssub{font-size:12px;color:var(--txm);margin-top:4px}
 
 /* ── POST BANNER ── */
 .pb{background:linear-gradient(135deg,var(--sur),var(--bg2));border:1px solid var(--bd);border-radius:18px;padding:24px 28px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;gap:20px}
@@ -1662,10 +1662,12 @@ async function loadStats() {
     const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100');
     const d = await r.json();
     const runs = d.workflow_runs || [];
-    const succ = runs.filter(r => r.conclusion === 'success');
+    // Exclude skipped cron runs (cancelled or fast-exit) from all stats
+    const realRuns = runs.filter(r => !isSkippedRun(r));
+    const succ = realRuns.filter(r => r.conclusion === 'success');
     const wk = new Date(Date.now() - 7*24*60*60*1000);
     const tw = succ.filter(r => new Date(r.created_at) > wk);
-    document.getElementById('s1').textContent = runs.length;
+    document.getElementById('s1').textContent = realRuns.length;
     document.getElementById('s2').textContent = succ.length;
     document.getElementById('s3').textContent = tw.length;
     if (succ.length > 0) {
