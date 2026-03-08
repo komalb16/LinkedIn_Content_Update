@@ -247,6 +247,13 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .rfp:hover{color:var(--txm);border-color:var(--bds)}
 .rfp.act{background:rgba(79,156,249,.14);border-color:var(--acc);color:var(--acc)}
 [data-theme="light"] .rfp.act{background:rgba(37,99,235,.08)}
+.sfp{padding:5px 12px;border-radius:100px;font-size:11px;font-weight:600;font-family:monospace;cursor:pointer;border:1.5px solid var(--bd);color:var(--txm);background:var(--sur2);transition:all var(--tr);white-space:nowrap}
+.sfp:hover{border-color:var(--bds)}
+.sfp.act-ok{background:rgba(52,211,153,.14);border-color:var(--grn);color:var(--grn)}
+.sfp.act-fail{background:rgba(248,113,113,.14);border-color:var(--red);color:var(--red)}
+.sfp.act-cancel{background:rgba(251,146,60,.12);border-color:var(--org);color:var(--org)}
+.sfp.act-all{background:rgba(79,156,249,.14);border-color:var(--acc);color:var(--acc)}
+.filter-divider{width:1px;height:18px;background:var(--bd);margin:0 4px;align-self:center}
 .run-total{font-size:11px;color:var(--txd);font-family:monospace;margin-left:auto;white-space:nowrap}
 .custom-range{display:none;align-items:center;gap:8px;padding:10px 22px;border-bottom:1px solid var(--bd);background:var(--sur2);flex-wrap:wrap}
 .custom-range.show{display:flex}
@@ -715,6 +722,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <button class="rfp" onclick="setRunFilter('1yr',this)">1 Year</button>
       <button class="rfp" onclick="setRunFilter('custom',this)">Custom ▾</button>
       <span class="run-total" id="runTotal"></span>
+      <span class="filter-divider"></span>
+      <button class="sfp act-all" id="sfAll"    onclick="setStatusFilter('all',this)"   >All</button>
+      <button class="sfp"         id="sfOk"     onclick="setStatusFilter('ok',this)"    >✅ Success</button>
+      <button class="sfp"         id="sfFail"   onclick="setStatusFilter('fail',this)"  >❌ Failed</button>
+      <button class="sfp"         id="sfCancel" onclick="setStatusFilter('cancel',this)">🚫 Cancelled</button>
     </div>
 
     <!-- CUSTOM RANGE (shown when Custom selected) -->
@@ -944,9 +956,13 @@ async function _exportXlsx(rows, tz) {
 }
 
 function exportRuns(fmt) {
+  // Respect both date range and status filter when exporting
   const { from, to } = getFilterRange();
-  let filtered = allRuns;
+  let filtered = allRuns.filter(r => !isSkippedRun(r));
   if (from) filtered = filtered.filter(r => { const d=new Date(r.created_at); return d>=from&&d<=to; });
+  if (_statusFilter === 'ok')     filtered = filtered.filter(r => r.conclusion === 'success');
+  if (_statusFilter === 'fail')   filtered = filtered.filter(r => r.conclusion === 'failure');
+  if (_statusFilter === 'cancel') filtered = filtered.filter(r => r.conclusion === 'cancelled');
   if (!filtered.length) { toast('No runs to export in this date range', 'err'); return; }
 
   const rows = filtered.map(r => ({
@@ -1520,6 +1536,21 @@ function isSkippedRun(r) {
   return dur < 60;                                 // old fallback: very short run
 }
 
+let _statusFilter = 'all'; // 'all' | 'ok' | 'fail' | 'cancel'
+
+function setStatusFilter(val, btn) {
+  _statusFilter = val;
+  // reset all pill active classes
+  ['sfAll','sfOk','sfFail','sfCancel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'sfp';
+  });
+  const cls = {all:'act-all', ok:'act-ok', fail:'act-fail', cancel:'act-cancel'}[val] || 'act-all';
+  btn.className = 'sfp ' + cls;
+  applyRunFilter();
+}
+
 function applyRunFilter() {
   const { from, to } = getFilterRange();
   let filtered = allRuns;
@@ -1542,7 +1573,12 @@ function applyRunFilter() {
     if (totalEl) totalEl.parentNode.insertBefore(skipBadge, totalEl.nextSibling);
   }
   skipBadge.textContent = skippedRuns.length ? ' + ' + skippedRuns.length + ' skipped' : '';
-  renderRuns(realRuns);
+  // Apply status filter
+  let displayRuns = realRuns;
+  if (_statusFilter === 'ok')     displayRuns = realRuns.filter(r => r.conclusion === 'success');
+  if (_statusFilter === 'fail')   displayRuns = realRuns.filter(r => r.conclusion === 'failure');
+  if (_statusFilter === 'cancel') displayRuns = realRuns.filter(r => r.conclusion === 'cancelled');
+  renderRuns(displayRuns);
 }
 
 function renderRuns(runs) {
