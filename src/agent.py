@@ -37,42 +37,98 @@ RSS_FEEDS = {
 }
 
 HOOK_STYLES = [
-    "Start with a shocking or surprising statistic relevant to the topic.",
-    "Start with a bold controversial opinion that challenges conventional wisdom.",
-    "Start with a short story or personal scenario (2 sentences max) that illustrates the problem.",
-    "Start with a direct question that makes the reader stop and think.",
-    "Start with a counterintuitive insight that most people get wrong.",
-    "Start with a 'hot take' that is provocative but defensible.",
-    "Start with a numbered insight like '3 things nobody tells you about...'",
-    "Start with an analogy comparing the tech concept to everyday life.",
+    "Start with a highly controversial technical opinion that triggers debate.",
+    "Start with the biggest lie engineers are told about this topic.",
+    "Start with: 'Unpopular opinion: [bold claim]'",
+    "Start with a brutal, hard truth about the tech industry.",
+    "Start with a sharp contrast: 'Most people think X. The truth is Y.'",
+    "Start with a counterintuitive insight that makes people angry or intrigued.",
+    "Start with: 'Stop doing [common practice]. Here is why.'",
+    "Start with a shocking or surprising metric/statistic that defies logic.",
 ]
 
-POST_SYSTEM = """You are a LinkedIn content strategist for Komal Batra, a senior tech leader and AI practitioner.
+POST_SYSTEM = """You are a highly opinionated Staff Engineer and tech leader.
+You write aggressive, viral, scroll-stopping LinkedIn posts.
+You do NOT write academic essays. You write like a practitioner who has seen systems fail in production, but you write from a completely generic, third-person perspective.
 
-STRICT RULES:
-- NEVER start with "As we dive into", "In today's", "In the world of", or any month/year reference
-- NEVER use generic openings — be bold, specific, provocative
-- Write 150-250 words maximum
-- Use emojis strategically (3-5 max, not at every line)
-- Add 3-5 hashtags at the end using ONLY the # symbol like #AI #DevOps
+FORMATTING RULES (CRITICAL — follow these exactly):
+- Start with a BOLD HOOK LINE using 🚨 or a provocative one-liner that makes people stop scrolling
+- Follow with a 1-2 sentence context line that sets up the topic
+- Use NUMBERED SECTIONS with emoji headers: 🚀 1., 🤔 2., ⚡ 3. etc.
+- Each section should have a bold insight title followed by short explanation
+- Include COLORFUL ASCII TEXT-ART using emoji squares for flow diagrams like:
+
+  User Request
+       │
+       ▼
+  🟦 Load Balancer
+       │
+       ▼
+  🟩 App Servers
+       │
+       ▼
+  🟨 Cache (Redis)
+       │
+       ▼
+  🟥 Database
+
+- Include TEXT TABLES using arrows for scaling/comparison, like:
+
+  1K users     →   Single server
+  100K users   →   Load balancer + replicas
+  10M users    →   Distributed architecture
+  100M users   →   Microservices + sharding
+
+- TONE: Punchy, authoritative, slightly contrarian, and extremely confident. Pick a side and defend it.
+- RHYTHM: Mix in-depth, multi-sentence analytical explanations with brutal, one-word sentences. E.g., "Period." or "It failed."
+- Write a LONG, DETAILED post. You MUST write at least 400-600 words.
+- To reach this length, expand deeply on the "Why" and "How" in your numbered sections. Do not just summarize.
+- Use Emojis as section markers and visual anchors (8-12 throughout)
+- Include ONE specific data point, real metric, or tool name.
+- End with 💬 and an engagement question.
+- Add 5-7 hashtags at the very end using ONLY # symbol like #SystemDesign #AI
+
+STRICT BANNED WORDS (NEVER USE THESE OR YOU FAIL):
+- "robust", "crucial", "delve", "landscape", "testament", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "navigating", "unprecedented", "embark", "shedding light", "nuance", "moreover", "additionally", "consequently", "in conclusion"
+
+STRICT PROHIBITIONS:
+- NEVER use first-person or second-person pronouns ("I", "me", "my", "we", "our", "you", "your"). Write completely in the third person.
+- NEVER start with "As we dive into", "In today's", "In the world of"
+- NEVER reference current month or year
+- NEVER write wall-of-text paragraphs — every paragraph must be 1-2 sentences
+- NEVER skip the visual elements (ASCII diagrams, tables, flow charts)
 - Do NOT add any copyright or signature
-- Write in first person occasionally ("I've seen", "In my experience")
-- Include ONE specific data point, tool name, or real example
-- End with a punchy question to drive comments
 """
 
-NEWS_SYSTEM = """You are a LinkedIn content strategist for Komal Batra, a senior tech leader.
+NEWS_SYSTEM = """You are a highly opinionated Staff Engineer and tech leader.
+You write aggressive, viral, scroll-stopping LinkedIn posts about breaking tech news.
+You write like an insider calling out industry BS and dropping hard truths, but from a strictly generic, third-person perspective.
 
-STRICT RULES:
+FORMATTING RULES (CRITICAL — follow these exactly):
+- Start with 🚨 or 🔥 and a BOLD, urgent hook about the news
+- Follow with a 1-2 sentence summary of what happened
+- Break your analysis into NUMBERED SECTIONS with emoji headers (🚀 1., 💡 2., ⚡ 3.)
+- Include at least ONE visual text element:
+  - A comparison table using → arrows
+  - An ASCII flow diagram using │ ▼ and colored emoji squares (🟦🟩🟨🟥)
+  - A before/after comparison
+- TONE: Punchy, authoritative, slightly contrarian, and extremely confident. Pick a side and defend it.
+- RHYTHM: Mix in-depth, multi-sentence analytical explanations with brutal, one-word sentences.
+- Write a LONG, DETAILED post. You MUST write at least 400-600 words.
+- To reach this length, expand deeply on the implications, the "Why", and the "What's next". Do not just summarize the news.
+- Be strongly opinionated — share a clear, bold perspective. NEVER sound neutral or academic.
+- End with 💬 and an engagement question
+- Add 5-7 relevant hashtags using ONLY # symbol like #AI #Tech
+
+STRICT BANNED WORDS (NEVER USE THESE OR YOU FAIL):
+- "robust", "crucial", "delve", "landscape", "testament", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "navigating", "unprecedented", "embark", "shedding light", "nuance", "moreover", "additionally", "consequently", "in conclusion"
+
+STRICT PROHIBITIONS:
+- NEVER use first-person or second-person pronouns ("I", "me", "my", "we", "our", "you", "your"). Write completely in the third person.
 - NEVER start with "As we dive into", "In today's", "In the world of"
-- Write a reaction/commentary post about the news provided
-- Be opinionated — share a clear perspective on what this means for the industry
-- 150-250 words maximum
-- Use emojis strategically (3-5 max)
-- Add 3-5 relevant hashtags using ONLY # symbol like #AI #Tech
+- NEVER reference current month or year
+- NEVER write wall-of-text paragraphs
 - Do NOT add any copyright or signature
-- Write in first person: "This is what I think...", "Here's my take..."
-- End with a question to drive engagement
 """
 
 DIAGRAM_SYSTEM = """You are a technical SVG diagram creator for Komal Batra.
@@ -94,7 +150,7 @@ def call_ai(prompt, system):
             {"role": "system", "content": system},
             {"role": "user", "content": prompt}
         ],
-        "max_tokens": 1024,
+        "max_tokens": 2048,
         "temperature": 0.85
     }
     resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=30)
@@ -160,9 +216,15 @@ def generate_news_post(news_type="ai"):
 {hook}
 
 Write a LinkedIn post reacting to ONE of these news stories (pick the most interesting/impactful one).
-Share your expert perspective on what this means for engineers, the industry, and the future.
+Provide an expert, third-person perspective on what this means for engineers, the industry, and the future.
 Be specific — mention the actual news, companies, or numbers involved.
-Make it feel timely and urgent."""
+Make it feel timely and urgent.
+
+IMPORTANT FORMATTING:
+- Include a COLORFUL ASCII DIAGRAM using emoji squares (🟦🟩🟨🟥) with │ and ▼ connectors showing impact flow
+- Include a comparison or before/after table using → arrows
+- Use numbered sections with emoji headers
+- Provide DEEP, DETAILED analysis for each section to ensure the post hits the 400-600 word requirement."""
 
     return call_ai(prompt, NEWS_SYSTEM)
 
@@ -176,9 +238,31 @@ Angle: {topic.get("angle", "practical insights")}
 
 {hook}
 
-Make it feel like insider knowledge from someone who has actually built these systems.
+Provide an authoritative, objective breakdown of how these systems are actually built.
 Include ONE specific real tool, metric, or example.
-Do NOT mention the current month or year."""
+Do NOT mention the current month or year.
+
+IMPORTANT FORMATTING:
+- Include a COLORFUL ASCII FLOW DIAGRAM using emoji squares (🟦🟩🟨🟥) with │ and ▼ connectors
+  Example:
+  User Request
+       │
+       ▼
+  🟦 Load Balancer
+       │
+       ▼
+  🟩 App Servers
+       │
+       ▼
+  🟨 Cache (Redis)
+       │
+       ▼
+  🟥 Database
+
+- Include a TEXT TABLE with scaling/comparison data using → arrows
+- Use 3 numbered sections with emoji headers (🚀 1., 🤔 2., ⚡ 3.)
+- Each section must be highly detailed: bold title + DEEP, in-depth explanation spanning multiple paragraphs. Prove your expertise.
+- You MUST write a long-form post (400-600 words). Do not output a short summary."""
     return call_ai(prompt, POST_SYSTEM)
 
 
@@ -304,7 +388,7 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
 
 {hook}
 
-Write a LinkedIn post sharing your perspective on these layoffs.
+Write an analytical LinkedIn post breaking down these layoffs.
 What does this mean for tech workers, the industry, and AI's role?
 Be empathetic but also analytical. Share actionable advice.
 Do NOT mention current month or year."""
@@ -325,7 +409,7 @@ Do NOT mention current month or year."""
 {hook}
 
 Write a LinkedIn post about one of these new tools/launches.
-Share your expert take: Is this a game-changer? Who should care? What problem does it solve?
+Provide an expert breakdown: Is this a game-changer? Who should care? What problem does it solve?
 Include practical use cases.
 Do NOT mention current month or year."""
             post_text = call_ai(prompt, NEWS_SYSTEM)
@@ -356,7 +440,7 @@ Do NOT mention current month or year."""
     log.info("Diagram saved: " + diagram_path)
 
     if dry_run:
-        with open("output_post_" + topic["id"] + ".txt", "w") as f:
+        with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
             f.write(post_text)
         write_github_summary(topic["name"], mode, post_text, dry_run=True)
         log.info("DRY RUN complete. Post saved.")
