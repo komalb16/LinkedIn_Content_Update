@@ -1,0 +1,48 @@
+{
+  "hidden_ids": [
+    "ai-agents-2025"
+  ],
+  "custom_topics": [
+    {
+      "id": "azure",
+      "name": "Azure"
+    },
+    {
+      "id": "ai-agents-2026",
+      "name": "AI Agents 2026"
+    },
+    {
+      "id": "llm",
+      "name": "LLM"
+    },
+    {
+      "id": "ai-in-real-world-applications",
+      "name": "AI in Real-World Applications"
+    },
+    {
+      "id": "responsible-ethical-ai",
+      "name": "Responsible & Ethical AI"
+    },
+    {
+      "id": "ai-career-skills",
+      "name": "AI + Career & Skills"
+    },
+    {
+      "id": "ai-trends-industry-insights",
+      "name": "AI Trends & Industry Insights"
+    },
+    {
+      "id": "ai-myths-misconceptions",
+      "name": "AI Myths & Misconceptions"
+    },
+    {
+      "id": "ai-innovation-experiments",
+      "name": "AI + Innovation Experiments"
+    },
+    {
+      "id": "data-engineering",
+      "name": "Data Engineering"
+    }
+  ],
+  "updated_at": "2026-03-08T21:56:53.028Z"
+}
