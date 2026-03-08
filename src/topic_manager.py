@@ -28,6 +28,17 @@ TOPICS = [
         "diagram_subject": "Multi-Agent System Architecture: orchestrator, tool use, memory, planning and execution loop",
         "diagram_type": "Architecture Diagram",
         "emoji": "🤖",
+        "hidden": True,   # superseded by ai-agents-2026
+    },
+    {
+        "id": "ai-agents-2026",
+        "name": "AI Agents in 2026",
+        "category": "AI",
+        "prompt": "The state of autonomous AI agents heading into 2026 — Agentic frameworks like LangGraph, AutoGen v2, and CrewAI, MCP protocol adoption, multi-agent orchestration, and how agent reliability has evolved from research toy to production workload",
+        "angle": "What changed in 12 months: better planning, tool use, memory, and the real failure modes still unsolved",
+        "diagram_subject": "Multi-Agent System Architecture 2026: orchestrator, planner, sub-agents, MCP tool servers, memory store, human-in-the-loop",
+        "diagram_type": "Architecture Diagram",
+        "emoji": "🤖",
     },
     {
         "id": "mlops-pipeline",
@@ -172,10 +183,16 @@ TOPICS = [
 ]
 
 
+# topics_config.json lives next to topic_manager.py in the repo.
+# The dashboard writes it whenever topics are hidden/shown/added/removed.
+# Format: { "hidden_ids": ["ai-agents-2025"], "custom_topics": [{"id":"..","name":"..","prompt":".."}] }
+TOPICS_CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "topics_config.json")
+
+
 class TopicManager:
     def __init__(self):
-        self.topics = TOPICS
         self.history = self._load_history()
+        self.topics = self._load_topics()
 
     def _load_history(self):
         if os.path.exists(HISTORY_FILE):
@@ -190,9 +207,56 @@ class TopicManager:
         with open(HISTORY_FILE, "w") as f:
             json.dump(self.history[-50:], f, indent=2)
 
+    def _load_topics(self):
+        """Merge hardcoded TOPICS with topics_config.json overrides from the dashboard."""
+        hidden_ids = set()
+        custom_topics = []
+
+        if os.path.exists(TOPICS_CONFIG_FILE):
+            try:
+                with open(TOPICS_CONFIG_FILE) as f:
+                    cfg = json.load(f)
+                hidden_ids = set(cfg.get("hidden_ids", []))
+                custom_topics = cfg.get("custom_topics", [])
+                if hidden_ids:
+                    log.info(f"topics_config.json: hiding {len(hidden_ids)} topic(s): {hidden_ids}")
+                if custom_topics:
+                    log.info(f"topics_config.json: {len(custom_topics)} custom topic(s) added")
+            except Exception as e:
+                log.warning(f"Could not read topics_config.json (using defaults): {e}")
+
+        # Built-in topics: also respect the hardcoded hidden flag, AND topics_config overrides
+        active = [
+            t for t in TOPICS
+            if not t.get("hidden", False) and t["id"] not in hidden_ids
+        ]
+
+        # Custom topics from dashboard — provide defaults for missing fields
+        for ct in custom_topics:
+            if not ct.get("id"):
+                continue
+            active.append({
+                "id":             ct["id"],
+                "name":           ct.get("name", ct["id"]),
+                "category":       ct.get("category", "Custom"),
+                "prompt":         ct.get("prompt", f"Write an insightful post about {ct.get('name', ct['id'])} for senior engineers."),
+                "angle":          ct.get("angle", "Practical insights and real-world implications"),
+                "diagram_subject": ct.get("diagram_subject", ct.get("name", ct["id"]) + " architecture overview"),
+                "diagram_type":   ct.get("diagram_type", "Architecture Diagram"),
+                "emoji":          ct.get("emoji", "💡"),
+            })
+
+        log.info(f"Topic pool: {len(active)} active topic(s) (of {len(TOPICS)+len(custom_topics)} total)")
+        return active
+
     def get_topic(self, topic_id):
         for t in self.topics:
             if t["id"] == topic_id:
+                return t
+        # Also search hidden built-ins in case --topic flag is used explicitly
+        for t in TOPICS:
+            if t["id"] == topic_id:
+                log.warning(f"Topic '{topic_id}' is hidden but used via --topic flag")
                 return t
         raise ValueError("Topic not found: " + topic_id)
 
@@ -200,11 +264,13 @@ class TopicManager:
         recent_ids = [h["topic_id"] for h in self.history[-6:]]
         available = [t for t in self.topics if t["id"] not in recent_ids]
         if not available:
-            available = self.topics
+            available = self.topics  # all have been used recently — full reset
         recent_categories = [h.get("category") for h in self.history[-3:]]
         prioritized = [t for t in available if t["category"] not in recent_categories]
         pool = prioritized if prioritized else available
-        return random.choice(pool)
+        chosen = random.choice(pool)
+        log.info(f"Selected topic: {chosen['name']} (category: {chosen['category']})")
+        return chosen
 
     def get_diagram_type_for_topic(self, topic):
         return topic.get("diagram_type", "Architecture Diagram")
@@ -216,8 +282,15 @@ class TopicManager:
 
     def list_topics(self):
         print("\n" + "-"*60)
-        print("  LinkedIn Agent Topic List  |  Komal Batra")
+        print("  LinkedIn Agent — Active Topic List  |  Komal Batra")
         print("-"*60)
         for t in self.topics:
-            print("  --topic " + t["id"].ljust(25) + t["name"])
+            tag = " [custom]" if t.get("category") == "Custom" else ""
+            print("  --topic " + t["id"].ljust(28) + t["name"] + tag)
+        # Also show hidden ones for visibility
+        hidden = [t for t in TOPICS if t.get("hidden", False)]
+        if hidden:
+            print("\n  Hidden (will not be auto-selected):")
+            for t in hidden:
+                print("  [hidden] " + t["id"].ljust(25) + t["name"])
         print("-"*60 + "\n")

@@ -1063,11 +1063,11 @@ function hideBuiltinTopic(id, el) {
   if (!hidden.includes(id)) hidden.push(id);
   saveHiddenTopics(hidden);
   el.classList.add('hidden-topic');
-  // Change button to restore icon
   const btn = el.querySelector('.hide-chip');
   if (btn) { btn.textContent = '↩'; btn.title = 'Restore topic'; btn.onclick = function(e){ e.stopPropagation(); restoreBuiltinTopic(id, el); }; }
   updateRestoreBar();
-  toast(`"${el.dataset.name}" hidden from rotation`, 'info');
+  pushTopicsConfig();
+  toast(`"${el.dataset.name}" hidden — saved to repo`, 'info');
 }
 
 function restoreBuiltinTopic(id, el) {
@@ -1077,7 +1077,8 @@ function restoreBuiltinTopic(id, el) {
   const btn = el.querySelector('.hide-chip');
   if (btn) { btn.textContent = '✕'; btn.title = 'Hide topic'; btn.onclick = function(e){ e.stopPropagation(); hideBuiltinTopic(id, el); }; }
   updateRestoreBar();
-  toast(`"${el.dataset.name}" restored to rotation`, 'ok');
+  pushTopicsConfig();
+  toast(`"${el.dataset.name}" restored — saved to repo`, 'ok');
 }
 
 function applyHiddenTopics() {
@@ -1221,7 +1222,7 @@ async function connect() {
     const u = await r.json();
     localStorage.setItem('gh_token', token);
     showDash(u.login);
-    await Promise.all([loadRuns(), loadStats(), loadSchedule()]);
+    await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
     toast('Connected as ' + u.login + ' ✓', 'ok');
   } catch(e) { toast('Failed: ' + e.message, 'err'); }
   finally { setLoad('conSpin','conTxt',false,'Connect'); }
@@ -1233,7 +1234,7 @@ async function silentConn() {
     if (!r.ok) { localStorage.removeItem('gh_token'); token = ''; return; }
     const u = await r.json();
     showDash(u.login);
-    await Promise.all([loadRuns(), loadStats(), loadSchedule()]);
+    await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
   } catch(e) { localStorage.removeItem('gh_token'); token = ''; }
 }
 
@@ -1527,13 +1528,11 @@ function getFilterRange() {
 
 function isSkippedRun(r) {
   // A "skipped" run = cron fired but it wasn't posting time.
-  // With new YAML: these are CANCELLED by the workflow itself.
-  // Fallback: completed in < 60s with success (old behavior).
+  // The YAML cancels these runs via "gh run cancel", so they show as
+  // 'cancelled' or 'skipped' in the GitHub API.
+  // NOTE: we never use duration as a filter — real posts can also be fast.
   if (r.event !== 'schedule') return false;
-  if (r.conclusion === 'cancelled') return true;   // new: self-cancelled
-  if (r.conclusion !== 'success')  return false;
-  const dur = r.updated_at ? (new Date(r.updated_at) - new Date(r.created_at)) / 1000 : 999;
-  return dur < 60;                                 // old fallback: very short run
+  return r.conclusion === 'cancelled' || r.conclusion === 'skipped';
 }
 
 let _statusFilter = 'all'; // 'all' | 'ok' | 'fail' | 'cancel'
@@ -1798,6 +1797,56 @@ async function saveSchedule() {
     }
   } catch(e) { toast('Save failed: ' + e.message, 'err'); }
   finally { btn.disabled = false; btn.textContent = '💾 Save Schedule'; }
+}
+
+// ── TOPICS CONFIG ─────────────────────────────────────────────────────────────
+// topics_config.json is the source of truth for the agent in GitHub Actions.
+// localStorage is only a local cache — the repo file is authoritative.
+
+async function pushTopicsConfig() {
+  if (!token) { toast('Connect GitHub first (Settings tab)', 'err'); return; }
+  const payload = {
+    hidden_ids:    getHiddenTopics(),
+    custom_topics: getCustomTopics(),
+    updated_at:    new Date().toISOString(),
+  };
+  try {
+    let sha = null;
+    try {
+      const ex = await gh('/repos/' + REPO + '/contents/topics_config.json');
+      if (ex && ex.sha) sha = ex.sha;
+    } catch(e) { /* file doesn't exist yet — first push */ }
+    const body = {
+      message: 'chore: update topics_config [dashboard]',
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
+    };
+    if (sha) body.sha = sha;
+    await gh('/repos/' + REPO + '/contents/topics_config.json', {
+      method: 'PUT', body: JSON.stringify(body)
+    });
+    toast('✅ Topics saved to repo!', 'ok');
+  } catch(e) {
+    console.error(e);
+    toast('❌ Failed to save topics: ' + e.message, 'err');
+  }
+}
+
+async function loadTopicsConfigFromRepo() {
+  if (!token) return;
+  try {
+    const r = await gh('/repos/' + REPO + '/contents/topics_config.json');
+    if (!r || !r.content) return;
+    const cfg = JSON.parse(decodeURIComponent(escape(atob(r.content.replace(/\n/g,'')))));
+    // Repo is authoritative — overwrite localStorage
+    if (Array.isArray(cfg.hidden_ids))    saveHiddenTopics(cfg.hidden_ids);
+    if (Array.isArray(cfg.custom_topics)) saveCustomTopics(cfg.custom_topics);
+    applyHiddenTopics();
+    loadCustomTopics();
+    console.log('[topics] synced from repo topics_config.json:', cfg);
+  } catch(e) {
+    // File doesn't exist yet — localStorage fallback is fine
+    console.log('[topics] topics_config.json not in repo yet, using localStorage');
+  }
 }
 
 // ── DAY GRID ─────────────────────────────────────────────────────────────────
@@ -2076,7 +2125,8 @@ function addCustomTopic() {
   custom.push({id, name});
   saveCustomTopics(custom);
   inp.value = '';
-  toast(`✅ "${name}" added to your topic list permanently`, 'ok');
+  pushTopicsConfig();
+  toast(`✅ "${name}" added and saved to repo`, 'ok');
 }
 
 function addCustomChip(id, name, grid) {
@@ -2094,7 +2144,8 @@ function removeCustomTopic(id, el) {
   el.remove();
   const custom = getCustomTopics().filter(c => c.id !== id);
   saveCustomTopics(custom);
-  toast('Topic removed', 'info');
+  pushTopicsConfig();
+  toast('Topic removed and saved to repo', 'info');
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
