@@ -6,9 +6,47 @@
 <title>LinkedIn Agent — Komal Batra</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-[data-theme="dark"]{--bg:#080c18;--bg2:#0d1426;--bg3:#121c32;--sur:#0d1428;--sur2:#131e36;--sur3:#1a2840;--bd:rgba(79,156,249,0.12);--bds:rgba(99,171,255,0.4);--tx:#e8f4ff;--txm:#6b9cc4;--txd:#2d4a6e;--sh:0 4px 24px rgba(0,0,0,0.7);--gl:0 0 60px rgba(79,156,249,0.15);--acc:#4f9cf9;--acc2:#a78bfa;--grn:#34d399;--red:#f87171;--org:#fb923c}
+/* ═══════════════════════════════════════════════════════════════
+   THEME SYSTEM: 5 colors × 3 brightness modes = 15 combinations
+   Format: [data-color="X"][data-mode="Y"]
+   Colors: blue(default) | purple | orange | teal | rose
+   Modes:  dark | medium | light
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── SHARED NEUTRALS (don't change with color) ── */
+[data-mode="dark"]  {--tx:#e8f4ff;--txm:#7aa8d4;--txd:#2d4a6e;--sh:0 4px 24px rgba(0,0,0,0.7);--grn:#34d399;--red:#f87171;--org:#fb923c}
+[data-mode="medium"]{--tx:#dce8ff;--txm:#8daad0;--txd:#4a6090;--sh:0 2px 14px rgba(0,0,0,0.35);--grn:#4ade80;--red:#f87171;--org:#fb923c}
+[data-mode="light"] {--tx:#0f172a;--txm:#4b5d78;--txd:#9eafc5;--sh:0 1px 6px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);--gl:none;--grn:#059669;--red:#dc2626;--org:#d97706}
+
+/* ── BLUE (default) ── */
+[data-color="blue"][data-mode="dark"]  {--bg:#080c18;--bg2:#0d1426;--bg3:#121c32;--sur:#0d1428;--sur2:#131e36;--sur3:#1a2840;--bd:rgba(79,156,249,0.12);--bds:rgba(99,171,255,0.4);--gl:0 0 60px rgba(79,156,249,0.15);--acc:#4f9cf9;--acc2:#a78bfa}
+[data-color="blue"][data-mode="medium"]{--bg:#1e2744;--bg2:#263156;--bg3:#2f3c68;--sur:#263156;--sur2:#2f3c68;--sur3:#38477a;--bd:rgba(255,255,255,0.09);--bds:rgba(129,200,255,0.4);--gl:0 0 40px rgba(99,184,248,0.1);--acc:#63b8f8;--acc2:#c4b5fd}
+[data-color="blue"][data-mode="light"] {--bg:#f0f5ff;--bg2:#e6eeff;--bg3:#d8e4ff;--sur:#ffffff;--sur2:#f5f8ff;--sur3:#eaf0ff;--bd:rgba(0,0,0,0.07);--bds:rgba(37,99,235,0.3);--acc:#2563eb;--acc2:#7c3aed}
+
+/* ── PURPLE ── */
+[data-color="purple"][data-mode="dark"]  {--bg:#0e0818;--bg2:#160e2a;--bg3:#1c1438;--sur:#160e2a;--sur2:#1c1438;--sur3:#241b4a;--bd:rgba(168,85,247,0.12);--bds:rgba(192,132,252,0.4);--gl:0 0 60px rgba(168,85,247,0.18);--acc:#a855f7;--acc2:#ec4899}
+[data-color="purple"][data-mode="medium"]{--bg:#1e1640;--bg2:#271d54;--bg3:#302468;--sur:#271d54;--sur2:#302468;--sur3:#3b2c7c;--bd:rgba(255,255,255,0.09);--bds:rgba(192,132,252,0.4);--gl:0 0 40px rgba(168,85,247,0.14);--acc:#c084fc;--acc2:#f472b6}
+[data-color="purple"][data-mode="light"] {--bg:#f5f0ff;--bg2:#ede6ff;--bg3:#e0d4ff;--sur:#ffffff;--sur2:#f8f4ff;--sur3:#ede6ff;--bd:rgba(0,0,0,0.07);--bds:rgba(126,34,206,0.3);--acc:#7c3aed;--acc2:#db2777}
+
+/* ── ORANGE ── */
+[data-color="orange"][data-mode="dark"]  {--bg:#120a04;--bg2:#1e1008;--bg3:#2a160c;--sur:#1e1008;--sur2:#2a160c;--sur3:#361c10;--bd:rgba(251,146,60,0.12);--bds:rgba(251,146,60,0.4);--gl:0 0 60px rgba(251,146,60,0.14);--acc:#fb923c;--acc2:#fbbf24}
+[data-color="orange"][data-mode="medium"]{--bg:#2a1810;--bg2:#362018;--bg3:#422820;--sur:#362018;--sur2:#422820;--sur3:#4e3028;--bd:rgba(255,255,255,0.09);--bds:rgba(251,146,60,0.5);--gl:0 0 40px rgba(251,146,60,0.10);--acc:#fdba74;--acc2:#fde68a}
+[data-color="orange"][data-mode="light"] {--bg:#fff8f2;--bg2:#fff0e6;--bg3:#ffe4cc;--sur:#ffffff;--sur2:#fff8f2;--sur3:#fff0e6;--bd:rgba(0,0,0,0.07);--bds:rgba(234,88,12,0.3);--acc:#ea580c;--acc2:#d97706}
+
+/* ── TEAL ── */
+[data-color="teal"][data-mode="dark"]  {--bg:#030f12;--bg2:#07191e;--bg3:#0b2228;--sur:#07191e;--sur2:#0b2228;--sur3:#102c34;--bd:rgba(20,184,166,0.12);--bds:rgba(45,212,191,0.4);--gl:0 0 60px rgba(20,184,166,0.15);--acc:#14b8a6;--acc2:#0ea5e9}
+[data-color="teal"][data-mode="medium"]{--bg:#0f2e35;--bg2:#183c44;--bg3:#204a54;--sur:#183c44;--sur2:#204a54;--sur3:#2a5a64;--bd:rgba(255,255,255,0.09);--bds:rgba(45,212,191,0.4);--gl:0 0 40px rgba(20,184,166,0.10);--acc:#2dd4bf;--acc2:#38bdf8}
+[data-color="teal"][data-mode="light"] {--bg:#f0fdfc;--bg2:#e0faf8;--bg3:#ccf4f0;--sur:#ffffff;--sur2:#f0fdfc;--sur3:#e0faf8;--bd:rgba(0,0,0,0.07);--bds:rgba(13,148,136,0.3);--acc:#0d9488;--acc2:#0284c7}
+
+/* ── ROSE ── */
+[data-color="rose"][data-mode="dark"]  {--bg:#12040a;--bg2:#1e0812;--bg3:#280c1a;--sur:#1e0812;--sur2:#280c1a;--sur3:#321022;--bd:rgba(244,63,94,0.12);--bds:rgba(251,113,133,0.4);--gl:0 0 60px rgba(244,63,94,0.15);--acc:#f43f5e;--acc2:#fb7185}
+[data-color="rose"][data-mode="medium"]{--bg:#2a1220;--bg2:#361828;--bg3:#421e30;--sur:#361828;--sur2:#421e30;--sur3:#4e2438;--bd:rgba(255,255,255,0.09);--bds:rgba(251,113,133,0.4);--gl:0 0 40px rgba(244,63,94,0.10);--acc:#fb7185;--acc2:#f9a8d4}
+[data-color="rose"][data-mode="light"] {--bg:#fff1f3;--bg2:#ffe4e8;--bg3:#fecdd4;--sur:#ffffff;--sur2:#fff1f3;--sur3:#ffe4e8;--bd:rgba(0,0,0,0.07);--bds:rgba(190,18,60,0.3);--acc:#be123c;--acc2:#db2777}
+
+/* ── Backwards-compat aliases so existing [data-theme="X"] still works ── */
+[data-theme="dark"]  {--bg:#080c18;--bg2:#0d1426;--bg3:#121c32;--sur:#0d1428;--sur2:#131e36;--sur3:#1a2840;--bd:rgba(79,156,249,0.12);--bds:rgba(99,171,255,0.4);--tx:#e8f4ff;--txm:#6b9cc4;--txd:#2d4a6e;--sh:0 4px 24px rgba(0,0,0,0.7);--gl:0 0 60px rgba(79,156,249,0.15);--acc:#4f9cf9;--acc2:#a78bfa;--grn:#34d399;--red:#f87171;--org:#fb923c}
 [data-theme="medium"]{--bg:#1e2744;--bg2:#263156;--bg3:#2f3c68;--sur:#263156;--sur2:#2f3c68;--sur3:#38477a;--bd:rgba(255,255,255,0.09);--bds:rgba(129,200,255,0.4);--tx:#dce8ff;--txm:#8daad0;--txd:#4a6090;--sh:0 2px 14px rgba(0,0,0,0.35);--gl:0 0 40px rgba(99,184,248,0.1);--acc:#63b8f8;--acc2:#c4b5fd;--grn:#4ade80;--red:#f87171;--org:#fb923c}
-[data-theme="light"]{--bg:#f2f5fc;--bg2:#e8edf8;--bg3:#dce3f5;--sur:#ffffff;--sur2:#f8faff;--sur3:#eef2fc;--bd:rgba(0,0,0,0.07);--bds:rgba(37,99,235,0.3);--tx:#0f172a;--txm:#4b5d78;--txd:#9eafc5;--sh:0 1px 6px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);--gl:none;--acc:#2563eb;--acc2:#7c3aed;--grn:#059669;--red:#dc2626;--org:#d97706}
+[data-theme="light"] {--bg:#f0f5ff;--bg2:#e6eeff;--bg3:#d8e4ff;--sur:#ffffff;--sur2:#f5f8ff;--sur3:#eaf0ff;--bd:rgba(0,0,0,0.07);--bds:rgba(37,99,235,0.3);--tx:#0f172a;--txm:#4b5d78;--txd:#9eafc5;--sh:0 1px 6px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);--gl:none;--acc:#2563eb;--acc2:#7c3aed;--grn:#059669;--red:#dc2626;--org:#d97706}
 :root{--r:14px;--rs:10px;--tr:0.2s cubic-bezier(.4,0,.2,1);--fh:'DM Sans',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh;transition:background var(--tr),color var(--tr);font-size:14px;line-height:1.5}
@@ -67,6 +105,22 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .tsw{display:flex;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:3px;gap:2px}
 .tbtn{padding:5px 12px;border-radius:100px;border:none;font-size:11px;font-family:var(--fb);font-weight:500;cursor:pointer;color:var(--txd);background:transparent;transition:all var(--tr)}
 .tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(79,156,249,.4)}
+/* theme swatches */
+/* ── THEME PICKER ── */
+.theme-picker{display:flex;flex-direction:column;gap:5px;align-items:center}
+.tpick-colors{display:flex;gap:5px;align-items:center}
+.tpick-modes {display:flex;gap:3px;align-items:center;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:2px}
+.cpick{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;padding:0;flex-shrink:0}
+.cpick:hover{transform:scale(1.2)}
+.cpick.blue  {background:radial-gradient(circle at 35% 35%,#93c5fd,#2563eb)}
+.cpick.purple{background:radial-gradient(circle at 35% 35%,#d8b4fe,#7c3aed)}
+.cpick.orange{background:radial-gradient(circle at 35% 35%,#fdba74,#ea580c)}
+.cpick.teal  {background:radial-gradient(circle at 35% 35%,#5eead4,#0d9488)}
+.cpick.rose  {background:radial-gradient(circle at 35% 35%,#fda4af,#be123c)}
+.cpick.active{box-shadow:0 0 0 2.5px #fff,0 0 0 4.5px var(--acc);transform:scale(1.15)}
+.mpick{padding:3px 10px;border-radius:100px;border:none;font-size:10px;font-family:var(--fb);font-weight:500;cursor:pointer;color:var(--txd);background:transparent;transition:all var(--tr);white-space:nowrap}
+.mpick.act{background:var(--acc);color:#fff;box-shadow:0 1px 8px rgba(0,0,0,.3)}
+.mpick:not(.act):hover{color:var(--txm);background:var(--sur3)}
 [data-theme="light"] .tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.25)}
 .cpill{display:flex;align-items:center;gap:7px;padding:6px 12px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:100px;font-size:11px;color:var(--grn);font-family:monospace;cursor:pointer;transition:all var(--tr)}
 .cpill:hover{background:rgba(34,197,94,0.15)}
@@ -507,10 +561,19 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
         <span style="font-size:10px;color:var(--txd);font-family:var(--fm)">🌍</span>
         <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Select your timezone"></select>
       </div>
-      <div class="tsw">
-        <button class="tbtn" onclick="setTheme('light')">☀️ Light</button>
-        <button class="tbtn" onclick="setTheme('medium')">🌤 Medium</button>
-        <button class="tbtn act" onclick="setTheme('dark')">🌙 Dark</button>
+      <div class="theme-picker" id="themePicker">
+        <div class="tpick-colors">
+          <button class="cpick blue"   onclick="setColor('blue')"   title="Blue"></button>
+          <button class="cpick purple" onclick="setColor('purple')" title="Purple"></button>
+          <button class="cpick orange" onclick="setColor('orange')" title="Orange"></button>
+          <button class="cpick teal"   onclick="setColor('teal')"   title="Teal"></button>
+          <button class="cpick rose"   onclick="setColor('rose')"   title="Rose"></button>
+        </div>
+        <div class="tpick-modes">
+          <button class="mpick" id="mp-light"  onclick="setMode('light')" >☀️ Light</button>
+          <button class="mpick" id="mp-medium" onclick="setMode('medium')">🌤 Mid</button>
+          <button class="mpick act" id="mp-dark" onclick="setMode('dark')" >🌙 Dark</button>
+        </div>
       </div>
       <div class="gear-btn" onclick="openSettings()" title="Settings">⚙️</div>
       <div class="cpill" onclick="disconnect()" title="Click to disconnect">
@@ -1114,7 +1177,10 @@ function updateRestoreBar() {
 }
 
 window.onload = () => {
-  applyTheme(localStorage.getItem('theme') || 'dark');
+  // Restore saved color + mode
+  _themeColor = localStorage.getItem('themeColor') || 'blue';
+  _themeMode  = localStorage.getItem('themeMode')  || 'dark';
+  applyTheme();
   initTzSelector();
   applyHiddenTopics();
   loadCustomTopics();
@@ -1168,16 +1234,47 @@ window.onload = () => {
 };
 
 // ── THEME ─────────────────────────────────────────────────────────────────────
-function setTheme(t) {
-  applyTheme(t); localStorage.setItem('theme', t);
+// ── THEME: 5 colors × 3 modes ────────────────────────────────────────────────
+let _themeColor = localStorage.getItem('themeColor') || 'blue';
+let _themeMode  = localStorage.getItem('themeMode')  || 'dark';
+
+function setColor(c) {
+  _themeColor = c;
+  localStorage.setItem('themeColor', c);
+  applyTheme();
 }
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
+function setMode(m) {
+  _themeMode = m;
+  localStorage.setItem('themeMode', m);
+  applyTheme();
+}
+// Legacy setTheme() called by old code paths — map to mode
+function setTheme(t) {
+  setMode(t);
+}
+function applyTheme() {
+  const root = document.documentElement;
+  // Apply color + mode attributes for new CSS system
+  root.setAttribute('data-color', _themeColor);
+  root.setAttribute('data-mode',  _themeMode);
+  // Keep backwards-compat data-theme for old CSS rules
+  root.setAttribute('data-theme', _themeMode);
+
+  // Color pill active rings
+  document.querySelectorAll('.cpick').forEach(b => {
+    b.classList.toggle('active', b.classList.contains(_themeColor));
+  });
+  // Mode button active state
+  ['light','medium','dark'].forEach(m => {
+    const el = document.getElementById('mp-' + m);
+    if (el) el.classList.toggle('act', m === _themeMode);
+  });
+  // Legacy tbtn support
   document.querySelectorAll('.tbtn').forEach(b => {
     b.classList.toggle('act',
-      (t==='light' && b.textContent.includes('Light')) ||
-      (t==='medium' && b.textContent.includes('Medium')) ||
-      (t==='dark' && b.textContent.includes('Dark'))
+      (_themeMode==='light'  && b.textContent.includes('Light'))  ||
+      (_themeMode==='medium' && b.textContent.includes('Medium')) ||
+      (_themeMode==='dark'   && b.textContent.includes('Dark'))
     );
   });
 }

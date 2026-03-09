@@ -132,7 +132,11 @@ def numbered_row(ry, row_h, num, label, sublabel, color, cards, total_w=900, pad
 
     # Cards on the right
     n = len(cards)
-    cw = RIGHT_W // n - 6
+    # Solve so last card right edge == total_w - pad:
+    # RIGHT_X+pad + (n-1)*(cw+6) + cw = total_w - pad
+    # n*cw = (total_w - pad) - (RIGHT_X+pad) - (n-1)*6
+    avail_for_cards = (total_w - pad) - (RIGHT_X + pad) - (n-1)*6
+    cw = max(60, avail_for_cards // n)
     for i, (title, sub) in enumerate(cards):
         cx = RIGHT_X + pad + i*(cw+6)
         cy = CARD_AREA_Y
@@ -222,6 +226,20 @@ def cheatrow(ry, rh, label, color, items, pad=18, total_w=900):
     return s
 
 # ── SECTION HEADER + CARDS ─────────────────────────────────────────────────────
+# ── THEME-AWARE PRIMITIVES ────────────────────────────────────────────────────
+# All drawing helpers read _DARK at call time so make_diagram can toggle once.
+_DARK = False   # set by make_diagram()
+_MID  = False   # mid-theme: tinted canvas, deeper card colors before calling diagram builders
+
+def _card_bg():       return "#1E293B" if _DARK else "white"
+def _card_border(c):  return lighten(c, 0.25) if _DARK else lighten(c, 0.45)
+def _txt_main(c):     return lighten(c, 0.75) if _DARK else darken(c, 0.05)
+def _txt_sub():       return "#94A3B8" if _DARK else "#64748B"
+def _sec_bg(c):       return darken(c, 0.62) if _DARK else lighten(c, 0.90)
+def _sec_border(c):   return lighten(c, 0.22) if _DARK else lighten(c, 0.55)
+def _shadow():        return "rgba(0,0,0,0.45)" if _DARK else "rgba(0,0,0,0.05)"
+
+
 def sec(sx, sy, sw, content_h, title, color, subtitle="", pad=0):
     ht = 26 if not subtitle else 34
     sh = ht + 3 + content_h + 7
@@ -238,9 +256,10 @@ def sec(sx, sy, sw, content_h, title, color, subtitle="", pad=0):
 def two_col(sy, lw, rw, content_h, ltitle, lcol, rtitle, rcol, lsub="", rsub="", pad=18):
     ht=34; sh=ht+3+content_h+7; s=""
     for sx,sw,title,color,sub in [(pad,lw,ltitle,lcol,lsub),(pad+lw+14,rw,rtitle,rcol,rsub)]:
-        bg=lighten(color,0.90)
-        s += f'<rect x="{sx+2}" y="{sy+2}" width="{sw}" height="{sh}" rx="10" fill="rgba(0,0,0,0.04)"/>'
-        s += f'<rect x="{sx}" y="{sy}" width="{sw}" height="{sh}" rx="10" fill="{bg}" stroke="{lighten(color,0.55)}" stroke-width="1.5"/>'
+        bg     = darken(color, 0.62) if _DARK else lighten(color, 0.90)
+        border = lighten(color, 0.22) if _DARK else lighten(color, 0.55)
+        s += f'<rect x="{sx+2}" y="{sy+2}" width="{sw}" height="{sh}" rx="10" fill="{"rgba(0,0,0,0.45)" if _DARK else "rgba(0,0,0,0.04)"}"/>'
+        s += f'<rect x="{sx}" y="{sy}" width="{sw}" height="{sh}" rx="10" fill="{bg}" stroke="{border}" stroke-width="1.5"/>'
         s += f'<rect x="{sx}" y="{sy}" width="{sw}" height="{ht}" rx="10" fill="{color}"/>'
         s += f'<rect x="{sx}" y="{sy+ht-8}" width="{sw}" height="8" fill="{color}"/>'
         s += f'<text x="{sx+14}" y="{sy+17}" fill="white" font-size="10.5" font-weight="800" font-family="Arial,sans-serif" letter-spacing="0.8">{xe(title.upper())}</text>'
@@ -249,52 +268,105 @@ def two_col(sy, lw, rw, content_h, ltitle, lcol, rtitle, rcol, lsub="", rsub="",
     return s, sy+ht+3, sy+sh
 
 def card(cx, cy, cw, ch, color, title, desc="", rx=8):
-    bg="white"; col=color
-    s  = f'<rect x="{cx+1}" y="{cy+1}" width="{cw}" height="{ch}" rx="{rx}" fill="rgba(0,0,0,0.05)"/>'
-    s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="{rx}" fill="{bg}" stroke="{lighten(col,0.45)}" stroke-width="1.2"/>'
+    bg  = "#1E293B" if _DARK else "white"
+    col = color
+    bdr = lighten(col, 0.25) if _DARK else lighten(col, 0.45)
+    txt = lighten(col, 0.75) if _DARK else darken(col, 0.05)
+    sub_txt = "#94A3B8" if _DARK else "#64748B"
+    shd = "rgba(0,0,0,0.5)" if _DARK else "rgba(0,0,0,0.05)"
+    s  = f'<rect x="{cx+1}" y="{cy+1}" width="{cw}" height="{ch}" rx="{rx}" fill="{shd}"/>'
+    s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="{rx}" fill="{bg}" stroke="{bdr}" stroke-width="1.2"/>'
     s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="4" rx="2" fill="{col}"/>'
     pad2=cx+8; avail=cw-16
     tf=min(10,max(8,avail//8)); df=min(8.5,max(7,avail//11))
     t_cl=xe(clamp(title,max(3,avail//max(1,tf-2))))
     if desc and ch>=32:
         max_lines=max(1,(ch-20)//12)
-        s += f'<text x="{pad2}" y="{cy+16}" fill="{darken(col,0.05)}" font-size="{tf}" font-weight="700" font-family="Arial,sans-serif">{t_cl}</text>'
+        s += f'<text x="{pad2}" y="{cy+16}" fill="{txt}" font-size="{tf}" font-weight="700" font-family="Arial,sans-serif">{t_cl}</text>'
         lines=wrap_text(desc,max(8,avail//max(1,df)))
         for i,ln in enumerate(lines[:max_lines]):
             ly=cy+28+i*12
             if ly+3<=cy+ch:
-                s += f'<text x="{pad2}" y="{ly}" fill="#64748B" font-size="{df}" font-family="Arial,sans-serif">{xe(ln)}</text>'
+                s += f'<text x="{pad2}" y="{ly}" fill="{sub_txt}" font-size="{df}" font-family="Arial,sans-serif">{xe(ln)}</text>'
     else:
-        s += f'<text x="{pad2}" y="{cy+ch//2+4}" fill="{darken(col,0.05)}" font-size="{tf}" font-weight="700" font-family="Arial,sans-serif">{t_cl}</text>'
+        s += f'<text x="{pad2}" y="{cy+ch//2+4}" fill="{txt}" font-size="{tf}" font-weight="700" font-family="Arial,sans-serif">{t_cl}</text>'
     return s
 
 def card_centered(cx, cy, cw, ch, color, title, sub="", rx=8):
-    bg=lighten(color, 0.88)
-    s  = f'<rect x="{cx+1}" y="{cy+1}" width="{cw}" height="{ch}" rx="{rx}" fill="rgba(0,0,0,0.05)"/>'
-    s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="{rx}" fill="{bg}" stroke="{lighten(color,0.45)}" stroke-width="1.4"/>'
+    bg  = darken(color, 0.55) if _DARK else lighten(color, 0.88)
+    bdr = lighten(color, 0.25) if _DARK else lighten(color, 0.45)
+    txt = lighten(color, 0.80) if _DARK else darken(color, 0.10)
+    sub_txt = "#94A3B8" if _DARK else "#64748B"
+    shd = "rgba(0,0,0,0.5)" if _DARK else "rgba(0,0,0,0.05)"
+    s  = f'<rect x="{cx+1}" y="{cy+1}" width="{cw}" height="{ch}" rx="{rx}" fill="{shd}"/>'
+    s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="{rx}" fill="{bg}" stroke="{bdr}" stroke-width="1.4"/>'
     mid=cy+ch//2; tf=min(10,max(8,cw//9)); sf=min(8.5,max(7,cw//11))
     if sub:
-        s += f'<text x="{cx+cw//2}" y="{mid-2}" text-anchor="middle" fill="{darken(color,0.1)}" font-size="{tf}" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(title,cw//5))}</text>'
-        s += f'<text x="{cx+cw//2}" y="{mid+12}" text-anchor="middle" fill="#64748B" font-size="{sf}" font-family="Arial,sans-serif">{xe(clamp(sub,cw//4))}</text>'
+        s += f'<text x="{cx+cw//2}" y="{mid-2}" text-anchor="middle" fill="{txt}" font-size="{tf}" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(title,cw//5))}</text>'
+        s += f'<text x="{cx+cw//2}" y="{mid+12}" text-anchor="middle" fill="{sub_txt}" font-size="{sf}" font-family="Arial,sans-serif">{xe(clamp(sub,cw//4))}</text>'
     else:
-        s += f'<text x="{cx+cw//2}" y="{mid+4}" text-anchor="middle" fill="{darken(color,0.1)}" font-size="{tf}" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(title,cw//5))}</text>'
+        s += f'<text x="{cx+cw//2}" y="{mid+4}" text-anchor="middle" fill="{txt}" font-size="{tf}" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(title,cw//5))}</text>'
     return s
 
 def status_bar(ry, items, pad=18, total_w=900):
     n=len(items); iw=(total_w-pad*2)//n
-    s=f'<rect x="{pad}" y="{ry}" width="{total_w-pad*2}" height="22" rx="11" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>'
+    bg  = "#0F172A" if _DARK else "#F1F5F9"
+    bdr = "rgba(255,255,255,0.08)" if _DARK else "#E2E8F0"
+    txt = "#94A3B8" if _DARK else "#475569"
+    s=f'<rect x="{pad}" y="{ry}" width="{total_w-pad*2}" height="22" rx="11" fill="{bg}" stroke="{bdr}" stroke-width="1"/>'
     for i,(label,color) in enumerate(items):
         lx=pad+i*iw+iw//2-len(label)*3-8
         s += f'<circle cx="{lx}" cy="{ry+11}" r="4" fill="{color}"/>'
-        s += f'<text x="{lx+9}" y="{ry+15}" fill="#475569" font-size="{min(9,max(6,iw//10))}" font-weight="600" font-family="Arial,sans-serif">{xe(label)}</text>'
+        s += f'<text x="{lx+9}" y="{ry+15}" fill="{txt}" font-size="{min(9,max(6,iw//10))}" font-weight="600" font-family="Arial,sans-serif">{xe(label)}</text>'
     return s
+
+# Dark-theme CSS (cards use dark backgrounds, light text)
+ANIM_CSS_DARK = """
+  <style>
+    @keyframes flowRight {
+      0%   { stroke-dashoffset: 24; }
+      100% { stroke-dashoffset: 0;  }
+    }
+    @keyframes flowDown {
+      0%   { stroke-dashoffset: 24; }
+      100% { stroke-dashoffset: 0;  }
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; r:5; }
+      50%      { opacity:0.6; r:7; }
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(4px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes glowPulse {
+      0%,100% { opacity:0.6; }
+      50%      { opacity:1; }
+    }
+    .flow-r { stroke-dasharray:8 4; animation:flowRight 1.2s linear infinite; }
+    .flow-d { stroke-dasharray:8 4; animation:flowDown  1.2s linear infinite; }
+    .pulse-dot { animation:pulse 2s ease-in-out infinite; }
+    .fadein { animation:fadeIn 0.6s ease-out both; }
+    .glow { animation:glowPulse 2.5s ease-in-out infinite; }
+  </style>
+"""
 
 GAP=14  # vertical gap between sections
 
 # ── WRAPPER ────────────────────────────────────────────────────────────────────
-def wrap(content, title, subtitle, color, date_str, total_w=900, total_h=590):
+
+def wrap(content, title, subtitle, color, date_str, total_w=900, total_h=590, dark=False):
+    """Light OR dark theme wrapper. dark=True renders dark background."""
+    if dark:
+        return _wrap_dark(content, title, subtitle, color, date_str, total_w, total_h)
+    return _wrap_light(content, title, subtitle, color, date_str, total_w, total_h)
+
+
+def _wrap_light(content, title, subtitle, color, date_str, total_w=900, total_h=590):
     dark_bg = darken(color, 0.55)
-    mid_bg = darken(color, 0.35)
+    mid_bg  = darken(color, 0.35)
+    bg_top = lighten(color, 0.92) if not _MID else lighten(color, 0.82)
+    bg_bot = lighten(color, 0.94) if not _MID else lighten(color, 0.86)
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {total_w} {total_h}" width="{total_w}" height="{total_h}" style="overflow:hidden;display:block;font-family:Arial,sans-serif">
   <defs>
     <linearGradient id="hg" x1="0" x2="1" y1="0" y2="0">
@@ -302,36 +374,179 @@ def wrap(content, title, subtitle, color, date_str, total_w=900, total_h=590):
       <stop offset="100%" stop-color="{mid_bg}"/>
     </linearGradient>
     <linearGradient id="bg_g" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0%" stop-color="#F8FAFF"/>
-      <stop offset="100%" stop-color="{lighten(color,0.94)}"/>
+      <stop offset="0%" stop-color="{bg_top}"/>
+      <stop offset="100%" stop-color="{bg_bot}"/>
     </linearGradient>
-    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+    <filter id="shadow">
       <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.12)"/>
     </filter>
   </defs>
   {ANIM_CSS}
   <rect width="{total_w}" height="{total_h}" fill="url(#bg_g)"/>
-  <!-- dot grid -->
   <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
     <circle cx="1" cy="1" r="0.7" fill="{rgba(color,0.12)}"/>
   </pattern>
   <rect width="{total_w}" height="{total_h}" fill="url(#dots)"/>
-  <!-- header -->
   <rect x="0" y="0" width="{total_w}" height="60" fill="url(#hg)"/>
   <rect x="0" y="58" width="{total_w}" height="3" fill="{color}" opacity="0.5"/>
-  <!-- subtitle pill -->
   <rect x="16" y="14" width="{len(subtitle)*7+22}" height="18" rx="9" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
   <text x="28" y="26" fill="white" font-size="8.5" font-weight="700" letter-spacing="1.8">{xe(subtitle.upper())}</text>
-  <!-- title -->
   <text x="{total_w//2}" y="40" text-anchor="middle" fill="white" font-size="21" font-weight="900" letter-spacing="-0.5">{xe(clamp(title.replace("&","and"),52))}</text>
   {content}
-  <!-- footer -->
   <rect x="0" y="{total_h-32}" width="{total_w}" height="32" fill="{lighten(color,0.95)}"/>
   <rect x="0" y="{total_h-33}" width="{total_w}" height="1" fill="#E2E8F0"/>
   <text x="20" y="{total_h-12}" fill="#94A3B8" font-size="9">{xe(date_str)}</text>
   <rect x="{total_w-310}" y="{total_h-26}" width="295" height="20" rx="10" fill="{rgba(color,0.1)}" stroke="{color}" stroke-width="1.2"/>
   <text x="{total_w-162}" y="{total_h-13}" text-anchor="middle" fill="{color}" font-size="9.5" font-weight="800" letter-spacing="0.8">AI (c) Komal Batra</text>
 </svg>'''
+
+
+def _wrap_dark(content, title, subtitle, color, date_str, total_w=900, total_h=590):
+    """Dark-theme wrapper — deep slate background, glowing accents."""
+    dark_bg  = darken(color, 0.55)
+    mid_bg   = darken(color, 0.35)
+    bg_dark  = "#0D1117"   # near-black canvas
+    bg_panel = "#0F172A"   # section/card background base
+    border   = lighten(color, 0.2)   # muted accent border
+    grid_col = rgba(color, 0.06)
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {total_w} {total_h}" width="{total_w}" height="{total_h}" style="overflow:hidden;display:block;font-family:Arial,sans-serif">
+  <defs>
+    <linearGradient id="hg" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="{dark_bg}"/>
+      <stop offset="100%" stop-color="{darken(color,0.45)}"/>
+    </linearGradient>
+    <linearGradient id="bg_g" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="{bg_dark}"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.55)"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  {ANIM_CSS_DARK}
+  <rect width="{total_w}" height="{total_h}" fill="url(#bg_g)"/>
+  <!-- subtle grid -->
+  <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+    <path d="M28 0 L0 0 0 28" fill="none" stroke="{rgba(color,0.07)}" stroke-width="0.5"/>
+  </pattern>
+  <rect width="{total_w}" height="{total_h}" fill="url(#grid)"/>
+  <!-- glow orbs for depth -->
+  <circle cx="150" cy="200" r="180" fill="{rgba(color,0.04)}"/>
+  <circle cx="750" cy="380" r="160" fill="{rgba(mid_bg,0.05)}"/>
+  <!-- header -->
+  <rect x="0" y="0" width="{total_w}" height="60" fill="url(#hg)"/>
+  <rect x="0" y="58" width="{total_w}" height="2" fill="{color}" opacity="0.8"/>
+  <!-- glowing accent line under header -->
+  <rect x="0" y="60" width="{total_w}" height="1" fill="{rgba(color,0.3)}"/>
+  <!-- subtitle pill -->
+  <rect x="16" y="14" width="{len(subtitle)*7+22}" height="18" rx="9" fill="{rgba(color,0.25)}" stroke="{rgba(color,0.6)}" stroke-width="1"/>
+  <text x="28" y="26" fill="{lighten(color,0.7)}" font-size="8.5" font-weight="700" letter-spacing="1.8">{xe(subtitle.upper())}</text>
+  <!-- title -->
+  <text x="{total_w//2}" y="40" text-anchor="middle" fill="white" font-size="21" font-weight="900" letter-spacing="-0.5">{xe(clamp(title.replace("&","and"),52))}</text>
+  {content}
+  <!-- footer -->
+  <rect x="0" y="{total_h-32}" width="{total_w}" height="32" fill="#0D1117"/>
+  <rect x="0" y="{total_h-33}" width="{total_w}" height="1" fill="{rgba(color,0.4)}"/>
+  <text x="20" y="{total_h-12}" fill="#475569" font-size="9">{xe(date_str)}</text>
+  <rect x="{total_w-310}" y="{total_h-26}" width="295" height="20" rx="10" fill="{rgba(color,0.15)}" stroke="{rgba(color,0.5)}" stroke-width="1.2"/>
+  <text x="{total_w-162}" y="{total_h-13}" text-anchor="middle" fill="{lighten(color,0.7)}" font-size="9.5" font-weight="800" letter-spacing="0.8">AI (c) Komal Batra</text>
+</svg>'''
+
+
+
+
+# ── VERTICAL FLOW (Image-3 style — stacked boxes + arrows) ──────────────────
+def vertical_flow(nodes, side_nodes=None, cx=450, box_w=280, box_h=52,
+                  arrow_h=36, start_y=68, total_w=900, pad=18):
+    """
+    Renders a vertical flowchart like Image-3.
+    nodes      : list of (label, sublabel, color)
+    side_nodes : list of (label, sublabel, color, attach_to_index, side)
+                 side = 'left' | 'right'
+    Returns (svg_string, final_y)
+    """
+    s = ""
+    bx = cx - box_w // 2
+    y  = start_y
+
+    # Node positions stored for side-connection
+    node_ys = []
+
+    for idx, (label, sub, color) in enumerate(nodes):
+        # Drop shadow
+        shd = "rgba(0,0,0,0.40)" if _DARK else "rgba(0,0,0,0.10)"
+        bg  = darken(color, 0.50) if _DARK else lighten(color, 0.88)
+        bdr = lighten(color, 0.35) if _DARK else color
+        txt = lighten(color, 0.85) if _DARK else darken(color, 0.08)
+        sub_txt = "#94A3B8" if _DARK else "#64748B"
+
+        node_ys.append(y)
+
+        s += f'<rect x="{bx+3}" y="{y+3}" width="{box_w}" height="{box_h}" rx="12" fill="{shd}" class="fadein" style="animation-delay:{idx*0.08:.2f}s"/>'
+        s += f'<rect x="{bx}" y="{y}" width="{box_w}" height="{box_h}" rx="12" fill="{bg}" stroke="{bdr}" stroke-width="2.5" class="fadein" style="animation-delay:{idx*0.08:.2f}s"/>'
+
+        # Left color accent bar
+        s += f'<rect x="{bx}" y="{y}" width="6" height="{box_h}" rx="3" fill="{color}"/>'
+
+        # Circle step number
+        num_cx = bx + 26
+        s += f'<circle cx="{num_cx}" cy="{y+box_h//2}" r="13" fill="{color}"/>'
+        s += f'<text x="{num_cx}" y="{y+box_h//2+4}" text-anchor="middle" fill="white" font-size="11" font-weight="900" font-family="Arial,sans-serif">{idx+1}</text>'
+
+        # Main label
+        tx = bx + 50
+        if sub:
+            s += f'<text x="{tx}" y="{y+box_h//2-6}" fill="{txt}" font-size="12" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label, 28))}</text>'
+            s += f'<text x="{tx}" y="{y+box_h//2+10}" fill="{sub_txt}" font-size="9" font-family="Arial,sans-serif">{xe(clamp(sub, 34))}</text>'
+        else:
+            s += f'<text x="{tx}" y="{y+box_h//2+5}" fill="{txt}" font-size="12" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label, 28))}</text>'
+
+        # Arrow down (except last node)
+        if idx < len(nodes) - 1:
+            ax = cx; ay1 = y + box_h; ay2 = ay1 + arrow_h
+            arrow_col = lighten(color, 0.40) if _DARK else darken(color, 0.10)
+            s += f'<line x1="{ax}" y1="{ay1}" x2="{ax}" y2="{ay2-8}" stroke="{arrow_col}" stroke-width="2.5" class="flow-d"/>'
+            s += f'<polygon points="{ax},{ay2} {ax-7},{ay2-10} {ax+7},{ay2-10}" fill="{arrow_col}" class="pulse-dot"/>'
+
+        y += box_h + arrow_h
+
+    # Side nodes
+    if side_nodes:
+        for (label, sub, color, attach_idx, side) in side_nodes:
+            ny = node_ys[attach_idx] + box_h // 2   # vertical centre of target node
+            sbw = 150; sbh = 44
+            if side == "right":
+                sx2 = bx + box_w + 60
+                # Horizontal connector
+                arr_col = lighten(color, 0.40) if _DARK else darken(color, 0.10)
+                s += f'<line x1="{bx+box_w}" y1="{ny}" x2="{sx2}" y2="{ny}" stroke="{arr_col}" stroke-width="1.8" stroke-dasharray="5,3" class="flow-r"/>'
+                s += f'<polygon points="{sx2},{ny} {sx2-8},{ny-5} {sx2-8},{ny+5}" fill="{arr_col}"/>'
+            else:
+                sx2 = bx - 60 - sbw
+                arr_col = lighten(color, 0.40) if _DARK else darken(color, 0.10)
+                s += f'<line x1="{bx}" y1="{ny}" x2="{sx2+sbw}" y2="{ny}" stroke="{arr_col}" stroke-width="1.8" stroke-dasharray="5,3" class="flow-r"/>'
+                s += f'<polygon points="{sx2+sbw},{ny} {sx2+sbw+8},{ny-5} {sx2+sbw+8},{ny+5}" fill="{arr_col}"/>'
+
+            # Side box
+            sbg = darken(color, 0.52) if _DARK else lighten(color, 0.90)
+            sbdr = lighten(color, 0.30) if _DARK else color
+            stxt = lighten(color, 0.80) if _DARK else darken(color, 0.10)
+            ssub = "#94A3B8" if _DARK else "#64748B"
+            sy_box = ny - sbh // 2
+            s += f'<rect x="{sx2+2}" y="{sy_box+2}" width="{sbw}" height="{sbh}" rx="10" fill="rgba(0,0,0,0.2)"/>'
+            s += f'<rect x="{sx2}" y="{sy_box}" width="{sbw}" height="{sbh}" rx="10" fill="{sbg}" stroke="{sbdr}" stroke-width="1.8" class="fadein"/>'
+            s += f'<rect x="{sx2}" y="{sy_box}" width="5" height="{sbh}" rx="2" fill="{color}"/>'
+            if sub:
+                s += f'<text x="{sx2+sbw//2}" y="{sy_box+sbh//2-5}" text-anchor="middle" fill="{stxt}" font-size="10" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label,18))}</text>'
+                s += f'<text x="{sx2+sbw//2}" y="{sy_box+sbh//2+9}" text-anchor="middle" fill="{ssub}" font-size="8" font-family="Arial,sans-serif">{xe(clamp(sub,22))}</text>'
+            else:
+                s += f'<text x="{sx2+sbw//2}" y="{sy_box+sbh//2+5}" text-anchor="middle" fill="{stxt}" font-size="10" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label,18))}</text>'
+
+    return s, y
 
 
 # ── DIAGRAM FUNCTIONS ──────────────────────────────────────────────────────────
@@ -354,9 +569,9 @@ def make_system_design(C):
         s+=card(P+4+i*142,cy,138,38,C[i%len(C)],t,sub)
     s+=arrow_down(W//2,y+2,y+11,C[3]); y+=GAP
 
-    sv,cy,y=sec(P,y,W-P*2,24,"MESSAGE BROKER",C[3]); s+=sv
+    sv,cy,y=sec(P,y,W-P*2,38,"MESSAGE BROKER",C[3],"Kafka  |  RabbitMQ  |  Redis PubSub  |  Dead Letter  |  EventBridge"); s+=sv
     for i,(t,sub) in enumerate([("Kafka","event streams"),("RabbitMQ","task queues"),("Redis PubSub","real-time"),("Dead Letter Q","failed msgs"),("EventBridge","cloud events")]):
-        s+=card_centered(P+4+i*170,cy,164,24,C[i%len(C)],t,sub)
+        s+=card(P+4+i*170,cy,164,38,C[i%len(C)],t,sub)
     s+=arrow_down(W//2,y+2,y+11,C[4]); y+=GAP
 
     sv,cy,y=sec(P,y,W-P*2,38,"DATA LAYER",C[4],"OLTP  |  Cache  |  Documents  |  Blobs  |  Search  |  Analytics"); s+=sv
@@ -572,19 +787,31 @@ def make_mlops(C):
 
 
 def make_rag(C):
-    s=""; y=68; P=18; W=900
-    rows=[
-        (1,"INGESTION","PDF/HTML → chunk → embed → store",C[0],[("Loader","PDF/HTML/MD"),("Chunker","semantic split"),("Cleaner","PII strip"),("Embedder","text-embed-3"),("VectorDB","Pinecone")]),
-        (2,"RETRIEVAL","dense + sparse + rerank",C[1],[("Dense","cosine sim"),("Sparse BM25","TF-IDF"),("Hybrid RRF","score fusion"),("Reranker","cross-encoder"),("HyDE","hypothetical")]),
-        (3,"AUGMENTATION","prompt + generate + cite",C[2],[("Context Inject","top-k chunks"),("Prompt Tmpl","few-shot"),("LLM Call","GPT-4o/Claude"),("Citation","source ref"),("Self-refine","critic loop")]),
-        (4,"EVAL + OPS","measure + monitor + improve",C[3],[("RAGAS","faithfulness"),("Context Prec.","recall"),("Caching","GPTCache"),("LangSmith","observability"),("Feedback","RLHF")]),
+    """Image-3 style vertical flowchart for RAG pipeline."""
+    nodes = [
+        ("Query Encoder",       "embed user query → dense vector",    C[0]),
+        ("Vector Database",     "ANN search — Pinecone / Weaviate",    C[1]),
+        ("Chunking Module",     "semantic split + overlap window",     C[2]),
+        ("Re-ranking Module",   "cross-encoder score fusion + HyDE",   C[3]),
+        ("LLM Generation",      "GPT-4o / Claude — grounded answer",   C[4]),
+        ("Answer + Citations",  "RAGAS eval · faithfulness · recall",  C[5]),
     ]
-    for num,label,sub,col,cards in rows:
-        sv,y=numbered_row(y,82,num,label,sub,col,cards,W,P)
-        s+=sv
-        if num<len(rows): s+=arrow_down(W//2,y+2,y+10,col); y+=GAP
-    s+=status_bar(y+10,[("Faithfulness 92%","#059669"),("Ctx Prec 87%","#2563EB"),("Latency 1.1s","#7C3AED"),("Cache 41%","#D97706"),("Cost -55%","#059669")])
-    return s,"AI Architecture"
+    side_nodes = [
+        ("PDF / HTML / MD",  "Document Loader",  C[0], 0, "left"),
+        ("Sparse BM25",      "Hybrid Retrieval", C[1], 1, "right"),
+        ("GPTCache",         "Response Cache",   C[4], 4, "right"),
+        ("LangSmith",        "Observability",    C[5], 5, "left"),
+    ]
+    # Center the flow, total canvas 900 wide
+    svg, final_y = vertical_flow(nodes, side_nodes, cx=450, box_w=320,
+                                  box_h=54, arrow_h=32, start_y=68)
+    svg += status_bar(final_y+8, [("Faithfulness 92%","#059669"),
+                                   ("Ctx Prec 87%","#2563EB"),
+                                   ("Latency 1.1s","#7C3AED"),
+                                   ("Cache 41%","#D97706"),
+                                   ("Cost -55%","#059669")])
+    total_h = final_y + 46
+    return svg, "AI Architecture", total_h
 
 
 def make_lakehouse(C):
@@ -754,7 +981,24 @@ def make_generic(topic_name, C):
 
 # ── DISPATCH ──────────────────────────────────────────────────────────────────
 def make_diagram(topic_name, topic_id, diagram_type=""):
-    C=get_pal(topic_id); now=datetime.now().strftime("%B %Y"); tid=topic_id.lower()
+    import hashlib, random
+    global _DARK, _MID
+    # Alternate dark/light per topic deterministically, then add randomness
+    h = int(hashlib.md5(topic_id.encode()).hexdigest(), 16)
+    # 3 themes: 0=light, 1=mid (slightly dark bg), 2=dark
+    theme_choice = h % 3
+    _DARK = (theme_choice == 2)       # full dark
+    _MID  = (theme_choice == 1)       # medium (light bg, more saturated cards)
+
+    C = get_pal(topic_id)
+    # Shift palette brightness for mid-theme
+    if _MID:
+        C = [darken(c, 0.05) for c in C]
+
+    now = datetime.now().strftime("%B %Y")
+    tid = topic_id.lower()
+    total_h = 590   # default, some diagrams override
+
     if   "kube"   in tid:                         content,sub=make_kubernetes(C)
     elif any(x in tid for x in["llm","agent"]):   content,sub=make_llm(C)
     elif "cicd"   in tid:                         content,sub=make_cicd(C)
@@ -765,13 +1009,16 @@ def make_diagram(topic_name, topic_id, diagram_type=""):
     elif "system" in tid:                         content,sub=make_system_design(C)
     elif "mlops"  in tid:                         content,sub=make_mlops(C)
     elif any(x in tid for x in["lake","data"]):   content,sub=make_lakehouse(C)
-    elif "rag"    in tid:                         content,sub=make_rag(C)
+    elif "rag"    in tid:
+        result = make_rag(C)
+        content, sub, total_h = result   # make_rag returns 3-tuple
     elif "docker" in tid:                         content,sub=make_docker(C)
     elif "git"    in tid:                         content,sub=make_git_workflow(C)
     elif "api"    in tid:                         content,sub=make_api_design(C)
     elif "solid"  in tid:                         content,sub=make_solid(C)
     else:                                         content,sub=make_generic(topic_name,C)
-    return wrap(content, topic_name, sub, C[0], now)
+
+    return wrap(content, topic_name, sub, C[0], now, dark=_DARK, total_h=total_h)
 
 
 class DiagramGenerator:
