@@ -588,13 +588,13 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   <div class="srow">
     <div class="stat">
       <div class="stat-icon">🚀</div>
-      <div class="slbl">Total Runs</div>
+      <div class="slbl">Total Posts</div>
       <div class="snum" style="color:var(--acc)" id="s1">—</div>
       <div class="ssub">all time</div>
     </div>
     <div class="stat">
       <div class="stat-icon">✅</div>
-      <div class="slbl">Successful</div>
+      <div class="slbl">Posts Live</div>
       <div class="snum" style="color:var(--grn)" id="s2">—</div>
       <div class="ssub">posts live on LinkedIn</div>
     </div>
@@ -756,7 +756,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   <!-- RUNS LOG -->
   <div class="card">
     <div class="ch">
-      <span class="ct">📋 Run History</span>
+      <span class="ct">📋 LinkedIn Post History</span>
       <div style="display:flex;align-items:center;gap:8px;position:relative">
         <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button>
         <div style="position:relative">
@@ -1013,7 +1013,7 @@ async function _exportXlsx(rows, tz) {
   // Column widths
   ws['!cols'] = [6,12,12,25,15,22,10,12,50].map(w=>({wch:w}));
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Run History');
+  XLSX.utils.book_append_sheet(wb, ws, 'LinkedIn Post History');
   XLSX.writeFile(wb, `linkedin-runs-${new Date().toISOString().split('T')[0]}.xlsx`);
   toast(`Downloaded ${rows.length} runs as .XLSX`, 'ok');
 }
@@ -1065,7 +1065,7 @@ function exportRuns(fmt) {
     const hr      = widths.map(w => '-'.repeat(w+2)).join('|');
     const header  = '| ' + mdCols.map((c,i) => pad(c,widths[i])).join(' | ') + ' |';
     const dataRows = rows.map(r => '| ' + mdKeys.map((k,i) => pad(r[k]??'',widths[i])).join(' | ') + ' |');
-    content = '# LinkedIn Agent — Run History\n> Exported ' + new Date().toLocaleDateString() +
+    content = '# LinkedIn Agent — LinkedIn Post History\n> Exported ' + new Date().toLocaleDateString() +
               ' · Timezone: ' + userTZ + '\n\n' + header + '\n|' + hr + '|\n' + dataRows.join('\n') + '\n';
     mime = 'text/markdown'; ext = 'md';
 
@@ -1076,7 +1076,7 @@ function exportRuns(fmt) {
     const keys = ['run_number','status','trigger','topic','mode','started_local','duration_s'];
     const line = '+' + w.map(n=>'-'.repeat(n+2)).join('+') + '+';
     const row  = r => '| ' + keys.map((k,i)=>pad(r[k],w[i])).join(' | ') + ' |';
-    content = 'LinkedIn Agent — Run History\nExported: ' + new Date().toLocaleDateString() +
+    content = 'LinkedIn Agent — LinkedIn Post History\nExported: ' + new Date().toLocaleDateString() +
               ' | TZ: ' + userTZ + '\n\n' + line + '\n| ' +
               hdrs.map((h,i)=>pad(h,w[i])).join(' | ') + ' |\n' + line + '\n' +
               rows.map(row).join('\n') + '\n' + line + '\n';
@@ -1090,11 +1090,11 @@ function exportRuns(fmt) {
       '</td><td>'+(r.topic||'')+'</td><td>'+(r.mode||'')+'</td><td>'+(r.started_local||'')+
       '</td><td>'+(r.duration_s||'')+'s</td><td><a href="'+r.github_url+'" target="_blank">View</a></td></tr>'
     ).join('');
-    content = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>LinkedIn Run History</title>'+
+    content = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>LinkedIn LinkedIn Post History</title>'+
       '<style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}'+
       'th,td{border:1px solid #e2e8f0;padding:8px 12px;text-align:left}th{background:#e0e7ff}'+
       'tr:nth-child(even){background:#f8fafc}a{color:#2563eb}</style></head><body>'+
-      '<h2>LinkedIn Agent Run History</h2><p>Exported '+new Date().toLocaleDateString()+' | TZ: '+userTZ+'</p>'+
+      '<h2>LinkedIn Agent LinkedIn Post History</h2><p>Exported '+new Date().toLocaleDateString()+' | TZ: '+userTZ+'</p>'+
       '<table><thead><tr>'+thRow+'</tr></thead><tbody>'+trRows+'</tbody></table></body></html>';
     mime = 'text/html'; ext = 'html';
 
@@ -1624,12 +1624,23 @@ function getFilterRange() {
 }
 
 function isSkippedRun(r) {
-  // A "skipped" run = cron fired but it wasn't posting time.
-  // The YAML cancels these runs via "gh run cancel", so they show as
-  // 'cancelled' or 'skipped' in the GitHub API.
-  // NOTE: we never use duration as a filter — real posts can also be fast.
-  if (r.event !== 'schedule') return false;
-  return r.conclusion === 'cancelled' || r.conclusion === 'skipped';
+  // Rule 1 — hide every single schedule/cron run.
+  //   Cron is a 30-min heartbeat that self-cancels when it's not posting
+  //   time.  None of those represent a LinkedIn post, so hide all of them.
+  if (r.event === 'schedule') return true;
+  // Rule 2 — hide non-post outcomes even for manual/dispatch triggers.
+  //   'skipped' = schedule_checker exited early without posting.
+  //   'cancelled' without a real post attempt = infrastructure noise.
+  //   Only keep: success | failure | in_progress | queued
+  //   (failure is kept — user needs to know their manual post failed)
+  if (r.conclusion === 'skipped') return true;
+  // Cancelled manual runs: keep if they ran long enough to attempt a post
+  // (>30s), hide otherwise (they were cancelled before doing anything).
+  if (r.conclusion === 'cancelled') {
+    const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
+    return durMs < 30000;   // < 30 s → noise, hide it
+  }
+  return false;
 }
 
 let _statusFilter = 'all'; // 'all' | 'ok' | 'fail' | 'cancel'
@@ -1654,26 +1665,18 @@ function applyRunFilter() {
     const d = new Date(r.created_at);
     return d >= from && d <= to;
   });
-  // Separate real posts from skip-runs
-  const realRuns    = filtered.filter(r => !isSkippedRun(r));
-  const skippedRuns = filtered.filter(r =>  isSkippedRun(r));
-  const totalEl = document.getElementById('runTotal');
-  if (totalEl) totalEl.textContent = realRuns.length + (realRuns.length===1?' run':' runs');
-  // Show skip counter badge
-  let skipBadge = document.getElementById('skipBadge');
-  if (!skipBadge) {
-    skipBadge = document.createElement('span');
-    skipBadge.id = 'skipBadge';
-    skipBadge.style.cssText = 'margin-left:8px;font-size:11px;color:var(--txm);opacity:0.7;cursor:help';
-    skipBadge.title = 'Cron runs where it was not posting time — filtered out to keep history clean';
-    if (totalEl) totalEl.parentNode.insertBefore(skipBadge, totalEl.nextSibling);
-  }
-  skipBadge.textContent = skippedRuns.length ? ' + ' + skippedRuns.length + ' skipped' : '';
+  // Only LinkedIn post runs — all schedule/cron runs already removed by isSkippedRun
+  const postRuns = filtered.filter(r => !isSkippedRun(r));
+  const totalEl  = document.getElementById('runTotal');
+  if (totalEl) totalEl.textContent = postRuns.length + (postRuns.length===1 ? ' post' : ' posts');
+  // Remove legacy skipBadge if it exists
+  const skipBadge = document.getElementById('skipBadge');
+  if (skipBadge) skipBadge.remove();
   // Apply status filter
-  let displayRuns = realRuns;
-  if (_statusFilter === 'ok')     displayRuns = realRuns.filter(r => r.conclusion === 'success');
-  if (_statusFilter === 'fail')   displayRuns = realRuns.filter(r => r.conclusion === 'failure');
-  if (_statusFilter === 'cancel') displayRuns = realRuns.filter(r => r.conclusion === 'cancelled');
+  let displayRuns = postRuns;
+  if (_statusFilter === 'ok')     displayRuns = postRuns.filter(r => r.conclusion === 'success');
+  if (_statusFilter === 'fail')   displayRuns = postRuns.filter(r => r.conclusion === 'failure');
+  if (_statusFilter === 'cancel') displayRuns = postRuns.filter(r => r.conclusion === 'cancelled');
   renderRuns(displayRuns);
 }
 
@@ -1688,8 +1691,9 @@ function renderRuns(runs) {
     const running = r.status==='in_progress' || r.status==='queued';
     const ico     = ok ? '✅' : fail ? '❌' : running ? '⏳' : '⚪';
     const icls    = ok ? 'ok' : fail ? 'fail' : running ? 'run' : 'oth';
-    const trig    = r.event==='schedule' ? 'schedule' : r.event==='workflow_dispatch' ? 'manual' : r.event;
-    const bcls    = trig==='schedule' ? 'bsch' : trig==='manual' ? 'bman' : 'bdry';
+    // schedule events are hidden by isSkippedRun — only manual/dispatch shown here
+    const trig    = r.event==='workflow_dispatch' ? 'manual post' : r.event || 'post';
+    const bcls    = trig==='manual post' ? 'bman' : 'bdry';
     const t       = new Date(r.created_at);
     const ts      = tzFmt(t,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
     const dur     = r.updated_at ? Math.round((new Date(r.updated_at) - t) / 1000) : null;
@@ -1699,7 +1703,7 @@ function renderRuns(runs) {
     const isDryRun= (r.display_title||r.name||'').toLowerCase().includes('dry');
     let tags = '';
     if (topic)  tags += `<span class="rtag rtag-topic">🎯 ${topic}</span>`;
-    else if (trig === 'schedule') tags += `<span class="rtag rtag-topic">🎲 Auto</span>`;
+    else        tags += `<span class="rtag rtag-topic">🎲 Auto topic</span>`;
     if (mode)   tags += `<span class="rtag rtag-mode">${mode}</span>`;
     if (isDryRun) tags += `<span class="rtag rtag-dry">🧪 dry run</span>`;
     return `<div class="ri" onclick="openRunDetail(${r.id})" title="Click for details" style="cursor:pointer">
@@ -1794,27 +1798,44 @@ async function loadStats() {
     const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100');
     const d = await r.json();
     const runs = d.workflow_runs || [];
-    // Exclude skipped cron runs (cancelled or fast-exit) from all stats
-    const realRuns = runs.filter(r => !isSkippedRun(r));
-    const succ = realRuns.filter(r => r.conclusion === 'success');
-    const wk = new Date(Date.now() - 7*24*60*60*1000);
-    const tw = succ.filter(r => new Date(r.created_at) > wk);
-    document.getElementById('s1').textContent = realRuns.length;
-    document.getElementById('s2').textContent = succ.length;
-    document.getElementById('s3').textContent = tw.length;
-    if (succ.length > 0) {
-      const last    = succ[0];
-      const diffMs  = Date.now() - new Date(last.created_at);
+
+    // "LinkedIn posts" = non-cron, non-skipped runs only.
+    // isSkippedRun already excludes every schedule event + skipped/fast-cancel.
+    const postRuns = runs.filter(r => !isSkippedRun(r));
+
+    // Successful posts = run reached LinkedIn and the API accepted the post.
+    const postedRuns = postRuns.filter(r => r.conclusion === 'success');
+
+    // This-week posts
+    const wk = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const thisWeek = postedRuns.filter(r => new Date(r.created_at) > wk);
+
+    // Stat card 1 — "LinkedIn Posts" (total ever successfully posted)
+    document.getElementById('s1').textContent = postedRuns.length;
+
+    // Stat card 2 — same as s1 (successful = posted); kept for layout
+    document.getElementById('s2').textContent = postedRuns.length;
+
+    // Stat card 3 — posts this week
+    document.getElementById('s3').textContent = thisWeek.length;
+
+    // Stat card 4 — last post time
+    if (postedRuns.length > 0) {
+      const last   = postedRuns[0];
+      const diffMs = Date.now() - new Date(last.created_at);
       const diffMin = Math.floor(diffMs / 60000);
       const diffHr  = Math.floor(diffMs / 3600000);
       const diffDay = Math.floor(diffMs / 86400000);
       let ago;
-      if (diffMin < 1)       ago = 'Just now';
+      if      (diffMin < 1)  ago = 'Just now';
       else if (diffMin < 60) ago = diffMin + ' min ago';
-      else if (diffHr < 24)  ago = diffHr + 'h ' + (diffMin % 60) + 'm ago';
-      else                   ago = diffDay + 'd ' + (diffHr % 24) + 'h ago';
+      else if (diffHr  < 24) ago = diffHr  + 'h ' + (diffMin % 60) + 'm ago';
+      else                   ago = diffDay + 'd '  + (diffHr  % 24) + 'h ago';
       document.getElementById('s4').textContent = ago;
-      document.getElementById('s4b').textContent = tzFmt(last.created_at,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+      document.getElementById('s4b').textContent = tzFmt(
+        last.created_at,
+        {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}
+      );
     }
   } catch(e) {}
 }
