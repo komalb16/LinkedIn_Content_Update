@@ -4,7 +4,7 @@
   "weekly": {
     "mon": {
       "enabled": true,
-      "time_utc": "13:59"
+      "time_utc": "16:28"
     },
     "tue": {
       "enabled": true,
@@ -33,5 +33,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-10T04:46:17.889Z"
+  "updated_at": "2026-03-10T04:46:43.733Z"
 }
