@@ -116,7 +116,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(79,156,249,.4)}
 /* theme swatches */
 /* ── THEME PICKER ── */
-.tpick-modes{display:flex;gap:3px;align-items:center;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:2px}
+.theme-strip{display:flex;align-items:center;gap:6px;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:4px 10px}
+.ts-colors{display:flex;gap:5px;align-items:center}
+.ts-sep{width:1px;height:16px;background:var(--bd);flex-shrink:0}
+.tpick-modes{display:flex;gap:2px;align-items:center}
+.cpick{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;padding:0;flex-shrink:0}
 .cpick{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;padding:0;flex-shrink:0}
 .cpick:hover{transform:scale(1.2)}
 .cpick.blue  {background:radial-gradient(circle at 35% 35%,#93c5fd,#2563eb)}
@@ -125,7 +129,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .cpick.teal  {background:radial-gradient(circle at 35% 35%,#5eead4,#0d9488)}
 .cpick.rose  {background:radial-gradient(circle at 35% 35%,#fda4af,#be123c)}
 .cpick.active{box-shadow:0 0 0 2.5px #fff,0 0 0 4.5px var(--acc);transform:scale(1.15)}
-.mpick{padding:3px 10px;border-radius:100px;border:none;font-size:10px;font-family:var(--fb);font-weight:500;cursor:pointer;color:var(--txd);background:transparent;transition:all var(--tr);white-space:nowrap}
+.mpick{padding:3px 7px;border-radius:100px;border:none;font-size:13px;cursor:pointer;color:var(--txd);background:transparent;transition:all var(--tr);white-space:nowrap}
 .mpick.act{background:var(--acc);color:#fff;box-shadow:0 1px 8px rgba(0,0,0,.3)}
 .mpick:not(.act):hover{color:var(--txm);background:var(--sur3)}
 [data-theme="light"] .tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.25)}
@@ -265,7 +269,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 
 /* ── TIMEZONE SELECTOR ── */
-.tz-sel{background:var(--sur2);border:1.5px solid var(--bd);border-radius:8px;padding:5px 10px;color:var(--tx);font-size:11px;font-family:var(--fm);outline:none;cursor:pointer;transition:border-color var(--tr);max-width:200px}
+.tz-sel{background:var(--sur2);border:1.5px solid var(--bd);border-radius:8px;padding:4px 8px;color:var(--tx);font-size:11px;font-family:var(--fm);outline:none;cursor:pointer;transition:border-color var(--tr);max-width:200px}
 .tz-sel:focus,.tz-sel:hover{border-color:var(--bds)}
 
 /* ── RUN DETAIL MODAL ── */
@@ -449,7 +453,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   .preview-diagram{border-top:1px solid var(--bd)}
   header{gap:10px}
   .hright{gap:7px}
-  /* theme-picker replaced by appear panel */
+  .theme-strip{gap:4px;padding:3px 8px}
 }
 
 /* Mobile 640px */
@@ -459,8 +463,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   .logo-name{font-size:13px}
   .logo-sub{display:none}
   .hright{width:100%;justify-content:space-between}
-  /* theme-picker replaced by appear panel */
-  /* tpick-colors in appear panel */
+  .theme-strip{gap:4px;padding:3px 8px}
+  .ts-colors{gap:4px}
   .tpick-modes .mpick{padding:3px 6px;font-size:9px}
   .gear-btn{width:30px;height:30px;font-size:14px}
   .cpill{padding:5px 9px;font-size:10px}
@@ -734,33 +738,24 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       </div>
     </div>
     <div class="hright">
-      <!-- Appearance toggle button -->
-      <div style="position:relative">
-        <button class="gear-btn" id="appearBtn" onclick="toggleAppearPanel()" title="Appearance" style="font-size:15px">🎨</button>
-        <!-- Floating appearance panel -->
-        <div id="appearPanel" style="display:none;position:absolute;top:42px;right:0;z-index:500;
-          background:var(--sur);border:1px solid var(--bd);border-radius:16px;padding:14px 16px;
-          box-shadow:var(--sh);min-width:200px;animation:up .15s ease">
-          <div style="font-size:10px;color:var(--txd);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Theme Color</div>
-          <div style="display:flex;gap:7px;margin-bottom:14px">
-            <button class="cpick blue"   onclick="setColor('blue')"   title="Blue"></button>
-            <button class="cpick purple" onclick="setColor('purple')" title="Purple"></button>
-            <button class="cpick orange" onclick="setColor('orange')" title="Orange"></button>
-            <button class="cpick teal"   onclick="setColor('teal')"   title="Teal"></button>
-            <button class="cpick rose"   onclick="setColor('rose')"   title="Rose"></button>
-          </div>
-          <div style="font-size:10px;color:var(--txd);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">Mode</div>
-          <div class="tpick-modes" style="width:100%">
-            <button class="mpick" id="mp-light"  onclick="setMode('light')"  style="flex:1">☀️ Light</button>
-            <button class="mpick" id="mp-medium" onclick="setMode('medium')" style="flex:1">🌤 Mid</button>
-            <button class="mpick act" id="mp-dark" onclick="setMode('dark')" style="flex:1">🌙 Dark</button>
-          </div>
-          <div style="border-top:1px solid var(--bd);margin:12px 0 10px"></div>
-          <div style="font-size:10px;color:var(--txd);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">Timezone</div>
-          <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Select your timezone" style="width:100%"></select>
+      <!-- Inline theme strip -->
+      <div class="theme-strip">
+        <div class="ts-colors">
+          <button class="cpick blue"   onclick="setColor('blue')"   title="Blue"></button>
+          <button class="cpick purple" onclick="setColor('purple')" title="Purple"></button>
+          <button class="cpick orange" onclick="setColor('orange')" title="Orange"></button>
+          <button class="cpick teal"   onclick="setColor('teal')"   title="Teal"></button>
+          <button class="cpick rose"   onclick="setColor('rose')"   title="Rose"></button>
+        </div>
+        <div class="ts-sep"></div>
+        <div class="tpick-modes">
+          <button class="mpick" id="mp-light"  onclick="setMode('light')" >☀️</button>
+          <button class="mpick" id="mp-medium" onclick="setMode('medium')">🌤</button>
+          <button class="mpick act" id="mp-dark" onclick="setMode('dark')">🌙</button>
         </div>
       </div>
-      <button class="gear-btn" id="qrShareBtn" onclick="openQR()" title="Open on another device" style="display:none;font-size:15px">📱</button>
+      <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Timezone"></select>
+      <button class="gear-btn" id="qrShareBtn" onclick="openQR()" title="Open on another device" style="display:none">📱</button>
       <div class="gear-btn" onclick="openSettings()" title="Settings">⚙️</div>
       <div class="cpill" onclick="disconnect()" title="Click to disconnect">
         <div class="dot"></div>
@@ -1478,25 +1473,8 @@ window.onload = () => {
 let _themeColor = localStorage.getItem('themeColor') || 'blue';
 let _themeMode  = localStorage.getItem('themeMode')  || 'dark';
 
-function toggleAppearPanel() {
-  const p = document.getElementById('appearPanel');
-  if (!p) return;
-  const showing = p.style.display !== 'none';
-  p.style.display = showing ? 'none' : 'block';
-  if (!showing) {
-    // close on outside click
-    setTimeout(() => {
-      const close = e => {
-        if (!document.getElementById('appearPanel').contains(e.target) &&
-            e.target.id !== 'appearBtn') {
-          document.getElementById('appearPanel').style.display = 'none';
-          document.removeEventListener('click', close);
-        }
-      };
-      document.addEventListener('click', close);
-    }, 10);
-  }
-}
+// (appear panel removed — theme strip is inline)
+
 
 function setColor(c) {
   _themeColor = c;
@@ -1554,24 +1532,36 @@ function saveSettings() {
   if (newRole) localStorage.setItem('author_role', newRole);
   // Save repo if changed
   const repoInp = document.getElementById('settingsRepoInput');
+  let repoChanged = false;
   if (repoInp) {
     const rv = repoInp.value.trim();
-    if (rv && rv.includes('/')) {
+    if (rv && rv.includes('/') && rv !== REPO) {
       REPO = rv;
       localStorage.setItem('agent_repo', rv);
       updateRepoDisplay();
+      repoChanged = true;
     }
   }
   closeSettings();
   updateRepoDisplay();
   toast('Settings saved ✓', 'ok');
+  if (repoChanged && token) loadAllData();
 }
 // ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
-if ('serviceWorker' in navigator && !location.hostname.includes('claudeusercontent.com')) {
+(function() {
+  // Only register SW when served from a real origin (GitHub Pages, localhost).
+  // Skip on claude.ai preview, file://, and any origin without a real domain.
+  const host = location.hostname;
+  const skip = !host ||
+               host === 'localhost' && location.protocol === 'file:' ||
+               host.includes('claudeusercontent.com') ||
+               host.includes('claude.ai') ||
+               !('serviceWorker' in navigator);
+  if (skip) return;
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(reg => {
-        console.log('[PWA] SW registered, scope:', reg.scope);
         reg.addEventListener('updatefound', () => {
           const newSW = reg.installing;
           newSW.addEventListener('statechange', () => {
@@ -1581,9 +1571,9 @@ if ('serviceWorker' in navigator && !location.hostname.includes('claudeuserconte
           });
         });
       })
-      .catch(err => console.warn('[PWA] SW registration failed:', err));
+      .catch(() => {}); // silently ignore — SW is enhancement only
   });
-}
+})();
 
 // ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────
 let _deferredInstallPrompt = null;
@@ -1753,7 +1743,7 @@ function pickRepo(repo) {
   updateRepoDisplay();
   closeSetupModal();
   toast('✅ Repo set: ' + REPO, 'ok');
-  Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+  loadAllData();
 }
 
 function showRepoPrompt() {
@@ -1778,7 +1768,7 @@ function saveRepoFromInput() {
   updateRepoDisplay();
   closeSetupModal();
   toast('✅ Repo saved: ' + REPO, 'ok');
-  Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+  loadAllData();
 }
 
 // ── FIRST-RUN SETUP WIZARD ─────────────────────────────────────────────────
@@ -1937,6 +1927,12 @@ function showDash(u) {
     const accent = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim();
     if (accent) meta.setAttribute('content', accent);
   }
+}
+
+// ── Central data loader — call after REPO is confirmed ───────────────────────
+function loadAllData() {
+  if (!REPO) { toast('No repo set — open ⚙️ Settings', 'err'); return; }
+  Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
 }
 
 function disconnect() {
@@ -2173,6 +2169,10 @@ let allRuns  = [];   // all fetched agent runs
 let runFilter = '30d';
 
 async function loadRuns() {
+  if (!REPO) {
+    document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">⚙️</div><span>Enter your repo in Settings (⚙️) to load posts</span></div>';
+    return;
+  }
   document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">🔄</div><span>Loading...</span></div>';
   try {
     // Workflow-specific endpoint — excludes pages/deploy runs automatically
@@ -2493,6 +2493,7 @@ async function loadSchedule() {
 
 // ── SAVE SCHEDULE TO REPO ─────────────────────────────────────────────────────
 async function saveSchedule() {
+  if (!REPO) { toast('No repo configured — open ⚙️ Settings and enter your repo first', 'err'); return; }
   const btn = document.getElementById('saveSchedBtn');
   btn.disabled = true; btn.textContent = '💾 Saving...';
   try {
