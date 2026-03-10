@@ -95,8 +95,12 @@ def load_config() -> dict:
         return defaults
 
 
+def utc_now() -> datetime:
+    """Current UTC datetime (naive)."""
+    return datetime.utcnow()
+
 def ist_now() -> datetime:
-    """Current datetime in IST (UTC+5:30) as a naive datetime."""
+    """Legacy alias — kept so old configs using time_ist still work."""
     return datetime.utcnow() + timedelta(hours=5, minutes=30)
 
 
@@ -115,9 +119,10 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         info("Manual trigger detected via GH_EVENT_NAME env var")
 
     cfg     = load_config()
-    now     = ist_now()
+    # Use UTC for day/date calculations — dashboard saves all times in UTC now
+    now     = utc_now()
     today   = now.strftime("%Y-%m-%d")
-    day_key = DAYS[now.weekday()]   # 0=Mon … 6=Sun
+    day_key = DAYS[now.weekday()]   # 0=Mon … 6=Sun (UTC date)
 
     trigger = "MANUAL" if manual else ("DRY-RUN" if dry_run else "SCHEDULED")
     info(f"Schedule check — {today} ({day_key.upper()}) — IST {now.strftime('%H:%M')} — trigger: {trigger}")
@@ -144,23 +149,40 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
 
     # ── 4. WEEKLY DAY ENABLED ─────────────────────────────────────────────────
     day_cfg = cfg["weekly"].get(day_key, {"enabled": True, "time_ist": "09:30"})
-    if not day_cfg.get("enabled", True) and not is_forced and not manual and not dry_run:
+    if not day_cfg.get("enabled", True) and not is_forced:
         info(f"📅 {day_key.capitalize()} is disabled in weekly schedule. Exiting cleanly.")
         sys.exit(0)
-    elif not day_cfg.get("enabled", True) and (manual or dry_run):
-        info(f"📅 {day_key.capitalize()} is disabled but {trigger} override — continuing")
 
     # ── 5. SLEEP UNTIL SCHEDULED TIME (only for cron triggers) ─────────────────
     if dry_run or manual:
         info(f"Skipping time-of-day sleep ({trigger}) — running immediately")
         return
 
-    time_ist = day_cfg.get("time_ist", "09:30")
+    # Prefer time_utc (set by modern dashboard). Fall back to time_ist for
+    # legacy configs — convert IST → UTC by subtracting 5h30m.
+    now = utc_now()   # re-fetch as UTC for time comparison
+    time_utc = day_cfg.get("time_utc")
+    if time_utc:
+        time_str = time_utc
+        info(f"Using time_utc={time_utc} (UTC) from schedule_config")
+    else:
+        time_ist = day_cfg.get("time_ist", "09:30")
+        # Convert IST → UTC: subtract 5h30m
+        try:
+            ih, im = map(int, time_ist.split(":"))
+        except Exception:
+            ih, im = 9, 30
+        total_min = ih * 60 + im - 330  # -330 = -5h30m
+        total_min = total_min % (24 * 60)  # wrap midnight
+        utc_h, utc_m = divmod(total_min, 60)
+        time_str = f"{utc_h:02d}:{utc_m:02d}"
+        info(f"Legacy time_ist={time_ist} → converted to time_utc={time_str}")
+
     try:
-        sched_h, sched_m = map(int, time_ist.split(":"))
+        sched_h, sched_m = map(int, time_str.split(":"))
     except Exception:
-        warn(f"Invalid time_ist value '{time_ist}' — defaulting to 09:30")
-        sched_h, sched_m = 9, 30
+        warn(f"Invalid scheduled time '{time_str}' — defaulting to 09:00 UTC")
+        sched_h, sched_m = 9, 0
 
     target = now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
     diff_secs = (target - now).total_seconds()
@@ -201,21 +223,22 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
 # ─── Quick diagnostic (python src/schedule_checker.py) ───────────────────────
 if __name__ == "__main__":
     cfg     = load_config()
-    now     = ist_now()
+    now     = utc_now()
     today   = now.strftime("%Y-%m-%d")
     day_key = DAYS[now.weekday()]
 
     print("\n" + "=" * 50)
     print("  schedule_checker.py — diagnostic")
     print("=" * 50)
-    print(f"  Now (IST):      {now.strftime('%Y-%m-%d %H:%M')}")
+    print(f"  Now (UTC):      {now.strftime('%Y-%m-%d %H:%M')}")
     print(f"  Day:            {day_key}")
     print(f"  Paused:         {cfg['paused']}")
     print(f"  Pause until:    {cfg.get('pause_until') or '(none)'}")
     print(f"  Today skip:     {today in cfg.get('skip_dates', [])}")
     print(f"  Today force:    {today in cfg.get('force_dates', [])}")
     print(f"  Day enabled:    {cfg['weekly'][day_key]['enabled']}")
-    print(f"  Scheduled time: {cfg['weekly'][day_key]['time_ist']} IST")
+    time_utc = cfg["weekly"][day_key].get("time_utc") or cfg["weekly"][day_key].get("time_ist","09:30")
+    print(f"  Scheduled time: {time_utc} UTC")
     print("=" * 50)
 
     would_run = (

@@ -1,5 +1,9 @@
 import os
 from datetime import datetime
+import os as _os
+
+# Author shown in diagram footer — reads from env var set by workflow
+_DIAGRAM_AUTHOR = _os.environ.get("AUTHOR_NAME") or _os.environ.get("GITHUB_ACTOR") or "Author"
 from pathlib import Path
 from logger import get_logger
 
@@ -397,7 +401,7 @@ def _wrap_light(content, title, subtitle, color, date_str, total_w=900, total_h=
   <rect x="0" y="{total_h-33}" width="{total_w}" height="1" fill="#E2E8F0"/>
   <text x="20" y="{total_h-12}" fill="#94A3B8" font-size="9">{xe(date_str)}</text>
   <rect x="{total_w-310}" y="{total_h-26}" width="295" height="20" rx="10" fill="{rgba(color,0.1)}" stroke="{color}" stroke-width="1.2"/>
-  <text x="{total_w-162}" y="{total_h-13}" text-anchor="middle" fill="{color}" font-size="9.5" font-weight="800" letter-spacing="0.8">AI (c) Komal Batra</text>
+  <text x="{total_w-162}" y="{total_h-13}" text-anchor="middle" fill="{color}" font-size="9.5" font-weight="800" letter-spacing="0.8">AI © ' + _DIAGRAM_AUTHOR + '</text>
 </svg>'''
 
 
@@ -453,7 +457,7 @@ def _wrap_dark(content, title, subtitle, color, date_str, total_w=900, total_h=5
   <rect x="0" y="{total_h-33}" width="{total_w}" height="1" fill="{rgba(color,0.4)}"/>
   <text x="20" y="{total_h-12}" fill="#475569" font-size="9">{xe(date_str)}</text>
   <rect x="{total_w-310}" y="{total_h-26}" width="295" height="20" rx="10" fill="{rgba(color,0.15)}" stroke="{rgba(color,0.5)}" stroke-width="1.2"/>
-  <text x="{total_w-162}" y="{total_h-13}" text-anchor="middle" fill="{lighten(color,0.7)}" font-size="9.5" font-weight="800" letter-spacing="0.8">AI (c) Komal Batra</text>
+  <text x="{total_w-162}" y="{total_h-13}" text-anchor="middle" fill="{lighten(color,0.7)}" font-size="9.5" font-weight="800" letter-spacing="0.8">AI © ' + _DIAGRAM_AUTHOR + '</text>
 </svg>'''
 
 
