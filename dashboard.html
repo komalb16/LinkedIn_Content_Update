@@ -116,9 +116,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(79,156,249,.4)}
 /* theme swatches */
 /* ── THEME PICKER ── */
-.theme-picker{display:flex;flex-direction:column;gap:5px;align-items:center}
-.tpick-colors{display:flex;gap:5px;align-items:center}
-.tpick-modes {display:flex;gap:3px;align-items:center;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:2px}
+.tpick-modes{display:flex;gap:3px;align-items:center;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:2px}
 .cpick{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;padding:0;flex-shrink:0}
 .cpick:hover{transform:scale(1.2)}
 .cpick.blue  {background:radial-gradient(circle at 35% 35%,#93c5fd,#2563eb)}
@@ -451,7 +449,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   .preview-diagram{border-top:1px solid var(--bd)}
   header{gap:10px}
   .hright{gap:7px}
-  .theme-picker{flex-direction:row;gap:8px}
+  /* theme-picker replaced by appear panel */
 }
 
 /* Mobile 640px */
@@ -461,9 +459,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   .logo-name{font-size:13px}
   .logo-sub{display:none}
   .hright{width:100%;justify-content:space-between}
-  .theme-picker{flex-direction:row;gap:6px}
-  .tpick-colors{gap:4px}
-  .tpick-modes .mpick{padding:3px 7px;font-size:9px}
+  /* theme-picker replaced by appear panel */
+  /* tpick-colors in appear panel */
+  .tpick-modes .mpick{padding:3px 6px;font-size:9px}
   .gear-btn{width:30px;height:30px;font-size:14px}
   .cpill{padding:5px 9px;font-size:10px}
 
@@ -736,25 +734,33 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       </div>
     </div>
     <div class="hright">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:10px;color:var(--txd);font-family:var(--fm)">🌍</span>
-        <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Select your timezone"></select>
-      </div>
-      <div class="theme-picker" id="themePicker">
-        <div class="tpick-colors">
-          <button class="cpick blue"   onclick="setColor('blue')"   title="Blue"></button>
-          <button class="cpick purple" onclick="setColor('purple')" title="Purple"></button>
-          <button class="cpick orange" onclick="setColor('orange')" title="Orange"></button>
-          <button class="cpick teal"   onclick="setColor('teal')"   title="Teal"></button>
-          <button class="cpick rose"   onclick="setColor('rose')"   title="Rose"></button>
+      <!-- Appearance toggle button -->
+      <div style="position:relative">
+        <button class="gear-btn" id="appearBtn" onclick="toggleAppearPanel()" title="Appearance" style="font-size:15px">🎨</button>
+        <!-- Floating appearance panel -->
+        <div id="appearPanel" style="display:none;position:absolute;top:42px;right:0;z-index:500;
+          background:var(--sur);border:1px solid var(--bd);border-radius:16px;padding:14px 16px;
+          box-shadow:var(--sh);min-width:200px;animation:up .15s ease">
+          <div style="font-size:10px;color:var(--txd);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Theme Color</div>
+          <div style="display:flex;gap:7px;margin-bottom:14px">
+            <button class="cpick blue"   onclick="setColor('blue')"   title="Blue"></button>
+            <button class="cpick purple" onclick="setColor('purple')" title="Purple"></button>
+            <button class="cpick orange" onclick="setColor('orange')" title="Orange"></button>
+            <button class="cpick teal"   onclick="setColor('teal')"   title="Teal"></button>
+            <button class="cpick rose"   onclick="setColor('rose')"   title="Rose"></button>
+          </div>
+          <div style="font-size:10px;color:var(--txd);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">Mode</div>
+          <div class="tpick-modes" style="width:100%">
+            <button class="mpick" id="mp-light"  onclick="setMode('light')"  style="flex:1">☀️ Light</button>
+            <button class="mpick" id="mp-medium" onclick="setMode('medium')" style="flex:1">🌤 Mid</button>
+            <button class="mpick act" id="mp-dark" onclick="setMode('dark')" style="flex:1">🌙 Dark</button>
+          </div>
+          <div style="border-top:1px solid var(--bd);margin:12px 0 10px"></div>
+          <div style="font-size:10px;color:var(--txd);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">Timezone</div>
+          <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Select your timezone" style="width:100%"></select>
         </div>
-        <div class="tpick-modes">
-          <button class="mpick" id="mp-light"  onclick="setMode('light')" >☀️ Light</button>
-          <button class="mpick" id="mp-medium" onclick="setMode('medium')">🌤 Mid</button>
-          <button class="mpick act" id="mp-dark" onclick="setMode('dark')" >🌙 Dark</button>
-        </div>
       </div>
-      <button class="btn bg" id="qrShareBtn" onclick="openQR()" title="Open on another device" style="font-size:11px;padding:6px 12px;display:none">📱 Share</button>
+      <button class="gear-btn" id="qrShareBtn" onclick="openQR()" title="Open on another device" style="display:none;font-size:15px">📱</button>
       <div class="gear-btn" onclick="openSettings()" title="Settings">⚙️</div>
       <div class="cpill" onclick="disconnect()" title="Click to disconnect">
         <div class="dot"></div>
@@ -1472,6 +1478,26 @@ window.onload = () => {
 let _themeColor = localStorage.getItem('themeColor') || 'blue';
 let _themeMode  = localStorage.getItem('themeMode')  || 'dark';
 
+function toggleAppearPanel() {
+  const p = document.getElementById('appearPanel');
+  if (!p) return;
+  const showing = p.style.display !== 'none';
+  p.style.display = showing ? 'none' : 'block';
+  if (!showing) {
+    // close on outside click
+    setTimeout(() => {
+      const close = e => {
+        if (!document.getElementById('appearPanel').contains(e.target) &&
+            e.target.id !== 'appearBtn') {
+          document.getElementById('appearPanel').style.display = 'none';
+          document.removeEventListener('click', close);
+        }
+      };
+      document.addEventListener('click', close);
+    }, 10);
+  }
+}
+
 function setColor(c) {
   _themeColor = c;
   localStorage.setItem('themeColor', c);
@@ -1541,7 +1567,7 @@ function saveSettings() {
   toast('Settings saved ✓', 'ok');
 }
 // ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && !location.hostname.includes('claudeusercontent.com')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(reg => {
@@ -2196,21 +2222,18 @@ function getFilterRange() {
 }
 
 function isSkippedRun(r) {
-  // Rule 1 — hide every single schedule/cron run.
-  //   Cron is a 30-min heartbeat that self-cancels when it's not posting
-  //   time.  None of those represent a LinkedIn post, so hide all of them.
-  if (r.event === 'schedule') return true;
-  // Rule 2 — hide non-post outcomes even for manual/dispatch triggers.
-  //   'skipped' = schedule_checker exited early without posting.
-  //   'cancelled' without a real post attempt = infrastructure noise.
-  //   Only keep: success | failure | in_progress | queued
-  //   (failure is kept — user needs to know their manual post failed)
+  // Schedule (cron) runs: the 30-min heartbeat fires constantly.
+  // Only hide the ones that were cancelled or skipped (= no post happened).
+  // A schedule run that SUCCEEDED is a real LinkedIn post — keep it.
+  if (r.event === 'schedule') {
+    return r.conclusion === 'cancelled' || r.conclusion === 'skipped';
+  }
+  // For dispatch/manual runs: hide only explicit skips and very fast cancels
+  // that never reached the posting step.
   if (r.conclusion === 'skipped') return true;
-  // Cancelled manual runs: keep if they ran long enough to attempt a post
-  // (>30s), hide otherwise (they were cancelled before doing anything).
   if (r.conclusion === 'cancelled') {
     const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
-    return durMs < 30000;   // < 30 s → noise, hide it
+    return durMs < 30000;
   }
   return false;
 }
@@ -2493,7 +2516,7 @@ async function saveSchedule() {
       toast('✅ Schedule saved to repo', 'ok');
       updNext();
     } else {
-      const e = await r.json(); throw new Error(e.message);
+      const txt = await r.text(); let msg; try { msg = JSON.parse(txt).message; } catch(_){msg=txt||r.status;} throw new Error(msg);
     }
   } catch(e) { toast('Save failed: ' + e.message, 'err'); }
   finally { btn.disabled = false; btn.textContent = '💾 Save Schedule'; }
