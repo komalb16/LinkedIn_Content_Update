@@ -8,7 +8,7 @@
     },
     "tue": {
       "enabled": true,
-      "time_utc": "14:45"
+      "time_utc": "19:14"
     },
     "wed": {
       "enabled": true,
@@ -33,5 +33,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-10T05:36:37.890Z"
+  "updated_at": "2026-03-10T05:36:48.222Z"
 }
