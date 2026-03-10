@@ -2,9 +2,18 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LinkedIn Agent — Komal Batra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="LI Agent"/>
+<meta name="theme-color" content="#080c18" id="themeColorMeta"/>
+<meta name="description" content="LinkedIn content automation dashboard — post, schedule and monitor from anywhere"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<title>LinkedIn Agent Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    THEME SYSTEM: 5 colors × 3 brightness modes = 15 combinations
@@ -426,8 +435,100 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 @keyframes tout{to{transform:translateX(110%);opacity:0}}
 .xl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--txd);font-family:monospace;margin-bottom:10px}
 
-@media(max-width:960px){.srow{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.pb{flex-direction:column;align-items:flex-start}.tgrid{grid-template-columns:1fr}.cc{padding:32px 24px}.preview-body{grid-template-columns:1fr}.preview-diagram{border-top:1px solid var(--bd)}.wrap{padding:0 16px 60px}}
-@media(max-width:600px){.srow{grid-template-columns:1fr 1fr}.day-grid{gap:6px}.rfp{font-size:10px;padding:4px 10px}}
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE / MOBILE — full overhaul for PWA
+   ═══════════════════════════════════════════════════════════ */
+
+/* Tablet 960px */
+@media(max-width:960px){
+  .wrap{padding:0 16px 80px}
+  .srow{grid-template-columns:1fr 1fr}
+  .g2{grid-template-columns:1fr}
+  .pb{flex-direction:column;align-items:flex-start;gap:14px}
+  .tgrid{grid-template-columns:1fr}
+  .cc{padding:32px 24px}
+  .preview-body{grid-template-columns:1fr}
+  .preview-diagram{border-top:1px solid var(--bd)}
+  header{gap:10px}
+  .hright{gap:7px}
+  .theme-picker{flex-direction:row;gap:8px}
+}
+
+/* Mobile 640px */
+@media(max-width:640px){
+  /* header collapses */
+  header{flex-wrap:wrap;padding:12px 0 10px;gap:8px}
+  .logo-name{font-size:13px}
+  .logo-sub{display:none}
+  .hright{width:100%;justify-content:space-between}
+  .theme-picker{flex-direction:row;gap:6px}
+  .tpick-colors{gap:4px}
+  .tpick-modes .mpick{padding:3px 7px;font-size:9px}
+  .gear-btn{width:30px;height:30px;font-size:14px}
+  .cpill{padding:5px 9px;font-size:10px}
+
+  /* stats 2-col */
+  .srow{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:16px 14px}
+  .stat-icon{width:32px;height:32px;font-size:15px;margin-bottom:10px}
+  .sval{font-size:22px}
+  .slbl{font-size:10px}
+
+  /* next post banner */
+  .pb{padding:16px 18px}
+  .pb-r{flex-wrap:wrap;gap:8px}
+  .pb-r .btn{font-size:11px;padding:8px 14px}
+
+  /* schedule day grid — horizontal scroll on very small screens */
+  .day-grid{grid-template-columns:repeat(7,1fr);gap:4px;overflow-x:auto;padding-bottom:4px}
+  .day-toggle{width:30px;height:30px;font-size:13px}
+  .day-label{font-size:9px}
+  .time-val{width:36px;font-size:10px;padding:2px 4px}
+  .time-btn{width:24px;height:18px;font-size:9px}
+
+  /* run history */
+  .rfp{font-size:9px;padding:3px 8px}
+  .ri{padding:10px 12px}
+  .rit{font-size:12px}
+  .rimeta{font-size:10px}
+  .rbadge{font-size:9px;padding:2px 7px}
+  .run-tags{gap:4px}
+  .rtag{font-size:9px;padding:1px 6px}
+
+  /* topic chips */
+  .tch{font-size:11px;padding:6px 11px}
+
+  /* modals fullscreen on mobile */
+  .modal{width:100%!important;max-width:100%!important;border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:90vh;overflow-y:auto}
+  .modal-bg{align-items:flex-end}
+
+  /* connect screen */
+  .cc{padding:28px 20px;border-radius:20px 20px 0 0;position:fixed;bottom:0;width:100%;max-width:100%}
+  #cs{align-items:flex-end;padding:0}
+
+  /* install / QR banners */
+  .install-banner{border-radius:14px;padding:12px 14px}
+  .install-banner h4{font-size:12px}
+  .install-banner p{font-size:10px}
+
+  /* wrap bottom padding = safe area + tab bar */
+  .wrap{padding:0 12px 100px}
+}
+
+/* Tiny phones 380px */
+@media(max-width:380px){
+  .srow{grid-template-columns:1fr 1fr;gap:8px}
+  .sval{font-size:20px}
+  .logo-name{font-size:12px}
+  .cpill span:last-child{display:none}
+  .hright{gap:5px}
+}
+
+/* Safe area insets (iPhone notch / home bar) */
+@supports(padding: max(0px)){
+  .wrap{padding-bottom:max(80px, calc(60px + env(safe-area-inset-bottom)))}
+  header{padding-top:max(18px, calc(12px + env(safe-area-inset-top)))}
+}
 
 /* ── AI SCAN EFFECT ON DIAGRAM PREVIEW ── */
 .preview-diagram{position:relative;overflow:hidden}
@@ -439,6 +540,51 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 /* ── PROGRESS BAR SHIMMER ── */
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
+
+/* ── PWA INSTALL BANNER ────────────────────────────────────────────────────── */
+.install-banner{display:none;align-items:center;gap:14px;padding:14px 18px;
+  background:linear-gradient(135deg,rgba(79,156,249,0.12),rgba(167,139,250,0.10));
+  border:1px solid rgba(79,156,249,0.25);border-radius:16px;margin-bottom:18px;
+  animation:up .4s ease}
+.install-banner.show{display:flex}
+.install-banner-ico{font-size:28px;flex-shrink:0}
+.install-banner-body{flex:1;min-width:0}
+.install-banner h4{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.install-banner p{font-size:11px;color:var(--txm);line-height:1.4}
+.install-banner-btns{display:flex;gap:8px;flex-shrink:0}
+[data-theme="light"] .install-banner{background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(124,58,237,0.05));border-color:rgba(37,99,235,0.2)}
+
+/* ── QR SHARE MODAL ────────────────────────────────────────────────────────── */
+.qr-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  z-index:10000;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.qr-modal-bg.show{display:flex}
+.qr-modal{background:var(--sur);border:1px solid var(--bd);border-radius:24px;
+  padding:32px;max-width:360px;width:calc(100% - 40px);text-align:center;
+  box-shadow:var(--sh);animation:up .3s ease}
+.qr-modal h3{font-size:16px;font-weight:800;color:var(--tx);margin-bottom:6px}
+.qr-modal p{font-size:12px;color:var(--txm);line-height:1.5;margin-bottom:20px}
+#qrCanvas{display:flex;justify-content:center;margin-bottom:16px}
+#qrCanvas canvas,#qrCanvas img{border-radius:12px;border:6px solid white}
+.qr-url-box{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;
+  padding:10px 12px;font-family:var(--fm);font-size:10px;color:var(--txm);
+  word-break:break-all;text-align:left;margin-bottom:16px;max-height:60px;overflow-y:auto}
+.qr-warn{font-size:10px;color:var(--org);margin-bottom:20px;
+  padding:8px 12px;background:rgba(251,146,60,0.08);border-radius:8px;
+  border:1px solid rgba(251,146,60,0.2);text-align:left}
+.qr-btn-row{display:flex;gap:8px;justify-content:center}
+
+/* ── MOBILE NAV BAR (bottom) ──────────────────────────────────────────────── */
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;
+  background:var(--sur);border-top:1px solid var(--bd);
+  padding:8px 0 max(8px,env(safe-area-inset-bottom));
+  z-index:900;grid-template-columns:repeat(4,1fr)}
+@media(max-width:640px){.mob-nav{display:grid}}
+.mob-nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 4px;background:none;border:none;cursor:pointer;
+  color:var(--txd);font-size:9px;font-family:var(--fb);font-weight:500;
+  transition:color var(--tr)}
+.mob-nav-btn.active,.mob-nav-btn:hover{color:var(--acc)}
+.mob-nav-ico{font-size:20px;line-height:1}
 </style>
 </head>
 <body>
@@ -451,7 +597,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   <div class="cc">
     <div class="clogo">
       <div class="clogo-ic">🤖</div>
-      <div><h1>LinkedIn Agent</h1><p>Komal Batra · Content Dashboard</p></div>
+      <div><h1>LinkedIn Agent</h1><p id="dashSubtitle">Content Dashboard</p></div>
     </div>
     <h2>Connect GitHub</h2>
     <p>Enter your Personal Access Token to manage posts, view run history, and preview content before publishing.</p>
@@ -482,15 +628,20 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <div class="field">
         <label>Groq API Key (for Dry Run Preview)</label>
         <input class="finp" id="groqKeyInput" type="password" placeholder="gsk_your_groq_api_key_here"/>
+      </div>
+      <div class="field">
+        <label>Your GitHub Repo</label>
+        <input class="finp" id="settingsRepoInput" placeholder="username/repo-name" style="font-family:var(--fm)"/>
+        <p class="fhint">The repo containing your linkedin-agent.yml workflow</p>
         <p class="fhint">Used only for generating post previews in your browser. Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys. Never sent anywhere except Groq's API directly.</p>
       </div>
       <div class="field">
         <label>Your Name (shown in post preview)</label>
-        <input class="finp" id="authorNameInput" type="text" placeholder="e.g. Komal Batra"/>
+        <input class="finp" id="authorNameInput" type="text" placeholder="e.g. Jane Smith"/>
       </div>
       <div class="field">
         <label>Your Role (shown in post preview)</label>
-        <input class="finp" id="authorRoleInput" type="text" placeholder="e.g. Software Engineer at Microsoft"/>
+        <input class="finp" id="authorRoleInput" type="text" placeholder="e.g. Software Engineer at Acme Corp"/>
       </div>
       <button class="btn bp" style="width:100%" onclick="saveSettings()">Save Settings</button>
     </div>
@@ -521,7 +672,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
           <div class="post-meta">
             <div class="post-avatar">👤</div>
             <div>
-              <div class="post-author" id="previewAuthor">Komal Batra</div>
+              <div class="post-author" id="previewAuthor">Your Name</div>
               <div class="post-role" id="previewRole">Software Engineer at Microsoft</div>
             </div>
           </div>
@@ -546,6 +697,34 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 <!-- ══ DASHBOARD ══ -->
 <div id="db">
+
+<!-- PWA Install Banner -->
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-ico">📲</div>
+  <div class="install-banner-body">
+    <h4>Install as App</h4>
+    <p>Add to your home screen for instant access on any device — works offline too.</p>
+  </div>
+  <div class="install-banner-btns">
+    <button class="btn bp" id="installBtn" onclick="pwaInstall()" style="font-size:11px;padding:7px 14px">Install</button>
+    <button class="btn bg" onclick="document.getElementById('installBanner').classList.remove('show')" style="font-size:11px;padding:7px 10px">✕</button>
+  </div>
+</div>
+
+<!-- QR Share Modal -->
+<div class="qr-modal-bg" id="qrBg" onclick="if(event.target===this)closeQR()">
+  <div class="qr-modal">
+    <h3>📱 Open on Another Device</h3>
+    <p>Scan this QR code on your phone or tablet. It will open the dashboard and connect automatically — no token re-entry needed.</p>
+    <div id="qrCanvas"></div>
+    <div class="qr-url-box" id="qrUrl"></div>
+    <div class="qr-warn">⚠️ This link contains your GitHub token. Only scan it on <strong>your own devices</strong> — never share it publicly.</div>
+    <div class="qr-btn-row">
+      <button class="btn bg" onclick="copyQrUrl()" style="font-size:11px;padding:8px 16px">📋 Copy Link</button>
+      <button class="btn bg" onclick="closeQR()" style="font-size:11px;padding:8px 16px">Close</button>
+    </div>
+  </div>
+</div>
 <div class="wrap">
 
   <header>
@@ -553,7 +732,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <div class="logo-ic">🤖</div>
       <div>
         <h1>LinkedIn Agent</h1>
-        <p>komalb16 / LinkedIn_Content_Update</p>
+        <p id="repoDisplay" style="font-size:11px;color:var(--txm);font-family:var(--fm)">—</p>
       </div>
     </div>
     <div class="hright">
@@ -575,6 +754,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
           <button class="mpick act" id="mp-dark" onclick="setMode('dark')" >🌙 Dark</button>
         </div>
       </div>
+      <button class="btn bg" id="qrShareBtn" onclick="openQR()" title="Open on another device" style="font-size:11px;padding:6px 12px;display:none">📱 Share</button>
       <div class="gear-btn" onclick="openSettings()" title="Settings">⚙️</div>
       <div class="cpill" onclick="disconnect()" title="Click to disconnect">
         <div class="dot"></div>
@@ -585,7 +765,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   </header>
 
   <!-- STATS -->
-  <div class="srow">
+  <div class="srow" id="statsTop">
     <div class="stat">
       <div class="stat-icon">🚀</div>
       <div class="slbl">Total Posts</div>
@@ -660,12 +840,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
     <!-- WEEKLY PANEL -->
     <div class="spanel show" id="panel-weekly">
-      <p style="font-size:11px;color:var(--txd);margin-bottom:14px">Toggle each day on/off and set a different posting time per day. Times are in <strong id="tzWeeklyNote">your timezone</strong>. Saved to <code style="font-size:10px;background:var(--bg2);padding:1px 5px;border-radius:4px">schedule_config.json</code> in your repo.</p>
+      <p style="font-size:11px;color:var(--txd);margin-bottom:14px">Toggle each day on/off and set a different posting time per day. Times shown in <strong id="tzWeeklyNote">your local timezone</strong> and automatically converted to UTC. Saved to <code style="font-size:10px;background:var(--bg2);padding:1px 5px;border-radius:4px">schedule_config.json</code> in your repo.</p>
       <div class="day-grid" id="dayGrid"><!-- built by JS --></div>
       <div class="sleg">
         <span><div class="ldot" style="background:var(--acc)"></div> Active day</span>
         <span><div class="ldot" style="background:var(--txd)"></div> Skipped day</span>
-        <span id="tzLegend">Times shown in IST (+5:30)</span>
+        <span id="tzLegend">Times shown in your timezone · saved as UTC</span>
       </div>
     </div>
 
@@ -756,7 +936,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   <!-- RUNS LOG -->
   <div class="card">
     <div class="ch">
-      <span class="ct">📋 LinkedIn Post History</span>
+      <span class="ct" id="histSection">📋 LinkedIn Post History</span>
       <div style="display:flex;align-items:center;gap:8px;position:relative">
         <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button>
         <div style="position:relative">
@@ -829,8 +1009,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-const REPO = 'komalb16/LinkedIn_Content_Update';
-const WF   = 'linkedin-agent.yml';
+// REPO is auto-detected from the user's token on connect (see detectRepo())
+// It can also be overridden manually in Settings
+let REPO = localStorage.getItem('agent_repo') || '';
+const WF = localStorage.getItem('agent_wf')  || 'linkedin-agent.yml';
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
@@ -854,6 +1036,36 @@ let userTZ = localStorage.getItem('user_tz') || Intl.DateTimeFormat().resolvedOp
 // ── TIMEZONE HELPERS ──────────────────────────────────────────────────────────
 function tzNow()  { return new Date(new Date().toLocaleString('en-US', {timeZone: userTZ})); }
 function tzFmt(d, opts) { return new Date(d).toLocaleString('en-US', {timeZone: userTZ, ...opts}); }
+
+// Convert "HH:MM" in userTZ → "HH:MM" in UTC (for saving to schedule_config)
+function localTimeToUtc(localHHMM) {
+  const [h, m] = localHHMM.split(':').map(Number);
+  // Build a Date for today at that local time, then read its UTC hours/minutes
+  const now = new Date();
+  // Use a reference date string in userTZ to get the offset
+  const refLocal = new Date(now.toLocaleString('en-US', {timeZone: userTZ}));
+  const refUTC   = now;
+  const offsetMs = refLocal - refUTC;   // positive if local is ahead of UTC
+  const localMs  = (h * 60 + m) * 60000;
+  const utcMs    = ((localMs - offsetMs) % 86400000 + 86400000) % 86400000;
+  const uh = Math.floor(utcMs / 3600000);
+  const um = Math.floor((utcMs % 3600000) / 60000);
+  return String(uh).padStart(2,'0') + ':' + String(um).padStart(2,'0');
+}
+
+// Convert "HH:MM" UTC → "HH:MM" in userTZ (for displaying from schedule_config)
+function utcTimeToLocal(utcHHMM) {
+  const [h, m] = utcHHMM.split(':').map(Number);
+  const now = new Date();
+  const refLocal = new Date(now.toLocaleString('en-US', {timeZone: userTZ}));
+  const refUTC   = now;
+  const offsetMs = refLocal - refUTC;
+  const utcMs    = (h * 60 + m) * 60000;
+  const localMs  = ((utcMs + offsetMs) % 86400000 + 86400000) % 86400000;
+  const lh = Math.floor(localMs / 3600000);
+  const lm = Math.floor((localMs % 3600000) / 60000);
+  return String(lh).padStart(2,'0') + ':' + String(lm).padStart(2,'0');
+}
 function tzLabel(){ const off = -new Date().getTimezoneOffset(); const h=Math.floor(Math.abs(off)/60),m=Math.abs(off)%60; return userTZ.split('/').pop().replace(/_/g,' ') + ' (UTC'+(off>=0?'+':'-')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+')'; }
 function tzOffsetMins() {
   // Get offset of userTZ from UTC in minutes (positive = ahead)
@@ -1177,6 +1389,28 @@ function updateRestoreBar() {
 }
 
 window.onload = () => {
+  // ── URL-fragment auto-connect (QR scan on new device) ─────────────────────
+  (function checkFragmentConnect() {
+    const hash = location.hash;
+    if (hash.startsWith('#connect=')) {
+      try {
+        const encoded = hash.slice('#connect='.length);
+        const payload = JSON.parse(atob(decodeURIComponent(encoded)));
+        if (payload.token) {
+          token = payload.token;
+          localStorage.setItem('gh_token', token);
+          // Restore shared settings if present
+          if (payload.themeColor) localStorage.setItem('themeColor', payload.themeColor);
+          if (payload.themeMode)  localStorage.setItem('themeMode',  payload.themeMode);
+          if (payload.tz)         localStorage.setItem('user_tz',    payload.tz);
+          // Clear the fragment so the token isn't visible in the address bar
+          history.replaceState(null, '', location.pathname);
+          toast('📱 Auto-connected from QR scan ✓', 'ok');
+        }
+      } catch(e) { console.warn('QR connect parse error', e); }
+    }
+  })();
+
   // Restore saved color + mode
   _themeColor = localStorage.getItem('themeColor') || 'blue';
   _themeMode  = localStorage.getItem('themeMode')  || 'dark';
@@ -1288,12 +1522,320 @@ function closeSettings(e) {
 }
 function saveSettings() {
   localStorage.setItem('groq_key', document.getElementById('groqKeyInput').value.trim());
-  localStorage.setItem('author_name', document.getElementById('authorNameInput').value.trim() || 'Komal Batra');
-  localStorage.setItem('author_role', document.getElementById('authorRoleInput').value.trim() || 'Software Engineer at Microsoft');
+  const newName = document.getElementById('authorNameInput').value.trim();
+  const newRole = document.getElementById('authorRoleInput').value.trim();
+  if (newName) localStorage.setItem('author_name', newName);
+  if (newRole) localStorage.setItem('author_role', newRole);
+  // Save repo if changed
+  const repoInp = document.getElementById('settingsRepoInput');
+  if (repoInp) {
+    const rv = repoInp.value.trim();
+    if (rv && rv.includes('/')) {
+      REPO = rv;
+      localStorage.setItem('agent_repo', rv);
+      updateRepoDisplay();
+    }
+  }
   closeSettings();
+  updateRepoDisplay();
   toast('Settings saved ✓', 'ok');
 }
+// ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => {
+        console.log('[PWA] SW registered, scope:', reg.scope);
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              toast('🔄 Dashboard updated — refresh to apply', 'ok');
+            }
+          });
+        });
+      })
+      .catch(err => console.warn('[PWA] SW registration failed:', err));
+  });
+}
+
+// ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────
+let _deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+  // Show banner only on the dashboard, not the connect screen
+  if (document.getElementById('db').style.display !== 'none') {
+    document.getElementById('installBanner').classList.add('show');
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.remove('show');
+  _deferredInstallPrompt = null;
+  toast('✅ App installed! Open it from your home screen.', 'ok');
+  localStorage.setItem('pwa_installed', '1');
+});
+
+async function pwaInstall() {
+  if (_deferredInstallPrompt) {
+    _deferredInstallPrompt.prompt();
+    const { outcome } = await _deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      _deferredInstallPrompt = null;
+      document.getElementById('installBanner').classList.remove('show');
+    }
+  } else {
+    // Fallback instructions for Safari/iOS
+    openIOSInstallGuide();
+  }
+}
+
+function openIOSInstallGuide() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIOS) {
+    toast('Tap the Share button (□↑) then "Add to Home Screen"', 'ok');
+  } else {
+    toast('Use your browser menu → "Install app" or "Add to home screen"', 'ok');
+  }
+}
+
+// Show install banner when dashboard loads if not already installed
+function checkInstallPrompt() {
+  const installed = localStorage.getItem('pwa_installed');
+  const dismissed = localStorage.getItem('pwa_banner_dismissed');
+  if (!installed && !dismissed && !window.matchMedia('(display-mode: standalone)').matches) {
+    // Show after a short delay so the dashboard loads first
+    setTimeout(() => {
+      document.getElementById('installBanner').classList.add('show');
+    }, 2000);
+  }
+}
+
+// ── QR TOKEN SHARE ────────────────────────────────────────────────────────────
+let _qrInstance = null;
+
+function buildShareUrl() {
+  const payload = {
+    token:      token,
+    themeColor: localStorage.getItem('themeColor') || 'blue',
+    themeMode:  localStorage.getItem('themeMode')  || 'dark',
+    tz:         localStorage.getItem('user_tz')    || '',
+  };
+  const encoded = encodeURIComponent(btoa(JSON.stringify(payload)));
+  const base = location.origin + location.pathname;
+  return base + '#connect=' + encoded;
+}
+
+function openQR() {
+  if (!token) { toast('Connect first, then use Share to transfer to another device', 'err'); return; }
+  const url = buildShareUrl();
+  document.getElementById('qrUrl').textContent = url;
+
+  const container = document.getElementById('qrCanvas');
+  container.innerHTML = '';
+  try {
+    _qrInstance = new QRCode(container, {
+      text:         url,
+      width:        220,
+      height:       220,
+      colorDark:    '#000000',
+      colorLight:   '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--red);font-size:12px">QR library not loaded yet — try again in a second.</p>';
+  }
+
+  document.getElementById('qrBg').classList.add('show');
+}
+
+// Convert legacy time_ist string → time_utc string (IST = UTC+5:30)
+function legacyIstToUtc(timeIst) {
+  const [h, m] = (timeIst || '09:30').split(':').map(Number);
+  const totalMin = ((h * 60 + m - 330) + 1440) % 1440; // -5h30m, wrap
+  return String(Math.floor(totalMin/60)).padStart(2,'0') + ':' + String(totalMin%60).padStart(2,'0');
+}
+
+function closeQR() {
+  document.getElementById('qrBg').classList.remove('show');
+}
+
+// ── REPO AUTO-DETECTION ───────────────────────────────────────────────────────
+// After login, search the user's repos for one containing linkedin-agent.yml.
+// If found → store and use it. If multiple → let user pick. If none → prompt.
+async function detectRepo(ghLogin) {
+  // 1. Check if already saved
+  if (localStorage.getItem('agent_repo')) {
+    REPO = localStorage.getItem('agent_repo');
+    updateRepoDisplay();
+    return;
+  }
+
+  try {
+    // 2. Search code for the workflow file across all user repos
+    const r = await gh('/search/code?q=filename:linkedin-agent.yml+user:' + ghLogin + '&per_page=10');
+    if (!r.ok) { showRepoPrompt(); return; }
+    const d = await r.json();
+    const repos = [...new Set((d.items || []).map(i => i.repository.full_name))];
+
+    if (repos.length === 1) {
+      // Exactly one match — auto-configure silently
+      REPO = repos[0];
+      localStorage.setItem('agent_repo', REPO);
+      updateRepoDisplay();
+      toast('✅ Repo auto-detected: ' + REPO, 'ok');
+    } else if (repos.length > 1) {
+      // Multiple matches — ask user to pick
+      showRepoPicker(repos);
+    } else {
+      // No match — maybe they renamed it; ask manually
+      showRepoPrompt();
+    }
+  } catch(e) {
+    showRepoPrompt();
+  }
+}
+
+function updateRepoDisplay() {
+  const el = document.getElementById('repoDisplay');
+  if (el && REPO) {
+    const [owner, name] = REPO.split('/');
+    el.textContent = owner + ' / ' + name;
+  }
+  // Also update subtitle with user name
+  const sub = document.getElementById('dashSubtitle');
+  const name = localStorage.getItem('author_name') || localStorage.getItem('gh_user') || '';
+  if (sub && name) sub.textContent = name + ' · Content Dashboard';
+}
+
+function showRepoPicker(repos) {
+  const options = repos.map(r =>
+    `<button class="btn bg" style="font-size:12px;padding:8px 16px;width:100%;text-align:left" onclick="pickRepo('${r}')">${r}</button>`
+  ).join('');
+  showSetupModal(
+    '🔎 Multiple repos found',
+    'Which repo is your LinkedIn Agent?',
+    options
+  );
+}
+
+function pickRepo(repo) {
+  REPO = repo;
+  localStorage.setItem('agent_repo', REPO);
+  updateRepoDisplay();
+  closeSetupModal();
+  toast('✅ Repo set: ' + REPO, 'ok');
+  Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+}
+
+function showRepoPrompt() {
+  showSetupModal(
+    '⚙️ One-time Setup',
+    'Enter your repo (e.g. <code>username/LinkedIn_Content_Update</code>):',
+    `<input class="inp" id="repoInput" placeholder="username/repo-name" style="margin-bottom:10px"
+       value="${localStorage.getItem('agent_repo') || ''}"/>
+     <button class="btn bp" style="width:100%" onclick="saveRepoFromInput()">Save & Continue →</button>`
+  );
+  setTimeout(() => {
+    const inp = document.getElementById('repoInput');
+    if (inp) inp.focus();
+  }, 100);
+}
+
+function saveRepoFromInput() {
+  const v = (document.getElementById('repoInput') || {}).value?.trim();
+  if (!v || !v.includes('/')) { toast('Enter a valid repo like username/repo-name', 'err'); return; }
+  REPO = v;
+  localStorage.setItem('agent_repo', v);
+  updateRepoDisplay();
+  closeSetupModal();
+  toast('✅ Repo saved: ' + REPO, 'ok');
+  Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+}
+
+// ── FIRST-RUN SETUP WIZARD ─────────────────────────────────────────────────
+// Shows after first successful login when author_name isn't set yet.
+function maybeShowFirstRunWizard() {
+  const name = localStorage.getItem('author_name');
+  const role = localStorage.getItem('author_role');
+  if (name && role) return;   // already configured
+
+  showSetupModal(
+    '👋 Welcome! Quick setup',
+    'This takes 10 seconds and personalises your posts and diagrams.',
+    `<label style="font-size:11px;color:var(--txm);display:block;margin-bottom:4px">Your name (appears on every post)</label>
+     <input class="inp" id="setupName" placeholder="e.g. Jane Smith" style="margin-bottom:12px" value="${name || ''}"/>
+     <label style="font-size:11px;color:var(--txm);display:block;margin-bottom:4px">Your role (shown under your name)</label>
+     <input class="inp" id="setupRole" placeholder="e.g. Senior Engineer at Acme" style="margin-bottom:16px" value="${role || ''}"/>
+     <button class="btn bp" style="width:100%" onclick="saveFirstRunWizard()">Save & Start Posting →</button>
+     <button class="btn bg" style="width:100%;margin-top:8px;font-size:11px" onclick="closeSetupModal()">Skip for now</button>`
+  );
+  setTimeout(() => { const el = document.getElementById('setupName'); if(el) el.focus(); }, 100);
+}
+
+function saveFirstRunWizard() {
+  const name = (document.getElementById('setupName') || {}).value?.trim();
+  const role = (document.getElementById('setupRole') || {}).value?.trim();
+  if (name) localStorage.setItem('author_name', name);
+  if (role) localStorage.setItem('author_role', role);
+  closeSetupModal();
+  updateRepoDisplay();
+  toast('✅ All set! Your posts will be signed as ' + (name || 'you'), 'ok');
+}
+
+// ── GENERIC SETUP MODAL ────────────────────────────────────────────────────────
+function showSetupModal(title, desc, bodyHtml) {
+  let el = document.getElementById('setupModalBg');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'setupModalBg';
+    el.className = 'modal-bg';
+    el.onclick = e => { if (e.target === el) closeSetupModal(); };
+    el.innerHTML = `
+      <div class="modal" style="max-width:420px;padding:32px;text-align:left">
+        <h3 id="setupModalTitle" style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:8px"></h3>
+        <p  id="setupModalDesc"  style="font-size:12px;color:var(--txm);margin-bottom:20px;line-height:1.5"></p>
+        <div id="setupModalBody"></div>
+      </div>`;
+    document.body.appendChild(el);
+  }
+  document.getElementById('setupModalTitle').textContent = title;
+  document.getElementById('setupModalDesc').innerHTML   = desc;
+  document.getElementById('setupModalBody').innerHTML   = bodyHtml;
+  el.classList.add('show');
+}
+
+function closeSetupModal() {
+  const el = document.getElementById('setupModalBg');
+  if (el) el.classList.remove('show');
+}
+
+async function copyQrUrl() {
+  const url = document.getElementById('qrUrl').textContent;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('🔗 Link copied — paste in any browser to auto-connect', 'ok');
+  } catch(e) {
+    toast('Could not copy — select the link text manually', 'err');
+  }
+}
+
+// ── MOBILE NAV SCROLL ─────────────────────────────────────────────────────────
+function mobScroll(sectionId) {
+  const el = document.getElementById(sectionId);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Update active state
+  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
+  const map = { statsTop:'mnHome', schedSection:'mnSched', histSection:'mnHist' };
+  const btn = document.getElementById(map[sectionId]);
+  if (btn) btn.classList.add('active');
+}
+
 function loadSettings() {
+  const repo = document.getElementById('settingsRepoInput');
+  if (repo) repo.value = localStorage.getItem('agent_repo') || REPO || '';
   const gk = localStorage.getItem('groq_key') || '';
   const an = localStorage.getItem('author_name') || '';
   const ar = localStorage.getItem('author_role') || '';
@@ -1318,8 +1860,19 @@ async function connect() {
     }
     const u = await r.json();
     localStorage.setItem('gh_token', token);
+    localStorage.setItem('gh_user', u.login);
+    // Pre-fill author name from GitHub if not already set
+    if (!localStorage.getItem('author_name') && u.name) {
+      localStorage.setItem('author_name', u.name);
+    }
     showDash(u.login);
-    await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+    // Auto-detect the user's agent repo, then load data
+    await detectRepo(u.login);
+    if (REPO) {
+      await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+    }
+    // Show first-run wizard if name/role not set
+    setTimeout(maybeShowFirstRunWizard, 800);
     toast('Connected as ' + u.login + ' ✓', 'ok');
   } catch(e) { toast('Failed: ' + e.message, 'err'); }
   finally { setLoad('conSpin','conTxt',false,'Connect'); }
@@ -1330,8 +1883,16 @@ async function silentConn() {
     const r = await gh('/user');
     if (!r.ok) { localStorage.removeItem('gh_token'); token = ''; return; }
     const u = await r.json();
+    localStorage.setItem('gh_user', u.login);
+    if (!localStorage.getItem('author_name') && u.name) {
+      localStorage.setItem('author_name', u.name);
+    }
     showDash(u.login);
-    await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+    await detectRepo(u.login);
+    if (REPO) {
+      await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+    }
+    updateRepoDisplay();
   } catch(e) { localStorage.removeItem('gh_token'); token = ''; }
 }
 
@@ -1339,6 +1900,17 @@ function showDash(u) {
   document.getElementById('cs').style.display = 'none';
   document.getElementById('db').style.display = 'block';
   document.getElementById('connUser').textContent = u;
+  // Show QR share button now that we have a token
+  const qrBtn = document.getElementById('qrShareBtn');
+  if (qrBtn) qrBtn.style.display = 'inline-flex';
+  // Check whether to show install banner
+  checkInstallPrompt();
+  // Update theme-color meta to match current accent
+  const meta = document.getElementById('themeColorMeta');
+  if (meta) {
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim();
+    if (accent) meta.setAttribute('content', accent);
+  }
 }
 
 function disconnect() {
@@ -1391,8 +1963,8 @@ async function showDryRunPreview() {
   document.getElementById('loadingMsg').textContent = 'Generating post with AI...';
 
   // Set author
-  document.getElementById('previewAuthor').textContent = localStorage.getItem('author_name') || 'Komal Batra';
-  document.getElementById('previewRole').textContent = localStorage.getItem('author_role') || 'Software Engineer at Microsoft';
+  document.getElementById('previewAuthor').textContent = localStorage.getItem('author_name') || '';
+  document.getElementById('previewRole').textContent = localStorage.getItem('author_role') || '';
 
   await generatePreviewPost(groqKey);
 }
@@ -1517,7 +2089,7 @@ function generatePreviewSVG(topic) {
     }
   });
 
-  svg += `<text x="200" y="270" text-anchor="middle" fill="#334155" font-size="8" font-family="Arial,sans-serif">Preview diagram • © Komal Batra</text>`;
+  svg += `<text x="200" y="270" text-anchor="middle" fill="#334155" font-size="8" font-family="Arial,sans-serif">Preview diagram • © " + (localStorage.getItem('author_name') || localStorage.getItem('gh_user') || 'Author') + "</text>`;
   svg += `</svg>`;
   return svg;
 }
@@ -1850,13 +2422,13 @@ let schedConfig = {
   paused: false,
   pause_until: null,
   weekly: {
-    mon:{enabled:true, time_ist:'09:30'},
-    tue:{enabled:true, time_ist:'09:30'},
-    wed:{enabled:true, time_ist:'09:30'},
-    thu:{enabled:true, time_ist:'09:30'},
-    fri:{enabled:true, time_ist:'09:30'},
-    sat:{enabled:false,time_ist:'10:00'},
-    sun:{enabled:false,time_ist:'10:00'},
+    mon:{enabled:true, time_utc:'04:00'},
+    tue:{enabled:true, time_utc:'04:00'},
+    wed:{enabled:true, time_utc:'04:00'},
+    thu:{enabled:true, time_utc:'04:00'},
+    fri:{enabled:true, time_utc:'04:00'},
+    sat:{enabled:false,time_utc:'04:30'},
+    sun:{enabled:false,time_utc:'04:30'},
   },
   skip_dates: [],
   force_dates: [],
@@ -1878,6 +2450,16 @@ async function loadSchedule() {
     if (!r.ok) { buildDayGrid(); renderOverrides(); renderPausePanel(); updNext(); return; }
     const d = await r.json();
     const cfg = JSON.parse(atob(d.content));
+    // Migrate legacy time_ist → time_utc on load so old configs still work
+    if (cfg.weekly) {
+      Object.keys(cfg.weekly).forEach(day => {
+        const dc = cfg.weekly[day];
+        if (dc && dc.time_ist && !dc.time_utc) {
+          dc.time_utc = legacyIstToUtc(dc.time_ist);
+          delete dc.time_ist;
+        }
+      });
+    }
     schedConfig = {...schedConfig, ...cfg};
   } catch(e) { /* file may not exist yet, use defaults */ }
   buildDayGrid();
@@ -1972,9 +2554,12 @@ function buildDayGrid() {
   const grid = document.getElementById('dayGrid');
   grid.innerHTML = '';
   DAYS.forEach((day, i) => {
-    const cfg = schedConfig.weekly[day] || {enabled: true, time_ist: '09:30'};
+    const cfg = schedConfig.weekly[day] || {enabled: true, time_utc: '09:00'};
     const on = cfg.enabled && !schedConfig.paused;
-    const [h, m] = (cfg.time_ist || '09:30').split(':').map(Number);
+    // Stored as UTC — convert to local timezone for display
+    const storedUtc = cfg.time_utc || (cfg.time_ist ? legacyIstToUtc(cfg.time_ist) : '09:00');
+    const displayLocal = utcTimeToLocal(storedUtc);
+    const [h, m] = displayLocal.split(':').map(Number);
     const col = document.createElement('div');
     col.className = 'day-col' + (cfg.enabled ? '' : ' disabled');
     col.id = 'daycol-' + day;
@@ -2024,9 +2609,12 @@ function onTimeInput(day, el) {
 function onTimeBlur(day, el) {
   const parsed = parseTimeInput(el.value);
   if (parsed) {
-    const time = String(parsed.h).padStart(2,'0') + ':' + String(parsed.m).padStart(2,'0');
-    schedConfig.weekly[day].time_ist = time;
-    el.value = time;
+    const localTime = String(parsed.h).padStart(2,'0') + ':' + String(parsed.m).padStart(2,'0');
+    // Convert local display time → UTC for storage
+    const utcTime = localTimeToUtc(localTime);
+    schedConfig.weekly[day].time_utc = utcTime;
+    delete schedConfig.weekly[day].time_ist; // remove legacy field
+    el.value = localTime; // keep displaying in local time
     el.style.borderColor = '';
     updNext();
   } else {
@@ -2051,11 +2639,17 @@ function toggleDay(day) {
 }
 
 function adjDayTime(day, deltaMin) {
-  const [h, m] = (schedConfig.weekly[day].time_ist || '09:30').split(':').map(Number);
+  // Read current display value from the input (already in local time)
+  const el = document.getElementById('tmval-' + day);
+  const curLocal = el ? el.value : '09:00';
+  const [h, m] = curLocal.split(':').map(Number);
   const total = ((h*60 + m + deltaMin) + 1440) % 1440;
   const nh = Math.floor(total/60), nm = total % 60;
-  schedConfig.weekly[day].time_ist = String(nh).padStart(2,'0') + ':' + String(nm).padStart(2,'0');
-  const el = document.getElementById('tmval-' + day); if (el) el.value = schedConfig.weekly[day].time_ist;
+  const newLocal = String(nh).padStart(2,'0') + ':' + String(nm).padStart(2,'0');
+  if (el) el.value = newLocal;
+  // Save as UTC
+  schedConfig.weekly[day].time_utc = localTimeToUtc(newLocal);
+  delete schedConfig.weekly[day].time_ist;
   updNext();
 }
 
@@ -2170,7 +2764,9 @@ function updNext() {
     const isSkip  = schedConfig.skip_dates.includes(ds);
     if (isSkip && !isForce) continue;
     if (!cfg.enabled && !isForce) continue;
-    const [ph,pm] = (cfg.time_ist || '09:30').split(':').map(Number);
+    const storedUtc2 = cfg.time_utc || (cfg.time_ist ? legacyIstToUtc(cfg.time_ist) : '09:00');
+    const localDisp = utcTimeToLocal(storedUtc2);
+    const [ph,pm] = localDisp.split(':').map(Number);
     const candidate = new Date(d);
     candidate.setHours(ph, pm, 0, 0);
     if (candidate <= ist) continue;
@@ -2287,5 +2883,20 @@ function toast(m, t = 'info') {
 
 
 
+<!-- Mobile nav bar (visible only < 640px) -->
+<nav class="mob-nav" id="mobNav">
+  <button class="mob-nav-btn active" onclick="mobScroll('statsTop')" id="mnHome">
+    <span class="mob-nav-ico">🏠</span>Home
+  </button>
+  <button class="mob-nav-btn" onclick="mobScroll('schedSection')" id="mnSched">
+    <span class="mob-nav-ico">📅</span>Schedule
+  </button>
+  <button class="mob-nav-btn" onclick="mobScroll('histSection')" id="mnHist">
+    <span class="mob-nav-ico">📋</span>History
+  </button>
+  <button class="mob-nav-btn" onclick="openQR()" id="mnQR">
+    <span class="mob-nav-ico">📱</span>Share
+  </button>
+</nav>
 </body>
 </html>

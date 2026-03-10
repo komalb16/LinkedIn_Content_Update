@@ -1,144 +1,145 @@
-name: LinkedIn Content Agent
-run-name: "LinkedIn Agent · ${{ github.event_name == 'workflow_dispatch' && 'Manual' || 'Scheduled' }} · ${{ github.event.inputs.topic_id || 'auto-topic' }}"
+name: 🤖 LinkedIn Agent
 
-# ─────────────────────────────────────────────────────────────────────────────
-# HOW TIMING WORKS:
-#   • The cron fires every 30 minutes (*/30 * * * *).
-#   • schedule_checker.py checks if NOW is within 30 min of your configured time.
-#   • If yes: sleeps the gap, then posts.
-#   • If no: exits in ~2 seconds (costs almost no Actions minutes).
-#
-# TO CHANGE POSTING TIME: just update it in the dashboard — no YAML change needed.
-# The */30 cron covers any time you pick automatically.
-# ─────────────────────────────────────────────────────────────────────────────
-
+# ─── Triggers ───────────────────────────────────────────────────────────────
 on:
+  # Scheduled: twice daily at 9 AM and 6 PM IST (3:30 UTC and 12:30 UTC)
   schedule:
-    # Fires every 30 minutes. schedule_checker.py decides whether to post
-    # based on the time configured in your dashboard (schedule_config.json).
-    # You NEVER need to update this cron — just change the time in the dashboard.
-    - cron: '*/30 * * * *'
+    # Heartbeat every 30 min — schedule_checker.py decides the actual post time.
+    # This is intentional: the checker reads your per-day UTC time from
+    # schedule_config.json and sleeps until the exact minute. Cron runs that
+    # fire outside the posting window exit in ~2 seconds (zero Actions cost).
+    - cron: "*/30 * * * *"
 
+  # Manual trigger from GitHub UI — with optional inputs
   workflow_dispatch:
     inputs:
       topic_id:
-        description: 'Topic ID (leave blank for auto-select)'
+        description: "Topic ID (leave blank for auto-selection)"
         required: false
-        default: ''
-      dry_run:
-        description: 'Dry run — generate without posting (true/false)'
-        required: false
-        default: 'false'
+        default: ""
+        type: choice
+        options:
+          - ""                    # auto
+          - llm-architecture
+          - ai-agents-2025
+          - mlops-pipeline
+          - rag-systems
+          - kubernetes-mastery
+          - docker-cheatsheet
+          - aws-architecture
+          - cicd-pipelines
+          - system-design
+          - api-design
+          - git-workflow
+          - solid-principles
+          - zero-trust
+          - devsecops
+          - data-lakehouse
+          - kafka-streaming
 
+      dry_run:
+        description: "Dry run (generate but don't post)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+# ─── Job ─────────────────────────────────────────────────────────────────────
 jobs:
-  post:
+  post-to-linkedin:
+    name: Generate & Post Content
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      actions: write   # needed for gh run cancel in the skip step
-      contents: read
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
+      # 1. Checkout repository
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      # 2. Set up Python
+      - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
+          cache: "pip"
 
-      - name: Install dependencies
+      # 3. Install system dependencies (for SVG → PNG conversion)
+      - name: 🔧 Install system deps
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
+            libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+
+      # 4. Install Python dependencies
+      - name: 📦 Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Check schedule timing
-        id: sched_check
-        if: github.event_name == 'schedule'
-        env:
-          GH_EVENT_NAME: ${{ github.event_name }}
+      # 5. Show run info
+      - name: ℹ️ Run Info
         run: |
-          python - << 'PYEOF2'
-          import os, sys
-          from datetime import datetime, timezone, timedelta
-          import json, pathlib
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  LinkedIn Agent — © ${{ vars.AUTHOR_NAME || github.actor }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Run time  : $(date '+%Y-%m-%d %H:%M %Z')"
+          echo "  Trigger   : ${{ github.event_name }}"
+          echo "  Topic     : ${{ github.event.inputs.topic_id || 'auto' }}"
+          echo "  Dry run   : ${{ github.event.inputs.dry_run || 'false' }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-          cfg_path = pathlib.Path("schedule_config.json")
-          if not cfg_path.exists():
-              print("No schedule_config.json — skipping timing check")
-              sys.exit(0)
-
-          cfg   = json.loads(cfg_path.read_text())
-          tz_offset_mins = cfg.get("tz_offset_mins", 330)  # default IST
-          sched_time = cfg.get("time", "20:50")
-          sched_h, sched_m = map(int, sched_time.split(":"))
-
-          utc_now  = datetime.now(timezone.utc)
-          local_now = utc_now + timedelta(minutes=tz_offset_mins)
-          target    = local_now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
-          diff_secs = (target - local_now).total_seconds()
-          WINDOW    = 30 * 60
-
-          gho = os.environ.get("GITHUB_OUTPUT", "")
-          if diff_secs > WINDOW or diff_secs < -WINDOW:
-              print(f"⏭️  Not posting — diff is {int(diff_secs/60)}m (outside ±30m window). Cancelling run.")
-              if gho:
-                  open(gho,"a").write("SKIP_RUN=true\n")
-          else:
-              print(f"✅ Within window ({int(diff_secs/60)}m to go) — will post.")
-              if gho:
-                  open(gho,"a").write("SKIP_RUN=false\n")
-          PYEOF2
-
-      - name: Cancel if not posting time
-        if: github.event_name == 'schedule' && steps.sched_check.outputs.SKIP_RUN == 'true'
+      # 6. Run the agent
+      - name: 🚀 Run LinkedIn Agent
+        working-directory: src
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Not posting time — cancelling this run to keep Actions history clean."
-          gh run cancel ${{ github.run_id }} --repo ${{ github.repository }} || true
-          sleep 5
-          exit 0
-
-      - name: Run LinkedIn Agent
-        id: run_agent
-        if: github.event_name != 'schedule' || steps.sched_check.outputs.SKIP_RUN != 'true'
-        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
-          LINKEDIN_PERSON_URN:   ${{ secrets.LINKEDIN_PERSON_URN }}
-          ANTHROPIC_API_KEY:     ${{ secrets.ANTHROPIC_API_KEY }}
-          NOTIFY_EMAIL:          ${{ secrets.NOTIFY_EMAIL }}
-          NOTIFY_EMAIL_PASSWORD: ${{ secrets.NOTIFY_EMAIL_PASSWORD }}
-          NOTIFY_TO_EMAIL:       ${{ secrets.NOTIFY_TO_EMAIL }}
-          CALLMEBOT_PHONE:       ${{ secrets.CALLMEBOT_PHONE }}
-          CALLMEBOT_APIKEY:      ${{ secrets.CALLMEBOT_APIKEY }}
-          TELEGRAM_BOT_TOKEN:    ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
-          # ── Expose event name as a real env var so shell can read it ──────
-          GH_EVENT_NAME:         ${{ github.event_name }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          # Optional: set AUTHOR_NAME as a repo variable (Settings → Variables)
+          # to personalise post signatures and diagram watermarks.
+          # Falls back to your GitHub username automatically if not set.
+          AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
         run: |
           ARGS=""
-
-          TOPIC="${{ github.event.inputs.topic_id }}"
-          if [ -n "$TOPIC" ]; then
-            ARGS="$ARGS --topic $TOPIC"
+          
+          # Add --topic flag if manually specified
+          if [ -n "${{ github.event.inputs.topic_id }}" ]; then
+            ARGS="$ARGS --topic ${{ github.event.inputs.topic_id }}"
           fi
-
+          
+          # Add --dry-run flag if requested
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
+          
+          python agent.py $ARGS
 
-          # Use the env var (not the expression) — expressions don't always
-          # evaluate inside shell if-statements reliably.
-          if [ "$GH_EVENT_NAME" = "workflow_dispatch" ]; then
-            ARGS="$ARGS --manual"
-            echo "✅ Manual trigger detected — will skip schedule sleep"
-          else
-            echo "⏰ Scheduled trigger — schedule_checker will validate timing"
-          fi
+      # 7. Upload diagrams as artifacts (always, even on failure)
+      - name: 📁 Upload Diagrams
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams-${{ github.run_number }}
+          path: |
+            src/diagrams/*.svg
+            src/diagrams/*.png
+            src/output_post_*.txt
+            src/agent.log
+          retention-days: 30
 
-          echo "Running: python src/agent.py $ARGS"
-          python src/agent.py $ARGS
+      # 8. Commit updated history back to repo
+      - name: 💾 Save Topic History
+        if: success() && github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "linkedin-agent[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/.topic_history.json || true
+          git diff --staged --quiet || git commit -m "chore: update topic history [skip ci]"
+          git push || true
 
-      # ── Bookmark: topic captured in step name for dashboard display ──────────
-      - name: "TOPIC: ${{ steps.run_agent.outputs.POST_TOPIC || 'auto' }}"
-        if: always() && (github.event_name != 'schedule' || steps.sched_check.outputs.SKIP_RUN != 'true')
-        run: echo "Topic bookmark — readable by dashboard via Jobs API"
+      # 9. Notify on failure
+      - name: ❌ Notify on Failure
+        if: failure()
+        run: |
+          echo "::error::LinkedIn Agent failed! Check the logs above."
+          echo "::error::Common causes: expired LinkedIn token, API rate limits, SVG parse error"
