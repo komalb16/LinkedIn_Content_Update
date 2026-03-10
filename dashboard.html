@@ -646,6 +646,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
         <input class="finp" id="authorRoleInput" type="text" placeholder="e.g. Software Engineer at Acme Corp"/>
       </div>
       <button class="btn bp" style="width:100%" onclick="saveSettings()">Save Settings</button>
+      <div style="border-top:1px solid var(--bd);margin:16px 0 12px"></div>
+      <div style="font-size:11px;color:var(--txd);margin-bottom:8px">If the dashboard is stuck or showing stale data, clear the local cache and reconnect.</div>
+      <button class="btn bg" style="width:100%;font-size:12px" onclick="clearCacheAndReconnect()">🔄 Clear Cache &amp; Reconnect</button>
     </div>
   </div>
 </div>
@@ -1890,6 +1893,7 @@ async function connect() {
     // Show first-run wizard if name/role not set
     setTimeout(maybeShowFirstRunWizard, 800);
     toast('Connected as ' + u.login + ' ✓', 'ok');
+    checkTokenScopes();
   } catch(e) { toast('Failed: ' + e.message, 'err'); }
   finally { setLoad('conSpin','conTxt',false,'Connect'); }
 }
@@ -1909,6 +1913,8 @@ async function silentConn() {
       await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
     }
     updateRepoDisplay();
+    // Warn if token is missing key scopes
+    checkTokenScopes();
   } catch(e) { localStorage.removeItem('gh_token'); token = ''; }
 }
 
@@ -1929,10 +1935,31 @@ function showDash(u) {
   }
 }
 
+// ── TOKEN SCOPE CHECK ─────────────────────────────────────────────────────────
+async function checkTokenScopes() {
+  try {
+    const r = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
+    });
+    const scopes = r.headers.get('x-oauth-scopes') || '';
+    // Fine-grained tokens don't return x-oauth-scopes — skip check for those
+    if (!scopes && token.startsWith('github_pat_')) return;
+    if (scopes && !scopes.includes('workflow') && !scopes.includes('repo')) {
+      toast('⚠️ Token may be missing workflow or repo scope — Save/Post may fail. Re-create token with repo+workflow scopes.', 'err');
+    }
+  } catch(_) {}
+}
+
 // ── Central data loader — call after REPO is confirmed ───────────────────────
 function loadAllData() {
   if (!REPO) { toast('No repo set — open ⚙️ Settings', 'err'); return; }
   Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+}
+
+function clearCacheAndReconnect() {
+  if (!confirm('This will clear all cached data (token, repo, settings) and reload. Continue?')) return;
+  localStorage.clear();
+  location.reload();
 }
 
 function disconnect() {
@@ -1958,7 +1985,16 @@ function gh(p, o = {}) {
   if (method !== 'GET' && method !== 'HEAD') {
     headers['Content-Type'] = 'application/json';
   }
-  return fetch('https://api.github.com' + p, { ...o, headers });
+  return fetch('https://api.github.com' + p, { ...o, headers })
+    .catch(err => {
+      // "Failed to fetch" usually means: expired/revoked token, wrong scope,
+      // or a network issue. Give the user an actionable message.
+      const msg = err.message || 'Network error';
+      if (msg.toLowerCase().includes('fetch')) {
+        throw new TypeError('GitHub API unreachable — check your token has repo+workflow scopes and has not expired');
+      }
+      throw err;
+    });
 }
 
 // ── HANDLE POST (dry run or live) ─────────────────────────────────────────────
@@ -2119,7 +2155,7 @@ function generatePreviewSVG(topic) {
     }
   });
 
-  svg += `<text x="200" y="270" text-anchor="middle" fill="#334155" font-size="8" font-family="Arial,sans-serif">Preview diagram • © " + (localStorage.getItem('author_name') || localStorage.getItem('gh_user') || 'Author') + "</text>`;
+  svg += `<text x="200" y="270" text-anchor="middle" fill="#334155" font-size="8" font-family="Arial,sans-serif">Preview diagram • © ${localStorage.getItem('author_name') || localStorage.getItem('gh_user') || 'Author'}</text>`;
   svg += `</svg>`;
   return svg;
 }
@@ -2232,20 +2268,23 @@ function getFilterRange() {
   return { from, to };
 }
 
+function runDurMs(r) {
+  if (!r.updated_at || !r.created_at) return 0;
+  return new Date(r.updated_at) - new Date(r.created_at);
+}
+
 function isSkippedRun(r) {
-  // Schedule (cron) runs: the 30-min heartbeat fires constantly.
-  // Only hide the ones that were cancelled or skipped (= no post happened).
-  // A schedule run that SUCCEEDED is a real LinkedIn post — keep it.
+  // Schedule (cron) heartbeat: fires every 30 min.
+  // Real posts take ≥60s (LLM call + LinkedIn API).
+  // Heartbeats that found nothing to do exit in <45s with conclusion=success/cancelled.
   if (r.event === 'schedule') {
-    return r.conclusion === 'cancelled' || r.conclusion === 'skipped';
+    if (r.conclusion === 'skipped') return true;
+    // Keep only runs that actually ran long enough to post
+    return runDurMs(r) < 120000; // real posts take ≥2min; heartbeats finish in <60s
   }
-  // For dispatch/manual runs: hide only explicit skips and very fast cancels
-  // that never reached the posting step.
+  // Manual/dispatch: hide explicit skips and very fast cancels
   if (r.conclusion === 'skipped') return true;
-  if (r.conclusion === 'cancelled') {
-    const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
-    return durMs < 30000;
-  }
+  if (r.conclusion === 'cancelled') return runDurMs(r) < 30000;
   return false;
 }
 
@@ -2298,7 +2337,7 @@ function renderRuns(runs) {
     const ico     = ok ? '✅' : fail ? '❌' : running ? '⏳' : '⚪';
     const icls    = ok ? 'ok' : fail ? 'fail' : running ? 'run' : 'oth';
     // schedule events are hidden by isSkippedRun — only manual/dispatch shown here
-    const trig    = r.event==='workflow_dispatch' ? 'manual post' : r.event || 'post';
+    const trig    = r.event==='workflow_dispatch' ? 'manual post' : r.event==='schedule' ? 'scheduled post' : r.event || 'post';
     const bcls    = trig==='manual post' ? 'bman' : 'bdry';
     const t       = new Date(r.created_at);
     const ts      = tzFmt(t,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
@@ -2400,6 +2439,7 @@ function getModeFromRun(r) {
 
 // ── STATS ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
+  if (!REPO) return;
   try {
     const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100');
     const d = await r.json();

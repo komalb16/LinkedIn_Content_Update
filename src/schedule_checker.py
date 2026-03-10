@@ -111,7 +111,7 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     Cron (scheduled) fires every 30 min. This function:
       - Exits in ~2s if configured time is more than 30 min away
       - Sleeps the gap if within 30 min of configured time, then returns
-      - Exits if more than 30 min past (already posted this window)
+      - Exits if more than 90 min past (already posted this window)
     """
     # Also check env var as fallback — in case --manual flag wasn't passed
     if not manual and os.environ.get("GH_EVENT_NAME") == "workflow_dispatch":
@@ -187,9 +187,9 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     target = now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
     diff_secs = (target - now).total_seconds()
 
-    # Cron fires every 30 min. We only proceed if we're within a 30-min window
+    # Cron fires every 2 hours. We only proceed if within a 90-min window
     # of the configured time. Otherwise exit cleanly (costs ~2 sec of Actions time).
-    WINDOW = 30 * 60  # 30-minute window
+    WINDOW = 6 * 60 * 60  # 6-hour window — cron fires twice daily, each covers half a day
 
     if diff_secs > WINDOW:
         # Too early — a future cron will catch the right window
@@ -213,7 +213,7 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         # Slightly past the target (cron fired just after) — run immediately
         info(f"✅ Within window of {time_ist} IST — proceeding immediately")
     else:
-        # More than 30 min past — already ran this window, skip
+        # More than 90 min past — already ran this window, skip
         mins_past = int(-diff_secs // 60)
         info(f"⏭️  {time_ist} IST was {mins_past}m ago — already handled. Exiting.")
         _mark_skip()
