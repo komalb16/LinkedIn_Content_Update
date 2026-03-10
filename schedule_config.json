@@ -4,34 +4,34 @@
   "weekly": {
     "mon": {
       "enabled": true,
-      "time_ist": "19:00"
+      "time_utc": "13:59"
     },
     "tue": {
       "enabled": true,
-      "time_ist": "20:15"
+      "time_utc": "14:45"
     },
     "wed": {
       "enabled": true,
-      "time_ist": "21:45"
+      "time_utc": "16:15"
     },
     "thu": {
       "enabled": true,
-      "time_ist": "09:30"
+      "time_utc": "04:00"
     },
     "fri": {
       "enabled": true,
-      "time_ist": "20:35"
+      "time_utc": "15:05"
     },
     "sat": {
       "enabled": true,
-      "time_ist": "02:20"
+      "time_utc": "20:50"
     },
     "sun": {
       "enabled": false,
-      "time_ist": "10:00"
+      "time_utc": "04:30"
     }
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-09T03:16:04.562Z"
+  "updated_at": "2026-03-10T04:46:17.889Z"
 }
