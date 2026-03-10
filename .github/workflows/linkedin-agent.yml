@@ -4,11 +4,11 @@ name: 🤖 LinkedIn Agent
 on:
   # Scheduled: twice daily at 9 AM and 6 PM IST (3:30 UTC and 12:30 UTC)
   schedule:
-    # Heartbeat every 30 min — schedule_checker.py decides the actual post time.
-    # This is intentional: the checker reads your per-day UTC time from
-    # schedule_config.json and sleeps until the exact minute. Cron runs that
-    # fire outside the posting window exit in ~2 seconds (zero Actions cost).
-    - cron: "*/30 * * * *"
+    # Two fixed triggers per day — one for a morning post, one for evening.
+    # schedule_checker.py sleeps until the exact per-day time set in the dashboard.
+    # If your posting time is anywhere in that half-day, it will be caught.
+    - cron: "0 1 * * *"   # 1 AM UTC = 6:30 AM IST  (catches morning posts)
+    - cron: "0 12 * * *"  # 12 PM UTC = 5:30 PM IST  (catches evening posts)
 
   # Manual trigger from GitHub UI — with optional inputs
   workflow_dispatch:
