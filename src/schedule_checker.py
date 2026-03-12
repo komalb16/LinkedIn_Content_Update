@@ -20,8 +20,42 @@ import json
 import sys
 import time
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+# zoneinfo is built-in from Python 3.9+. On older Pythons fall back to
+# a UTC-only stub so the rest of the code still runs (GitHub runners use 3.11+).
+try:
+    from zoneinfo import ZoneInfo
+
+    def _dst_offset_str(tz_name: str) -> str:
+        """Return current UTC offset as a readable string, e.g. '-04:00 (DST)'."""
+        try:
+            now = datetime.now(ZoneInfo(tz_name))
+            off = now.utcoffset()
+            total = int(off.total_seconds())
+            sign = "+" if total >= 0 else "-"
+            h, m = divmod(abs(total) // 60, 60)
+            dst = " (DST)" if now.dst() and now.dst().total_seconds() != 0 else ""
+            return f"UTC{sign}{h:02d}:{m:02d}{dst}"
+        except Exception:
+            return "unknown"
+
+    def _local_to_utc_hhmm(hhmm: str, tz_name: str) -> str:
+        """Convert wall-clock HH:MM in tz_name to HH:MM UTC using TODAY's DST offset."""
+        now_utc = datetime.now(timezone.utc)
+        tz = ZoneInfo(tz_name)
+        local_today = now_utc.astimezone(tz).replace(
+            hour=int(hhmm[:2]), minute=int(hhmm[3:]), second=0, microsecond=0
+        )
+        utc_dt = local_today.astimezone(timezone.utc)
+        return f"{utc_dt.hour:02d}:{utc_dt.minute:02d}"
+
+    HAS_ZONEINFO = True
+except ImportError:
+    HAS_ZONEINFO = False
+    def _dst_offset_str(tz_name): return "unknown"
+    def _local_to_utc_hhmm(hhmm, tz_name): return hhmm  # fallback: treat as UTC
 
 # ─── Try to import logger, fall back to print ────────────────────────────────
 try:
@@ -41,6 +75,18 @@ def _mark_skip():
         try:
             with open(gho, "a") as fh:
                 fh.write("SKIP_RUN=true\n")
+        except Exception:
+            pass
+
+
+def _mark_newsletter():
+    """Write NEWSLETTER_RUN=true to GITHUB_OUTPUT so the agent knows to generate newsletter diagram."""
+    gho = os.environ.get("GITHUB_OUTPUT", "")
+    if gho:
+        try:
+            with open(gho, "a") as fh:
+                fh.write("NEWSLETTER_RUN=true\n")
+            info("📰 Newsletter day — NEWSLETTER_RUN=true written to GITHUB_OUTPUT")
         except Exception:
             pass
 
@@ -161,22 +207,33 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     # Prefer time_utc (set by modern dashboard). Fall back to time_ist for
     # legacy configs — convert IST → UTC by subtracting 5h30m.
     now = utc_now()   # re-fetch as UTC for time comparison
-    time_utc = day_cfg.get("time_utc")
-    if time_utc:
-        time_str = time_utc
-        info(f"Using time_utc={time_utc} (UTC) from schedule_config")
-    else:
-        time_ist = day_cfg.get("time_ist", "09:30")
-        # Convert IST → UTC: subtract 5h30m
+
+    # ── DST-AWARE time resolution ─────────────────────────────────────────────
+    # Priority 1: time_local + time_tz (set by modern dashboard, DST-safe)
+    #   → convert wall-clock time in the saved timezone to UTC using TODAY's offset
+    #   → 6 PM America/New_York is always 6 PM, whether DST is on or off
+    # Priority 2: time_utc (fixed UTC, no DST awareness — legacy)
+    # Priority 3: time_ist (oldest legacy, warn and default)
+    time_local = day_cfg.get("time_local")
+    time_tz    = day_cfg.get("time_tz", "")
+    time_utc   = day_cfg.get("time_utc")
+
+    if time_local and time_tz and HAS_ZONEINFO:
         try:
-            ih, im = map(int, time_ist.split(":"))
-        except Exception:
-            ih, im = 9, 30
-        total_min = ih * 60 + im - 330  # -330 = -5h30m
-        total_min = total_min % (24 * 60)  # wrap midnight
-        utc_h, utc_m = divmod(total_min, 60)
-        time_str = f"{utc_h:02d}:{utc_m:02d}"
-        info(f"Legacy time_ist={time_ist} → converted to time_utc={time_str}")
+            time_str = _local_to_utc_hhmm(time_local, time_tz)
+            info(f"Using time_local={time_local} {time_tz} → {time_str} UTC "
+                 f"(DST-aware, offset today: {_dst_offset_str(time_tz)})")
+        except Exception as e:
+            warn(f"DST conversion failed ({e}) — falling back to time_utc")
+            time_str = time_utc or "09:00"
+    elif time_utc:
+        time_str = time_utc
+        info(f"Using time_utc={time_utc} (fixed UTC — re-save schedule for DST support)")
+    else:
+        raw = day_cfg.get("time_ist", "")
+        warn(f"LEGACY CONFIG: time_ist='{raw}' found but no time_utc or time_local. "
+             f"Open dashboard → Save Schedule to fix. Defaulting to 09:00 UTC.")
+        time_str = "09:00"
 
     try:
         sched_h, sched_m = map(int, time_str.split(":"))
@@ -187,9 +244,9 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     target = now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
     diff_secs = (target - now).total_seconds()
 
-    # Cron fires every 2 hours. We only proceed if within a 90-min window
+    # Cron fires twice daily. We only proceed if within a 6-hour window
     # of the configured time. Otherwise exit cleanly (costs ~2 sec of Actions time).
-    WINDOW = 6 * 60 * 60  # 6-hour window — cron fires twice daily, each covers half a day
+    WINDOW = 4 * 60 * 60  # 4-hour window — cron fires every 8h, each covers a 4h posting slot
 
     if diff_secs > WINDOW:
         # Too early — a future cron will catch the right window
@@ -218,6 +275,14 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         info(f"⏭️  {time_ist} IST was {mins_past}m ago — already handled. Exiting.")
         _mark_skip()
         sys.exit(0)
+
+    # ── NEWSLETTER DAY CHECK ──────────────────────────────────────────────────
+    # If today's schedule config has newsletter: true, signal the agent to also
+    # generate the Built/Broke/Learned newsletter diagram alongside the regular post.
+    if day_cfg.get("newsletter", False):
+        _mark_newsletter()
+    else:
+        info("📰 Not a newsletter day — skipping newsletter diagram")
 
 
 # ─── Quick diagnostic (python src/schedule_checker.py) ───────────────────────

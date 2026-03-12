@@ -228,6 +228,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .day-toggle{width:36px;height:36px;border-radius:50%;border:2px solid var(--bd);background:var(--bg2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);color:var(--txd)}
 .day-toggle.on{border-color:var(--acc);background:rgba(14,165,233,0.12);color:var(--acc)}
 .day-toggle:hover{border-color:var(--bds)}
+.nl-toggle{width:100%;padding:3px 4px;border-radius:8px;border:1.5px solid var(--bd);background:var(--bg2);cursor:pointer;font-size:9px;color:var(--txd);transition:all var(--tr);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nl-toggle.nl-on{border-color:#a855f7;background:rgba(168,85,247,0.13);color:#a855f7;font-weight:700}
+.nl-toggle:hover{border-color:var(--bds)}
 /* ── TIME CONTROL (clean & readable on all themes) ── */
 .time-ctrl{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%}
 .time-btn{width:28px;height:20px;background:var(--sur3);border:1.5px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txm);transition:all var(--tr);padding:0;line-height:1}
@@ -556,6 +559,48 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .install-banner-btns{display:flex;gap:8px;flex-shrink:0}
 [data-theme="light"] .install-banner{background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(124,58,237,0.05));border-color:rgba(37,99,235,0.2)}
 
+
+/* ── #26 ONBOARDING CHECKLIST ──────────────────────────────────────────────── */
+.onboard-card{background:linear-gradient(135deg,rgba(79,156,249,0.09),rgba(167,139,250,0.07));
+  border:1px solid rgba(79,156,249,0.28);border-radius:16px;margin-bottom:18px;
+  overflow:hidden;animation:up .4s ease;transition:all .3s}
+.onboard-card.done{border-color:rgba(52,211,153,0.4);background:linear-gradient(135deg,rgba(52,211,153,0.08),rgba(16,185,129,0.05))}
+[data-mode="light"] .onboard-card{background:linear-gradient(135deg,rgba(37,99,235,0.05),rgba(124,58,237,0.04));border-color:rgba(37,99,235,0.22)}
+[data-mode="light"] .onboard-card.done{border-color:rgba(5,118,66,0.35)}
+.onboard-header{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;cursor:pointer;user-select:none}
+.onboard-header-left{display:flex;align-items:center;gap:10px}
+.onboard-title{font-size:13px;font-weight:700;color:var(--tx)}
+.onboard-prog-pill{font-size:11px;color:var(--txm);background:var(--bg2);
+  border-radius:20px;padding:2px 9px;border:1px solid var(--bd)}
+.onboard-chevron{font-size:12px;color:var(--txm);transition:transform .2s}
+.onboard-card.collapsed .onboard-chevron{transform:rotate(-90deg)}
+.onboard-body{padding:4px 16px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+@media(max-width:600px){.onboard-body{grid-template-columns:1fr}}
+.onboard-card.collapsed .onboard-body{display:none}
+.onboard-step{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;
+  border-radius:10px;background:var(--bg2);border:1px solid var(--bd);transition:all .2s}
+.onboard-step.complete{background:rgba(52,211,153,0.07);border-color:rgba(52,211,153,0.25)}
+[data-mode="light"] .onboard-step.complete{background:rgba(5,118,66,0.06);border-color:rgba(5,118,66,0.22)}
+.onboard-check{width:20px;height:20px;min-width:20px;border-radius:50%;border:2px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px;
+  transition:all .25s}
+.onboard-step.complete .onboard-check{background:var(--grn);border-color:var(--grn);color:#fff}
+.onboard-step-text{flex:1}
+.onboard-step-label{font-size:12px;font-weight:600;color:var(--tx);line-height:1.3}
+.onboard-step.complete .onboard-step-label{color:var(--txm);text-decoration:line-through}
+.onboard-step-sub{font-size:10px;color:var(--txd);margin-top:2px;line-height:1.4}
+.onboard-step-action{font-size:10px;color:var(--acc);cursor:pointer;margin-top:3px;font-weight:600}
+.onboard-step-action:hover{text-decoration:underline}
+.onboard-footer{padding:0 16px 12px;display:flex;align-items:center;gap:10px}
+.onboard-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.onboard-bar-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));
+  border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.onboard-dismiss{font-size:10px;color:var(--txd);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.onboard-dismiss:hover{color:var(--txm)}
+.onboard-complete-msg{text-align:center;padding:14px 16px;font-size:12px;
+  color:var(--grn);font-weight:600;letter-spacing:.02em}
+
 /* ── QR SHARE MODAL ────────────────────────────────────────────────────────── */
 .qr-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
   z-index:10000;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
@@ -716,6 +761,23 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   </div>
 </div>
 
+<!-- #26 Onboarding Checklist -->
+<div class="onboard-card" id="onboardCard" style="display:none">
+  <div class="onboard-header" onclick="toggleChecklist()">
+    <div class="onboard-header-left">
+      <span>🚀</span>
+      <span class="onboard-title">Setup Checklist</span>
+      <span class="onboard-prog-pill" id="onboardPill">0 / 6</span>
+    </div>
+    <span class="onboard-chevron" id="onboardChev">▾</span>
+  </div>
+  <div class="onboard-body" id="onboardBody"></div>
+  <div class="onboard-footer">
+    <div class="onboard-bar-wrap"><div class="onboard-bar-fill" id="onboardBar" style="width:0%"></div></div>
+    <span class="onboard-dismiss" onclick="dismissChecklist()">Dismiss ✕</span>
+  </div>
+</div>
+
 <!-- QR Share Modal -->
 <div class="qr-modal-bg" id="qrBg" onclick="if(event.target===this)closeQR()">
   <div class="qr-modal">
@@ -755,6 +817,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
           <button class="mpick" id="mp-light"  onclick="setMode('light')" >☀️</button>
           <button class="mpick" id="mp-medium" onclick="setMode('medium')">🌤</button>
           <button class="mpick act" id="mp-dark" onclick="setMode('dark')">🌙</button>
+          <button class="mpick" id="mp-auto" onclick="setModeAuto()" title="Follow system theme">⚙️</button>
         </div>
       </div>
       <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Timezone"></select>
@@ -821,7 +884,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     <div class="ch" style="padding:16px 22px 0;display:flex;align-items:center;justify-content:space-between">
       <span class="ct">⏰ Schedule Control</span>
       <div style="display:flex;gap:8px">
-        <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="copyCron()">Copy Cron</button>
         <button class="btn bp" style="font-size:11px;padding:5px 14px" onclick="saveSchedule()" id="saveSchedBtn">💾 Save Schedule</button>
       </div>
     </div>
@@ -974,6 +1036,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <button class="sfp"         id="sfOk"     onclick="setStatusFilter('ok',this)"    >✅ Success</button>
       <button class="sfp"         id="sfFail"   onclick="setStatusFilter('fail',this)"  >❌ Failed</button>
       <button class="sfp"         id="sfCancel" onclick="setStatusFilter('cancel',this)">🚫 Cancelled</button>
+      <span class="filter-divider"></span>
+      <button class="sfp act-all" id="tfAll"    onclick="setTriggerFilter('all',this)"      >All</button>
+      <button class="sfp"         id="tfManual" onclick="setTriggerFilter('manual',this)"   >🖱️ Manual</button>
+      <button class="sfp"         id="tfSched"  onclick="setTriggerFilter('schedule',this)" >⏰ Scheduled</button>
     </div>
 
     <!-- CUSTOM RANGE (shown when Custom selected) -->
@@ -1042,6 +1108,21 @@ function tzNow()  { return new Date(new Date().toLocaleString('en-US', {timeZone
 function tzFmt(d, opts) { return new Date(d).toLocaleString('en-US', {timeZone: userTZ, ...opts}); }
 
 // Convert "HH:MM" in userTZ → "HH:MM" in UTC (for saving to schedule_config)
+// Convert wall-clock HH:MM in an explicit timezone → HH:MM UTC
+// Uses that day's actual DST offset, not a fixed one.
+function wallClockToUtc(hhmm, tzName) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const now = new Date();
+  // Compute offset for the given timezone at today's date
+  const refLocal = new Date(now.toLocaleString('en-US', {timeZone: tzName}));
+  const offsetMs = refLocal - now;
+  const localMs  = (h * 60 + m) * 60000;
+  const utcMs    = ((localMs - offsetMs) % 86400000 + 86400000) % 86400000;
+  const uh = Math.floor(utcMs / 3600000);
+  const um = Math.floor((utcMs % 3600000) / 60000);
+  return String(uh).padStart(2,'0') + ':' + String(um).padStart(2,'0');
+}
+
 function localTimeToUtc(localHHMM) {
   const [h, m] = localHHMM.split(':').map(Number);
   // Build a Date for today at that local time, then read its UTC hours/minutes
@@ -1121,9 +1202,8 @@ function setTimezone(tz) {
   localStorage.setItem('user_tz', tz);
   updateTzLabels();
   updNext();
-  // Re-render runs with new timezone
+  buildDayGrid();          // re-display schedule times in new timezone
   if (allRuns.length) applyRunFilter();
-  // Re-render stats
   loadStats();
   toast('Timezone set to ' + tz.split('/').pop().replace(/_/g,' '), 'info');
 }
@@ -1473,8 +1553,22 @@ window.onload = () => {
 
 // ── THEME ─────────────────────────────────────────────────────────────────────
 // ── THEME: 5 colors × 3 modes ────────────────────────────────────────────────
-let _themeColor = localStorage.getItem('themeColor') || 'blue';
-let _themeMode  = localStorage.getItem('themeMode')  || 'dark';
+
+// #27 System theme auto-sync: derive mode from OS if user hasn't manually chosen
+function _systemPreferredMode() {
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
+  return 'dark';
+}
+let _themeColor   = localStorage.getItem('themeColor') || 'blue';
+let _themeMode    = localStorage.getItem('themeMode')  || _systemPreferredMode();
+let _themeAutoMode = !localStorage.getItem('themeMode'); // true = following OS
+
+// Live-follow OS changes (only when no manual override saved)
+if (window.matchMedia) {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+    if (_themeAutoMode) { _themeMode = e.matches ? 'dark' : 'light'; applyTheme(); }
+  });
+}
 
 // (appear panel removed — theme strip is inline)
 
@@ -1485,9 +1579,22 @@ function setColor(c) {
   applyTheme();
 }
 function setMode(m) {
-  _themeMode = m;
+  _themeMode    = m;
+  _themeAutoMode = false; // user explicitly chose — stop following OS
   localStorage.setItem('themeMode', m);
   applyTheme();
+  // Show "Auto" button as available when user is in manual mode
+  const autoBtn = document.getElementById('mp-auto');
+  if (autoBtn) autoBtn.style.opacity = '0.55';
+}
+// Auto mode: clear manual override, re-follow OS preference
+function setModeAuto() {
+  _themeAutoMode = true;
+  _themeMode     = _systemPreferredMode();
+  localStorage.removeItem('themeMode');
+  applyTheme();
+  const autoBtn = document.getElementById('mp-auto');
+  if (autoBtn) autoBtn.style.opacity = '1';
 }
 // Legacy setTheme() called by old code paths — map to mode
 function setTheme(t) {
@@ -1508,8 +1615,17 @@ function applyTheme() {
   // Mode button active state
   ['light','medium','dark'].forEach(m => {
     const el = document.getElementById('mp-' + m);
-    if (el) el.classList.toggle('act', m === _themeMode);
+    if (el) el.classList.toggle('act', m === _themeMode && !_themeAutoMode);
   });
+  // Auto button: highlighted when following OS, dimmed when overridden
+  const autoBtn = document.getElementById('mp-auto');
+  if (autoBtn) {
+    autoBtn.classList.toggle('act', _themeAutoMode);
+    autoBtn.style.opacity = _themeAutoMode ? '1' : '0.55';
+    autoBtn.title = _themeAutoMode
+      ? 'Following system theme (click mode buttons to override)'
+      : 'Click to follow system theme again';
+  }
   // Legacy tbtn support
   document.querySelectorAll('.tbtn').forEach(b => {
     b.classList.toggle('act',
@@ -1776,6 +1892,124 @@ function saveRepoFromInput() {
 
 // ── FIRST-RUN SETUP WIZARD ─────────────────────────────────────────────────
 // Shows after first successful login when author_name isn't set yet.
+
+// ── #26 ONBOARDING CHECKLIST ──────────────────────────────────────────────────
+const ONBOARD_STEPS = [
+  {
+    id: 'github',
+    label: 'Connect to GitHub',
+    sub: 'Paste your GitHub token and click Connect',
+    check: () => !!localStorage.getItem('gh_token'),
+    action: null
+  },
+  {
+    id: 'repo',
+    label: 'Repository detected',
+    sub: 'Your LinkedIn Agent repo is linked automatically',
+    check: () => !!REPO,
+    action: null
+  },
+  {
+    id: 'groq',
+    label: 'Add Groq API key',
+    sub: 'Required for Dry Run preview — free at console.groq.com',
+    check: () => !!(localStorage.getItem('groq_key') || '').startsWith('gsk_'),
+    action: 'openSettings()'
+  },
+  {
+    id: 'schedule',
+    label: 'Configure schedule',
+    sub: 'Enable at least one posting day with a time',
+    check: () => {
+      try {
+        const cfg = JSON.parse(localStorage.getItem('schedule_cfg_cache') || '{}');
+        return Object.values(cfg).some(d => d && d.enabled && (d.time_local || d.time_utc));
+      } catch { return false; }
+    },
+    action: "document.getElementById('schedSection') && document.getElementById('schedSection').scrollIntoView({behavior:'smooth'})"
+  },
+  {
+    id: 'topics',
+    label: 'Review your topics',
+    sub: 'Check the topic list — disable or add topics for your field',
+    check: () => !!localStorage.getItem('checklist_topics_ok'),
+    action: "markChecklistStep('topics'); document.getElementById('topicsSection') && document.getElementById('topicsSection').scrollIntoView({behavior:'smooth'})"
+  },
+  {
+    id: 'dryrun',
+    label: 'Try a Dry Run',
+    sub: 'Preview your first AI-generated post before publishing',
+    check: () => !!localStorage.getItem('checklist_dryrun_ok'),
+    action: "isDry=true; document.getElementById('dryToggle') && (document.getElementById('dryToggle').checked=true); handlePost()"
+  }
+];
+
+function renderChecklist() {
+  const card = document.getElementById('onboardCard');
+  if (!card) return;
+  if (localStorage.getItem('checklist_dismissed')) { card.style.display = 'none'; return; }
+
+  const completed = ONBOARD_STEPS.filter(s => s.check()).length;
+  const total     = ONBOARD_STEPS.length;
+
+  // All done — show completion and schedule auto-dismiss
+  if (completed === total) {
+    card.style.display = '';
+    card.classList.add('done');
+    document.getElementById('onboardBody').innerHTML =
+      '<div class="onboard-complete-msg" style="grid-column:1/-1">🎉 All set! You\'re fully configured — enjoy automated LinkedIn posting.</div>';
+    document.getElementById('onboardPill').textContent = '✓ Complete';
+    document.getElementById('onboardBar').style.width = '100%';
+    document.getElementById('onboardBody').style.display = 'block';
+    if (!localStorage.getItem('checklist_dismissed')) {
+      setTimeout(() => dismissChecklist(), 5000);
+    }
+    return;
+  }
+
+  card.style.display = '';
+  card.classList.remove('done');
+  document.getElementById('onboardPill').textContent = completed + ' / ' + total;
+  document.getElementById('onboardBar').style.width  = Math.round(completed/total*100) + '%';
+
+  const body = document.getElementById('onboardBody');
+  body.innerHTML = ONBOARD_STEPS.map(s => {
+    const done = s.check();
+    return `<div class="onboard-step ${done ? 'complete' : ''}" id="os-${s.id}">
+      <div class="onboard-check">${done ? '✓' : ''}</div>
+      <div class="onboard-step-text">
+        <div class="onboard-step-label">${s.label}</div>
+        <div class="onboard-step-sub">${s.sub}</div>
+        ${!done && s.action ? `<div class="onboard-step-action" onclick="${s.action}">Fix this →</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markChecklistStep(id) {
+  localStorage.setItem('checklist_' + id + '_ok', '1');
+  renderChecklist();
+}
+
+function dismissChecklist() {
+  localStorage.setItem('checklist_dismissed', '1');
+  const card = document.getElementById('onboardCard');
+  if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.style.display='none', 300); }
+}
+
+function toggleChecklist() {
+  const card = document.getElementById('onboardCard');
+  const chev = document.getElementById('onboardChev');
+  if (!card) return;
+  card.classList.toggle('collapsed');
+  if (chev) chev.textContent = card.classList.contains('collapsed') ? '▸' : '▾';
+}
+
+// Cache schedule config when loaded so checklist can read it
+function cacheScheduleForChecklist(cfg) {
+  try { localStorage.setItem('schedule_cfg_cache', JSON.stringify(cfg)); } catch {}
+}
+
 function maybeShowFirstRunWizard() {
   const name = localStorage.getItem('author_name');
   const role = localStorage.getItem('author_role');
@@ -1900,8 +2134,27 @@ async function connect() {
 
 async function silentConn() {
   try {
-    const r = await gh('/user');
-    if (!r.ok) { localStorage.removeItem('gh_token'); token = ''; return; }
+    let r;
+    try {
+      r = await gh('/user');
+    } catch(netErr) {
+      // Network not ready (e.g. laptop just woke up) — keep token, stay logged in
+      // The user can manually refresh if they want to force reconnect
+      showDash(localStorage.getItem('gh_user') || '');
+      updateRepoDisplay();
+      toast('Network unavailable — showing cached data', 'inf');
+      return;
+    }
+    if (r.status === 401) {
+      // Truly invalid/expired token — clear it
+      localStorage.removeItem('gh_token'); token = ''; return;
+    }
+    if (!r.ok) {
+      // GitHub API error (rate limit, server error) — keep token, show cached UI
+      showDash(localStorage.getItem('gh_user') || '');
+      updateRepoDisplay();
+      return;
+    }
     const u = await r.json();
     localStorage.setItem('gh_user', u.login);
     if (!localStorage.getItem('author_name') && u.name) {
@@ -1927,6 +2180,8 @@ function showDash(u) {
   if (qrBtn) qrBtn.style.display = 'inline-flex';
   // Check whether to show install banner
   checkInstallPrompt();
+  // #26 Refresh onboarding checklist
+  setTimeout(renderChecklist, 400);
   // Update theme-color meta to match current accent
   const meta = document.getElementById('themeColorMeta');
   if (meta) {
@@ -2022,6 +2277,9 @@ async function showDryRunPreview() {
 
   // Open modal
   document.getElementById('previewBg').classList.add('show');
+  // #26 Mark dry run step as attempted
+  localStorage.setItem('checklist_dryrun_ok', '1');
+  renderChecklist();
   document.getElementById('postLoading').style.display = 'flex';
   document.getElementById('postContentArea').style.display = 'none';
   document.getElementById('previewDiagram').innerHTML = '';
@@ -2273,22 +2531,34 @@ function runDurMs(r) {
   return new Date(r.updated_at) - new Date(r.created_at);
 }
 
+function runDurMs(r) {
+  if (!r.updated_at || !r.created_at) return 0;
+  return new Date(r.updated_at) - new Date(r.created_at);
+}
+
 function isSkippedRun(r) {
-  // Schedule (cron) heartbeat: fires every 30 min.
-  // Real posts take ≥60s (LLM call + LinkedIn API).
-  // Heartbeats that found nothing to do exit in <45s with conclusion=success/cancelled.
+  // Only hide cron heartbeats — no-op runs that exited before posting.
+  // Real posts (manual OR scheduled) take ≥2 min → keep them.
   if (r.event === 'schedule') {
-    if (r.conclusion === 'skipped') return true;
-    // Keep only runs that actually ran long enough to post
-    return runDurMs(r) < 120000; // real posts take ≥2min; heartbeats finish in <60s
+    if (r.conclusion === 'skipped')   return true;
+    if (r.conclusion === 'cancelled') return true;
+    return runDurMs(r) < 120000; // <2 min = heartbeat, not a real post
   }
-  // Manual/dispatch: hide explicit skips and very fast cancels
+  // workflow_dispatch (manual): only hide explicit skips
   if (r.conclusion === 'skipped') return true;
-  if (r.conclusion === 'cancelled') return runDurMs(r) < 30000;
   return false;
 }
 
 let _statusFilter = 'all'; // 'all' | 'ok' | 'fail' | 'cancel'
+
+let _triggerFilter = 'all';
+
+function setTriggerFilter(key, btn) {
+  _triggerFilter = key;
+  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => b.classList.remove('act-all','act'));
+  btn.classList.add('act-all');
+  applyRunFilter();
+}
 
 function setStatusFilter(val, btn) {
   _statusFilter = val;
@@ -2311,7 +2581,10 @@ function applyRunFilter() {
     return d >= from && d <= to;
   });
   // Only LinkedIn post runs — all schedule/cron runs already removed by isSkippedRun
-  const postRuns = filtered.filter(r => !isSkippedRun(r));
+  let postRuns = filtered.filter(r => !isSkippedRun(r));
+  // Trigger type filter (Manual vs Scheduled)
+  if (_triggerFilter === 'manual')   postRuns = postRuns.filter(r => r.event === 'workflow_dispatch');
+  if (_triggerFilter === 'schedule') postRuns = postRuns.filter(r => r.event === 'schedule');
   const totalEl  = document.getElementById('runTotal');
   if (totalEl) totalEl.textContent = postRuns.length + (postRuns.length===1 ? ' post' : ' posts');
   // Remove legacy skipBadge if it exists
@@ -2535,6 +2808,7 @@ async function loadSchedule() {
       });
     }
     schedConfig = {...schedConfig, ...cfg};
+  cacheScheduleForChecklist(schedConfig.weekly || {});
   } catch(e) { /* file may not exist yet, use defaults */ }
   buildDayGrid();
   renderOverrides();
@@ -2631,9 +2905,23 @@ function buildDayGrid() {
   DAYS.forEach((day, i) => {
     const cfg = schedConfig.weekly[day] || {enabled: true, time_utc: '09:00'};
     const on = cfg.enabled && !schedConfig.paused;
+    const nlOn = cfg.newsletter === true;
     // Stored as UTC — convert to local timezone for display
-    const storedUtc = cfg.time_utc || (cfg.time_ist ? legacyIstToUtc(cfg.time_ist) : '09:00');
-    const displayLocal = utcTimeToLocal(storedUtc);
+    // Prefer time_local (DST-aware wall-clock) → fallback to time_utc → legacy time_ist
+    let displayLocal;
+    if (cfg.time_local) {
+      // Wall-clock time stored directly — show as-is if timezone matches, else convert
+      if (cfg.time_tz && cfg.time_tz !== userTZ) {
+        // Saved in a different timezone — convert wall-clock through UTC
+        const savedUtc = wallClockToUtc(cfg.time_local, cfg.time_tz);
+        displayLocal = utcTimeToLocal(savedUtc);
+      } else {
+        displayLocal = cfg.time_local;
+      }
+    } else {
+      const storedUtc = cfg.time_utc || (cfg.time_ist ? legacyIstToUtc(cfg.time_ist) : '09:00');
+      displayLocal = utcTimeToLocal(storedUtc);
+    }
     const [h, m] = displayLocal.split(':').map(Number);
     const col = document.createElement('div');
     col.className = 'day-col' + (cfg.enabled ? '' : ' disabled');
@@ -2647,7 +2935,13 @@ function buildDayGrid() {
         <button class="time-btn" onclick="adjDayTime('${day}',15)">▲</button>
         <input type="text" class="time-val" id="tmval-${day}" value="${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}" maxlength="5" placeholder="HH:MM" oninput="onTimeInput('${day}',this)" onblur="onTimeBlur('${day}',this)" onkeydown="onTimeKey(event,'${day}',this)" />
         <button class="time-btn" onclick="adjDayTime('${day}',-15)">▼</button>
-      </div>`;
+      </div>
+      <button
+        class="nl-toggle ${nlOn ? 'nl-on' : ''}"
+        id="nltog-${day}"
+        onclick="toggleNewsletter('${day}')"
+        title="${nlOn ? 'Newsletter diagram ON — click to turn off' : 'Click to generate newsletter diagram on this day'}"
+      >📰 ${nlOn ? 'Newsletter ON' : 'Newsletter'}</button>`;
     grid.appendChild(col);
   });
 }
@@ -2685,11 +2979,14 @@ function onTimeBlur(day, el) {
   const parsed = parseTimeInput(el.value);
   if (parsed) {
     const localTime = String(parsed.h).padStart(2,'0') + ':' + String(parsed.m).padStart(2,'0');
-    // Convert local display time → UTC for storage
-    const utcTime = localTimeToUtc(localTime);
-    schedConfig.weekly[day].time_utc = utcTime;
-    delete schedConfig.weekly[day].time_ist; // remove legacy field
-    el.value = localTime; // keep displaying in local time
+    // Store wall-clock time + timezone name — NOT a fixed UTC value.
+    // schedule_checker converts to UTC at runtime each day so DST is always correct.
+    schedConfig.weekly[day].time_local = localTime;
+    schedConfig.weekly[day].time_tz    = userTZ;
+    // Also store current UTC equivalent for legacy fallback only
+    schedConfig.weekly[day].time_utc   = localTimeToUtc(localTime);
+    delete schedConfig.weekly[day].time_ist; // remove old legacy field
+    el.value = localTime;
     el.style.borderColor = '';
     updNext();
   } else {
@@ -2711,6 +3008,15 @@ function toggleDay(day) {
   schedConfig.weekly[day].enabled = !schedConfig.weekly[day].enabled;
   buildDayGrid();
   updNext();
+}
+
+function toggleNewsletter(day) {
+  // Toggle newsletter flag for this day — saved to schedule_config.json on Save Schedule
+  const current = schedConfig.weekly[day].newsletter === true;
+  schedConfig.weekly[day].newsletter = !current;
+  buildDayGrid();
+  const state = schedConfig.weekly[day].newsletter ? 'ON' : 'OFF';
+  toast(`📰 Newsletter diagram ${state} for ${day.charAt(0).toUpperCase()+day.slice(1)} — click Save Schedule to persist`, 'ok');
 }
 
 function adjDayTime(day, deltaMin) {
@@ -2839,9 +3145,29 @@ function updNext() {
     const isSkip  = schedConfig.skip_dates.includes(ds);
     if (isSkip && !isForce) continue;
     if (!cfg.enabled && !isForce) continue;
-    const storedUtc2 = cfg.time_utc || (cfg.time_ist ? legacyIstToUtc(cfg.time_ist) : '09:00');
-    const localDisp = utcTimeToLocal(storedUtc2);
-    const [ph,pm] = localDisp.split(':').map(Number);
+    // DST-aware: resolve wall-clock time for THIS specific future date
+    // so that summer/winter schedules are always correct.
+    let ph, pm;
+    if (cfg.time_local) {
+      const savedTz = cfg.time_tz || userTZ;
+      // Convert wall-clock in saved timezone → UTC for the candidate date
+      const dummy = new Date(d);
+      const refLocal = new Date(dummy.toLocaleString('en-US', {timeZone: savedTz}));
+      const offsetMs = refLocal - dummy;
+      const [lh, lm] = cfg.time_local.split(':').map(Number);
+      const localMs  = (lh * 60 + lm) * 60000;
+      const utcMs    = ((localMs - offsetMs) % 86400000 + 86400000) % 86400000;
+      // Convert that UTC back to display timezone
+      const utcH = Math.floor(utcMs / 3600000);
+      const utcM = Math.floor((utcMs % 3600000) / 60000);
+      const utcStr = String(utcH).padStart(2,'0') + ':' + String(utcM).padStart(2,'0');
+      const disp = utcTimeToLocal(utcStr);
+      [ph, pm] = disp.split(':').map(Number);
+    } else {
+      const storedUtc2 = cfg.time_utc || (cfg.time_ist ? legacyIstToUtc(cfg.time_ist) : '09:00');
+      const localDisp = utcTimeToLocal(storedUtc2);
+      [ph, pm] = localDisp.split(':').map(Number);
+    }
     const candidate = new Date(d);
     candidate.setHours(ph, pm, 0, 0);
     if (candidate <= ist) continue;
@@ -2854,11 +3180,6 @@ function updNext() {
   }
   document.getElementById('nxt').textContent = 'No active days in next 14 days';
   document.getElementById('cdt').textContent = '—';
-}
-
-function copyCron() {
-  const c = document.getElementById('cronv')?.textContent || '0 4 * * *';
-  navigator.clipboard?.writeText(c).then(() => toast('Copied: ' + c, 'ok')).catch(() => toast('Cron: ' + c, 'info'));
 }
 
 // ── TOPIC / TYPE ──────────────────────────────────────────────────────────────
