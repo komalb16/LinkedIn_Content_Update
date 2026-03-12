@@ -1,5 +1,8 @@
 name: 🤖 LinkedIn Agent
 
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.topic_id || 'auto-topic' }}
+
 # ─── Triggers ───────────────────────────────────────────────────────────────
 on:
   # Scheduled: twice daily at 9 AM and 6 PM IST (3:30 UTC and 12:30 UTC)
@@ -119,7 +122,14 @@ jobs:
 
           python agent.py $ARGS
 
-      # 7. Upload diagrams as artifacts (always, even on failure)
+      # 7. Bookmark — dashboard reads this step name to identify real posts and extract topic
+      #    Only runs when a post was actually made (POSTED_TOPIC is set by agent.py).
+      #    Heartbeat/skip runs never reach this step, so dashboard can filter them out.
+      - name: "✅ Posted · ${{ steps.run_agent.outputs.POSTED_TOPIC || 'auto-topic' }}"
+        if: steps.run_agent.outputs.POSTED_TOPIC != '' && github.event.inputs.dry_run != 'true'
+        run: echo "Posted ${{ steps.run_agent.outputs.POSTED_TOPIC }} at ${{ steps.run_agent.outputs.POSTED_DATE }}"
+
+      # 8. Upload diagrams as artifacts (always, even on failure)
       - name: 📁 Upload Diagrams
         if: always()
         uses: actions/upload-artifact@v4
