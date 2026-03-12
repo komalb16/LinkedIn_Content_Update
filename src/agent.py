@@ -12,7 +12,7 @@ from openai import OpenAI
 from datetime import datetime
 from topic_manager import TopicManager
 from linkedin_poster import LinkedInPoster
-from diagram_generator import DiagramGenerator, save_newsletter_svg
+from diagram_generator import DiagramGenerator
 from logger import get_logger
 
 log = get_logger("agent")
@@ -56,80 +56,6 @@ Requirements:
 - Make it professional, detailed, and informative — worth saving and sharing
 - Use rounded rectangles, arrows, connecting lines, and clear labels
 """
-
-
-NEWSLETTER_SYSTEM_PROMPT = """You are a technical writer for a developer newsletter called "The Automation Log".
-Given a topic, produce a JSON object describing three sections of a newsletter edition.
-
-Rules:
-- Return ONLY valid JSON, no markdown fences, no extra text
-- Each section has up to 3 steps, each step has: label (short title), detail (one sentence), and optionally code (one-line snippet)
-- The last step of each section should have "result": true to highlight it
-- Keep labels under 30 chars, details under 50 chars, code under 48 chars
-
-JSON format:
-{
-  "title": "Short punchy edition title (max 70 chars)",
-  "built": [
-    {"label": "What was built", "detail": "One sentence description"},
-    {"label": "Key feature", "detail": "How it works", "code": "example_code()"},
-    {"label": "RESULT", "detail": "The outcome", "result": true}
-  ],
-  "broke": [
-    {"label": "What broke", "detail": "The symptom"},
-    {"label": "Root cause", "detail": "Why it happened", "code": "bad_code = 'example'"},
-    {"label": "FIXED", "detail": "How it was resolved", "result": true}
-  ],
-  "learned": [
-    {"label": "The insight", "detail": "First observation"},
-    {"label": "The principle", "detail": "The general rule"},
-    {"label": "TAKEAWAY", "detail": "What you should do differently", "result": true}
-  ]
-}
-"""
-
-
-def generate_newsletter_content(client, topic: dict) -> dict:
-    """Ask the LLM to produce Built/Broke/Learned content for the newsletter diagram."""
-    log.info(f"Generating newsletter content for: {topic['name']}")
-    prompt = (
-        f"Topic: {topic['name']}\n"
-        f"Context: {topic.get('prompt', topic['name'])}\n\n"
-        "Produce the Built/Broke/Learned newsletter sections for this topic. "
-        "The 'built' section shows what was built or how it works. "
-        "The 'broke' section shows a common mistake or pitfall with this topic. "
-        "The 'learned' section gives the key professional insight. "
-        "Make it concrete, specific, and useful for a developer audience."
-    )
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            max_tokens=800,
-            messages=[
-                {"role": "system", "content": NEWSLETTER_SYSTEM_PROMPT},
-                {"role": "user",   "content": prompt},
-            ]
-        )
-        raw = response.choices[0].message.content.strip()
-        # Strip markdown fences if present
-        import re
-        raw = re.sub(r'^```[a-z]*\n?', '', raw, flags=re.MULTILINE)
-        raw = re.sub(r'\n?```$', '', raw, flags=re.MULTILINE)
-        data = json.loads(raw)
-        log.info("Newsletter content generated successfully")
-        return data
-    except Exception as e:
-        log.warning(f"Newsletter content generation failed: {e} — using fallback")
-        # Fallback: minimal content so the diagram still renders
-        return {
-            "title": f"Building with {topic['name']}",
-            "built":   [{"label": topic['name'], "detail": "Core concept implemented"},
-                        {"label": "RESULT", "detail": "System running as expected", "result": True}],
-            "broke":   [{"label": "Common pitfall", "detail": "Missed edge case"},
-                        {"label": "FIXED", "detail": "Added validation + tests", "result": True}],
-            "learned": [{"label": "Key insight", "detail": "Understanding the tradeoffs"},
-                        {"label": "TAKEAWAY", "detail": "Test the unhappy path first", "result": True}],
-        }
 
 
 def generate_post(client, topic: dict) -> str:
@@ -190,28 +116,11 @@ Include real commands, steps, or concepts — not placeholders.
     return raw
 
 
-def run_agent(manual_topic_id: str = None, dry_run: bool = False, newsletter: bool = False):
+def run_agent(manual_topic_id: str = None, dry_run: bool = False):
     """Main agent execution."""
     log.info("=" * 60)
     log.info(f"LinkedIn Agent starting — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    log.info(f"Mode: {'DRY RUN' if dry_run else 'LIVE'} | Manual topic: {manual_topic_id or 'Auto'} | Newsletter diagram: {'ON' if newsletter else 'off'}")
-
-    # ── Auto-detect newsletter day from schedule_config.json ─────────────────
-    # If --newsletter was not explicitly passed, check whether today's schedule
-    # config has newsletter: true. This is set from the dashboard toggle —
-    # no manual intervention needed.
-    if not newsletter:
-        try:
-            import schedule_checker as _sc
-            _cfg    = _sc.load_config()
-            _now    = _sc.utc_now()
-            _daykey = _sc.DAYS[_now.weekday()]
-            _day_cfg = _cfg.get("weekly", {}).get(_daykey, {})
-            if _day_cfg.get("newsletter", False):
-                newsletter = True
-                log.info(f"📰 Auto-enabled newsletter: {_daykey} is marked as a newsletter day in schedule_config.json")
-        except Exception as _e:
-            log.warning(f"Could not auto-detect newsletter day: {_e}")
+    log.info(f"Mode: {'DRY RUN' if dry_run else 'LIVE'} | Manual topic: {manual_topic_id or 'Auto'}")
     log.info("=" * 60)
 
     # Initialize clients
@@ -252,31 +161,11 @@ def run_agent(manual_topic_id: str = None, dry_run: bool = False, newsletter: bo
     diagram_path = diagram_gen.save_svg(svg_content, topic['id'])
     log.info(f"Diagram saved: {diagram_path}")
 
-    # ── Newsletter diagram ────────────────────────────────────────────────────
-    newsletter_diagram_path = None
-    if newsletter:
-        log.info("Newsletter mode ON — generating Built/Broke/Learned diagram...")
-        edition_num = os.environ.get("NEWSLETTER_EDITION")  # optional: set as repo variable
-        nl_data = generate_newsletter_content(client, topic)
-        newsletter_diagram_path = save_newsletter_svg(
-            topic_id   = topic['id'],
-            topic_name = nl_data.get("title", topic['name']),
-            built_steps  = nl_data.get("built",   []),
-            broke_steps  = nl_data.get("broke",   []),
-            learned_steps= nl_data.get("learned", []),
-            edition      = edition_num,
-        )
-        log.info(f"Newsletter diagram saved: {newsletter_diagram_path}")
-
-
     if dry_run:
         log.info("DRY RUN complete — nothing posted to LinkedIn")
-        # Save outputs for review
         with open(f"output_post_{topic['id']}.txt", "w") as f:
             f.write(post_text)
         log.info(f"Post saved to output_post_{topic['id']}.txt")
-        if newsletter_diagram_path:
-            log.info(f"Newsletter diagram (dry run): {newsletter_diagram_path}")
         return
 
     # Post to LinkedIn
@@ -314,7 +203,6 @@ def run_agent(manual_topic_id: str = None, dry_run: bool = False, newsletter: bo
             "post_id": post_id,
             "url": post_url,
             "status": "success",
-            "newsletter_diagram": newsletter_diagram_path or "",
         }
         topic_mgr.save_run_history(history_entry)
     else:
@@ -326,14 +214,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LinkedIn Agent — " + COPYRIGHT)
     parser.add_argument("--topic", type=str, help="Manually specify topic ID", default=None)
     parser.add_argument("--dry-run", action="store_true", help="Generate content but don't post")
-    parser.add_argument("--newsletter", action="store_true", help="Also generate Built/Broke/Learned newsletter diagram")
     parser.add_argument("--list-topics", action="store_true", help="List all available topics")
-    
+
     args = parser.parse_args()
-    
+
     if args.list_topics:
         mgr = TopicManager()
         mgr.list_topics()
         sys.exit(0)
-    
-    run_agent(manual_topic_id=args.topic, dry_run=args.dry_run, newsletter=args.newsletter)
+
+    run_agent(manual_topic_id=args.topic, dry_run=args.dry_run)

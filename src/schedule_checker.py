@@ -79,18 +79,6 @@ def _mark_skip():
             pass
 
 
-def _mark_newsletter():
-    """Write NEWSLETTER_RUN=true to GITHUB_OUTPUT so the agent knows to generate newsletter diagram."""
-    gho = os.environ.get("GITHUB_OUTPUT", "")
-    if gho:
-        try:
-            with open(gho, "a") as fh:
-                fh.write("NEWSLETTER_RUN=true\n")
-            info("📰 Newsletter day — NEWSLETTER_RUN=true written to GITHUB_OUTPUT")
-        except Exception:
-            pass
-
-
 DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]  # weekday() 0=Mon
 
 
@@ -275,14 +263,6 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         info(f"⏭️  {time_ist} IST was {mins_past}m ago — already handled. Exiting.")
         _mark_skip()
         sys.exit(0)
-
-    # ── NEWSLETTER DAY CHECK ──────────────────────────────────────────────────
-    # If today's schedule config has newsletter: true, signal the agent to also
-    # generate the Built/Broke/Learned newsletter diagram alongside the regular post.
-    if day_cfg.get("newsletter", False):
-        _mark_newsletter()
-    else:
-        info("📰 Not a newsletter day — skipping newsletter diagram")
 
 
 # ─── Quick diagnostic (python src/schedule_checker.py) ───────────────────────
