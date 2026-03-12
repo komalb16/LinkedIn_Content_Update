@@ -2529,12 +2529,16 @@ function runDurMs(r) {
 }
 
 function isSkippedRun(r) {
-  // Heartbeat runs (schedule_checker exits without posting) complete in < 5s.
-  // Real posts (Groq + LinkedIn API) take 30–90s. Threshold: 25s.
+  // For schedule (cron) runs: only show runs that actually posted.
+  // A real post always has the bookmark step "✅ Posted · TOPIC" in its jobs.
+  // Heartbeat/skip runs never reach that step — they're hidden regardless of duration.
+  // _topicCache[r.id] === false means enrichment completed and found no bookmark (= skip).
   if (r.event === 'schedule') {
     if (r.conclusion === 'skipped')   return true;
     if (r.conclusion === 'cancelled') return true;
-    return runDurMs(r) < 25000; // <25s = heartbeat/skip, not a real post
+    if (_topicCache[r.id] === false)  return true;   // enriched, no bookmark = heartbeat
+    // Not yet enriched — show for now, enrichRunTopics will re-filter after fetching
+    return false;
   }
   // workflow_dispatch (manual): only hide explicit skips
   if (r.conclusion === 'skipped') return true;
@@ -2633,48 +2637,68 @@ function renderRuns(runs) {
 const _topicCache = {};
 
 async function enrichRunTopics(runs) {
+  // Fetch job steps for runs that haven't been enriched yet.
+  // For schedule runs we MUST enrich to know if they posted (bookmark step present) or were heartbeats.
+  // For manual runs we enrich to extract the topic name.
   const toFetch = runs.filter(r =>
     r.conclusion === 'success' &&
-    !_topicCache[r.id] &&
-    !getTopicFromRun(r)
-  ).slice(0, 15);
+    _topicCache[r.id] === undefined   // not yet fetched
+  ).slice(0, 20);
   if (!toFetch.length) return;
+
   await Promise.all(toFetch.map(async r => {
     try {
       const resp = await gh('/repos/' + REPO + '/actions/runs/' + r.id + '/jobs');
-      if (!resp.ok) return;
+      if (!resp.ok) { _topicCache[r.id] = false; return; }
       const data = await resp.json();
+      let found = false;
       for (const job of (data.jobs || [])) {
         for (const step of (job.steps || [])) {
           const sn = step.name || '';
-          // Bookmark step is named like "bookmark_pin TOPIC_NAME"
+          // Primary: new bookmark step "✅ Posted · TOPIC_NAME"
+          if (sn.startsWith('✅ Posted ·')) {
+            const topic = sn.replace('✅ Posted ·', '').trim();
+            _topicCache[r.id] = (topic && topic !== 'auto-topic') ? topic : '__posted__';
+            found = true;
+            break;
+          }
+          // Legacy fallback: old bookmark_pin or TOPIC: patterns
           if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
             const topic = sn.replace('TOPIC:', '').replace(/^bookmark_pin /, '').trim();
             if (topic && topic !== 'auto' && topic !== 'auto-topic') {
               _topicCache[r.id] = topic;
+              found = true;
+              break;
             }
           }
         }
+        if (found) break;
       }
-    } catch(e) {}
+      // Mark as enriched-but-no-bookmark (heartbeat schedule run)
+      if (!found) _topicCache[r.id] = false;
+    } catch(e) {
+      _topicCache[r.id] = false;
+    }
   }));
   applyRunFilter();
 }
 
 function getTopicFromRun(r) {
-  if (_topicCache[r.id]) return _topicCache[r.id];
-  // Priority 1: run-name set by YAML e.g. "LinkedIn Agent · Manual · kubernetes"
-  const runName = r.name || r.display_title || '';
-  const parts   = runName.split('·').map(s => s.trim());
-  const topicPart = parts.length >= 3 ? parts[parts.length - 1] : '';
+  const cached = _topicCache[r.id];
+  // false = enriched, no topic (heartbeat); undefined = not yet fetched
+  if (cached && cached !== '__posted__') return cached;
+
+  // Fallback: parse run-name set by workflow  e.g. "🖱️ Manual · kubernetes-mastery"
+  const runName  = r.name || r.display_title || '';
+  const parts    = runName.split('·').map(s => s.trim());
+  const topicPart = parts.length >= 2 ? parts[parts.length - 1] : '';
   if (topicPart && topicPart !== 'auto-topic' && topicPart.length > 2) {
-    // Prettify known IDs
     for (const [id, name] of Object.entries(TNAMES)) {
       if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
     }
     return topicPart.charAt(0).toUpperCase() + topicPart.slice(1);
   }
-  // Priority 2: scan full title against known topic IDs/names
+  // Scan full title against known topic IDs
   const title = runName.toLowerCase();
   for (const [id, name] of Object.entries(TNAMES)) {
     if (title.includes(id) || title.includes(name.toLowerCase())) return name;
@@ -2710,11 +2734,11 @@ async function loadStats() {
     const d = await r.json();
     const runs = d.workflow_runs || [];
 
-    // "LinkedIn posts" = non-cron, non-skipped runs only.
-    // isSkippedRun already excludes every schedule event + skipped/fast-cancel.
-    const postRuns = runs.filter(r => !isSkippedRun(r));
+    // Trigger enrichment so schedule heartbeats get marked _topicCache[id] = false
+    await enrichRunTopics(runs.filter(r => _topicCache[r.id] === undefined).slice(0, 20));
 
-    // Successful posts = run reached LinkedIn and the API accepted the post.
+    // Real posts = runs not filtered by isSkippedRun
+    const postRuns   = runs.filter(r => !isSkippedRun(r));
     const postedRuns = postRuns.filter(r => r.conclusion === 'success');
 
     // This-week posts
