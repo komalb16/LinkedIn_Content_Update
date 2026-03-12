@@ -9,7 +9,7 @@ No server. No cloud bill. No code changes required.
 ## ✨ What it does
 
 - Generates a professional LinkedIn post + a custom technical diagram every time it runs.
-- Runs on a schedule you control (default: twice daily)
+- Runs on a schedule you control (default: twice daily).
 - Posts directly to your LinkedIn via their API
 - Dashboard to monitor posts, trigger manually, and change topics — works on mobile as a PWA
 
