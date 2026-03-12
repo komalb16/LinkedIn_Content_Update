@@ -50,7 +50,6 @@ on:
         options:
           - "false"
           - "true"
-          # newsletter is now automatic — set per-day in the dashboard schedule grid
 
 # ─── Job ─────────────────────────────────────────────────────────────────────
 jobs:
@@ -106,27 +105,18 @@ jobs:
           # to personalise post signatures and diagram watermarks.
           # Falls back to your GitHub username automatically if not set.
           AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
-          # Optional: set NEWSLETTER_EDITION as a repo variable to stamp edition number on diagrams
-          NEWSLETTER_EDITION: ${{ vars.NEWSLETTER_EDITION || '' }}
-          # GH_EVENT_NAME lets schedule_checker detect manual vs cron triggers without a flag
           GH_EVENT_NAME: ${{ github.event_name }}
         run: |
           ARGS=""
-          
-          # Add --topic flag if manually specified
+
           if [ -n "${{ github.event.inputs.topic_id }}" ]; then
             ARGS="$ARGS --topic ${{ github.event.inputs.topic_id }}"
           fi
-          
-          # Add --dry-run flag if requested
+
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
 
-          # --newsletter is NOT a manual input anymore.
-          # agent.py auto-detects newsletter day from schedule_config.json (set in dashboard).
-          # No flags needed — the schedule drives everything.
-          
           python agent.py $ARGS
 
       # 7. Upload diagrams as artifacts (always, even on failure)

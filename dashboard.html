@@ -228,9 +228,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .day-toggle{width:36px;height:36px;border-radius:50%;border:2px solid var(--bd);background:var(--bg2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);color:var(--txd)}
 .day-toggle.on{border-color:var(--acc);background:rgba(14,165,233,0.12);color:var(--acc)}
 .day-toggle:hover{border-color:var(--bds)}
-.nl-toggle{width:100%;padding:3px 4px;border-radius:8px;border:1.5px solid var(--bd);background:var(--bg2);cursor:pointer;font-size:9px;color:var(--txd);transition:all var(--tr);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nl-toggle.nl-on{border-color:#a855f7;background:rgba(168,85,247,0.13);color:#a855f7;font-weight:700}
-.nl-toggle:hover{border-color:var(--bds)}
 /* ── TIME CONTROL (clean & readable on all themes) ── */
 .time-ctrl{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%}
 .time-btn{width:28px;height:20px;background:var(--sur3);border:1.5px solid var(--bd);border-radius:6px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txm);transition:all var(--tr);padding:0;line-height:1}
@@ -2531,18 +2528,13 @@ function runDurMs(r) {
   return new Date(r.updated_at) - new Date(r.created_at);
 }
 
-function runDurMs(r) {
-  if (!r.updated_at || !r.created_at) return 0;
-  return new Date(r.updated_at) - new Date(r.created_at);
-}
-
 function isSkippedRun(r) {
-  // Only hide cron heartbeats — no-op runs that exited before posting.
-  // Real posts (manual OR scheduled) take ≥2 min → keep them.
+  // Heartbeat runs (schedule_checker exits without posting) complete in < 5s.
+  // Real posts (Groq + LinkedIn API) take 30–90s. Threshold: 25s.
   if (r.event === 'schedule') {
     if (r.conclusion === 'skipped')   return true;
     if (r.conclusion === 'cancelled') return true;
-    return runDurMs(r) < 120000; // <2 min = heartbeat, not a real post
+    return runDurMs(r) < 25000; // <25s = heartbeat/skip, not a real post
   }
   // workflow_dispatch (manual): only hide explicit skips
   if (r.conclusion === 'skipped') return true;
@@ -2714,7 +2706,7 @@ function getModeFromRun(r) {
 async function loadStats() {
   if (!REPO) return;
   try {
-    const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100');
+    const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100&status=completed');
     const d = await r.json();
     const runs = d.workflow_runs || [];
 
@@ -2905,14 +2897,9 @@ function buildDayGrid() {
   DAYS.forEach((day, i) => {
     const cfg = schedConfig.weekly[day] || {enabled: true, time_utc: '09:00'};
     const on = cfg.enabled && !schedConfig.paused;
-    const nlOn = cfg.newsletter === true;
-    // Stored as UTC — convert to local timezone for display
-    // Prefer time_local (DST-aware wall-clock) → fallback to time_utc → legacy time_ist
     let displayLocal;
     if (cfg.time_local) {
-      // Wall-clock time stored directly — show as-is if timezone matches, else convert
       if (cfg.time_tz && cfg.time_tz !== userTZ) {
-        // Saved in a different timezone — convert wall-clock through UTC
         const savedUtc = wallClockToUtc(cfg.time_local, cfg.time_tz);
         displayLocal = utcTimeToLocal(savedUtc);
       } else {
@@ -2935,13 +2922,7 @@ function buildDayGrid() {
         <button class="time-btn" onclick="adjDayTime('${day}',15)">▲</button>
         <input type="text" class="time-val" id="tmval-${day}" value="${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}" maxlength="5" placeholder="HH:MM" oninput="onTimeInput('${day}',this)" onblur="onTimeBlur('${day}',this)" onkeydown="onTimeKey(event,'${day}',this)" />
         <button class="time-btn" onclick="adjDayTime('${day}',-15)">▼</button>
-      </div>
-      <button
-        class="nl-toggle ${nlOn ? 'nl-on' : ''}"
-        id="nltog-${day}"
-        onclick="toggleNewsletter('${day}')"
-        title="${nlOn ? 'Newsletter diagram ON — click to turn off' : 'Click to generate newsletter diagram on this day'}"
-      >📰 ${nlOn ? 'Newsletter ON' : 'Newsletter'}</button>`;
+      </div>`;
     grid.appendChild(col);
   });
 }
@@ -3008,15 +2989,6 @@ function toggleDay(day) {
   schedConfig.weekly[day].enabled = !schedConfig.weekly[day].enabled;
   buildDayGrid();
   updNext();
-}
-
-function toggleNewsletter(day) {
-  // Toggle newsletter flag for this day — saved to schedule_config.json on Save Schedule
-  const current = schedConfig.weekly[day].newsletter === true;
-  schedConfig.weekly[day].newsletter = !current;
-  buildDayGrid();
-  const state = schedConfig.weekly[day].newsletter ? 'ON' : 'OFF';
-  toast(`📰 Newsletter diagram ${state} for ${day.charAt(0).toUpperCase()+day.slice(1)} — click Save Schedule to persist`, 'ok');
 }
 
 function adjDayTime(day, deltaMin) {
