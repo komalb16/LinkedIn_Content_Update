@@ -4,11 +4,16 @@ name: 🤖 LinkedIn Agent
 on:
   # Scheduled: twice daily at 9 AM and 6 PM IST (3:30 UTC and 12:30 UTC)
   schedule:
-    # Two fixed triggers per day — one for a morning post, one for evening.
-    # schedule_checker.py sleeps until the exact per-day time set in the dashboard.
-    # If your posting time is anywhere in that half-day, it will be caught.
-    - cron: "0 1 * * *"   # 1 AM UTC = 6:30 AM IST  (catches morning posts)
-    - cron: "0 12 * * *"  # 12 PM UTC = 5:30 PM IST  (catches evening posts)
+    # Three evenly-spaced triggers (every 8h). schedule_checker sleeps up to 4h
+    # after firing, so any posting time you set in the dashboard is covered.
+    #
+    # Coverage (EDT = UTC-4, 4h window each):
+    #   06:00 UTC → catches  2 AM –  6 AM EDT  (overnight/early)
+    #   14:00 UTC → catches 10 AM –  2 PM EDT  (morning window) ✓
+    #   22:00 UTC → catches  6 PM – 10 PM EDT  (evening window) ✓
+    - cron: "0 6  * * *"  #  6 AM UTC =  2 AM EDT
+    - cron: "0 14 * * *"  #  2 PM UTC = 10 AM EDT  ← morning posts
+    - cron: "0 22 * * *"  # 10 PM UTC =  6 PM EDT  ← evening posts
 
   # Manual trigger from GitHub UI — with optional inputs
   workflow_dispatch:
@@ -45,6 +50,7 @@ on:
         options:
           - "false"
           - "true"
+          # newsletter is now automatic — set per-day in the dashboard schedule grid
 
 # ─── Job ─────────────────────────────────────────────────────────────────────
 jobs:
@@ -90,6 +96,7 @@ jobs:
 
       # 6. Run the agent
       - name: 🚀 Run LinkedIn Agent
+        id: run_agent
         working-directory: src
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -99,6 +106,10 @@ jobs:
           # to personalise post signatures and diagram watermarks.
           # Falls back to your GitHub username automatically if not set.
           AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
+          # Optional: set NEWSLETTER_EDITION as a repo variable to stamp edition number on diagrams
+          NEWSLETTER_EDITION: ${{ vars.NEWSLETTER_EDITION || '' }}
+          # GH_EVENT_NAME lets schedule_checker detect manual vs cron triggers without a flag
+          GH_EVENT_NAME: ${{ github.event_name }}
         run: |
           ARGS=""
           
@@ -111,6 +122,10 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
+
+          # --newsletter is NOT a manual input anymore.
+          # agent.py auto-detects newsletter day from schedule_config.json (set in dashboard).
+          # No flags needed — the schedule drives everything.
           
           python agent.py $ARGS
 
@@ -137,7 +152,40 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: update topic history [skip ci]"
           git push || true
 
-      # 9. Notify on failure
+      # 9. Update GitHub Profile README with latest post  (#18)
+      - name: 📝 Update GitHub Profile README
+        if: success() && github.event.inputs.dry_run != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          POST_TOPIC:   ${{ steps.run_agent.outputs.POSTED_TOPIC }}
+          POST_DATE:    ${{ steps.run_agent.outputs.POSTED_DATE }}
+          LINKEDIN_POST_URL: ${{ steps.run_agent.outputs.POSTED_URL }}
+          # Notification channels (same as used by notifier.py)
+          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL }}
+          NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS }}
+          NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL }}
+          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python src/update_profile_readme.py || echo "::warning::Profile README update failed (non-fatal)"
+
+      # 10. Check LinkedIn token expiry  (#15)
+      - name: 🔐 Check Token Expiry
+        if: always()
+        env:
+          LINKEDIN_TOKEN_DATE: ${{ secrets.LINKEDIN_TOKEN_DATE }}
+          # Notification channels
+          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL }}
+          NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS }}
+          NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL }}
+          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python src/check_token_expiry.py
+
+      # 11. Notify on failure
       - name: ❌ Notify on Failure
         if: failure()
         run: |
