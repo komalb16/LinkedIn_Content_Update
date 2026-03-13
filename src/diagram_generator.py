@@ -1,15 +1,44 @@
+"""
+diagram_generator.py — visually varied SVG diagrams for LinkedIn posts.
+
+8 distinct layout styles (selected deterministically per topic so the same
+topic always gets the same style, but adjacent topics look completely different):
+
+  0  VERTICAL FLOW      — numbered step-by-step pipeline (tall nodes, arrows)
+  1  MIND MAP           — central hub with radiating branches + sub-leaves
+  2  PYRAMID / FUNNEL   — stacked trapezoids, widest at base
+  3  TIMELINE           — horizontal spine with alternating milestone cards
+  4  HEXAGON GRID       — honeycomb cells for concept clusters
+  5  COMPARISON TABLE   — side-by-side matrix with coloured headers
+  6  CIRCULAR ORBIT     — central circle surrounded by satellite bubbles
+  7  CARD GRID          — the original style (kept as variety, not the default)
+"""
+
 import os
+import math
+import hashlib
 from datetime import datetime
-import os as _os
-
-# Author shown in diagram footer — reads from env var set by workflow
-_DIAGRAM_AUTHOR = _os.environ.get("AUTHOR_NAME") or _os.environ.get("GITHUB_ACTOR") or "Author"
 from pathlib import Path
-from logger import get_logger
 
-log = get_logger("diagrams")
+try:
+    import os as _os
+    _DIAGRAM_AUTHOR = _os.environ.get("AUTHOR_NAME") or _os.environ.get("GITHUB_ACTOR") or "Author"
+except Exception:
+    _DIAGRAM_AUTHOR = "Author"
+
+try:
+    from logger import get_logger
+    log = get_logger("diagrams")
+except Exception:
+    class _L:
+        def info(self, m): print("[diagrams]", m)
+        def warning(self, m): print("[diagrams] WARN", m)
+        def error(self, m): print("[diagrams] ERR", m)
+    log = _L()
+
 OUTPUT_DIR = "diagrams"
 
+# ── Colour palettes ────────────────────────────────────────────────────────────
 PALETTES = {
     "ai":       ["#7C3AED","#2563EB","#059669","#D97706","#DB2777","#0891B2"],
     "cloud":    ["#2563EB","#0891B2","#059669","#7C3AED","#D97706","#DB2777"],
@@ -20,19 +49,17 @@ PALETTES = {
 }
 
 def get_pal(tid):
-    t=tid.lower()
-    if any(x in t for x in ["llm","rag","agent","mlops"]): return PALETTES["ai"]
-    if any(x in t for x in ["kube","docker","aws","cicd"]): return PALETTES["cloud"]
-    if any(x in t for x in ["zero","devsec"]):              return PALETTES["security"]
-    if any(x in t for x in ["kafka","data","lake"]):        return PALETTES["data"]
-    if any(x in t for x in ["git","devops","solid","api"]): return PALETTES["devops"]
+    t = tid.lower()
+    if any(x in t for x in ["llm","rag","agent","mlops","ai"]): return PALETTES["ai"]
+    if any(x in t for x in ["kube","docker","aws","cicd","cloud"]): return PALETTES["cloud"]
+    if any(x in t for x in ["zero","devsec","security"]): return PALETTES["security"]
+    if any(x in t for x in ["kafka","data","lake","lakehouse"]): return PALETTES["data"]
+    if any(x in t for x in ["git","devops","solid","api","cicd"]): return PALETTES["devops"]
     return PALETTES["default"]
 
-def xe(t):
-    return str(t).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
-
-def clamp(text, n):
-    text=str(text); return text if len(text)<=n else text[:n-1]+"..."
+# ── Utilities ──────────────────────────────────────────────────────────────────
+def xe(t): return str(t).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+def clamp(text, n): text=str(text); return text if len(text)<=n else text[:n-1]+"..."
 
 def rgba(hex_color, alpha):
     h=hex_color.lstrip("#"); r,g,b=int(h[0:2],16),int(h[2:4],16),int(h[4:6],16)
@@ -47,7 +74,7 @@ def darken(hex_color, pct=0.25):
     h=hex_color.lstrip("#"); r,g,b=int(h[0:2],16),int(h[2:4],16),int(h[4:6],16)
     return f"#{int(r*(1-pct)):02X}{int(g*(1-pct)):02X}{int(b*(1-pct)):02X}"
 
-def wrap_text(text, max_chars):
+def wrap_lines(text, max_chars):
     words=text.split(); lines=[]; cur=""
     for w in words:
         if len(cur)+len(w)+1<=max_chars: cur=(cur+" "+w).strip()
@@ -57,983 +84,936 @@ def wrap_text(text, max_chars):
     if cur: lines.append(cur)
     return lines or [""]
 
-# ── CSS ANIMATIONS ─────────────────────────────────────────────────────────────
-ANIM_CSS = """
-  <style>
-    @keyframes flowRight {
-      0%   { stroke-dashoffset: 24; }
-      100% { stroke-dashoffset: 0;  }
-    }
-    @keyframes flowDown {
-      0%   { stroke-dashoffset: 24; }
-      100% { stroke-dashoffset: 0;  }
-    }
-    @keyframes pulse {
-      0%,100% { opacity:1; r:5; }
-      50%      { opacity:0.6; r:7; }
-    }
-    @keyframes fadeIn {
-      from { opacity:0; transform:translateY(4px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    @keyframes shimmer {
-      0%   { stop-color: #fff; stop-opacity:0; }
-      50%  { stop-color: #fff; stop-opacity:0.08; }
-      100% { stop-color: #fff; stop-opacity:0; }
-    }
-    .flow-r { stroke-dasharray:8 4; animation:flowRight 1.2s linear infinite; }
-    .flow-d { stroke-dasharray:8 4; animation:flowDown  1.2s linear infinite; }
-    .pulse-dot { animation:pulse 2s ease-in-out infinite; }
-    .fadein { animation:fadeIn 0.6s ease-out both; }
-  </style>
-"""
+# ── Shared CSS animations ──────────────────────────────────────────────────────
+ANIM = """<style>
+  @keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fr{0%{stroke-dashoffset:24}100%{stroke-dashoffset:0}}
+  @keyframes pu{0%,100%{opacity:1}50%{opacity:0.55}}
+  .fi{animation:fd .5s ease-out both}
+  .flow{stroke-dasharray:8 4;animation:fr 1.4s linear infinite}
+  .pu{animation:pu 2.2s ease-in-out infinite}
+</style>"""
 
-# ── ANIMATED ARROW ─────────────────────────────────────────────────────────────
-def arrow_down(ax, ay1, ay2, color, delay=0):
-    mid = (ay1+ay2)//2
-    tip = ay2+8
-    ds = f"animation-delay:{delay:.1f}s" if delay else ""
-    return (
-        f'<line x1="{ax}" y1="{ay1}" x2="{ax}" y2="{ay2}" '
-        f'stroke="{color}" stroke-width="2.5" class="flow-d" style="{ds}" opacity="0.9"/>'
-        f'<polygon points="{ax-6},{ay2} {ax+6},{ay2} {ax},{tip}" fill="{color}" opacity="0.9"/>'
-        f'<circle cx="{ax}" cy="{mid}" r="3.5" fill="{color}" class="pulse-dot" style="animation-delay:{delay+0.3:.1f}s" opacity="0.7"/>'
-    )
+# ── Common footer / header wrapper ─────────────────────────────────────────────
+def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
+    dark_hdr = darken(accent, 0.55)
+    mid_hdr  = darken(accent, 0.35)
+    foot_bg  = lighten(accent, 0.95) if not dark else "#0D1117"
+    foot_bdr = "#E2E8F0" if not dark else rgba(accent, 0.35)
+    foot_txt = "#94A3B8"
 
-def arrow_right(ax1, ax2, ay, color, delay=0):
-    ds = f"animation-delay:{delay:.1f}s" if delay else ""
-    return (
-        f'<line x1="{ax1}" y1="{ay}" x2="{ax2}" y2="{ay}" '
-        f'stroke="{color}" stroke-width="2" class="flow-r" style="{ds}" opacity="0.85"/>'
-        f'<polygon points="{ax2},{ay-5} {ax2+9},{ay} {ax2},{ay+5}" fill="{color}" opacity="0.85"/>'
-    )
-
-# ── NUMBERED ROW (like Azure AI Ecosystem image) ─────────────────────────────
-def numbered_row(ry, row_h, num, label, sublabel, color, cards, total_w=900, pad=18):
-    """Left: numbered label. Right: card area. Returns (svg, next_y)."""
-    LEFT_W = 165
-    RIGHT_X = LEFT_W + 24
-    RIGHT_W = total_w - RIGHT_X - pad
-    CARD_AREA_Y = ry + 8
-    CARD_H = row_h - 16
-
-    bg = lighten(color, 0.88)
-    border = lighten(color, 0.6)
-
-    s = ""
-    # Row background
-    s += f'<rect x="{pad}" y="{ry}" width="{total_w-pad*2}" height="{row_h}" rx="12" fill="{bg}" stroke="{border}" stroke-width="1.2" class="fadein"/>'
-
-    # Left label area
-    s += f'<circle cx="{pad+22}" cy="{ry+row_h//2}" r="14" fill="{color}" class="fadein"/>'
-    s += f'<text x="{pad+22}" y="{ry+row_h//2+5}" text-anchor="middle" fill="white" font-size="13" font-weight="900" font-family="Arial,sans-serif">{num}</text>'
-    s += f'<text x="{pad+42}" y="{ry+row_h//2-4}" fill="{darken(color,0.1)}" font-size="11" font-weight="800" font-family="Arial,sans-serif">{xe(label)}</text>'
-    if sublabel:
-        s += f'<text x="{pad+42}" y="{ry+row_h//2+10}" fill="{darken(color,0.2)}" font-size="8.5" font-family="Arial,sans-serif" font-style="italic">{xe(sublabel)}</text>'
-
-    # Animated connector line
-    s += arrow_right(LEFT_W+pad-4, RIGHT_X+pad-8, ry+row_h//2, color)
-
-    # Cards on the right
-    n = len(cards)
-    # Solve so last card right edge == total_w - pad:
-    # RIGHT_X+pad + (n-1)*(cw+6) + cw = total_w - pad
-    # n*cw = (total_w - pad) - (RIGHT_X+pad) - (n-1)*6
-    avail_for_cards = (total_w - pad) - (RIGHT_X + pad) - (n-1)*6
-    cw = max(60, avail_for_cards // n)
-    for i, (title, sub) in enumerate(cards):
-        cx = RIGHT_X + pad + i*(cw+6)
-        cy = CARD_AREA_Y
-        ch = CARD_H
-        c2 = f'#{int(int(color.lstrip("#")[0:2],16)*0.95):02X}{int(int(color.lstrip("#")[2:4],16)*0.95):02X}FF' if i==0 else color
-        col = PALETTES["default"][i % 6]
-
-        # Card shadow effect
-        s += f'<rect x="{cx+2}" y="{cy+2}" width="{cw}" height="{ch}" rx="9" fill="rgba(0,0,0,0.06)"/>'
-        # Card body
-        s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="9" fill="white" stroke="{lighten(col,0.5)}" stroke-width="1.5" class="fadein"/>'
-        # Top accent bar
-        s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="4" rx="2" fill="{col}"/>'
-        # Title
-        tf = min(10, max(8, cw//9))
-        df = min(8.5, max(7, cw//11))
-        s += f'<text x="{cx+cw//2}" y="{cy+ch//2}" text-anchor="middle" fill="{darken(col,0.05)}" font-size="{tf}" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(title, cw//5))}</text>'
-        if sub and ch >= 30:
-            s += f'<text x="{cx+cw//2}" y="{cy+ch//2+12}" text-anchor="middle" fill="#64748B" font-size="{df}" font-family="Arial,sans-serif">{xe(clamp(sub, cw//4))}</text>'
-
-    return s, ry + row_h
-
-# ── PHASE PIPELINE (like CI/CD steps) ─────────────────────────────────────────
-def pipeline_phases(sy, phases, color_list, pad=18, total_w=900):
-    """Horizontal numbered pipeline with animated flow arrows."""
-    n = len(phases)
-    pw = (total_w - pad*2 - (n-1)*10) // n
-    ph = 140
-    s = ""
-    for i, (env, title, sub) in enumerate(phases):
-        col = color_list[i % len(color_list)]
-        bx = pad + i*(pw+10)
-        bg = lighten(col, 0.87)
-        s += f'<rect x="{bx+2}" y="{sy+2}" width="{pw}" height="{ph}" rx="10" fill="rgba(0,0,0,0.05)"/>'
-        s += f'<rect x="{bx}" y="{sy}" width="{pw}" height="{ph}" rx="10" fill="{bg}" stroke="{lighten(col,0.5)}" stroke-width="1.5" class="fadein" style="animation-delay:{i*0.08:.2f}s"/>'
-        # Top band
-        s += f'<rect x="{bx}" y="{sy}" width="{pw}" height="26" rx="10" fill="{col}"/>'
-        s += f'<rect x="{bx}" y="{sy+18}" width="{pw}" height="8" fill="{col}"/>'
-        s += f'<text x="{bx+pw//2}" y="{sy+17}" text-anchor="middle" fill="white" font-size="9" font-weight="800" font-family="Arial,sans-serif" letter-spacing="0.8">{xe(env.upper())}</text>'
-        # Step number
-        s += f'<circle cx="{bx+pw//2}" cy="{sy+55}" r="16" fill="{rgba(col,0.12)}" stroke="{lighten(col,0.4)}" stroke-width="1.5"/>'
-        s += f'<text x="{bx+pw//2}" y="{sy+61}" text-anchor="middle" fill="{col}" font-size="18" font-weight="900" font-family="Arial,sans-serif">{i+1}</text>'
-        s += f'<text x="{bx+pw//2}" y="{sy+88}" text-anchor="middle" fill="#1E293B" font-size="9" font-weight="700" font-family="Arial,sans-serif">{xe(clamp(title,pw//5))}</text>'
-        s += f'<text x="{bx+pw//2}" y="{sy+102}" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{xe(clamp(sub,pw//4))}</text>'
-        # Arrow to next
-        if i < n-1:
-            s += arrow_right(bx+pw+1, bx+pw+9, sy+ph//2, col, delay=i*0.1)
-    return s, sy+ph
-
-# ── BRANCH COLUMNS (git workflow) ─────────────────────────────────────────────
-def branch_columns(sy, branches, pad=18, total_w=900):
-    n = len(branches); bw = (total_w-pad*2-4*(n-1))//n; bh = 155
-    s = ""
-    for i,(name,role,deploy,col) in enumerate(branches):
-        bx = pad+i*(bw+4); bg=lighten(col,0.88)
-        s += f'<rect x="{bx+2}" y="{sy+2}" width="{bw}" height="{bh}" rx="10" fill="rgba(0,0,0,0.05)"/>'
-        s += f'<rect x="{bx}" y="{sy}" width="{bw}" height="{bh}" rx="10" fill="{bg}" stroke="{lighten(col,0.5)}" stroke-width="1.5" class="fadein" style="animation-delay:{i*0.07:.2f}s"/>'
-        s += f'<rect x="{bx}" y="{sy}" width="{bw}" height="24" rx="10" fill="{col}"/>'
-        s += f'<rect x="{bx}" y="{sy+16}" width="{bw}" height="8" fill="{col}"/>'
-        s += f'<text x="{bx+bw//2}" y="{sy+16}" text-anchor="middle" fill="white" font-size="9" font-weight="800" font-family="Arial,sans-serif">{xe(name)}</text>'
-        s += f'<text x="{bx+bw//2}" y="{sy+62}" text-anchor="middle" fill="{col}" font-size="26" font-weight="900" font-family="Arial,sans-serif">{name[0].upper()}</text>'
-        s += f'<text x="{bx+bw//2}" y="{sy+86}" text-anchor="middle" fill="#1E293B" font-size="9" font-weight="700" font-family="Arial,sans-serif">{xe(clamp(role,bw//5))}</text>'
-        s += f'<text x="{bx+bw//2}" y="{sy+100}" text-anchor="middle" fill="#64748B" font-size="8" font-family="Arial,sans-serif">{xe(clamp(deploy,bw//4))}</text>'
-        # Badge
-        badge_col = "#DC2626" if i<2 else "#D97706"
-        badge_txt = "protected" if i<2 else "PR required"
-        s += f'<rect x="{bx+6}" y="{sy+bh-24}" width="{bw-12}" height="17" rx="8" fill="{rgba(badge_col,0.12)}" stroke="{badge_col}" stroke-width="1"/>'
-        s += f'<text x="{bx+bw//2}" y="{sy+bh-12}" text-anchor="middle" fill="{badge_col}" font-size="7.5" font-weight="700" font-family="Arial,sans-serif">{badge_txt}</text>'
-    return s, sy+bh
-
-# ── CHEAT-ROW (docker layers etc) ─────────────────────────────────────────────
-def cheatrow(ry, rh, label, color, items, pad=18, total_w=900):
-    lw = max(90, len(label)*9+20); bg=lighten(color,0.88)
-    s  = f'<rect x="{pad}" y="{ry}" width="{total_w-pad*2}" height="{rh}" rx="8" fill="{bg}" stroke="{lighten(color,0.55)}" stroke-width="1.2"/>'
-    s += f'<rect x="{pad}" y="{ry}" width="{lw}" height="{rh}" rx="8" fill="{color}"/>'
-    s += f'<rect x="{pad+lw-8}" y="{ry}" width="8" height="{rh}" fill="{color}"/>'
-    s += f'<text x="{pad+lw//2}" y="{ry+rh//2+4}" text-anchor="middle" fill="white" font-size="{min(10,max(8,lw//9))}" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label,lw//5))}</text>'
-    gx=pad+lw+8; avail=total_w-pad-gx-pad; n=len(items); cw=max(50,avail//n-4)
-    for i,item in enumerate(items):
-        t2=item[1] if len(item)>1 else ""; sub=item[2] if len(item)>2 else ""; cx2=gx+i*(cw+4)
-        col2=PALETTES["default"][i%6]
-        s += f'<rect x="{cx2}" y="{ry+3}" width="{cw}" height="{rh-6}" rx="7" fill="white" stroke="{lighten(col2,0.4)}" stroke-width="1"/>'
-        s += f'<rect x="{cx2}" y="{ry+3}" width="{cw}" height="3" rx="1" fill="{col2}"/>'
-        s += f'<text x="{cx2+cw//2}" y="{ry+rh//2}" text-anchor="middle" fill="{darken(col2,0.05)}" font-size="{min(10,max(8,cw//7))}" font-weight="700" font-family="Arial,sans-serif">{xe(clamp(t2,cw//4))}</text>'
-        if sub and rh>=44:
-            s += f'<text x="{cx2+cw//2}" y="{ry+rh-10}" text-anchor="middle" fill="#64748B" font-size="{min(8,max(6,cw//9))}" font-family="Arial,sans-serif">{xe(clamp(sub,cw//4))}</text>'
-    return s
-
-# ── SECTION HEADER + CARDS ─────────────────────────────────────────────────────
-# ── THEME-AWARE PRIMITIVES ────────────────────────────────────────────────────
-# All drawing helpers read _DARK at call time so make_diagram can toggle once.
-_DARK = False   # set by make_diagram()
-_MID  = False   # mid-theme: tinted canvas, deeper card colors before calling diagram builders
-
-def _card_bg():       return "#1E293B" if _DARK else "white"
-def _card_border(c):  return lighten(c, 0.25) if _DARK else lighten(c, 0.45)
-def _txt_main(c):     return lighten(c, 0.75) if _DARK else darken(c, 0.05)
-def _txt_sub():       return "#94A3B8" if _DARK else "#64748B"
-def _sec_bg(c):       return darken(c, 0.62) if _DARK else lighten(c, 0.90)
-def _sec_border(c):   return lighten(c, 0.22) if _DARK else lighten(c, 0.55)
-def _shadow():        return "rgba(0,0,0,0.45)" if _DARK else "rgba(0,0,0,0.05)"
-
-
-def sec(sx, sy, sw, content_h, title, color, subtitle="", pad=0):
-    ht = 26 if not subtitle else 34
-    sh = ht + 3 + content_h + 7
-    bg = lighten(color, 0.90)
-    s  = f'<rect x="{sx+2}" y="{sy+2}" width="{sw}" height="{sh}" rx="10" fill="rgba(0,0,0,0.04)"/>'
-    s += f'<rect x="{sx}" y="{sy}" width="{sw}" height="{sh}" rx="10" fill="{bg}" stroke="{lighten(color,0.55)}" stroke-width="1.5"/>'
-    s += f'<rect x="{sx}" y="{sy}" width="{sw}" height="{ht}" rx="10" fill="{color}"/>'
-    s += f'<rect x="{sx}" y="{sy+ht-8}" width="{sw}" height="8" fill="{color}"/>'
-    s += f'<text x="{sx+14}" y="{sy+17}" fill="white" font-size="10.5" font-weight="800" font-family="Arial,sans-serif" letter-spacing="0.8">{xe(title.upper())}</text>'
-    if subtitle:
-        s += f'<text x="{sx+14}" y="{sy+29}" fill="rgba(255,255,255,0.85)" font-size="8.5" font-family="Arial,sans-serif">{xe(subtitle)}</text>'
-    return s, sy+ht+3, sy+sh
-
-def two_col(sy, lw, rw, content_h, ltitle, lcol, rtitle, rcol, lsub="", rsub="", pad=18):
-    ht=34; sh=ht+3+content_h+7; s=""
-    for sx,sw,title,color,sub in [(pad,lw,ltitle,lcol,lsub),(pad+lw+14,rw,rtitle,rcol,rsub)]:
-        bg     = darken(color, 0.62) if _DARK else lighten(color, 0.90)
-        border = lighten(color, 0.22) if _DARK else lighten(color, 0.55)
-        s += f'<rect x="{sx+2}" y="{sy+2}" width="{sw}" height="{sh}" rx="10" fill="{"rgba(0,0,0,0.45)" if _DARK else "rgba(0,0,0,0.04)"}"/>'
-        s += f'<rect x="{sx}" y="{sy}" width="{sw}" height="{sh}" rx="10" fill="{bg}" stroke="{border}" stroke-width="1.5"/>'
-        s += f'<rect x="{sx}" y="{sy}" width="{sw}" height="{ht}" rx="10" fill="{color}"/>'
-        s += f'<rect x="{sx}" y="{sy+ht-8}" width="{sw}" height="8" fill="{color}"/>'
-        s += f'<text x="{sx+14}" y="{sy+17}" fill="white" font-size="10.5" font-weight="800" font-family="Arial,sans-serif" letter-spacing="0.8">{xe(title.upper())}</text>'
-        if sub:
-            s += f'<text x="{sx+14}" y="{sy+29}" fill="rgba(255,255,255,0.85)" font-size="8.5" font-family="Arial,sans-serif">{xe(sub)}</text>'
-    return s, sy+ht+3, sy+sh
-
-def card(cx, cy, cw, ch, color, title, desc="", rx=8):
-    bg  = "#1E293B" if _DARK else "white"
-    col = color
-    bdr = lighten(col, 0.25) if _DARK else lighten(col, 0.45)
-    txt = lighten(col, 0.75) if _DARK else darken(col, 0.05)
-    sub_txt = "#94A3B8" if _DARK else "#64748B"
-    shd = "rgba(0,0,0,0.5)" if _DARK else "rgba(0,0,0,0.05)"
-    s  = f'<rect x="{cx+1}" y="{cy+1}" width="{cw}" height="{ch}" rx="{rx}" fill="{shd}"/>'
-    s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="{rx}" fill="{bg}" stroke="{bdr}" stroke-width="1.2"/>'
-    s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="4" rx="2" fill="{col}"/>'
-    pad2=cx+8; avail=cw-16
-    tf=min(10,max(8,avail//8)); df=min(8.5,max(7,avail//11))
-    t_cl=xe(clamp(title,max(3,avail//max(1,tf-2))))
-    if desc and ch>=32:
-        max_lines=max(1,(ch-20)//12)
-        s += f'<text x="{pad2}" y="{cy+16}" fill="{txt}" font-size="{tf}" font-weight="700" font-family="Arial,sans-serif">{t_cl}</text>'
-        lines=wrap_text(desc,max(8,avail//max(1,df)))
-        for i,ln in enumerate(lines[:max_lines]):
-            ly=cy+28+i*12
-            if ly+3<=cy+ch:
-                s += f'<text x="{pad2}" y="{ly}" fill="{sub_txt}" font-size="{df}" font-family="Arial,sans-serif">{xe(ln)}</text>'
+    bg_rect = f'<rect width="{W}" height="{H}" fill="url(#BG)"/>'
+    if not dark:
+        dot_pat = (f'<pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">'
+                   f'<circle cx="1" cy="1" r="0.65" fill="{rgba(accent,0.10)}"/></pattern>'
+                   f'<rect width="{W}" height="{H}" fill="url(#dots)"/>')
     else:
-        s += f'<text x="{pad2}" y="{cy+ch//2+4}" fill="{txt}" font-size="{tf}" font-weight="700" font-family="Arial,sans-serif">{t_cl}</text>'
-    return s
+        dot_pat = (f'<pattern id="grid" width="26" height="26" patternUnits="userSpaceOnUse">'
+                   f'<path d="M26 0 L0 0 0 26" fill="none" stroke="{rgba(accent,0.06)}" stroke-width="0.5"/></pattern>'
+                   f'<rect width="{W}" height="{H}" fill="url(#grid)"/>')
 
-def card_centered(cx, cy, cw, ch, color, title, sub="", rx=8):
-    bg  = darken(color, 0.55) if _DARK else lighten(color, 0.88)
-    bdr = lighten(color, 0.25) if _DARK else lighten(color, 0.45)
-    txt = lighten(color, 0.80) if _DARK else darken(color, 0.10)
-    sub_txt = "#94A3B8" if _DARK else "#64748B"
-    shd = "rgba(0,0,0,0.5)" if _DARK else "rgba(0,0,0,0.05)"
-    s  = f'<rect x="{cx+1}" y="{cy+1}" width="{cw}" height="{ch}" rx="{rx}" fill="{shd}"/>'
-    s += f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="{rx}" fill="{bg}" stroke="{bdr}" stroke-width="1.4"/>'
-    mid=cy+ch//2; tf=min(10,max(8,cw//9)); sf=min(8.5,max(7,cw//11))
-    if sub:
-        s += f'<text x="{cx+cw//2}" y="{mid-2}" text-anchor="middle" fill="{txt}" font-size="{tf}" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(title,cw//5))}</text>'
-        s += f'<text x="{cx+cw//2}" y="{mid+12}" text-anchor="middle" fill="{sub_txt}" font-size="{sf}" font-family="Arial,sans-serif">{xe(clamp(sub,cw//4))}</text>'
-    else:
-        s += f'<text x="{cx+cw//2}" y="{mid+4}" text-anchor="middle" fill="{txt}" font-size="{tf}" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(title,cw//5))}</text>'
-    return s
+    pill_w = len(subtitle)*7 + 22
 
-def status_bar(ry, items, pad=18, total_w=900):
-    n=len(items); iw=(total_w-pad*2)//n
-    bg  = "#0F172A" if _DARK else "#F1F5F9"
-    bdr = "rgba(255,255,255,0.08)" if _DARK else "#E2E8F0"
-    txt = "#94A3B8" if _DARK else "#475569"
-    s=f'<rect x="{pad}" y="{ry}" width="{total_w-pad*2}" height="22" rx="11" fill="{bg}" stroke="{bdr}" stroke-width="1"/>'
-    for i,(label,color) in enumerate(items):
-        lx=pad+i*iw+iw//2-len(label)*3-8
-        s += f'<circle cx="{lx}" cy="{ry+11}" r="4" fill="{color}"/>'
-        s += f'<text x="{lx+9}" y="{ry+15}" fill="{txt}" font-size="{min(9,max(6,iw//10))}" font-weight="600" font-family="Arial,sans-serif">{xe(label)}</text>'
-    return s
-
-# Dark-theme CSS (cards use dark backgrounds, light text)
-ANIM_CSS_DARK = """
-  <style>
-    @keyframes flowRight {
-      0%   { stroke-dashoffset: 24; }
-      100% { stroke-dashoffset: 0;  }
-    }
-    @keyframes flowDown {
-      0%   { stroke-dashoffset: 24; }
-      100% { stroke-dashoffset: 0;  }
-    }
-    @keyframes pulse {
-      0%,100% { opacity:1; r:5; }
-      50%      { opacity:0.6; r:7; }
-    }
-    @keyframes fadeIn {
-      from { opacity:0; transform:translateY(4px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    @keyframes glowPulse {
-      0%,100% { opacity:0.6; }
-      50%      { opacity:1; }
-    }
-    .flow-r { stroke-dasharray:8 4; animation:flowRight 1.2s linear infinite; }
-    .flow-d { stroke-dasharray:8 4; animation:flowDown  1.2s linear infinite; }
-    .pulse-dot { animation:pulse 2s ease-in-out infinite; }
-    .fadein { animation:fadeIn 0.6s ease-out both; }
-    .glow { animation:glowPulse 2.5s ease-in-out infinite; }
-  </style>
-"""
-
-GAP=14  # vertical gap between sections
-
-# ── WRAPPER ────────────────────────────────────────────────────────────────────
-
-def wrap(content, title, subtitle, color, date_str, total_w=900, total_h=590, dark=False):
-    """Light OR dark theme wrapper. dark=True renders dark background."""
-    if dark:
-        return _wrap_dark(content, title, subtitle, color, date_str, total_w, total_h)
-    return _wrap_light(content, title, subtitle, color, date_str, total_w, total_h)
-
-
-def _wrap_light(content, title, subtitle, color, date_str, total_w=900, total_h=590):
-    dark_bg = darken(color, 0.55)
-    mid_bg  = darken(color, 0.35)
-    bg_top = lighten(color, 0.92) if not _MID else lighten(color, 0.82)
-    bg_bot = lighten(color, 0.94) if not _MID else lighten(color, 0.86)
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {total_w} {total_h}" width="{total_w}" height="{total_h}" style="overflow:hidden;display:block;font-family:Arial,sans-serif">
-  <defs>
-    <linearGradient id="hg" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%" stop-color="{dark_bg}"/>
-      <stop offset="100%" stop-color="{mid_bg}"/>
-    </linearGradient>
-    <linearGradient id="bg_g" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0%" stop-color="{bg_top}"/>
-      <stop offset="100%" stop-color="{bg_bot}"/>
-    </linearGradient>
-    <filter id="shadow">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.12)"/>
-    </filter>
-  </defs>
-  {ANIM_CSS}
-  <rect width="{total_w}" height="{total_h}" fill="url(#bg_g)"/>
-  <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
-    <circle cx="1" cy="1" r="0.7" fill="{rgba(color,0.12)}"/>
-  </pattern>
-  <rect width="{total_w}" height="{total_h}" fill="url(#dots)"/>
-  <rect x="0" y="0" width="{total_w}" height="60" fill="url(#hg)"/>
-  <rect x="0" y="58" width="{total_w}" height="3" fill="{color}" opacity="0.5"/>
-  <rect x="16" y="14" width="{len(subtitle)*7+22}" height="18" rx="9" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
-  <text x="28" y="26" fill="white" font-size="8.5" font-weight="700" letter-spacing="1.8">{xe(subtitle.upper())}</text>
-  <text x="{total_w//2}" y="40" text-anchor="middle" fill="white" font-size="21" font-weight="900" letter-spacing="-0.5">{xe(clamp(title.replace("&","and"),52))}</text>
-  {content}
-  <rect x="0" y="{total_h-32}" width="{total_w}" height="32" fill="{lighten(color,0.95)}"/>
-  <rect x="0" y="{total_h-33}" width="{total_w}" height="1" fill="#E2E8F0"/>
-  <text x="20" y="{total_h-12}" fill="#94A3B8" font-size="9">{xe(date_str)}</text>
-  <rect x="{total_w-310}" y="{total_h-26}" width="295" height="20" rx="10" fill="{rgba(color,0.1)}" stroke="{color}" stroke-width="1.2"/>
-  <text x="{total_w-162}" y="{total_h-13}" text-anchor="middle" fill="{color}" font-size="9.5" font-weight="800" letter-spacing="0.8">AI © ' + _DIAGRAM_AUTHOR + '</text>
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif;overflow:hidden">
+<defs>
+  <linearGradient id="HG" x1="0" x2="1" y1="0" y2="0">
+    <stop offset="0%" stop-color="{dark_hdr}"/>
+    <stop offset="100%" stop-color="{mid_hdr}"/>
+  </linearGradient>
+  <linearGradient id="BG" x1="0" x2="0" y1="0" y2="1">
+    <stop offset="0%" stop-color="{bg_top}"/>
+    <stop offset="100%" stop-color="{bg_bot}"/>
+  </linearGradient>
+</defs>
+{ANIM}
+{bg_rect}
+{dot_pat}
+<rect x="0" y="0" width="{W}" height="58" fill="url(#HG)"/>
+<rect x="0" y="56" width="{W}" height="2" fill="{accent}" opacity="0.7"/>
+<rect x="16" y="13" width="{pill_w}" height="18" rx="9" fill="{rgba(accent,0.25)}" stroke="{rgba(accent,0.55)}" stroke-width="1"/>
+<text x="28" y="25" fill="white" font-size="8" font-weight="700" letter-spacing="1.6">{xe(subtitle.upper())}</text>
+<text x="{W//2}" y="40" text-anchor="middle" fill="white" font-size="20" font-weight="900" letter-spacing="-0.3">{xe(clamp(title,54))}</text>
+{inner_svg}
+<rect x="0" y="{H-30}" width="{W}" height="30" fill="{foot_bg}"/>
+<rect x="0" y="{H-31}" width="{W}" height="1" fill="{foot_bdr}"/>
+<text x="18" y="{H-11}" fill="{foot_txt}" font-size="8.5">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>
+<rect x="{W-220}" y="{H-24}" width="208" height="18" rx="9" fill="{rgba(accent,0.12)}" stroke="{accent}" stroke-width="1"/>
+<text x="{W-116}" y="{H-12}" text-anchor="middle" fill="{accent}" font-size="9" font-weight="800" letter-spacing="0.5">AI · copyright {xe(_DIAGRAM_AUTHOR)}</text>
 </svg>'''
 
 
-def _wrap_dark(content, title, subtitle, color, date_str, total_w=900, total_h=590):
-    """Dark-theme wrapper — deep slate background, glowing accents."""
-    dark_bg  = darken(color, 0.55)
-    mid_bg   = darken(color, 0.35)
-    bg_dark  = "#0D1117"   # near-black canvas
-    bg_panel = "#0F172A"   # section/card background base
-    border   = lighten(color, 0.2)   # muted accent border
-    grid_col = rgba(color, 0.06)
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {total_w} {total_h}" width="{total_w}" height="{total_h}" style="overflow:hidden;display:block;font-family:Arial,sans-serif">
-  <defs>
-    <linearGradient id="hg" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%" stop-color="{dark_bg}"/>
-      <stop offset="100%" stop-color="{darken(color,0.45)}"/>
-    </linearGradient>
-    <linearGradient id="bg_g" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0%" stop-color="{bg_dark}"/>
-      <stop offset="100%" stop-color="#111827"/>
-    </linearGradient>
-    <filter id="shadow">
-      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.55)"/>
-    </filter>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-  {ANIM_CSS_DARK}
-  <rect width="{total_w}" height="{total_h}" fill="url(#bg_g)"/>
-  <!-- subtle grid -->
-  <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
-    <path d="M28 0 L0 0 0 28" fill="none" stroke="{rgba(color,0.07)}" stroke-width="0.5"/>
-  </pattern>
-  <rect width="{total_w}" height="{total_h}" fill="url(#grid)"/>
-  <!-- glow orbs for depth -->
-  <circle cx="150" cy="200" r="180" fill="{rgba(color,0.04)}"/>
-  <circle cx="750" cy="380" r="160" fill="{rgba(mid_bg,0.05)}"/>
-  <!-- header -->
-  <rect x="0" y="0" width="{total_w}" height="60" fill="url(#hg)"/>
-  <rect x="0" y="58" width="{total_w}" height="2" fill="{color}" opacity="0.8"/>
-  <!-- glowing accent line under header -->
-  <rect x="0" y="60" width="{total_w}" height="1" fill="{rgba(color,0.3)}"/>
-  <!-- subtitle pill -->
-  <rect x="16" y="14" width="{len(subtitle)*7+22}" height="18" rx="9" fill="{rgba(color,0.25)}" stroke="{rgba(color,0.6)}" stroke-width="1"/>
-  <text x="28" y="26" fill="{lighten(color,0.7)}" font-size="8.5" font-weight="700" letter-spacing="1.8">{xe(subtitle.upper())}</text>
-  <!-- title -->
-  <text x="{total_w//2}" y="40" text-anchor="middle" fill="white" font-size="21" font-weight="900" letter-spacing="-0.5">{xe(clamp(title.replace("&","and"),52))}</text>
-  {content}
-  <!-- footer -->
-  <rect x="0" y="{total_h-32}" width="{total_w}" height="32" fill="#0D1117"/>
-  <rect x="0" y="{total_h-33}" width="{total_w}" height="1" fill="{rgba(color,0.4)}"/>
-  <text x="20" y="{total_h-12}" fill="#475569" font-size="9">{xe(date_str)}</text>
-  <rect x="{total_w-310}" y="{total_h-26}" width="295" height="20" rx="10" fill="{rgba(color,0.15)}" stroke="{rgba(color,0.5)}" stroke-width="1.2"/>
-  <text x="{total_w-162}" y="{total_h-13}" text-anchor="middle" fill="{lighten(color,0.7)}" font-size="9.5" font-weight="800" letter-spacing="0.8">AI © ' + _DIAGRAM_AUTHOR + '</text>
-</svg>'''
-
-
-
-
-# ── VERTICAL FLOW (Image-3 style — stacked boxes + arrows) ──────────────────
-def vertical_flow(nodes, side_nodes=None, cx=450, box_w=280, box_h=52,
-                  arrow_h=36, start_y=68, total_w=900, pad=18):
-    """
-    Renders a vertical flowchart like Image-3.
-    nodes      : list of (label, sublabel, color)
-    side_nodes : list of (label, sublabel, color, attach_to_index, side)
-                 side = 'left' | 'right'
-    Returns (svg_string, final_y)
-    """
-    s = ""
-    bx = cx - box_w // 2
-    y  = start_y
-
-    # Node positions stored for side-connection
-    node_ys = []
-
-    for idx, (label, sub, color) in enumerate(nodes):
-        # Drop shadow
-        shd = "rgba(0,0,0,0.40)" if _DARK else "rgba(0,0,0,0.10)"
-        bg  = darken(color, 0.50) if _DARK else lighten(color, 0.88)
-        bdr = lighten(color, 0.35) if _DARK else color
-        txt = lighten(color, 0.85) if _DARK else darken(color, 0.08)
-        sub_txt = "#94A3B8" if _DARK else "#64748B"
-
-        node_ys.append(y)
-
-        s += f'<rect x="{bx+3}" y="{y+3}" width="{box_w}" height="{box_h}" rx="12" fill="{shd}" class="fadein" style="animation-delay:{idx*0.08:.2f}s"/>'
-        s += f'<rect x="{bx}" y="{y}" width="{box_w}" height="{box_h}" rx="12" fill="{bg}" stroke="{bdr}" stroke-width="2.5" class="fadein" style="animation-delay:{idx*0.08:.2f}s"/>'
-
-        # Left color accent bar
-        s += f'<rect x="{bx}" y="{y}" width="6" height="{box_h}" rx="3" fill="{color}"/>'
-
-        # Circle step number
-        num_cx = bx + 26
-        s += f'<circle cx="{num_cx}" cy="{y+box_h//2}" r="13" fill="{color}"/>'
-        s += f'<text x="{num_cx}" y="{y+box_h//2+4}" text-anchor="middle" fill="white" font-size="11" font-weight="900" font-family="Arial,sans-serif">{idx+1}</text>'
-
-        # Main label
-        tx = bx + 50
-        if sub:
-            s += f'<text x="{tx}" y="{y+box_h//2-6}" fill="{txt}" font-size="12" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label, 28))}</text>'
-            s += f'<text x="{tx}" y="{y+box_h//2+10}" fill="{sub_txt}" font-size="9" font-family="Arial,sans-serif">{xe(clamp(sub, 34))}</text>'
-        else:
-            s += f'<text x="{tx}" y="{y+box_h//2+5}" fill="{txt}" font-size="12" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label, 28))}</text>'
-
-        # Arrow down (except last node)
-        if idx < len(nodes) - 1:
-            ax = cx; ay1 = y + box_h; ay2 = ay1 + arrow_h
-            arrow_col = lighten(color, 0.40) if _DARK else darken(color, 0.10)
-            s += f'<line x1="{ax}" y1="{ay1}" x2="{ax}" y2="{ay2-8}" stroke="{arrow_col}" stroke-width="2.5" class="flow-d"/>'
-            s += f'<polygon points="{ax},{ay2} {ax-7},{ay2-10} {ax+7},{ay2-10}" fill="{arrow_col}" class="pulse-dot"/>'
-
-        y += box_h + arrow_h
-
-    # Side nodes
-    if side_nodes:
-        for (label, sub, color, attach_idx, side) in side_nodes:
-            ny = node_ys[attach_idx] + box_h // 2   # vertical centre of target node
-            sbw = 150; sbh = 44
-            if side == "right":
-                sx2 = bx + box_w + 60
-                # Horizontal connector
-                arr_col = lighten(color, 0.40) if _DARK else darken(color, 0.10)
-                s += f'<line x1="{bx+box_w}" y1="{ny}" x2="{sx2}" y2="{ny}" stroke="{arr_col}" stroke-width="1.8" stroke-dasharray="5,3" class="flow-r"/>'
-                s += f'<polygon points="{sx2},{ny} {sx2-8},{ny-5} {sx2-8},{ny+5}" fill="{arr_col}"/>'
-            else:
-                sx2 = bx - 60 - sbw
-                arr_col = lighten(color, 0.40) if _DARK else darken(color, 0.10)
-                s += f'<line x1="{bx}" y1="{ny}" x2="{sx2+sbw}" y2="{ny}" stroke="{arr_col}" stroke-width="1.8" stroke-dasharray="5,3" class="flow-r"/>'
-                s += f'<polygon points="{sx2+sbw},{ny} {sx2+sbw+8},{ny-5} {sx2+sbw+8},{ny+5}" fill="{arr_col}"/>'
-
-            # Side box
-            sbg = darken(color, 0.52) if _DARK else lighten(color, 0.90)
-            sbdr = lighten(color, 0.30) if _DARK else color
-            stxt = lighten(color, 0.80) if _DARK else darken(color, 0.10)
-            ssub = "#94A3B8" if _DARK else "#64748B"
-            sy_box = ny - sbh // 2
-            s += f'<rect x="{sx2+2}" y="{sy_box+2}" width="{sbw}" height="{sbh}" rx="10" fill="rgba(0,0,0,0.2)"/>'
-            s += f'<rect x="{sx2}" y="{sy_box}" width="{sbw}" height="{sbh}" rx="10" fill="{sbg}" stroke="{sbdr}" stroke-width="1.8" class="fadein"/>'
-            s += f'<rect x="{sx2}" y="{sy_box}" width="5" height="{sbh}" rx="2" fill="{color}"/>'
-            if sub:
-                s += f'<text x="{sx2+sbw//2}" y="{sy_box+sbh//2-5}" text-anchor="middle" fill="{stxt}" font-size="10" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label,18))}</text>'
-                s += f'<text x="{sx2+sbw//2}" y="{sy_box+sbh//2+9}" text-anchor="middle" fill="{ssub}" font-size="8" font-family="Arial,sans-serif">{xe(clamp(sub,22))}</text>'
-            else:
-                s += f'<text x="{sx2+sbw//2}" y="{sy_box+sbh//2+5}" text-anchor="middle" fill="{stxt}" font-size="10" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label,18))}</text>'
-
-    return s, y
-
-
-# ── DIAGRAM FUNCTIONS ──────────────────────────────────────────────────────────
-
-def make_system_design(C):
-    s=""; y=68; P=18; W=900
-
-    sv,cy,y=sec(P,y,W-P*2,24,"CLIENT LAYER",C[0]); s+=sv
-    for i,(t,sub) in enumerate([("Browser","Web SPA"),("Mobile App","iOS/Android"),("Desktop","Electron"),("3rd Party","REST / SDK"),("IoT Device","MQTT")]):
-        s+=card_centered(P+4+i*170,cy,162,24,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[1]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,26,"EDGE + AUTH",C[1],"Rate limit  |  JWT/OAuth2  |  WAF  |  CDN"); s+=sv
-    for i,(t,sub) in enumerate([("CDN","CloudFront"),("Load Balancer","Layer-7"),("API Gateway","rate limit"),("Auth Service","OAuth2/JWT"),("WAF","shield")]):
-        s+=card(P+4+i*170,cy,164,26,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[2]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,38,"MICROSERVICES",C[2]); s+=sv
-    for i,(t,sub) in enumerate([("User Service","auth+profile"),("Order Service","cart+checkout"),("Payment","Stripe+PCI"),("Notification","email+SMS"),("Search","Elasticsearch"),("Analytics","event tracking")]):
-        s+=card(P+4+i*142,cy,138,38,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[3]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,38,"MESSAGE BROKER",C[3],"Kafka  |  RabbitMQ  |  Redis PubSub  |  Dead Letter  |  EventBridge"); s+=sv
-    for i,(t,sub) in enumerate([("Kafka","event streams"),("RabbitMQ","task queues"),("Redis PubSub","real-time"),("Dead Letter Q","failed msgs"),("EventBridge","cloud events")]):
-        s+=card(P+4+i*170,cy,164,38,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[4]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,38,"DATA LAYER",C[4],"OLTP  |  Cache  |  Documents  |  Blobs  |  Search  |  Analytics"); s+=sv
-    for i,(t,sub) in enumerate([("PostgreSQL","OLTP+ACID"),("Redis","cache+sessions"),("MongoDB","documents"),("S3","blob store"),("Elasticsearch","full-text"),("ClickHouse","analytics")]):
-        s+=card(P+4+i*142,cy,138,38,C[i%len(C)],t,sub)
-
-    s+=status_bar(y+8,[("Load Balanced","#059669"),("Auth Active","#7C3AED"),("Events Flowing","#2563EB"),("DB Healthy","#059669"),("Cache 94%","#D97706")])
-    return s,"System Architecture"
-
-
-def make_kubernetes(C):
-    s=""; y=68; P=18; W=900
-
-    sv,cy,y=sec(P,y,W-P*2,28,"CONTROL PLANE",C[0],"API Server  |  Scheduler  |  Controller Manager  |  etcd"); s+=sv
-    for i,(t,sub) in enumerate([("API Server","entry point"),("Scheduler","node select"),("Controller Mgr","reconcile"),("etcd","state store"),("Cloud CM","cloud API")]):
-        s+=card(P+4+i*170,cy,164,28,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[1]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,26,"WORKER NODES",C[1],"Kubelet  |  kube-proxy  |  Container Runtime  |  CNI"); s+=sv
-    for i,(t,sub) in enumerate([("Kubelet","node agent"),("kube-proxy","networking"),("Container RT","containerd"),("CNI Plugin","Calico/Cilium"),("Node Exporter","metrics")]):
-        s+=card(P+4+i*170,cy,164,26,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[2]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,28,"WORKLOADS",C[2]); s+=sv
-    for i,(t,sub) in enumerate([("Deployment","rolling update"),("StatefulSet","ordered pods"),("DaemonSet","per-node"),("CronJob","scheduled"),("HPA","autoscale"),("PDB","disruption budget")]):
-        s+=card(P+4+i*142,cy,138,28,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[3]); y+=GAP
-
-    lw=426; rw=W-P*2-lw-14
-    sv,cy,bot=two_col(y,lw,rw,74,"NETWORKING + INGRESS",C[3],"STORAGE + CONFIG",C[4],
-                      "Ingress  |  Service Mesh  |  NetworkPolicy","PV  |  ConfigMap  |  Secrets",P); s+=sv
-    for i,(t,sub,col) in enumerate([("Ingress Ctrl","nginx/traefik",C[3]),("Service Mesh","Istio/Linkerd",C[5]),("NetworkPolicy","microseg",C[3]),("LoadBalancer","cloud LB",C[0])]):
-        s+=card(P+4+i*106,cy,102,74,col,t,sub)
-    for i,(t,sub,col) in enumerate([("PersistentVol","dynamic prov",C[4]),("ConfigMap","env config",C[1]),("Secrets","encrypted kv",C[2]),("StorageClass","CSI driver",C[5])]):
-        s+=card(P+lw+18+i*106,cy,102,74,col,t,sub)
-    y=bot
-
-    s+=status_bar(y+8,[("Nodes Ready","#059669"),("Pods Running","#2563EB"),("Services OK","#7C3AED"),("Storage Bound","#D97706"),("Certs Valid","#059669")])
-    return s,"Cloud Architecture"
-
-
-def make_llm(C):
-    s=""; y=68; P=18; W=900
-
-    sv,cy,y=sec(P,y,W-P*2,24,"FOUNDATION MODELS",C[0],"GPT-4o  |  Claude  |  Gemini  |  Llama 3.1  |  Mistral"); s+=sv
-    for i,(t,sub) in enumerate([("GPT-4o","OpenAI"),("Claude 3.5","Anthropic"),("Gemini 1.5","Google"),("Llama 3.1","Meta OSS"),("Mistral","EU OSS"),("Qwen 2.5","Alibaba")]):
-        s+=card_centered(P+4+i*142,cy,138,24,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[1]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,28,"CONTEXT + RETRIEVAL (RAG)",C[1],"Vector DB  |  Chunking  |  Embeddings  |  Reranker  |  Cache"); s+=sv
-    for i,(t,sub) in enumerate([("Vector DB","Pinecone/Weaviate"),("Chunking","semantic split"),("Embeddings","text-embed-3"),("Reranker","cross-encoder"),("Semantic Cache","sim.lookup")]):
-        s+=card(P+4+i*170,cy,164,28,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[2]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,32,"AGENT + ORCHESTRATION",C[2],"ReAct  |  Tool Use  |  Memory  |  Planner  |  Critic  |  Router"); s+=sv
-    for i,(t,sub) in enumerate([("Agent Loop","ReAct/CoT"),("Tool Use","function call"),("Memory","episodic store"),("Planner","decompose"),("Critic","self-refine"),("Router","skill select")]):
-        s+=card(P+4+i*142,cy,138,32,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[3]); y+=GAP
-
-    lw=440; rw=W-P*2-lw-14
-    sv,cy,bot=two_col(y,lw,rw,72,"INFERENCE + SERVING",C[3],"SAFETY + OPS",C[4],
-                      "vLLM  |  TRT-LLM  |  Batching  |  KV Cache","Guardrails  |  Evals  |  Tracing",P); s+=sv
-    for i,(t,sub,col) in enumerate([("vLLM","tensor parallel",C[3]),("TRT-LLM","NVIDIA opt",C[5]),("Batching","continuous",C[3]),("KV Cache","paged attn",C[0]),("Streaming","SSE/WS",C[1])]):
-        s+=card(P+4+i*86,cy,82,72,col,t,sub)
-    for i,(t,sub,col) in enumerate([("Guardrails","PII+toxic",C[4]),("Evals","RAGAS",C[2]),("LangSmith","trace+debug",C[5])]):
-        s+=card(P+lw+18+i*138,cy,134,72,col,t,sub)
-    y=bot
-
-    s+=status_bar(y+8,[("P50 420ms","#059669"),("Tokens/s 1.2k","#2563EB"),("Cache 64%","#7C3AED"),("Cost -38%","#059669"),("Safety 99%","#D97706")])
-    return s,"AI Architecture"
-
-
-def make_system_design_numbered(C):
-    """Like Azure AI Ecosystem — numbered rows with left label + right cards."""
-    s=""; y=68; P=18; W=900
-    rows=[
-        (1,"CLIENT LAYER","browsers, mobile, IoT",C[0],[("Browser","Web SPA"),("Mobile App","iOS/Android"),("Desktop","Electron"),("IoT Device","MQTT")]),
-        (2,"EDGE + AUTH","rate limit, CDN, WAF",C[1],[("CDN","CloudFront"),("Load Balancer","Layer-7"),("API Gateway","rate limit"),("Auth","OAuth2/JWT")]),
-        (3,"MICROSERVICES","independent deployments",C[2],[("User Service","auth+profile"),("Order Service","cart+checkout"),("Payment","Stripe+PCI"),("Analytics","events")]),
-        (4,"MESSAGE BROKER","async event streaming",C[3],[("Kafka","event streams"),("RabbitMQ","task queues"),("Redis PubSub","real-time"),("Dead Letter Q","retries")]),
-        (5,"DATA LAYER","OLTP, cache, search, blobs",C[4],[("PostgreSQL","OLTP+ACID"),("Redis","cache"),("MongoDB","docs"),("S3","blobs"),("Elasticsearch","search")]),
-    ]
-    for num,label,sub,col,cards in rows:
-        sv,y=numbered_row(y,76,num,label,sub,col,cards,W,P)
-        s+=sv
-        if num<len(rows): s+=arrow_down(W//2,y+2,y+10,col); y+=GAP
-    s+=status_bar(y+10,[("Load Balanced","#059669"),("Auth Active","#7C3AED"),("Events Flowing","#2563EB"),("DB Healthy","#059669"),("Cache 94%","#D97706")])
-    return s,"System Architecture"
-
-
-def make_cicd(C):
-    s=""; y=68; P=18; W=900
-    phases=[("CODE","git push","pre-commit hooks"),("BUILD","compile","unit tests"),
-            ("TEST","integration","DAST/SAST scan"),("SCAN","CVE scan","SCA/SBOM"),
-            ("PACKAGE","Docker","sign+push registry"),("STAGE","deploy","smoke test"),("PROD","blue/green","canary rollout")]
-    sv,y=pipeline_phases(y,phases,C,P,W); s+=sv
-    s+=status_bar(y+6,[("Build 2m14s","#059669"),("Tests 97%","#2563EB"),("CVEs 0","#059669"),("Image Signed","#7C3AED"),("DORA Elite","#D97706")])
-    y+=32
-
-    sv,cy,y=sec(P,y,W-P*2,80,"OBSERVABILITY",C[4],"Metrics  |  Logs  |  Traces  |  Alerts  |  SLO"); s+=sv
-    for i,(t,sub,col) in enumerate([("Prometheus","metrics collect",C[0]),("Grafana","dashboards",C[1]),("Loki/ELK","log aggregation",C[2]),("Jaeger","dist. tracing",C[3]),("PagerDuty","alerting",C[4])]):
-        s+=card(P+4+i*170,cy,164,80,col,t,sub)
-
-    s+=status_bar(y+8,[("Deploy daily","#059669"),("Lead time <1h","#2563EB"),("MTTR <30m","#7C3AED"),("Change fail <5%","#059669"),("Rollback <5m","#D97706")])
-    return s,"DevOps Pipeline"
-
-
-def make_kafka(C):
-    s=""; y=68; P=18; W=900
-
-    sv,cy,y=sec(P,y,W-P*2,34,"PRODUCERS",C[0],"Microservices  |  IoT  |  CDC  |  Clickstream  |  Batch"); s+=sv
-    for i,(t,sub) in enumerate([("Microservices","REST/gRPC"),("IoT Devices","MQTT bridge"),("DB CDC","Debezium"),("Clickstream","JS SDK"),("Mobile Apps","SDK"),("Batch Import","file ingest")]):
-        s+=card(P+4+i*142,cy,138,34,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[1]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,52,"KAFKA CLUSTER",C[1],"Brokers  |  Partitions  |  Schema Registry  |  Topics"); s+=sv
-    for i,(t,sub) in enumerate([("Broker 1","leader"),("Broker 2","replica"),("Broker 3","replica"),("ZooKeeper","coord"),("Schema Reg","Avro/JSON"),("Kafka UI","monitoring")]):
-        s+=card_centered(P+4+i*142,cy,138,24,C[1],t,sub)
-    for i,(t,sub) in enumerate([("orders","p=6 rf=3"),("events","p=12 rf=3"),("errors","Dead Letter"),("audit","immutable"),("users.cdc","CDC stream")]):
-        s+=card(P+4+i*170,cy+28,164,24,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[2]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,26,"STREAM PROCESSING",C[2],"Kafka Streams  |  Flink  |  ksqlDB  |  Spark  |  Bytewax"); s+=sv
-    for i,(t,sub) in enumerate([("Kafka Streams","in-process"),("Apache Flink","stateful"),("ksqlDB","SQL stream"),("Spark Struct.","micro-batch"),("Bytewax","Python")]):
-        s+=card(P+4+i*170,cy,164,26,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[3]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,30,"CONSUMERS + SINKS",C[3],"Elasticsearch  |  ClickHouse  |  S3  |  PostgreSQL  |  Redis"); s+=sv
-    for i,(t,sub) in enumerate([("Elasticsearch","search sink"),("ClickHouse","analytics"),("S3/GCS","data lake"),("PostgreSQL","OLTP sink"),("Redis","cache warm"),("Alerting","PD/Slack")]):
-        s+=card(P+4+i*142,cy,138,30,C[i%len(C)],t,sub)
-
-    s+=status_bar(y+8,[("Throughput 2M/s","#059669"),("Lag 0","#2563EB"),("Partitions 48","#7C3AED"),("Retention 7d","#D97706"),("Replication 3x","#059669")])
-    return s,"Data Architecture"
-
-
-def make_zero_trust(C):
-    s=""; y=68; P=18; W=900
-
-    sv,cy,y=sec(P,y,W-P*2,26,"IDENTITY + ACCESS",C[0],"IdP/SSO  |  MFA  |  PAM  |  Service Identity  |  Certificates"); s+=sv
-    for i,(t,sub) in enumerate([("IdP/SSO","Okta/Azure AD"),("MFA","FIDO2/TOTP"),("PAM","just-in-time"),("Service ID","SPIFFE/SPIRE"),("Certificates","mTLS/PKI")]):
-        s+=card(P+4+i*170,cy,164,26,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[1]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,26,"POLICY ENGINE — NEVER TRUST, ALWAYS VERIFY",C[1]); s+=sv
-    for i,(t,sub) in enumerate([("OPA/Rego","policy-as-code"),("ABAC","attribute-based"),("Context Aware","device posture"),("Time-based","lease expiry"),("Continuous","re-auth")]):
-        s+=card(P+4+i*170,cy,164,26,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[2]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,36,"NETWORK MICRO-SEGMENTS",C[2],"Internet  |  DMZ  |  App Zone  |  Data Zone  |  Admin  |  IoT"); s+=sv
-    for i,(t,sub) in enumerate([("Internet Zone","WAF+DDoS"),("DMZ","reverse proxy"),("App Zone","east-west mTLS"),("Data Zone","encrypted"),("Admin Zone","bastion/PAM"),("IoT Zone","MAC filter")]):
-        s+=card(P+4+i*142,cy,138,36,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[3]); y+=GAP
-
-    lw=426; rw=W-P*2-lw-14
-    sv,cy,bot=two_col(y,lw,rw,72,"DETECT + RESPOND",C[3],"DATA PROTECTION",C[4],
-                      "SIEM  |  SOAR  |  EDR  |  Deception","DLP  |  Encryption  |  Tokenization  |  Keys",P); s+=sv
-    for i,(t,sub,col) in enumerate([("SIEM","Splunk/Sentinel",C[3]),("SOAR","auto-remediate",C[5]),("EDR","endpoint detect",C[3]),("Deception","honeypots",C[0])]):
-        s+=card(P+4+i*106,cy,102,72,col,t,sub)
-    for i,(t,sub,col) in enumerate([("DLP","data loss prev",C[4]),("Encryption","AES-256/TLS1.3",C[1]),("Tokenization","PCI/PII",C[2]),("Key Mgmt","Vault",C[5])]):
-        s+=card(P+lw+18+i*106,cy,102,72,col,t,sub)
-    y=bot
-
-    s+=status_bar(y+8,[("Zero Standing Priv","#059669"),("mTLS 100%","#2563EB"),("Posture Check","#7C3AED"),("Least Privilege","#059669"),("Audit Logged","#D97706")])
-    return s,"Security Architecture"
-
-
-def make_aws(C):
-    s=""; y=68; P=18; W=900
-
-    sv,cy,y=sec(P,y,W-P*2,26,"EDGE + CDN LAYER",C[0],"Route 53  |  CloudFront  |  ACM  |  Shield  |  API Gateway"); s+=sv
-    for i,(t,sub) in enumerate([("Route 53","DNS+health"),("CloudFront","CDN+WAF"),("ACM","SSL certs"),("Shield Adv","DDoS"),("API Gateway","REST/WS/GQL")]):
-        s+=card(P+4+i*170,cy,164,26,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[1]); y+=GAP
-
-    lw=426; rw=W-P*2-lw-14
-    sv,cy,bot=two_col(y,lw,rw,64,"PUBLIC SUBNETS (AZ-a/b/c)",C[1],"PRIVATE SUBNETS",C[2],
-                      "ALB  |  NAT Gateway  |  Bastion","ECS  |  Lambda  |  EC2 ASG  |  ElastiCache",P); s+=sv
-    for i,(t,sub,col) in enumerate([("ALB","Layer-7 LB",C[1]),("NAT GW","outbound",C[5]),("Bastion","SSH jump",C[3])]):
-        s+=card(P+4+i*140,cy,136,64,col,t,sub)
-    for i,(t,sub,col) in enumerate([("ECS/EKS","containers",C[2]),("Lambda","serverless",C[0]),("EC2 ASG","VM fleet",C[4]),("ElastiCache","Redis",C[5])]):
-        s+=card(P+lw+18+i*106,cy,102,64,col,t,sub)
-    y=bot
-    s+=arrow_down(W//2,y+2,y+11,C[3]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,32,"DATA LAYER",C[3],"RDS Aurora  |  DynamoDB  |  S3  |  Redshift  |  Elasticsearch  |  SQS/SNS"); s+=sv
-    for i,(t,sub) in enumerate([("RDS Aurora","Multi-AZ"),("DynamoDB","global tables"),("S3","11-nines"),("Redshift","analytics DW"),("Elasticsearch","full-text"),("SQS/SNS","messaging")]):
-        s+=card(P+4+i*142,cy,138,32,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[4]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,32,"MONITORING + SECURITY",C[4],"CloudWatch  |  X-Ray  |  GuardDuty  |  Config  |  CloudTrail"); s+=sv
-    for i,(t,sub) in enumerate([("CloudWatch","metrics+logs"),("X-Ray","dist. tracing"),("GuardDuty","threat detect"),("Config","compliance"),("CloudTrail","audit log"),("Security Hub","findings")]):
-        s+=card(P+4+i*142,cy,138,32,C[i%len(C)],t,sub)
-
-    s+=status_bar(y+8,[("99.99% SLA","#059669"),("Multi-AZ","#2563EB"),("Auto Scaled","#7C3AED"),("Cost Opt","#D97706"),("Compliant","#059669")])
-    return s,"Cloud Architecture"
-
-
-def make_mlops(C):
-    s=""; y=68; P=18; W=900
-    rows=[
-        (1,"DATA ENGINEERING","feature store, catalog, labeling",C[0],[("Feature Store","Feast/Tecton"),("Data Catalog","lineage"),("Label Studio","annotation"),("DVC","version")]),
-        (2,"TRAINING + EXP","distributed, HPO, AutoML",C[1],[("MLflow","experiment"),("Ray Train","distributed"),("Optuna","HPO"),("Kubeflow","pipeline")]),
-        (3,"MODEL REGISTRY","versioning, governance, approval",C[2],[("MLflow Reg","versioning"),("Model Card","bias+docs"),("A/B Test","champ/chal"),("Approval","review gate")]),
-        (4,"SERVING","online + batch inference",C[3],[("Seldon Core","K8s serving"),("Triton","GPU inference"),("TorchServe","PyTorch"),("Ray Serve","multi-model")]),
-        (5,"MONITORING","drift, metrics, auto-retrain",C[4],[("Evidently","data drift"),("Prometheus","perf metrics"),("Retraining","auto-trigger"),("Feedback","RLHF loop")]),
-    ]
-    for num,label,sub,col,cards in rows:
-        sv,y=numbered_row(y,74,num,label,sub,col,cards,W,P)
-        s+=sv
-        if num<len(rows): s+=arrow_down(W//2,y+2,y+10,col); y+=GAP
-    s+=status_bar(y+10,[("Acc 96.2%","#059669"),("Drift: None","#2563EB"),("P99 87ms","#7C3AED"),("Retrain weekly","#D97706"),("Registry v2.4","#059669")])
-    return s,"AI Architecture"
-
-
-def make_rag(C):
-    """Image-3 style vertical flowchart for RAG pipeline."""
-    nodes = [
-        ("Query Encoder",       "embed user query → dense vector",    C[0]),
-        ("Vector Database",     "ANN search — Pinecone / Weaviate",    C[1]),
-        ("Chunking Module",     "semantic split + overlap window",     C[2]),
-        ("Re-ranking Module",   "cross-encoder score fusion + HyDE",   C[3]),
-        ("LLM Generation",      "GPT-4o / Claude — grounded answer",   C[4]),
-        ("Answer + Citations",  "RAGAS eval · faithfulness · recall",  C[5]),
-    ]
-    side_nodes = [
-        ("PDF / HTML / MD",  "Document Loader",  C[0], 0, "left"),
-        ("Sparse BM25",      "Hybrid Retrieval", C[1], 1, "right"),
-        ("GPTCache",         "Response Cache",   C[4], 4, "right"),
-        ("LangSmith",        "Observability",    C[5], 5, "left"),
-    ]
-    # Center the flow, total canvas 900 wide
-    svg, final_y = vertical_flow(nodes, side_nodes, cx=450, box_w=320,
-                                  box_h=54, arrow_h=32, start_y=68)
-    svg += status_bar(final_y+8, [("Faithfulness 92%","#059669"),
-                                   ("Ctx Prec 87%","#2563EB"),
-                                   ("Latency 1.1s","#7C3AED"),
-                                   ("Cache 41%","#D97706"),
-                                   ("Cost -55%","#059669")])
-    total_h = final_y + 46
-    return svg, "AI Architecture", total_h
-
-
-def make_lakehouse(C):
-    s=""; y=68; P=18; W=900
-    rows=[
-        (1,"INGESTION","batch, streaming, CDC, IoT",C[0],[("Batch ETL","Airflow/Glue"),("Streaming","Kafka/Kinesis"),("CDC","Debezium"),("API Pull","REST/GraphQL"),("IoT","MQTT")]),
-        (2,"TABLE FORMAT","ACID, time travel, schema evo",C[1],[("Delta Lake","ACID+time travel"),("Apache Iceberg","schema evolution"),("Apache Hudi","upserts+deletes"),("Metadata","Glue/Hive")]),
-        (3,"COMPUTE","SQL, ML, streaming transforms",C[2],[("Apache Spark","SQL+ML"),("Trino/Presto","interactive SQL"),("dbt","transform+test"),("Apache Flink","stream proc")]),
-        (4,"CONSUMPTION","BI, ML, dashboards, APIs",C[3],[("BI Tools","Tableau/Superset"),("ML Platform","SageMaker"),("Ad-hoc SQL","Athena"),("Dashboards","Grafana"),("Data APIs","REST/GQL")]),
-    ]
-    for num,label,sub,col,cards in rows:
-        sv,y=numbered_row(y,80,num,label,sub,col,cards,W,P)
-        s+=sv
-        if num<len(rows): s+=arrow_down(W//2,y+2,y+10,col); y+=GAP
-    s+=status_bar(y+10,[("Bronze","#B45309"),("Silver","#94A3B8"),("Gold","#D97706"),("Serving","#059669"),("Governed","#7C3AED")])
-    return s,"Data Architecture"
-
-
-def make_devsecops(C):
-    s=""; y=68; P=18; W=900
-    phases=[("IDE","Pre-commit","git-secrets"),("SCM","PR Review","SAST/Semgrep"),
-            ("Build","Compile","SCA/SBOM"),("Test","Quality","DAST/ZAP"),
-            ("Artifact","Registry","Trivy+sign"),("Stage","Deploy","IaC scan"),("Prod","Runtime","Falco/eBPF")]
-    sv,y=pipeline_phases(y,phases,C,P,W); s+=sv
-    s+=status_bar(y+6,[("Secrets Blocked","#DC2626"),("CVE Free","#D97706"),("Image Signed","#059669"),("Policy Pass","#7C3AED"),("Runtime Watch","#2563EB")])
-    y+=32
-
-    lw=426; rw=W-P*2-lw-14
-    sv,cy,bot=two_col(y,lw,rw,76,"SIEM + INCIDENT RESPONSE",C[4],"COMPLIANCE + POLICY",C[1],
-                      "Splunk  |  SOAR  |  Threat Intel","CIS  |  SOC2  |  ISO 27001  |  OPA",P); s+=sv
-    for i,(t,sub,col) in enumerate([("SIEM","Splunk/Sentinel",C[4]),("SOAR","auto-remediation",C[5]),("Threat Intel","IOC feeds",C[0])]):
-        s+=card(P+4+i*140,cy,136,76,col,t,sub)
-    for i,(t,sub,col) in enumerate([("CIS Benchmarks","hardening",C[1]),("SOC2/ISO27K","audit",C[2]),("OPA/Rego","policy-as-code",C[3])]):
-        s+=card(P+lw+18+i*140,cy,136,76,col,t,sub)
-    y=bot
-
-    s+=status_bar(y+8,[("NIST CSF","#059669"),("ISO 27001","#2563EB"),("SOC2 Type II","#7C3AED"),("GDPR","#D97706"),("PCI-DSS","#DC2626")])
-    return s,"Security Architecture"
-
-
-def make_docker(C):
-    s=""; y=68; P=18; W=900
-    rows=[("FROM/BASE",C[0],[("","Alpine","3.19"),("","Ubuntu","22.04 LTS"),("","Node","20-alpine"),("","Python","3.12-slim"),("","JDK","21-eclipse")]),
-          ("BUILD",C[1],[("","COPY","src→workdir"),("","RUN","apt/pip"),("","ARG","build-time var"),("","CACHE","layer reuse"),("","Multi-stage","slim final")]),
-          ("CONFIGURE",C[2],[("","ENV","runtime vars"),("","WORKDIR","app dir"),("","USER","non-root"),("","VOLUME","mounts"),("","EXPOSE","port decl")]),
-          ("RUNTIME",C[3],[("","CMD","default exec"),("","ENTRYPOINT","fixed cmd"),("","HEALTHCHECK","liveness"),("","LABEL","metadata"),("","STOPSIGNAL","graceful")])]
-    for label,col,items in rows:
-        s+=cheatrow(y,50,label,col,items,P,W); y+=56
-
-    sv,cy,y=sec(P,y,W-P*2,24,"COMPOSE ESSENTIALS",C[4]); s+=sv
-    for i,(t,sub) in enumerate([("services","container defs"),("networks","bridge/overlay"),("volumes","named/bind"),("env_file","secrets"),("depends_on","start order"),("healthcheck","readiness")]):
-        s+=card_centered(P+4+i*142,cy,138,24,C[i%len(C)],t,sub)
-    y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,46,"SECURITY HARDENING",C[5],"Distroless  |  Read-only FS  |  Non-root  |  Secrets  |  Scan  |  Sign"); s+=sv
-    for i,(t,sub) in enumerate([("Distroless","min attack surface"),("Read-only FS","immutable"),("No root","USER 1001"),("Docker Secrets","injection"),("Trivy Scan","CVE scan"),("cosign+SBOM","sign+BOM")]):
-        s+=card(P+4+i*142,cy,138,46,C[i%len(C)],t,sub)
-
-    s+=status_bar(y+8,[("Image <50MB","#059669"),("0 CVE Critical","#059669"),("Non-root","#2563EB"),("SBOM","#7C3AED"),("Signed","#D97706")])
-    return s,"DevOps Pipeline"
-
-
-def make_git_workflow(C):
-    s=""; y=68; P=18; W=900
-    branches=[("main","protected","prod on tag",C[0]),("develop","integration","staging deploy",C[1]),
-              ("feature/*","short-lived","PR to develop",C[2]),("release/*","RC freeze","QA only",C[3]),("hotfix/*","critical fix","main+develop",C[4])]
-    sv,y=branch_columns(y,branches,P,W); s+=sv
-    s+=status_bar(y+6,[("Signed commits","#059669"),("DCO required","#2563EB"),("Branch protect","#7C3AED"),("Linear history","#D97706"),("Tag on release","#059669")])
-    y+=32
-
-    sv,cy,y=sec(P,y,W-P*2,30,"CONVENTIONAL COMMITS",C[2],"feat | fix | docs | style | refactor | test | ci  →  type(scope): description"); s+=sv
-    for i,(t,sub) in enumerate([("feat","new feature"),("fix","bug fix"),("docs","docs only"),("style","formatting"),("refactor","restructure"),("test","add tests"),("ci","CI config")]):
-        s+=card(P+4+i*122,cy,118,30,C[i%len(C)],t,sub)
-    y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,44,"PR + REVIEW WORKFLOW",C[3],"Branch  →  Commit  →  Push  →  PR  →  Review  →  Merge  →  Delete"); s+=sv
-    for i,(t,sub) in enumerate([("Branch","from develop"),("Commit","conventional"),("Push","trigger CI"),("PR Open","auto-assign"),("Review","2 approvals"),("Merge","squash/rebase"),("Delete","clean branch")]):
-        s+=card(P+4+i*122,cy,118,44,C[i%len(C)],t,sub)
-
-    s+=status_bar(y+8,[("PR coverage","#059669"),("Avg review 4h","#2563EB"),("Pass rate 94%","#7C3AED"),("Commits signed","#059669"),("Releases tagged","#D97706")])
-    return s,"DevOps Pipeline"
-
-
-def make_api_design(C):
-    s=""; y=68; P=18; W=900
-    phases=[("REST","HTTP/JSON","CRUD resources"),("GraphQL","SDL schema","flex queries"),
-            ("gRPC","Protobuf","streaming RPC"),("WebSocket","ws://","bi-directional"),("Webhooks","HTTP push","async notify"),
-            ("SSE","server push","real-time feed"),("AsyncAPI","event-driven","message spec")]
-    sv,y=pipeline_phases(y,phases,C,P,W); s+=sv
-    s+=status_bar(y+6,[("Versioned","#059669"),("Rate Limited","#2563EB"),("Auth Required","#7C3AED"),("Documented","#D97706"),("Monitored","#059669")])
-    y+=32
-
-    sv,cy,y=sec(P,y,W-P*2,30,"SECURITY LAYER",C[2],"OAuth2/OIDC  |  API Keys  |  JWT  |  mTLS  |  Rate Limit  |  IP Allowlist"); s+=sv
-    for i,(t,sub) in enumerate([("OAuth2/OIDC","delegated auth"),("API Keys","svc-to-svc"),("JWT","stateless"),("mTLS","mesh auth"),("Rate Limit","token bucket"),("IP Allowlist","network ACL")]):
-        s+=card(P+4+i*142,cy,138,30,C[i%len(C)],t,sub)
-    y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,30,"GATEWAY + OBSERVABILITY",C[3],"Circuit Break  |  Retry  |  Cache  |  Tracing  |  Error Budget  |  Alerting"); s+=sv
-    for i,(t,sub) in enumerate([("Circuit Break","hystrix/resilience"),("Retry Logic","exp backoff"),("Caching","Redis+CDN"),("Dist. Tracing","Jaeger/Tempo"),("Error Budget","SLO-based"),("Alerting","PagerDuty")]):
-        s+=card(P+4+i*142,cy,138,30,C[i%len(C)],t,sub)
-
-    s+=status_bar(y+8,[("OpenAPI 3.1","#059669"),("Breaking 0","#059669"),("p95<200ms","#2563EB"),("Uptime 99.9%","#7C3AED"),("Auth 100%","#D97706")])
-    return s,"System Architecture"
-
-
-def make_solid(C):
-    s=""; y=68; P=18; W=900
-    principles=[("S","Single Responsibility","One class — one reason to change",C[0]),
-                ("O","Open / Closed","Open for extension, closed for modification",C[1]),
-                ("L","Liskov Substitution","Subtypes must be replaceable for base types",C[2]),
-                ("I","Interface Segregation","Many small, focused interfaces over one fat",C[3]),
-                ("D","Dependency Inversion","Depend on abstractions, not concretions",C[4])]
-    ph=205; pw=(W-P*2-4*(len(principles)-1))//len(principles)
-    for i,(letter,name,rule,col) in enumerate(principles):
-        bx=P+i*(pw+4); bg=lighten(col,0.89)
-        s+=f'<rect x="{bx+2}" y="{y+2}" width="{pw}" height="{ph}" rx="11" fill="rgba(0,0,0,0.05)"/>'
-        s+=f'<rect x="{bx}" y="{y}" width="{pw}" height="{ph}" rx="11" fill="{bg}" stroke="{lighten(col,0.5)}" stroke-width="1.8" class="fadein" style="animation-delay:{i*0.1:.1f}s"/>'
-        s+=f'<rect x="{bx}" y="{y}" width="{pw}" height="28" rx="11" fill="{col}"/>'
-        s+=f'<rect x="{bx}" y="{y+20}" width="{pw}" height="8" fill="{col}"/>'
-        s+=f'<text x="{bx+pw//2}" y="{y+18}" text-anchor="middle" fill="white" font-size="8.5" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(name,pw//5))}</text>'
-        s+=f'<text x="{bx+pw//2}" y="{y+80}" text-anchor="middle" fill="{col}" font-size="40" font-weight="900" font-family="Arial,sans-serif">{letter}</text>'
-        lines=wrap_text(rule,max(10,(pw-4)//6))
-        for j,ln in enumerate(lines[:4]):
-            s+=f'<text x="{bx+pw//2}" y="{y+110+j*14}" text-anchor="middle" fill="#334155" font-size="8" font-family="Arial,sans-serif">{xe(ln)}</text>'
-    y+=ph
-    s+=status_bar(y+6,[("Cohesion UP","#059669"),("Coupling DOWN","#2563EB"),("Testable","#7C3AED"),("Extensible","#D97706"),("Readable","#059669")])
-    y+=32
-
-    sv,cy,y=sec(P,y,W-P*2,54,"DESIGN PATTERNS — APPLY WITH SOLID",C[2],"Creational  |  Structural  |  Behavioral"); s+=sv
-    for i,(t,sub,col) in enumerate([("Factory","object creation",C[0]),("Strategy","swappable algo",C[1]),("Observer","event pub/sub",C[2]),("Decorator","wrap+extend",C[3]),("Repository","data access",C[4]),("Command","encapsulate act",C[5])]):
-        s+=card(P+4+i*142,cy,138,54,col,t,sub)
-
-    s+=status_bar(y+8,[("DRY","#059669"),("YAGNI","#2563EB"),("KISS","#7C3AED"),("Clean Code","#D97706"),("Test First","#059669")])
-    return s,"System Architecture"
-
-
-def make_generic(topic_name, C):
-    s=""; y=68; P=18; W=900
-
-    sv,cy,y=sec(P,y,W-P*2,38,"CORE ARCHITECTURE",C[0]); s+=sv
-    words=topic_name.split()[:6]
-    for i,w in enumerate(words):
-        s+=card(P+4+i*142,cy,138,38,C[i%len(C)],w,"core component")
-    s+=arrow_down(W//2,y+2,y+11,C[1]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,30,"KEY SERVICES",C[1],"API Layer  |  Business Logic  |  Data Access  |  Cache  |  Auth"); s+=sv
-    for i,(t,sub) in enumerate([("API Layer","REST/GraphQL"),("Business Logic","core rules"),("Data Access","ORM+queries"),("Cache Layer","Redis/CDN"),("Auth Service","JWT/OAuth2")]):
-        s+=card(P+4+i*170,cy,164,30,C[i%len(C)],t,sub)
-    s+=arrow_down(W//2,y+2,y+11,C[2]); y+=GAP
-
-    lw=426; rw=W-P*2-lw-14
-    sv,cy,bot=two_col(y,lw,rw,64,"DATA + STORAGE",C[2],"INFRASTRUCTURE",C[3],"Primary DB | Cache | Search","Containers | CI/CD | CDN",P); s+=sv
-    for i,(t,sub,col) in enumerate([("Primary DB","PostgreSQL",C[2]),("Cache","Redis",C[5]),("Object Store","S3/GCS",C[2]),("Search","Elasticsearch",C[0])]):
-        s+=card(P+4+i*106,cy,102,64,col,t,sub)
-    for i,(t,sub,col) in enumerate([("Containers","Docker/K8s",C[3]),("CI/CD","GitHub Actions",C[1]),("CDN","CloudFront",C[4]),("DNS","Route53",C[5])]):
-        s+=card(P+lw+18+i*106,cy,102,64,col,t,sub)
-    y=bot
-    s+=arrow_down(W//2,y+2,y+11,C[4]); y+=GAP
-
-    sv,cy,y=sec(P,y,W-P*2,32,"OBSERVABILITY + SECURITY",C[4],"Metrics  |  Logs  |  Traces  |  Alerts  |  Auth  |  Audit"); s+=sv
-    for i,(t,sub) in enumerate([("Metrics","Prometheus"),("Logs","ELK/Loki"),("Traces","Jaeger"),("Alerts","PagerDuty"),("Auth","mTLS+OAuth2"),("Audit","CloudTrail")]):
-        s+=card(P+4+i*142,cy,138,32,C[i%len(C)],t,sub)
-
-    s+=status_bar(y+8,[("Scalable","#059669"),("Resilient","#2563EB"),("Secure","#7C3AED"),("Observable","#D97706"),("Cost-Opt","#059669")])
-    return s,"System Architecture"
-
-
-# ── DISPATCH ──────────────────────────────────────────────────────────────────
-def make_diagram(topic_name, topic_id, diagram_type=""):
-    import hashlib, random
-    global _DARK, _MID
-    # Alternate dark/light per topic deterministically, then add randomness
-    h = int(hashlib.md5(topic_id.encode()).hexdigest(), 16)
-    # 3 themes: 0=light, 1=mid (slightly dark bg), 2=dark
-    theme_choice = h % 3
-    _DARK = (theme_choice == 2)       # full dark
-    _MID  = (theme_choice == 1)       # medium (light bg, more saturated cards)
-
-    C = get_pal(topic_id)
-    # Shift palette brightness for mid-theme
-    if _MID:
-        C = [darken(c, 0.05) for c in C]
-
-    now = datetime.now().strftime("%B %Y")
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 0 — VERTICAL FLOW  (numbered steps with animated arrows)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_vertical_flow(topic_id, topic_name, C):
+    W, H = 900, 620
+    accent = C[0]
+    bg_top = lighten(accent, 0.93)
+    bg_bot = lighten(accent, 0.96)
+
+    STEP_DATA = {
+        "llm": [("Tokenisation","Raw text split into sub-word tokens via BPE"),
+                ("Embedding Layer","Token IDs mapped to 768-4096d dense vectors"),
+                ("Transformer Blocks","Multi-head attention + feed-forward x N layers"),
+                ("Layer Norm + Residuals","Stable training via skip connections"),
+                ("Output Projection","Hidden state projected to vocabulary logits"),
+                ("Sampling / Decoding","Top-k / Nucleus sampling selects next token")],
+        "rag": [("Document Ingestion","PDF, HTML, Markdown loaded and cleaned"),
+                ("Chunking + Overlap","512-token semantic chunks, 10% overlap"),
+                ("Embedding","text-embed-3 encodes chunks to 1536-d vectors"),
+                ("Vector Store Index","Pinecone / Weaviate ANN index for fast search"),
+                ("Query + Rerank","Hybrid BM25 + dense retrieval, cross-encoder rerank"),
+                ("LLM Generation","Grounded answer generated with citation sources")],
+        "mlops": [("Data Validation","Schema checks, dedup, Great Expectations"),
+                  ("Feature Engineering","Feast feature store, transforms, versioning"),
+                  ("Distributed Training","Ray Train / Kubeflow on GPU cluster"),
+                  ("Experiment Tracking","MLflow: params, metrics, artefacts logged"),
+                  ("Model Registry","Versioned models with cards and approval gate"),
+                  ("Serving + Monitoring","Seldon/Triton, Evidently drift detection")],
+        "cicd": [("Code Commit","git push triggers pre-commit hooks and linting"),
+                 ("CI Build","Compile, unit tests, SAST scan run in parallel"),
+                 ("Image Build","Docker multi-stage build with layer caching"),
+                 ("Security Scan","Trivy CVE scan, Snyk SCA, SBOM generation"),
+                 ("Stage Deploy","Helm upgrade, smoke tests, auto-rollback ready"),
+                 ("Production Release","Blue/green switch, canary traffic, feature flags")],
+        "devsec": [("IDE / Pre-commit","gitleaks, detect-secrets, git-secrets hooks"),
+                   ("Pull Request","Semgrep SAST, CodeQL analysis, peer review"),
+                   ("Build Stage","SCA SBOM, Snyk, dependency vulnerability audit"),
+                   ("Container Scan","Trivy, Docker Scout CVE check, cosign signing"),
+                   ("Deploy Stage","tfsec / checkov IaC scan, OPA policy gate"),
+                   ("Runtime Security","Falco eBPF alerts, SIEM, SOAR auto-remediate")],
+        "kafka": [("Producers","Microservices, IoT, DB CDC events via Debezium"),
+                  ("Kafka Brokers","Partitioned topics with replication factor 3"),
+                  ("Schema Registry","Avro / Protobuf contract enforcement"),
+                  ("Stream Processing","Apache Flink / ksqlDB stateful transforms"),
+                  ("Consumer Groups","Parallel reads, offset commit management"),
+                  ("Sinks","Elasticsearch, ClickHouse, S3 data lake landing")],
+    }
     tid = topic_id.lower()
-    total_h = 590   # default, some diagrams override
+    key = next((k for k in STEP_DATA if k in tid), None)
+    steps = STEP_DATA[key] if key else [
+        ("Ingest","Collect raw inputs from all upstream sources"),
+        ("Validate","Schema checks, deduplication, quality gates"),
+        ("Transform","Business logic, enrichment, join operations"),
+        ("Store","Persist to primary data store with indexing"),
+        ("Serve","REST / GraphQL API layer with caching"),
+        ("Monitor","Metrics, SLO alerts, and automated reporting"),
+    ]
 
-    if   "kube"   in tid:                         content,sub=make_kubernetes(C)
-    elif any(x in tid for x in["llm","agent"]):   content,sub=make_llm(C)
-    elif "cicd"   in tid:                         content,sub=make_cicd(C)
-    elif "kafka"  in tid:                         content,sub=make_kafka(C)
-    elif "zero"   in tid:                         content,sub=make_zero_trust(C)
-    elif "aws"    in tid:                         content,sub=make_aws(C)
-    elif "devsec" in tid:                         content,sub=make_devsecops(C)
-    elif "system" in tid:                         content,sub=make_system_design(C)
-    elif "mlops"  in tid:                         content,sub=make_mlops(C)
-    elif any(x in tid for x in["lake","data"]):   content,sub=make_lakehouse(C)
-    elif "rag"    in tid:
-        result = make_rag(C)
-        content, sub, total_h = result   # make_rag returns 3-tuple
-    elif "docker" in tid:                         content,sub=make_docker(C)
-    elif "git"    in tid:                         content,sub=make_git_workflow(C)
-    elif "api"    in tid:                         content,sub=make_api_design(C)
-    elif "solid"  in tid:                         content,sub=make_solid(C)
-    else:                                         content,sub=make_generic(topic_name,C)
+    BOX_W, BOX_H, ARROW_H = 500, 56, 32
+    cx = W // 2
+    y = 70
+    svg = ""
 
-    return wrap(content, topic_name, sub, C[0], now, dark=_DARK, total_h=total_h)
+    for i, (label, sub) in enumerate(steps):
+        col = C[i % len(C)]
+        bx = cx - BOX_W // 2
+        bg  = lighten(col, 0.88)
+        delay = f"animation-delay:{i*0.08:.2f}s"
 
+        svg += f'<rect x="{bx+3}" y="{y+3}" width="{BOX_W}" height="{BOX_H}" rx="13" fill="{rgba(col,0.12)}"/>'
+        svg += f'<rect x="{bx}" y="{y}" width="{BOX_W}" height="{BOX_H}" rx="13" fill="{bg}" stroke="{col}" stroke-width="2" class="fi" style="{delay}"/>'
+        svg += f'<rect x="{bx}" y="{y}" width="6" height="{BOX_H}" rx="3" fill="{col}"/>'
+        svg += f'<circle cx="{bx+32}" cy="{y+BOX_H//2}" r="14" fill="{col}"/>'
+        svg += f'<text x="{bx+32}" y="{y+BOX_H//2+5}" text-anchor="middle" fill="white" font-size="13" font-weight="900">{i+1}</text>'
+        svg += f'<text x="{bx+58}" y="{y+BOX_H//2-7}" fill="{darken(col,0.08)}" font-size="13" font-weight="800">{xe(label)}</text>'
+        svg += f'<text x="{bx+58}" y="{y+BOX_H//2+10}" fill="#64748B" font-size="9.5">{xe(sub)}</text>'
+        svg += f'<text x="{bx+BOX_W-40}" y="{y+BOX_H//2+9}" fill="{rgba(col,0.18)}" font-size="28" font-weight="900">{i+1:02d}</text>'
+
+        if i < len(steps) - 1:
+            ax = cx; ay1 = y + BOX_H; ay2 = ay1 + ARROW_H - 8
+            svg += f'<line x1="{ax}" y1="{ay1}" x2="{ax}" y2="{ay2}" stroke="{col}" stroke-width="2.5" class="flow" opacity="0.8"/>'
+            svg += f'<polygon points="{ax},{ay2+8} {ax-7},{ay2} {ax+7},{ay2}" fill="{col}" class="pu"/>'
+        y += BOX_H + ARROW_H
+
+    return _wrap(svg, W, H, topic_name, "Step-by-Step", accent, bg_top, bg_bot)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 1 — MIND MAP  (hub + branches + sub-leaves, dark theme)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_mind_map(topic_id, topic_name, C):
+    W, H = 900, 600
+    accent = C[0]
+    dark_bg  = darken(accent, 0.60)
+    dark_bg2 = darken(accent, 0.72)
+
+    BRANCHES = {
+        "llm": [("Attention","Multi-head self-attention","Scaled dot-product"),
+                ("Training","Pre-train then RLHF","Instruction tuning"),
+                ("Inference","KV-cache + batching","vLLM / TRT-LLM"),
+                ("Safety","Guardrails + evals","Constitutional AI"),
+                ("Context","128k+ token window","RAG extension")],
+        "kube": [("Control Plane","API server + etcd","Scheduler, CM"),
+                 ("Networking","CNI + Service Mesh","Ingress, DNS"),
+                 ("Workloads","Deployment, SS, DS","HPA autoscaling"),
+                 ("Storage","PV / PVC + CSI","StorageClass"),
+                 ("Security","RBAC + NetworkPol","Pod Security Std")],
+        "zero": [("Identity","IdP, MFA, PAM creds","SPIFFE/SPIRE certs"),
+                 ("Policy Engine","OPA / Rego rules","ABAC + time-limits"),
+                 ("Network Segs","DMZ + micro-segs","mTLS everywhere"),
+                 ("Detection","SIEM + EDR + SOAR","Threat intel feeds"),
+                 ("Data","DLP + encryption","Tokenization + Vault")],
+        "docker": [("Images","Multi-stage builds","Distroless, Alpine"),
+                   ("Runtime","containerd / runc","cgroups + namespaces"),
+                   ("Networking","bridge, overlay","host and none modes"),
+                   ("Compose","services + volumes","health-checks, deps"),
+                   ("Security","non-root, read-only","Trivy + cosign SBOM")],
+        "git": [("Branching","main + develop","feature/* + hotfix/*"),
+                ("Commits","Conventional Commits","DCO + GPG signed"),
+                ("PR Flow","2-reviewer gate","squash or rebase merge"),
+                ("Tags","SemVer releases","CHANGELOG generation"),
+                ("Hooks","pre-commit linting","Secret leak scanning")],
+        "api": [("Protocols","REST + GraphQL","gRPC + WebSocket SSE"),
+                ("Auth","OAuth2 + JWT","mTLS + API keys"),
+                ("Gateway","Rate limit + CB","Retry + caching layer"),
+                ("Versioning","URI /v2 headers","Backward compatible"),
+                ("Observability","OpenTelemetry","Jaeger traces + SLOs")],
+        "solid": [("S SRP","One class one job","Cohesive modules"),
+                  ("O OCP","Extend not modify","Plugin architecture"),
+                  ("L LSP","Substitutable types","Contract test coverage"),
+                  ("I ISP","Focused interfaces","No fat interface bloat"),
+                  ("D DIP","Depend on abstracts","IoC + DI containers")],
+        "aws": [("Compute","EC2, Lambda, ECS","Fargate + Batch jobs"),
+                ("Storage","S3, EBS, EFS","Glacier + FSx options"),
+                ("Database","RDS Aurora, Dynamo","Redshift + Neptune"),
+                ("Network","VPC, ALB, CF","Route 53 + Transit GW"),
+                ("Security","IAM + GuardDuty","KMS + Secrets Manager")],
+    }
+    tid = topic_id.lower()
+    key = next((k for k in BRANCHES if k in tid), None)
+    branches = BRANCHES[key] if key else [
+        ("Ingest","Data collection layer","APIs + streams"),
+        ("Process","Transform and enrich","Spark + dbt"),
+        ("Store","Persist and index","PostgreSQL + S3"),
+        ("Serve","APIs and dashboards","REST + Grafana"),
+        ("Govern","Quality and lineage","Catalog + policies"),
+    ]
+
+    cx, cy = W // 2, H // 2 + 10
+    r_hub = 68
+    svg = ""
+
+    svg += f'<circle cx="{cx}" cy="{cy}" r="{r_hub+6}" fill="{rgba(accent,0.15)}" class="pu"/>'
+    svg += f'<circle cx="{cx}" cy="{cy}" r="{r_hub}" fill="{darken(accent,0.45)}"/>'
+    svg += f'<circle cx="{cx}" cy="{cy}" r="{r_hub-4}" fill="{darken(accent,0.55)}" stroke="{lighten(accent,0.4)}" stroke-width="1.5"/>'
+
+    words = topic_name.replace("&","and").split()
+    mid = len(words) // 2
+    line1 = " ".join(words[:mid]) or topic_name[:14]
+    line2 = " ".join(words[mid:]) or ""
+    svg += f'<text x="{cx}" y="{cy-6}" text-anchor="middle" fill="white" font-size="13" font-weight="900">{xe(clamp(line1,14))}</text>'
+    if line2:
+        svg += f'<text x="{cx}" y="{cy+12}" text-anchor="middle" fill="{lighten(accent,0.6)}" font-size="12" font-weight="700">{xe(clamp(line2,14))}</text>'
+
+    n = len(branches)
+    for i, (bname, bdesc, bsub) in enumerate(branches):
+        angle_deg = -90 + i * (360 / n)
+        angle_rad = math.radians(angle_deg)
+        col = C[i % len(C)]
+
+        R_branch = 195
+        bx = cx + R_branch * math.cos(angle_rad)
+        by = cy + R_branch * math.sin(angle_rad)
+
+        start_x = cx + r_hub * math.cos(angle_rad)
+        start_y = cy + r_hub * math.sin(angle_rad)
+        svg += (f'<path d="M{start_x:.1f},{start_y:.1f} '
+                f'Q{(cx+bx)/2:.1f},{(cy+by)/2:.1f} {bx:.1f},{by:.1f}" '
+                f'fill="none" stroke="{col}" stroke-width="2.5" stroke-dasharray="6 3" class="flow" '
+                f'style="animation-delay:{i*0.15:.2f}s"/>')
+
+        br = 46
+        svg += f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="{br+3}" fill="{rgba(col,0.12)}"/>'
+        svg += f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="{br}" fill="{darken(col,0.50)}" stroke="{col}" stroke-width="2" class="fi" style="animation-delay:{i*0.1:.2f}s"/>'
+        svg += f'<text x="{bx:.1f}" y="{by-7:.1f}" text-anchor="middle" fill="white" font-size="10" font-weight="800">{xe(clamp(bname,13))}</text>'
+        svg += f'<text x="{bx:.1f}" y="{by+8:.1f}" text-anchor="middle" fill="{lighten(col,0.55)}" font-size="8">{xe(clamp(bdesc,16))}</text>'
+
+        R_leaf = 308
+        lx = cx + R_leaf * math.cos(angle_rad)
+        ly = cy + R_leaf * math.sin(angle_rad)
+        svg += (f'<line x1="{bx+br*math.cos(angle_rad):.1f}" y1="{by+br*math.sin(angle_rad):.1f}" '
+                f'x2="{lx:.1f}" y2="{ly:.1f}" stroke="{rgba(col,0.5)}" stroke-width="1.5" stroke-dasharray="4 3"/>')
+        lw, lh = 110, 28
+        svg += f'<rect x="{lx-lw//2:.1f}" y="{ly-lh//2:.1f}" width="{lw}" height="{lh}" rx="14" fill="{darken(col,0.55)}" stroke="{lighten(col,0.3)}" stroke-width="1" class="fi" style="animation-delay:{i*0.1+0.2:.2f}s"/>'
+        svg += f'<text x="{lx:.1f}" y="{ly+4:.1f}" text-anchor="middle" fill="{lighten(col,0.65)}" font-size="8.5" font-weight="700">{xe(clamp(bsub,16))}</text>'
+
+    return _wrap(svg, W, H, topic_name, "Concept Map", accent, dark_bg2, dark_bg, dark=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 2 — PYRAMID  (stacked trapezoids, narrow at top)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_pyramid(topic_id, topic_name, C):
+    W, H = 900, 600
+    accent = C[0]
+    bg_top = lighten(accent, 0.91)
+    bg_bot = lighten(accent, 0.95)
+
+    LAYERS = {
+        "solid": [
+            ("Maintainability","Clean, readable, easily refactorable code"),
+            ("Testability","SOLID design makes unit testing natural"),
+            ("Extensibility","Add features without touching existing code"),
+            ("Scalability","Teams can grow without merge conflicts"),
+            ("Business Value","Ship faster, break less, adapt quicker"),
+        ],
+        "zero": [
+            ("Data Encryption","AES-256 at rest + TLS 1.3 in transit"),
+            ("Data Classification","PII, confidential, public labelling"),
+            ("Micro-segmentation","East-west mTLS between all services"),
+            ("Identity and Access","Zero standing privileges, JIT access"),
+            ("Culture and Process","Security-first mindset, DevSecOps"),
+        ],
+        "mlops": [
+            ("Raw Data","Unstructured ingestion with no schema enforcement"),
+            ("Curated Data","Validated, deduplicated, and properly labelled"),
+            ("Feature Layer","Engineered and versioned in a feature store"),
+            ("Model Registry","Trained, evaluated, and version-controlled"),
+            ("Production","Served, monitored, retrained on data drift"),
+        ],
+        "kube": [
+            ("Infrastructure","VMs, bare metal, or managed cloud nodes"),
+            ("Container Runtime","containerd managing cgroups and namespaces"),
+            ("Cluster Layer","Control plane, etcd, and the API server"),
+            ("Platform Layer","Ingress, service mesh, and storage classes"),
+            ("Application Layer","Your deployments, stateful sets, and jobs"),
+        ],
+        "api": [
+            ("Transport","TCP over TLS — HTTP 1.1, HTTP/2, HTTP/3"),
+            ("Protocol","REST, GraphQL, gRPC, WebSocket, SSE"),
+            ("Security","OAuth2, JWT, mTLS, rate limiting, WAF"),
+            ("Gateway","Routing, circuit breaker, cache, retry"),
+            ("Business Logic","Domain services and orchestration layer"),
+        ],
+        "aws": [
+            ("Physical","Data centres, AZs, regions, and edge PoPs"),
+            ("Network","VPC, subnets, Transit GW, Direct Connect"),
+            ("Compute","EC2, Lambda, ECS/EKS, Fargate workloads"),
+            ("Platform Services","RDS, DynamoDB, S3, SQS, ElastiCache"),
+            ("Application Layer","Your services, APIs, and business logic"),
+        ],
+    }
+    tid = topic_id.lower()
+    key = next((k for k in LAYERS if k in tid), None)
+    layers = LAYERS[key] if key else [
+        ("Foundation","Core infrastructure and platform services"),
+        ("Data Layer","Storage, caching, and streaming systems"),
+        ("Service Layer","Business logic and API endpoints"),
+        ("Integration","Third-party services, messaging, and events"),
+        ("User / Client","Web, mobile, and CLI consumers"),
+    ]
+
+    n = len(layers)
+    pad_top = 75
+    available_h = H - pad_top - 55
+    layer_h = available_h // n
+    max_w = W - 70
+    min_w = 200
+
+    svg = ""
+    for i, (label, desc) in enumerate(layers):
+        col = C[i % len(C)]
+        ratio_top = (i / n)
+        ratio_bot = ((i + 1) / n)
+        w_top = int(min_w + (max_w - min_w) * ratio_top)
+        w_bot = int(min_w + (max_w - min_w) * ratio_bot)
+        x_top = (W - w_top) // 2
+        x_bot = (W - w_bot) // 2
+        y_top = pad_top + i * layer_h
+        y_bot = y_top + layer_h - 3
+        cx_row = W // 2
+
+        pts = f"{x_top},{y_top} {x_top+w_top},{y_top} {x_bot+w_bot},{y_bot} {x_bot},{y_bot}"
+        svg += f'<polygon points="{pts}" fill="{lighten(col,0.82)}" stroke="{col}" stroke-width="1.8" class="fi" style="animation-delay:{i*0.09:.2f}s"/>'
+        svg += f'<polygon points="{x_top},{y_top} {x_top+8},{y_top} {x_bot+8},{y_bot} {x_bot},{y_bot}" fill="{col}"/>'
+
+        ny = (y_top + y_bot) // 2
+        svg += f'<circle cx="{x_top+26}" cy="{ny}" r="13" fill="{col}"/>'
+        svg += f'<text x="{x_top+26}" y="{ny+5}" text-anchor="middle" fill="white" font-size="12" font-weight="900">{n-i}</text>'
+        svg += f'<text x="{cx_row}" y="{ny-5}" text-anchor="middle" fill="{darken(col,0.10)}" font-size="13" font-weight="800">{xe(label)}</text>'
+        svg += f'<text x="{cx_row}" y="{ny+12}" text-anchor="middle" fill="#475569" font-size="9.5">{xe(desc)}</text>'
+
+    return _wrap(svg, W, H, topic_name, "Pyramid Model", accent, bg_top, bg_bot)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 3 — TIMELINE  (horizontal spine, cards alternate above/below)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_timeline(topic_id, topic_name, C):
+    W, H = 900, 560
+    accent = C[0]
+    dark_bg  = darken(accent, 0.58)
+    dark_bg2 = darken(accent, 0.72)
+
+    MILESTONES = {
+        "cicd": [("2004","CruiseControl","First CI server, polling SVN"),
+                 ("2011","Jenkins","Open-source CI king, 1000+ plugins"),
+                 ("2016","GitLab CI","Pipeline-as-code era begins"),
+                 ("2018","GitHub Actions","YAML workflows + marketplace"),
+                 ("2021","DORA Metrics","Measuring DevOps performance"),
+                 ("2024","AI-Assisted CI","LLM test gen + PR review bots"),
+                 ("2026","Autonomous CD","Self-healing auto-rollback agents")],
+        "llm": [("2017","Transformer","Attention is All You Need paper"),
+                ("2018","BERT + GPT","Bidirectional and generative"),
+                ("2020","GPT-3","175B params, few-shot learning"),
+                ("2022","InstructGPT","RLHF alignment, ChatGPT launch"),
+                ("2023","Llama + Claude","Open weights, constitutional AI"),
+                ("2024","MoE Models","GPT-4, Mixtral sparse routing"),
+                ("2026","Agentic LLMs","Tool use, MCP, long context")],
+        "docker": [("2013","Docker 0.1","LXC wrapper for dev-to-prod parity"),
+                   ("2015","Compose","Multi-container local dev stacks"),
+                   ("2016","Swarm","Native clustering, declarative YAML"),
+                   ("2017","K8s wins","K8s standard, Docker as runtime"),
+                   ("2020","containerd","CNCF grad, OCI compliant runtime"),
+                   ("2022","BuildKit","Layer cache, multi-arch, SBOM"),
+                   ("2025","Wasm + Docker","WebAssembly runtime alternative")],
+        "kube": [("2014","K8s v0.1","Google open-sources Borg successor"),
+                 ("2016","K8s 1.4","Helm charts, RBAC, StatefulSets"),
+                 ("2018","CNCF Grad","Production ready, major cloud support"),
+                 ("2020","K8s 1.18","Topology spread, sidecar containers"),
+                 ("2022","Gateway API","Ingress v2 with traffic policies"),
+                 ("2024","K8s 1.30","In-place pod resize, custom schedulers"),
+                 ("2026","AI Workloads","GPU pooling, MIG, KubeAI operators")],
+        "kafka": [("2011","Kafka 0.7","LinkedIn open-source pub-sub log"),
+                  ("2014","Kafka 0.9","Consumer groups + security + replication"),
+                  ("2016","Kafka Streams","Native stream processing library"),
+                  ("2018","ksqlDB","SQL interface for event streaming"),
+                  ("2021","KRaft Mode","ZooKeeper-free faster failover"),
+                  ("2023","Tiered Storage","S3-backed log, infinite retention"),
+                  ("2025","Kafka 4.0","KRaft GA, 2M msg/s per broker")],
+    }
+    tid = topic_id.lower()
+    key = next((k for k in MILESTONES if k in tid), None)
+    milestones = MILESTONES[key] if key else [
+        ("Phase 1","Foundation","Core infrastructure established"),
+        ("Phase 2","Build","Services and APIs developed"),
+        ("Phase 3","Integrate","Systems connected, data flowing"),
+        ("Phase 4","Test","Load testing and security scans"),
+        ("Phase 5","Deploy","Staged rollout to production"),
+        ("Phase 6","Operate","Monitor, alert, and improve"),
+        ("Phase 7","Scale","Optimise and grow capacity"),
+    ]
+
+    svg = ""
+    n = len(milestones)
+    spine_y = H // 2 - 10
+    pad = 55
+    span_w = W - pad * 2
+    step = span_w // (n - 1)
+
+    svg += f'<line x1="{pad}" y1="{spine_y}" x2="{W-pad}" y2="{spine_y}" stroke="{lighten(accent,0.3)}" stroke-width="3" class="flow"/>'
+
+    for i, (year, title, desc) in enumerate(milestones):
+        col = C[i % len(C)]
+        mx = pad + i * step
+        above = (i % 2 == 0)
+
+        card_h = 88
+        card_w = min(step - 8, 115)
+        cy_card = spine_y - card_h - 38 if above else spine_y + 38
+
+        delay = f"animation-delay:{i*0.09:.2f}s"
+        stem_y1 = spine_y - 12 if above else spine_y + 12
+        stem_y2 = cy_card + card_h if above else cy_card
+        svg += f'<line x1="{mx}" y1="{stem_y1}" x2="{mx}" y2="{stem_y2}" stroke="{col}" stroke-width="2" stroke-dasharray="4 2"/>'
+
+        svg += f'<circle cx="{mx}" cy="{spine_y}" r="10" fill="{dark_bg2}" stroke="{col}" stroke-width="2.5" class="pu"/>'
+        svg += f'<circle cx="{mx}" cy="{spine_y}" r="5" fill="{col}"/>'
+
+        svg += f'<rect x="{mx-card_w//2}" y="{cy_card}" width="{card_w}" height="{card_h}" rx="10" fill="{darken(col,0.52)}" stroke="{lighten(col,0.28)}" stroke-width="1.5" class="fi" style="{delay}"/>'
+        svg += f'<rect x="{mx-card_w//2}" y="{cy_card}" width="{card_w}" height="4" rx="2" fill="{col}"/>'
+        svg += f'<text x="{mx}" y="{cy_card+18}" text-anchor="middle" fill="{col}" font-size="9" font-weight="900">{xe(year)}</text>'
+        svg += f'<text x="{mx}" y="{cy_card+34}" text-anchor="middle" fill="white" font-size="9.5" font-weight="800">{xe(clamp(title,13))}</text>'
+        lines = wrap_lines(desc, card_w // 5)
+        for j, ln in enumerate(lines[:3]):
+            svg += f'<text x="{mx}" y="{cy_card+50+j*12}" text-anchor="middle" fill="{lighten(col,0.45)}" font-size="7.5">{xe(ln)}</text>'
+
+    return _wrap(svg, W, H, topic_name, "Evolution Timeline", accent, dark_bg2, dark_bg, dark=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 4 — HEXAGON GRID  (honeycomb concept cells, dark theme)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_hexagon(topic_id, topic_name, C):
+    W, H = 900, 600
+    accent = C[0]
+    dark_bg  = darken(accent, 0.62)
+    dark_bg2 = darken(accent, 0.74)
+
+    HEXES = {
+        "llm": [("GPT-4o",C[0]),("Claude 3.5",C[1]),("Gemini 1.5",C[2]),
+                ("Llama 3.1",C[3]),("Mistral",C[4]),("Qwen 2.5",C[5]),
+                ("Attention",C[0]),("RLHF",C[1]),("KV Cache",C[2]),
+                ("LoRA",C[3]),("MoE",C[4]),("RAG",C[5]),
+                ("Embeddings",C[0]),("Tokenizer",C[1]),("Safety",C[2])],
+        "kube": [("Pod",C[0]),("Deployment",C[1]),("StatefulSet",C[2]),
+                 ("DaemonSet",C[3]),("Service",C[4]),("Ingress",C[5]),
+                 ("HPA",C[0]),("PVC",C[1]),("ConfigMap",C[2]),
+                 ("Secret",C[3]),("RBAC",C[4]),("NetworkPol",C[5]),
+                 ("Helm",C[0]),("Operator",C[1]),("etcd",C[2])],
+        "aws": [("EC2",C[0]),("Lambda",C[1]),("ECS",C[2]),
+                ("S3",C[3]),("RDS",C[4]),("DynamoDB",C[5]),
+                ("VPC",C[0]),("ALB",C[1]),("CloudFront",C[2]),
+                ("IAM",C[3]),("KMS",C[4]),("GuardDuty",C[5]),
+                ("SQS",C[0]),("SNS",C[1]),("Route 53",C[2])],
+        "docker": [("FROM",C[0]),("RUN",C[1]),("COPY",C[2]),
+                   ("ENV",C[3]),("EXPOSE",C[4]),("CMD",C[5]),
+                   ("ENTRYPOINT",C[0]),("VOLUME",C[1]),("ARG",C[2]),
+                   ("HEALTHCHECK",C[3]),("USER",C[4]),("WORKDIR",C[5]),
+                   ("Multi-stage",C[0]),("BuildKit",C[1]),("Compose",C[2])],
+        "solid": [("SRP",C[0]),("OCP",C[1]),("LSP",C[2]),
+                  ("ISP",C[3]),("DIP",C[4]),("Factory",C[5]),
+                  ("Strategy",C[0]),("Observer",C[1]),("Decorator",C[2]),
+                  ("Repository",C[3]),("Command",C[4]),("Facade",C[5]),
+                  ("Adapter",C[0]),("DRY",C[1]),("YAGNI",C[2])],
+        "kafka": [("Producer",C[0]),("Consumer",C[1]),("Broker",C[2]),
+                  ("Topic",C[3]),("Partition",C[4]),("Offset",C[5]),
+                  ("Consumer Grp",C[0]),("Schema Reg",C[1]),("KRaft",C[2]),
+                  ("Flink",C[3]),("ksqlDB",C[4]),("Streams",C[5]),
+                  ("Dead Letter",C[0]),("Compaction",C[1]),("Tiered",C[2])],
+    }
+    tid = topic_id.lower()
+    key = next((k for k in HEXES if k in tid), None)
+    hexes = HEXES[key] if key else [
+        ("Ingest",C[0]),("Process",C[1]),("Store",C[2]),
+        ("Cache",C[3]),("Serve",C[4]),("Monitor",C[5]),
+        ("Alert",C[0]),("Scale",C[1]),("Deploy",C[2]),
+        ("Test",C[3]),("Secure",C[4]),("Govern",C[5]),
+        ("Observe",C[0]),("Optimise",C[1]),("Recover",C[2]),
+    ]
+
+    def hex_points(cx, cy, r):
+        pts = []
+        for k in range(6):
+            a = math.radians(60 * k - 30)
+            pts.append(f"{cx+r*math.cos(a):.1f},{cy+r*math.sin(a):.1f}")
+        return " ".join(pts)
+
+    R = 52
+    rows_layout = [4, 5, 4, 2]
+    start_y = 75
+    row_h = R * 1.72
+
+    svg = ""
+    idx = 0
+    for row, n_cols in enumerate(rows_layout):
+        offset_x = (W - (n_cols * R * 1.73)) / 2 + R
+        cy_row = start_y + row * row_h + (R * 0.86 if row % 2 else 0)
+        for col in range(n_cols):
+            if idx >= len(hexes): break
+            label, col_hex = hexes[idx]
+            hx = offset_x + col * R * 1.73 + (R * 0.865 if row % 2 else 0)
+
+            delay = f"animation-delay:{idx*0.04:.2f}s"
+            pts = hex_points(hx, cy_row, R - 2)
+            inner_pts = hex_points(hx, cy_row, R - 6)
+
+            svg += f'<polygon points="{pts}" fill="{darken(col_hex,0.55)}" stroke="{lighten(col_hex,0.3)}" stroke-width="1.8" class="fi" style="{delay}"/>'
+            svg += f'<polygon points="{inner_pts}" fill="{darken(col_hex,0.62)}" opacity="0.6"/>'
+
+            lines = wrap_lines(label, 9)
+            base_y = cy_row - (len(lines)-1)*7
+            for li, ln in enumerate(lines):
+                svg += f'<text x="{hx:.1f}" y="{base_y+li*14:.1f}" text-anchor="middle" fill="white" font-size="9.5" font-weight="800">{xe(ln)}</text>'
+            idx += 1
+
+    return _wrap(svg, W, H, topic_name, "Concept Grid", accent, dark_bg2, dark_bg, dark=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 5 — COMPARISON TABLE  (side-by-side matrix)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_comparison(topic_id, topic_name, C):
+    W, H = 900, 580
+    accent = C[0]
+    bg_top = lighten(accent, 0.90)
+    bg_bot = lighten(accent, 0.94)
+
+    TABLES = {
+        "kafka": {
+            "cols": ["Kafka","RabbitMQ","Redis Streams","Kinesis","Pulsar"],
+            "rows": [
+                ("Throughput",    ["Millions/s","100k/s","500k/s","1M/s","1M/s"]),
+                ("Retention",     ["Configurable","Queue-depth","Memory/disk","7 days","Infinite"]),
+                ("Ordering",      ["Per-partition","Per-queue","Per-stream","Per-shard","Per-partition"]),
+                ("Replay",        ["Yes","No","Yes","Yes","Yes"]),
+                ("Geo-replicate", ["MirrorMaker2","Shovel","Manual","Built-in","Built-in"]),
+                ("Best For",      ["Event stream","Task queue","Low-latency","AWS-native","Multi-tenant"]),
+            ],
+        },
+        "rag": {
+            "cols": ["RAG","Fine-tuning","Full Training","Prompt Eng.","Hybrid"],
+            "rows": [
+                ("Cost",          ["Low","Medium","Very High","Zero","Medium"]),
+                ("Freshness",     ["Real-time","Static","Static","Static","Real-time"]),
+                ("Accuracy",      ["High","High","Highest","Moderate","Highest"]),
+                ("Setup time",    ["Days","Weeks","Months","Hours","Weeks"]),
+                ("Hallucination", ["Low","Medium","Low","High","Low"]),
+                ("Best For",      ["Live data","Domain adapt","Novel tasks","Quick tests","Production"]),
+            ],
+        },
+        "docker": {
+            "cols": ["Docker","Podman","containerd","LXC","Wasm"],
+            "rows": [
+                ("Daemon",        ["Yes","No (rootless)","Yes","Yes","No"]),
+                ("Compose",       ["Native","Compatible","No","No","Partial"]),
+                ("K8s runtime",   ["Deprecated","via CRI","Default","No","Emerging"]),
+                ("Root required", ["Optional","No","Yes","Yes","No"]),
+                ("Image format",  ["OCI","OCI","OCI","LXD","WASI"]),
+                ("Best For",      ["Dev teams","Security","Production","VMs","Edge"]),
+            ],
+        },
+        "api": {
+            "cols": ["REST","GraphQL","gRPC","WebSocket","AsyncAPI"],
+            "rows": [
+                ("Payload",       ["JSON","JSON","Protobuf","Binary/text","JSON/Avro"]),
+                ("Streaming",     ["Limited","Subscriptions","Bi-direct","Native","Native"]),
+                ("Type safety",   ["OpenAPI","Schema","Proto IDL","None","AsyncAPI spec"]),
+                ("Caching",       ["HTTP native","Hard","No","No","No"]),
+                ("Browser supp.", ["Yes","Yes","gRPC-web","Yes","Partial"]),
+                ("Best For",      ["Public APIs","Flexible UI","Internal svcs","Real-time","Event-driven"]),
+            ],
+        },
+        "kube": {
+            "cols": ["K8s","Swarm","Nomad","Mesos","ECS"],
+            "rows": [
+                ("Complexity",    ["High","Low","Medium","Very High","Low"]),
+                ("Auto-scaling",  ["HPA + VPA","Limited","Yes","Yes","Yes"]),
+                ("Multi-cloud",   ["Yes","Partial","Yes","Yes","AWS only"]),
+                ("Ecosystem",     ["Huge","Small","Growing","Declining","AWS-native"]),
+                ("Stateful wkld", ["StatefulSet","Volumes","Yes","Yes","EFS"]),
+                ("Best For",      ["Any scale","Small teams","Multi-runtime","Legacy","AWS shops"]),
+            ],
+        },
+    }
+    tid = topic_id.lower()
+    key = next((k for k in TABLES if k in tid), None)
+    if key:
+        data = TABLES[key]
+        cols = data["cols"]
+        rows = data["rows"]
+    else:
+        cols = ["Option A","Option B","Option C","Option D"]
+        rows = [
+            ("Performance",  ["High","Medium","Very High","Medium"]),
+            ("Complexity",   ["Low","Medium","High","Low"]),
+            ("Cost",         ["Free","Paid","Enterprise","OSS"]),
+            ("Scalability",  ["Linear","Limited","Excellent","Good"]),
+            ("Maturity",     ["Stable","Beta","Stable","Stable"]),
+            ("Best For",     ["Dev","Prototyping","Production","Edge"]),
+        ]
+
+    n_cols = len(cols)
+    n_rows = len(rows)
+    pad = 20
+    label_w = 130
+    avail_w = W - pad * 2 - label_w
+    col_w = avail_w // n_cols
+    row_h = min(56, (H - 130) // (n_rows + 1))
+    tbl_x = pad
+    tbl_y = 72
+
+    svg = ""
+    for ci, col_name in enumerate(cols):
+        col_color = C[ci % len(C)]
+        hx = tbl_x + label_w + ci * col_w
+        svg += f'<rect x="{hx}" y="{tbl_y}" width="{col_w-2}" height="{row_h}" rx="8" fill="{col_color}" class="fi" style="animation-delay:{ci*0.07:.2f}s"/>'
+        svg += f'<text x="{hx+col_w//2-1}" y="{tbl_y+row_h//2+5}" text-anchor="middle" fill="white" font-size="10" font-weight="800">{xe(clamp(col_name,11))}</text>'
+
+    svg += f'<rect x="{tbl_x}" y="{tbl_y}" width="{label_w-4}" height="{row_h}" rx="8" fill="{darken(accent,0.35)}"/>'
+    svg += f'<text x="{tbl_x+label_w//2}" y="{tbl_y+row_h//2+5}" text-anchor="middle" fill="white" font-size="9" font-weight="700">Feature</text>'
+
+    for ri, (row_label, values) in enumerate(rows):
+        ry = tbl_y + (ri + 1) * row_h
+        bg = lighten(accent, 0.93) if ri % 2 == 0 else "white"
+
+        svg += f'<rect x="{tbl_x}" y="{ry}" width="{label_w-4}" height="{row_h-1}" fill="{lighten(accent,0.80)}"/>'
+        svg += f'<text x="{tbl_x+10}" y="{ry+row_h//2+4}" fill="{darken(accent,0.15)}" font-size="9.5" font-weight="700">{xe(row_label)}</text>'
+
+        for ci, val in enumerate(values[:n_cols]):
+            col_color = C[ci % len(C)]
+            cx2 = tbl_x + label_w + ci * col_w
+            svg += f'<rect x="{cx2}" y="{ry}" width="{col_w-2}" height="{row_h-1}" fill="{bg}"/>'
+            is_yes = val.lower() in ["yes","native","built-in","yes (rootless)"]
+            is_no  = val.lower() in ["no","deprecated","partial"]
+            fill_c = "#059669" if is_yes else ("#DC2626" if is_no else darken(col_color, 0.05))
+            svg += f'<text x="{cx2+col_w//2-1}" y="{ry+row_h//2+4}" text-anchor="middle" fill="{fill_c}" font-size="9" font-weight="600">{xe(clamp(val,13))}</text>'
+
+    tbl_h = (n_rows + 1) * row_h
+    tbl_w = label_w + n_cols * col_w - 2
+    svg += f'<rect x="{tbl_x}" y="{tbl_y}" width="{tbl_w}" height="{tbl_h}" rx="8" fill="none" stroke="{lighten(accent,0.5)}" stroke-width="1.5"/>'
+
+    return _wrap(svg, W, H, topic_name, "Comparison Matrix", accent, bg_top, bg_bot)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 6 — CIRCULAR ORBIT  (central hub + inner + outer satellites)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_orbit(topic_id, topic_name, C):
+    W, H = 900, 600
+    accent = C[0]
+    dark_bg  = darken(accent, 0.62)
+    dark_bg2 = darken(accent, 0.74)
+
+    ORBITS = {
+        "system": {
+            "center": ("System\nDesign","Scale to millions"),
+            "inner": [("Load\nBalancer","Layer-7 routing",C[1]),
+                      ("API\nGateway","Rate limit + auth",C[2]),
+                      ("Cache","Redis + CDN edge",C[3]),
+                      ("Database","PostgreSQL replica",C[4]),
+                      ("Queue","Kafka + SQS",C[5])],
+            "outer": [("CDN","Edge delivery"),("Auth","JWT / OAuth2"),
+                      ("Search","Elasticsearch"),("Blob","S3 / GCS"),
+                      ("Monitor","Prometheus"),("Tracing","Jaeger"),
+                      ("Alerting","PagerDuty"),("CI/CD","GitHub Actions")],
+        },
+        "mlops": {
+            "center": ("MLOps\nPlatform","Train to production"),
+            "inner": [("Data\nPipeline","ETL + features",C[1]),
+                      ("Training","GPU cluster",C[2]),
+                      ("Registry","Model versions",C[3]),
+                      ("Serving","Seldon / Triton",C[4]),
+                      ("Monitor","Drift detection",C[5])],
+            "outer": [("Feature Store","Feast / Tecton"),("MLflow","Experiments"),
+                      ("DVC","Data versioning"),("Kubeflow","Pipelines"),
+                      ("Evidently","Drift alerts"),("RLHF","Feedback loop"),
+                      ("A/B Test","Champ/challenger"),("Grafana","Dashboards")],
+        },
+        "aws": {
+            "center": ("AWS\nCloud","Global infrastructure"),
+            "inner": [("Compute","EC2 / Lambda / ECS",C[1]),
+                      ("Storage","S3 / EFS / EBS",C[2]),
+                      ("Database","RDS / DynamoDB",C[3]),
+                      ("Network","VPC / ALB / CF",C[4]),
+                      ("Security","IAM / KMS / GD",C[5])],
+            "outer": [("Route 53","DNS"),("CloudFront","CDN"),
+                      ("SQS / SNS","Messaging"),("ElastiCache","Redis"),
+                      ("Redshift","Analytics"),("Glue","ETL"),
+                      ("Bedrock","AI / ML"),("CloudWatch","Observability")],
+        },
+        "zero": {
+            "center": ("Zero\nTrust","Never trust,\nalways verify"),
+            "inner": [("Identity","IdP + MFA + PAM",C[1]),
+                      ("Policy","OPA + ABAC rules",C[2]),
+                      ("Network","mTLS + micro-seg",C[3]),
+                      ("Device","Posture checks",C[4]),
+                      ("Data","DLP + encryption",C[5])],
+            "outer": [("SPIFFE","Workload ID"),("FIDO2","Passwordless"),
+                      ("SIEM","Log analysis"),("SOAR","Auto-remediate"),
+                      ("EDR","Endpoint detect"),("Deception","Honeypots"),
+                      ("Vault","Secrets mgmt"),("PKI","Cert authority")],
+        },
+        "agent": {
+            "center": ("AI\nAgents","Autonomous systems"),
+            "inner": [("Planner","Decompose goals",C[1]),
+                      ("Tool Use","Function calls",C[2]),
+                      ("Memory","Short + long term",C[3]),
+                      ("Critic","Self-reflection",C[4]),
+                      ("Router","Skill selection",C[5])],
+            "outer": [("LangGraph","Orchestration"),("AutoGen","Multi-agent"),
+                      ("MCP","Tool protocol"),("Vector DB","Memory store"),
+                      ("Web Search","Real-time data"),("Code Exec","Sandbox"),
+                      ("Human Loop","Approval gate"),("Observ.","LangSmith")],
+        },
+    }
+    tid = topic_id.lower()
+    key = next((k for k in ORBITS if k in tid), "system")
+    orb = ORBITS.get(key, ORBITS["system"])
+    center_label, center_sub = orb["center"]
+    inner = orb["inner"]
+    outer = orb["outer"]
+
+    cx, cy = W // 2, H // 2 + 5
+    svg = ""
+
+    svg += f'<circle cx="{cx}" cy="{cy}" r="160" fill="none" stroke="{rgba(accent,0.12)}" stroke-width="1" stroke-dasharray="5 4"/>'
+    svg += f'<circle cx="{cx}" cy="{cy}" r="268" fill="none" stroke="{rgba(accent,0.07)}" stroke-width="1" stroke-dasharray="3 5"/>'
+
+    svg += f'<circle cx="{cx}" cy="{cy}" r="66" fill="{rgba(accent,0.15)}" class="pu"/>'
+    svg += f'<circle cx="{cx}" cy="{cy}" r="62" fill="{darken(accent,0.50)}" stroke="{lighten(accent,0.3)}" stroke-width="2"/>'
+    for li, ln in enumerate(center_label.split("\n")):
+        svg += f'<text x="{cx}" y="{cy-8+li*17}" text-anchor="middle" fill="white" font-size="13" font-weight="900">{xe(ln)}</text>'
+    for li2, ln2 in enumerate(center_sub.split("\n")):
+        svg += f'<text x="{cx}" y="{cy+22+li2*12}" text-anchor="middle" fill="{lighten(accent,0.55)}" font-size="8.5">{xe(ln2)}</text>'
+
+    n_inner = len(inner)
+    for i, (label, sub, col) in enumerate(inner):
+        a = math.radians(-90 + i * 360 / n_inner)
+        R_inner = 158
+        sx = cx + R_inner * math.cos(a)
+        sy = cy + R_inner * math.sin(a)
+
+        svg += (f'<line x1="{cx+63*math.cos(a):.1f}" y1="{cy+63*math.sin(a):.1f}" '
+                f'x2="{sx-38*math.cos(a):.1f}" y2="{sy-38*math.sin(a):.1f}" '
+                f'stroke="{col}" stroke-width="1.8" stroke-dasharray="5 3" class="flow" style="animation-delay:{i*0.12:.2f}s"/>')
+
+        r_sat = 38
+        svg += f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="{r_sat}" fill="{darken(col,0.52)}" stroke="{col}" stroke-width="2" class="fi" style="animation-delay:{i*0.1:.2f}s"/>'
+        for li, ln in enumerate(label.split("\n")):
+            svg += f'<text x="{sx:.1f}" y="{sy-5+li*13:.1f}" text-anchor="middle" fill="white" font-size="9" font-weight="800">{xe(clamp(ln,10))}</text>'
+        svg += f'<text x="{sx:.1f}" y="{sy+23:.1f}" text-anchor="middle" fill="{lighten(col,0.45)}" font-size="7.5">{xe(clamp(sub,14))}</text>'
+
+    n_outer = len(outer)
+    for i, (label, sub) in enumerate(outer):
+        a = math.radians(-90 + i * 360 / n_outer)
+        R_outer = 268
+        ox = cx + R_outer * math.cos(a)
+        oy = cy + R_outer * math.sin(a)
+        col = C[i % len(C)]
+        w_pill, h_pill = 82, 26
+        svg += f'<rect x="{ox-w_pill//2:.1f}" y="{oy-h_pill//2:.1f}" width="{w_pill}" height="{h_pill}" rx="13" fill="{darken(col,0.55)}" stroke="{lighten(col,0.28)}" stroke-width="1.2" class="fi" style="animation-delay:{i*0.06:.2f}s"/>'
+        svg += f'<text x="{ox:.1f}" y="{oy-2:.1f}" text-anchor="middle" fill="white" font-size="8.5" font-weight="800">{xe(label)}</text>'
+        svg += f'<text x="{ox:.1f}" y="{oy+10:.1f}" text-anchor="middle" fill="{lighten(col,0.45)}" font-size="7">{xe(sub)}</text>'
+
+    return _wrap(svg, W, H, topic_name, "Ecosystem Map", accent, dark_bg2, dark_bg, dark=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 7 — CARD GRID  (grouped cards, light theme)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_card_grid(topic_id, topic_name, C):
+    W, H = 900, 580
+    accent = C[0]
+    bg_top = lighten(accent, 0.91)
+    bg_bot = lighten(accent, 0.95)
+    P = 18
+
+    CARDS = {
+        "system": [("Client Layer",["Browser","Mobile","Desktop","IoT"],C[0]),
+                   ("Edge + Auth",["CDN","Load Balancer","API Gateway","WAF"],C[1]),
+                   ("Microservices",["User Svc","Order Svc","Payment","Notifs"],C[2]),
+                   ("Messaging",["Kafka","RabbitMQ","Redis PubSub","SQS"],C[3]),
+                   ("Data Layer",["PostgreSQL","Redis","MongoDB","S3"],C[4]),
+                   ("Observability",["Prometheus","Grafana","Jaeger","PagerDuty"],C[5])],
+        "llm": [("Foundation Models",["GPT-4o","Claude 3.5","Gemini","Llama 3.1"],C[0]),
+                ("Context + RAG",["Vector DB","Chunking","Embeddings","Reranker"],C[1]),
+                ("Agent Layer",["ReAct Loop","Tool Use","Memory","Planner"],C[2]),
+                ("Serving",["vLLM","TRT-LLM","Batching","KV Cache"],C[3]),
+                ("Guardrails",["PII Filter","Toxic Check","RAGAS","LangSmith"],C[4]),
+                ("Infra",["GPU cluster","Kubernetes","Prometheus","Cost track"],C[5])],
+        "kube": [("Control Plane",["API Server","Scheduler","etcd","Controller Mgr"],C[0]),
+                 ("Worker Nodes",["Kubelet","kube-proxy","containerd","CNI"],C[1]),
+                 ("Workloads",["Deployment","StatefulSet","DaemonSet","CronJob"],C[2]),
+                 ("Networking",["Service","Ingress","Istio","NetworkPolicy"],C[3]),
+                 ("Storage",["PersistentVol","StorageClass","ConfigMap","Secrets"],C[4]),
+                 ("Observability",["Prometheus","Grafana","Loki","OpenTelemetry"],C[5])],
+    }
+    tid = topic_id.lower()
+    key = next((k for k in CARDS if k in tid), None)
+    groups = CARDS[key] if key else [
+        ("Ingest",["Batch ETL","Streaming","CDC","REST Pull"],C[0]),
+        ("Process",["Spark","Flink","dbt","ksqlDB"],C[1]),
+        ("Store",["Delta Lake","Iceberg","Hudi","Hive Meta"],C[2]),
+        ("Serve",["Trino","Athena","BI Tools","APIs"],C[3]),
+        ("Govern",["Data Catalog","Lineage","Quality","Masking"],C[4]),
+        ("Monitor",["Grafana","Great Expect.","Alerts","SLOs"],C[5]),
+    ]
+
+    cols = 3
+    rows_g = math.ceil(len(groups) / cols)
+    gw = (W - P * 2 - (cols - 1) * 14) // cols
+    gh = (H - 80 - (rows_g - 1) * 14) // rows_g
+
+    svg = ""
+    for gi, (group_name, items, col) in enumerate(groups):
+        gx = P + (gi % cols) * (gw + 14)
+        gy = 70 + (gi // cols) * (gh + 14)
+        delay = f"animation-delay:{gi*0.07:.2f}s"
+
+        svg += f'<rect x="{gx+2}" y="{gy+2}" width="{gw}" height="{gh}" rx="10" fill="rgba(0,0,0,0.06)"/>'
+        svg += f'<rect x="{gx}" y="{gy}" width="{gw}" height="{gh}" rx="10" fill="{lighten(col,0.88)}" stroke="{lighten(col,0.5)}" stroke-width="1.5" class="fi" style="{delay}"/>'
+        svg += f'<rect x="{gx}" y="{gy}" width="{gw}" height="26" rx="10" fill="{col}"/>'
+        svg += f'<rect x="{gx}" y="{gy+18}" width="{gw}" height="8" fill="{col}"/>'
+        svg += f'<text x="{gx+gw//2}" y="{gy+17}" text-anchor="middle" fill="white" font-size="10" font-weight="800" letter-spacing="0.5">{xe(group_name.upper())}</text>'
+
+        n_items = len(items)
+        iw = (gw - 16) // min(n_items, 2)
+        ih = (gh - 38) // math.ceil(n_items / 2) - 4
+        for ii, item in enumerate(items):
+            icol = C[(gi + ii) % len(C)]
+            ix = gx + 8 + (ii % 2) * iw
+            iy = gy + 30 + (ii // 2) * (ih + 4)
+            svg += f'<rect x="{ix}" y="{iy}" width="{iw-4}" height="{ih}" rx="7" fill="white" stroke="{lighten(icol,0.4)}" stroke-width="1"/>'
+            svg += f'<rect x="{ix}" y="{iy}" width="{iw-4}" height="3" rx="1" fill="{icol}"/>'
+            svg += f'<text x="{ix+(iw-4)//2}" y="{iy+ih//2+4}" text-anchor="middle" fill="{darken(icol,0.05)}" font-size="8.5" font-weight="700">{xe(clamp(item,10))}</text>'
+
+    return _wrap(svg, W, H, topic_name, "Architecture", accent, bg_top, bg_bot)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  DISPATCH — pick style per topic (override map + hash fallback)
+# ══════════════════════════════════════════════════════════════════════════════
+
+STYLES = [
+    _style_vertical_flow,   # 0 — numbered pipeline steps
+    _style_mind_map,        # 1 — radial hub + branches
+    _style_pyramid,         # 2 — stacked trapezoids
+    _style_timeline,        # 3 — horizontal spine, alternating cards
+    _style_hexagon,         # 4 — honeycomb concept grid
+    _style_comparison,      # 5 — side-by-side matrix
+    _style_orbit,           # 6 — central hub + inner + outer rings
+    _style_card_grid,       # 7 — grouped card layout
+]
+
+TOPIC_STYLE_OVERRIDES = {
+    "llm-architecture":  1,   # mind map — concepts radiate naturally
+    "ai-agents":         6,   # orbit — agent ecosystem
+    "mlops-pipeline":    0,   # vertical flow — pipeline steps
+    "rag-systems":       0,   # vertical flow — pipeline steps
+    "kubernetes":        4,   # hexagon grid — many K8s concepts
+    "docker":            4,   # hexagon grid — Dockerfile cheatsheet
+    "aws-architecture":  6,   # orbit — AWS service ecosystem
+    "cicd-pipelines":    3,   # timeline — CI/CD history
+    "system-design":     7,   # card grid — layered architecture
+    "api-design":        5,   # comparison — protocol matrix
+    "git-workflow":      3,   # timeline — branching evolution
+    "solid-principles":  2,   # pyramid — principle hierarchy
+    "zero-trust":        1,   # mind map — concept web
+    "devsecops":         0,   # vertical flow — shift-left pipeline
+    "data-lakehouse":    2,   # pyramid — medallion architecture layers
+    "kafka-streaming":   5,   # comparison — vs other brokers
+}
+
+
+def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "") -> str:
+    C = get_pal(topic_id)
+    tid = topic_id.lower()
+
+    style_idx = None
+    for key, idx in TOPIC_STYLE_OVERRIDES.items():
+        if key in tid:
+            style_idx = idx
+            break
+
+    if style_idx is None:
+        h = int(hashlib.md5(topic_id.encode()).hexdigest(), 16)
+        style_idx = h % len(STYLES)
+
+    fn = STYLES[style_idx]
+    try:
+        return fn(topic_id, topic_name, C)
+    except Exception as e:
+        log.warning(f"Style {style_idx} failed ({e}), falling back to card grid")
+        return _style_card_grid(topic_id, topic_name, C)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  DiagramGenerator — interface used by agent.py
+# ══════════════════════════════════════════════════════════════════════════════
 
 class DiagramGenerator:
     def __init__(self):
         Path(OUTPUT_DIR).mkdir(exist_ok=True)
-        log.info("Diagram output dir: "+OUTPUT_DIR+"/")
+        log.info("Diagram output dir: " + OUTPUT_DIR + "/")
 
-    def save_svg(self,svg_content,topic_id,topic_name="",diagram_type="Architecture Diagram"):
-        ts=datetime.now().strftime("%Y%m%d_%H%M%S"); filename=f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
-        svg=make_diagram(topic_name or topic_id,topic_id,diagram_type)
-        with open(filename,"w",encoding="utf-8") as f: f.write(svg)
-        size_kb=os.path.getsize(filename)/1024
-        log.info(f"Diagram saved: {filename} ({round(size_kb,1)} KB)")
+    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram"):
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
+        svg = make_diagram(topic_name or topic_id, topic_id, diagram_type)
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(svg)
+        size_kb = os.path.getsize(filename) / 1024
+        log.info(f"Diagram saved: {filename} ({round(size_kb, 1)} KB)")
         return filename

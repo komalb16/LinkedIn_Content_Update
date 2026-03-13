@@ -4,34 +4,41 @@
   "weekly": {
     "mon": {
       "enabled": true,
-      "time_ist": "10:00"
+      "time_ist": "10:00",
+      "time_utc": "04:30"
     },
     "tue": {
       "enabled": true,
-      "time_ist": "09:30"
+      "time_ist": "09:30",
+      "time_utc": "04:00"
     },
     "wed": {
       "enabled": true,
-      "time_ist": "09:30"
+      "time_ist": "09:30",
+      "time_utc": "04:00"
     },
     "thu": {
       "enabled": true,
-      "time_ist": "09:30"
+      "time_ist": "09:30",
+      "time_utc": "04:00"
     },
     "fri": {
       "enabled": true,
-      "time_ist": "20:35"
+      "time_ist": "20:35",
+      "time_utc": "15:05"
     },
     "sat": {
       "enabled": true,
-      "time_ist": "02:20"
+      "time_ist": "02:20",
+      "time_utc": "20:50"
     },
     "sun": {
       "enabled": false,
-      "time_ist": "10:00"
+      "time_ist": "10:00",
+      "time_utc": "04:30"
     }
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-07T16:55:28.405Z"
+  "updated_at": "2026-03-13T00:00:00.000Z"
 }

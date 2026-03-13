@@ -8,7 +8,7 @@ import os
 import sys
 import json
 import argparse
-from openai import OpenAI
+from groq import Groq
 from datetime import datetime
 from topic_manager import TopicManager
 from linkedin_poster import LinkedInPoster
@@ -84,7 +84,7 @@ Include:
     return post_text
 
 
-def generate_diagram(client: OpenAI, topic: dict, diagram_type: str) -> str:
+def generate_diagram(client: Groq, topic: dict, diagram_type: str) -> str:
     """Generate an SVG diagram for the given topic."""
     log.info(f"Generating {diagram_type} diagram for: {topic['name']}")
     
@@ -129,7 +129,7 @@ def run_agent(manual_topic_id: str = None, dry_run: bool = False):
         log.error("GROQ_API_KEY not set")
         sys.exit(1)
     
-    client = OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
+    client = Groq(api_key=api_key)
     topic_mgr = TopicManager()
     diagram_gen = DiagramGenerator()
     
