@@ -1503,12 +1503,10 @@ window.onload = () => {
   if (token) silentConn();
   setInterval(updNext, 60000);
 
-  // Auto-refresh run history every 5 minutes — no hard refresh needed
+  // Auto-refresh run list every 5 minutes — no hard refresh needed
   setInterval(() => {
     if (!document.hidden && REPO) { loadRuns(); loadStats(); }
   }, 5 * 60 * 1000);
-
-  // Refresh immediately when tab becomes visible again
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && REPO) { loadRuns(); loadStats(); }
   });
@@ -1691,13 +1689,12 @@ function saveSettings() {
         reg.addEventListener('updatefound', () => {
           const newSW = reg.installing;
           newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-              toast('🔄 Dashboard updated — refresh to apply', 'ok');
-            }
+            if (newSW.state === 'activated') { window.location.reload(); }
           });
         });
       })
-      .catch(() => {}); // silently ignore — SW is enhancement only
+      .catch(() => {});
+    navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
   });
 })();
 
@@ -2145,19 +2142,30 @@ async function silentConn() {
     try {
       r = await gh('/user');
     } catch(netErr) {
-      // Network not ready (e.g. laptop just woke up) — keep token, stay logged in
-      // The user can manually refresh if they want to force reconnect
+      if (!navigator.onLine) {
+        showDash(localStorage.getItem('gh_user') || '');
+        updateRepoDisplay();
+        toast('Network unavailable — showing cached data', 'inf');
+        return;
+      }
+      // Online but fetch threw — stale SW intercepting. Unregister and reload.
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      window.location.reload();
+      return;
+    }
+    if (r.status === 401) {
+      localStorage.removeItem('gh_token'); token = ''; return;
+    }
+    if (r.status === 503) {
       showDash(localStorage.getItem('gh_user') || '');
       updateRepoDisplay();
       toast('Network unavailable — showing cached data', 'inf');
       return;
     }
-    if (r.status === 401) {
-      // Truly invalid/expired token — clear it
-      localStorage.removeItem('gh_token'); token = ''; return;
-    }
     if (!r.ok) {
-      // GitHub API error (rate limit, server error) — keep token, show cached UI
       showDash(localStorage.getItem('gh_user') || '');
       updateRepoDisplay();
       return;
@@ -2501,10 +2509,15 @@ async function loadRuns() {
     allRuns = [...(di.workflow_runs||[]),...(dq.workflow_runs||[]),...(dc.workflow_runs||[])]
       .filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; })
       .sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
-    enrichRunTopics(allRuns.slice(0, 50)).then(() => applyRunFilter());
+    // Await full enrichment before rendering — isSkippedRun hides unenriched schedule runs
+    document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">🔍</div><span>Checking which runs are real posts...</span></div>';
+    const needsEnrich = allRuns.filter(r => _topicCache[r.id] === undefined);
+    for (let i = 0; i < needsEnrich.length; i += 50) {
+      await enrichRunTopics(needsEnrich.slice(i, i + 50));
+    }
     applyRunFilter();
     const tsEl = document.getElementById('lastRefreshed');
-    if (tsEl) { const n = new Date(); tsEl.textContent = 'Updated ' + n.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); tsEl.title = 'Last fetched: ' + n.toLocaleString(); }
+    if (tsEl) { const n = new Date(); tsEl.textContent = 'Updated ' + n.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); tsEl.title = n.toLocaleString(); }
   } catch(e) {
     document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">❌</div><span>Could not load runs: '+e.message+'</span></div>';
   }
@@ -2542,17 +2555,16 @@ function runDurMs(r) {
 }
 
 function isSkippedRun(r) {
-  // For schedule (cron) runs: only show runs that ACTUALLY POSTED.
-  // Real posts have the bookmark step "✅ Posted · TOPIC" in their job steps.
-  // Heartbeat/skip cron runs never reach that step and are filtered out.
+  // Schedule (cron) runs: only show if enrichment confirmed a real post.
   if (r.event === 'schedule') {
     if (r.conclusion === 'skipped')      return true;
     if (r.conclusion === 'cancelled')    return true;
-    if (_topicCache[r.id] === false)     return true;    // enriched, no bookmark = heartbeat
-    if (_topicCache[r.id] === undefined) return true;    // hide until enrichment confirms
-    return false;  // _topicCache has topic or __posted__ = confirmed real post
+    if (_topicCache[r.id] === false)     return true;  // no bookmark = heartbeat
+    if (_topicCache[r.id] === undefined) return true;  // not yet enriched — hide until confirmed
+    return false;  // bookmark found = real post, show it
   }
-  // workflow_dispatch (manual): always show, only hide explicit GitHub-level skips
+  // workflow_dispatch (manual): ALWAYS show — user triggered it, it's a real run.
+  // Never hide based on enrichment state, only hide GitHub-level skips.
   if (r.conclusion === 'skipped') return true;
   return false;
 }
@@ -2563,11 +2575,7 @@ let _triggerFilter = 'all';
 
 function setTriggerFilter(key, btn) {
   _triggerFilter = key;
-  // Clear active state from all trigger filter pills
-  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => {
-    b.classList.remove('act-all', 'act', 'act-ok', 'act-fail');
-  });
-  // Apply correct active class: all → act-all, others → act
+  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => b.classList.remove('act-all','act'));
   btn.classList.add(key === 'all' ? 'act-all' : 'act');
   applyRunFilter();
 }
@@ -2659,8 +2667,8 @@ async function enrichRunTopics(runs) {
   const toFetch = runs.filter(r =>
     r.conclusion !== 'skipped' &&
     r.conclusion !== 'cancelled' &&
-    _topicCache[r.id] === undefined   // not yet fetched
-  ).slice(0, 50);  // increased from 20 → 50 so history loads topics fully
+    _topicCache[r.id] === undefined
+  ).slice(0, 50);
   if (!toFetch.length) return;
 
   await Promise.all(toFetch.map(async r => {
@@ -2694,7 +2702,10 @@ async function enrichRunTopics(runs) {
       // Mark as enriched-but-no-bookmark (heartbeat schedule run)
       if (!found) _topicCache[r.id] = false;
     } catch(e) {
-      _topicCache[r.id] = false;
+      // API call failed (rate limit, network) — leave as undefined so it retries next time
+      // Don't mark as false (heartbeat) since we don't actually know
+      console.warn('[enrich] jobs fetch failed for run', r.id, e.message);
+      // _topicCache[r.id] stays undefined → will be retried on next loadRuns
     }
   }));
   applyRunFilter();
@@ -2702,27 +2713,48 @@ async function enrichRunTopics(runs) {
 
 function getTopicFromRun(r) {
   const cached = _topicCache[r.id];
-  // false = enriched, no topic (heartbeat); undefined = not yet fetched
-  if (cached && cached !== '__posted__') return cached;
+  // false = heartbeat (no post); undefined = not yet enriched
+  if (cached === false || cached === undefined) {
+    // Fall through to run-name parsing below
+  } else if (cached === '__posted__') {
+    // We know it posted but topic name wasn't captured — fall through to run-name
+  } else {
+    // cached is the human-readable topic name from the "✅ Posted · NAME" step
+    // Return it directly — no ID lookup needed, it's already the display name
+    return cached;
+  }
 
-  // Fallback: parse run-name set by workflow  e.g. "🖱️ Manual · kubernetes-mastery"
-  const runName  = r.name || r.display_title || '';
-  const parts    = runName.split('·').map(s => s.trim());
+  // Fallback: parse run-name set by workflow YAML run-name field
+  // e.g. "🖱️ Manual · llm-architecture"  or  "⏰ Scheduled · auto-topic"
+  const runName   = r.name || r.display_title || '';
+  const parts     = runName.split('·').map(s => s.trim());
   const topicPart = parts.length >= 2 ? parts[parts.length - 1] : '';
-  if (topicPart && topicPart !== 'auto-topic' && topicPart.length > 2) {
+
+  if (topicPart && topicPart !== 'auto-topic' && topicPart !== 'auto' && topicPart.length > 2) {
+    // Try matching against known IDs (run-name uses topic IDs)
     for (const [id, name] of Object.entries(TNAMES)) {
-      if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
+      if (topicPart.toLowerCase() === id) return name;
     }
+    // Try partial match on ID
+    for (const [id, name] of Object.entries(TNAMES)) {
+      if (topicPart.toLowerCase().includes(id)) return name;
+    }
+    // Try matching against topic names (in case name was used)
+    for (const [id, name] of Object.entries(TNAMES)) {
+      if (topicPart.toLowerCase().includes(name.toLowerCase())) return name;
+    }
+    // Unknown topic — capitalise and return as-is
     return topicPart.charAt(0).toUpperCase() + topicPart.slice(1);
   }
-  // Scan full title against known topic IDs
+
+  // Last resort: scan full run title for any known topic ID or name
   const title = runName.toLowerCase();
   for (const [id, name] of Object.entries(TNAMES)) {
     if (title.includes(id) || title.includes(name.toLowerCase())) return name;
   }
   const custom = getCustomTopics();
   for (const ct of custom) {
-    if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
+    if (title.includes((ct.id||'').toLowerCase()) || title.includes((ct.name||'').toLowerCase())) return ct.name;
   }
   return null;
 }
@@ -2751,8 +2783,11 @@ async function loadStats() {
     const d = await r.json();
     const runs = d.workflow_runs || [];
 
-    // Trigger enrichment so schedule heartbeats get marked _topicCache[id] = false
-    await enrichRunTopics(runs.filter(r => _topicCache[r.id] === undefined).slice(0, 20));
+    // Enrich ALL runs before counting — isSkippedRun hides unenriched schedule runs
+    const needsEnrich = runs.filter(r => _topicCache[r.id] === undefined);
+    for (let i = 0; i < needsEnrich.length; i += 50) {
+      await enrichRunTopics(needsEnrich.slice(i, i + 50));
+    }
 
     // Real posts = runs not filtered by isSkippedRun
     const postRuns   = runs.filter(r => !isSkippedRun(r));
