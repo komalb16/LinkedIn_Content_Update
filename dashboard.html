@@ -790,6 +790,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <button class="sfp"         id="sfOk"     onclick="setStatusFilter('ok',this)"    >✅ Success</button>
       <button class="sfp"         id="sfFail"   onclick="setStatusFilter('fail',this)"  >❌ Failed</button>
       <button class="sfp"         id="sfCancel" onclick="setStatusFilter('cancel',this)">🚫 Cancelled</button>
+      <span style="width:1px;background:var(--bd);display:inline-block;height:16px;margin:0 4px;vertical-align:middle"></span>
+      <button class="sfp act-all" id="tfAll"    onclick="setTriggerFilter('all',this)"     >All Triggers</button>
+      <button class="sfp"         id="tfManual" onclick="setTriggerFilter('manual',this)"  >🖱️ Manual</button>
+      <button class="sfp"         id="tfSched"  onclick="setTriggerFilter('schedule',this)">⏰ Scheduled</button>
     </div>
 
     <!-- CUSTOM RANGE (shown when Custom selected) -->
@@ -1643,7 +1647,16 @@ function isSkippedRun(r) {
   return false;
 }
 
-let _statusFilter = 'all'; // 'all' | 'ok' | 'fail' | 'cancel'
+let _statusFilter  = 'all'; // 'all' | 'ok' | 'fail' | 'cancel'
+let _triggerFilter = 'all'; // 'all' | 'manual' | 'schedule'
+
+function setTriggerFilter(key, btn) {
+  _triggerFilter = key;
+  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => b.classList.remove('act-all', 'act'));
+  btn.classList.add(key === 'all' ? 'act-all' : 'act');
+  applyRunFilter();
+}
+
 
 function setStatusFilter(val, btn) {
   _statusFilter = val;
@@ -1672,11 +1685,16 @@ function applyRunFilter() {
   // Remove legacy skipBadge if it exists
   const skipBadge = document.getElementById('skipBadge');
   if (skipBadge) skipBadge.remove();
+  // Apply trigger filter (Manual vs Scheduled)
+  let trigRuns = postRuns;
+  if (_triggerFilter === 'manual')   trigRuns = postRuns.filter(r => r.event === 'workflow_dispatch');
+  if (_triggerFilter === 'schedule') trigRuns = postRuns.filter(r => r.event === 'schedule');
+
   // Apply status filter
-  let displayRuns = postRuns;
-  if (_statusFilter === 'ok')     displayRuns = postRuns.filter(r => r.conclusion === 'success');
-  if (_statusFilter === 'fail')   displayRuns = postRuns.filter(r => r.conclusion === 'failure');
-  if (_statusFilter === 'cancel') displayRuns = postRuns.filter(r => r.conclusion === 'cancelled');
+  let displayRuns = trigRuns;
+  if (_statusFilter === 'ok')     displayRuns = trigRuns.filter(r => r.conclusion === 'success');
+  if (_statusFilter === 'fail')   displayRuns = trigRuns.filter(r => r.conclusion === 'failure');
+  if (_statusFilter === 'cancel') displayRuns = trigRuns.filter(r => r.conclusion === 'cancelled');
   renderRuns(displayRuns);
 }
 
@@ -1724,7 +1742,8 @@ const _topicCache = {};
 
 async function enrichRunTopics(runs) {
   const toFetch = runs.filter(r =>
-    r.conclusion === 'success' &&
+    r.conclusion !== 'skipped' &&
+    r.conclusion !== 'cancelled' &&
     !_topicCache[r.id] &&
     !getTopicFromRun(r)
   ).slice(0, 15);
@@ -1737,12 +1756,21 @@ async function enrichRunTopics(runs) {
       for (const job of (data.jobs || [])) {
         for (const step of (job.steps || [])) {
           const sn = step.name || '';
-          // Bookmark step is named like "bookmark_pin TOPIC_NAME"
+          // Current workflow: "✅ Posted · TOPIC_NAME"
+          if (sn.startsWith('✅ Posted ·')) {
+            const topic = sn.replace('✅ Posted ·', '').trim();
+            if (topic && topic !== 'auto-topic') {
+              _topicCache[r.id] = topic;  // already human-readable name
+            }
+            break;
+          }
+          // Legacy: "bookmark_pin TOPIC_NAME" or "TOPIC: NAME"
           if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
             const topic = sn.replace('TOPIC:', '').replace(/^bookmark_pin /, '').trim();
             if (topic && topic !== 'auto' && topic !== 'auto-topic') {
               _topicCache[r.id] = topic;
             }
+            break;
           }
         }
       }
@@ -1752,26 +1780,41 @@ async function enrichRunTopics(runs) {
 }
 
 function getTopicFromRun(r) {
+  // Cached value from "✅ Posted · NAME" step is already human-readable — return directly
   if (_topicCache[r.id]) return _topicCache[r.id];
-  // Priority 1: run-name set by YAML e.g. "LinkedIn Agent · Manual · kubernetes"
-  const runName = r.name || r.display_title || '';
-  const parts   = runName.split('·').map(s => s.trim());
-  const topicPart = parts.length >= 3 ? parts[parts.length - 1] : '';
-  if (topicPart && topicPart !== 'auto-topic' && topicPart.length > 2) {
-    // Prettify known IDs
+
+  // Parse run-name field set by workflow YAML run-name:
+  // Current format:  "🖱️ Manual · llm-architecture"   (2 parts)
+  // Legacy format:   "LinkedIn Agent · Manual · kubernetes" (3 parts)
+  const runName   = r.name || r.display_title || '';
+  const parts     = runName.split('·').map(s => s.trim());
+  // Accept topic from last segment if there are 2+ parts
+  const topicPart = parts.length >= 2 ? parts[parts.length - 1] : '';
+
+  if (topicPart && topicPart !== 'auto-topic' && topicPart !== 'auto' && topicPart.length > 2) {
+    // Exact ID match (e.g. "llm-architecture")
     for (const [id, name] of Object.entries(TNAMES)) {
-      if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
+      if (topicPart.toLowerCase() === id) return name;
+    }
+    // Partial ID match
+    for (const [id, name] of Object.entries(TNAMES)) {
+      if (topicPart.toLowerCase().includes(id)) return name;
+    }
+    // Already a human name (e.g. from older runs)
+    for (const [id, name] of Object.entries(TNAMES)) {
+      if (topicPart.toLowerCase().includes(name.toLowerCase())) return name;
     }
     return topicPart.charAt(0).toUpperCase() + topicPart.slice(1);
   }
-  // Priority 2: scan full title against known topic IDs/names
+
+  // Fallback: scan full title against known topic IDs/names
   const title = runName.toLowerCase();
   for (const [id, name] of Object.entries(TNAMES)) {
     if (title.includes(id) || title.includes(name.toLowerCase())) return name;
   }
   const custom = getCustomTopics();
   for (const ct of custom) {
-    if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
+    if (title.includes((ct.id||'').toLowerCase()) || title.includes((ct.name||'').toLowerCase())) return ct.name;
   }
   return null;
 }
