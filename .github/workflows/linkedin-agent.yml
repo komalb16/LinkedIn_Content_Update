@@ -1,0 +1,197 @@
+name: 🤖 LinkedIn Agent
+
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.topic_id || 'auto' }}
+
+# ─── Triggers ───────────────────────────────────────────────────────────────
+on:
+  # Scheduled: twice daily at 9 AM and 6 PM IST (3:30 UTC and 12:30 UTC)
+  schedule:
+    # Three evenly-spaced triggers (every 8h). schedule_checker sleeps up to 4h
+    # after firing, so any posting time you set in the dashboard is covered.
+    #
+    # Coverage (EDT = UTC-4, 4h window each):
+    #   06:00 UTC → catches  2 AM –  6 AM EDT  (overnight/early)
+    #   14:00 UTC → catches 10 AM –  2 PM EDT  (morning window) ✓
+    #   22:00 UTC → catches  6 PM – 10 PM EDT  (evening window) ✓
+    - cron: "0 6  * * *"  #  6 AM UTC =  2 AM EDT
+    - cron: "0 14 * * *"  #  2 PM UTC = 10 AM EDT  ← morning posts
+    - cron: "0 22 * * *"  # 10 PM UTC =  6 PM EDT  ← evening posts
+
+  # Manual trigger from GitHub UI — with optional inputs
+  workflow_dispatch:
+    inputs:
+      topic_id:
+        description: "Topic ID (leave blank for auto-selection)"
+        required: false
+        default: ""
+        type: choice
+        options:
+          - ""                    # auto
+          - llm-architecture
+          - ai-agents-2025
+          - mlops-pipeline
+          - rag-systems
+          - kubernetes-mastery
+          - docker-cheatsheet
+          - aws-architecture
+          - cicd-pipelines
+          - system-design
+          - api-design
+          - git-workflow
+          - solid-principles
+          - zero-trust
+          - devsecops
+          - data-lakehouse
+          - kafka-streaming
+
+      dry_run:
+        description: "Dry run (generate but don't post)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+# ─── Job ─────────────────────────────────────────────────────────────────────
+jobs:
+  post-to-linkedin:
+    name: Generate & Post Content
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # 1. Checkout repository
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # 2. Set up Python
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # 3. Install system dependencies (for SVG → PNG conversion)
+      - name: 🔧 Install system deps
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
+            libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+
+      # 4. Install Python dependencies
+      - name: 📦 Install dependencies
+        run: pip install -r requirements.txt
+
+      # 5. Show run info
+      - name: ℹ️ Run Info
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  LinkedIn Agent — © ${{ vars.AUTHOR_NAME || github.actor }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Run time  : $(date '+%Y-%m-%d %H:%M %Z')"
+          echo "  Trigger   : ${{ github.event_name }}"
+          echo "  Topic     : ${{ github.event.inputs.topic_id || 'auto' }}"
+          echo "  Dry run   : ${{ github.event.inputs.dry_run || 'false' }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      # 6. Run the agent
+      - name: 🚀 Run LinkedIn Agent
+        id: run_agent
+        working-directory: src
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          # Optional: set AUTHOR_NAME as a repo variable (Settings → Variables)
+          # to personalise post signatures and diagram watermarks.
+          # Falls back to your GitHub username automatically if not set.
+          AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
+          GH_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          ARGS=""
+
+          if [ -n "${{ github.event.inputs.topic_id }}" ]; then
+            ARGS="$ARGS --topic ${{ github.event.inputs.topic_id }}"
+          fi
+
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          python agent.py $ARGS
+
+      # 7. Bookmark — dashboard reads this step name to identify real posts and extract topic.
+      #    agent.py writes POSTED_TOPIC to GITHUB_OUTPUT immediately after topic selection,
+      #    so this step runs for ALL real posts (including auto-selected topics).
+      #    Heartbeat/skip runs never reach this step, so dashboard can filter them out.
+      - name: "✅ Posted · ${{ steps.run_agent.outputs.POSTED_TOPIC || 'unknown' }}"
+        if: steps.run_agent.outputs.POSTED_TOPIC != '' && github.event.inputs.dry_run != 'true'
+        run: |
+          echo "Topic: ${{ steps.run_agent.outputs.POSTED_TOPIC }}"
+          echo "Date:  ${{ steps.run_agent.outputs.POSTED_DATE }}"
+          echo "URL:   ${{ steps.run_agent.outputs.POSTED_URL }}"
+
+      # 8. Upload diagrams as artifacts (always, even on failure)
+      - name: 📁 Upload Diagrams
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams-${{ github.run_number }}
+          path: |
+            src/diagrams/*.svg
+            src/diagrams/*.png
+            src/output_post_*.txt
+            src/agent.log
+          retention-days: 30
+
+      # 8. Commit updated history back to repo
+      - name: 💾 Save Topic History
+        if: success() && github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "linkedin-agent[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/.topic_history.json || true
+          git diff --staged --quiet || git commit -m "chore: update topic history [skip ci]"
+          git push || true
+
+      # 9. Update GitHub Profile README with latest post  (#18)
+      - name: 📝 Update GitHub Profile README
+        if: success() && github.event.inputs.dry_run != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          POST_TOPIC:   ${{ steps.run_agent.outputs.POSTED_TOPIC }}
+          POST_DATE:    ${{ steps.run_agent.outputs.POSTED_DATE }}
+          LINKEDIN_POST_URL: ${{ steps.run_agent.outputs.POSTED_URL }}
+          # Notification channels (same as used by notifier.py)
+          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL }}
+          NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS }}
+          NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL }}
+          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python src/update_profile_readme.py || echo "::warning::Profile README update failed (non-fatal)"
+
+      # 10. Check LinkedIn token expiry  (#15)
+      - name: 🔐 Check Token Expiry
+        if: always()
+        env:
+          LINKEDIN_TOKEN_DATE: ${{ secrets.LINKEDIN_TOKEN_DATE }}
+          # Notification channels
+          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL }}
+          NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS }}
+          NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL }}
+          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python src/check_token_expiry.py
+
+      # 11. Notify on failure
+      - name: ❌ Notify on Failure
+        if: failure()
+        run: |
+          echo "::error::LinkedIn Agent failed! Check the logs above."
+          echo "::error::Common causes: expired LinkedIn token, API rate limits, SVG parse error"
