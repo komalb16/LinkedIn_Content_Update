@@ -24,8 +24,7 @@
     },
     "fri": {
       "enabled": true,
-      "time_ist": "20:35",
-      "time_utc": "15:05"
+      "time_utc": "18:19"
     },
     "sat": {
       "enabled": true,
@@ -40,5 +39,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-13T00:00:00.000Z"
+  "updated_at": "2026-03-13T21:38:12.282Z"
 }
