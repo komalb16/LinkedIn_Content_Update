@@ -104,6 +104,8 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           # Optional: set AUTHOR_NAME as a repo variable (Settings → Variables)
           # to personalise post signatures and diagram watermarks.
           # Falls back to your GitHub username automatically if not set.
@@ -176,6 +178,7 @@ jobs:
           python src/update_profile_readme.py || echo "::warning::Profile README update failed (non-fatal)"
 
       # 10. Check LinkedIn token expiry  (#15)
+
       - name: 🔐 Check Token Expiry
         if: always()
         env:
