@@ -155,7 +155,6 @@ def main() -> int:
 
     try:
         # Use notifier.py infrastructure (Email / Telegram / WhatsApp)
-        import sys, os
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from notifier import notify_all
 
