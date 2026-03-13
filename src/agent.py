@@ -207,9 +207,9 @@ RULES (non-negotiable):
 
 
 def call_ai(prompt, system):
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY secret not set")
+        raise ValueError("GROQ_API_KEY secret not set")
     headers = {
         "Authorization": "Bearer " + api_key,
         "Content-Type": "application/json"
