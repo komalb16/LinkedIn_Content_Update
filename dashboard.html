@@ -1001,7 +1001,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     <div class="ch">
       <span class="ct" id="histSection">📋 LinkedIn Post History</span>
       <div style="display:flex;align-items:center;gap:8px;position:relative">
-        <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button>
+        <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button><span id="lastRefreshed" style="font-size:10px;color:var(--txd);margin-left:8px;vertical-align:middle"></span>
         <div style="position:relative">
           <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="toggleExportMenu(event)">⬇ Export ▾</button>
           <div class="export-menu" id="exportMenu">
@@ -1502,6 +1502,16 @@ window.onload = () => {
   loadSettings();
   if (token) silentConn();
   setInterval(updNext, 60000);
+
+  // Auto-refresh run history every 5 minutes — no hard refresh needed
+  setInterval(() => {
+    if (!document.hidden && REPO) { loadRuns(); loadStats(); }
+  }, 5 * 60 * 1000);
+
+  // Refresh immediately when tab becomes visible again
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && REPO) { loadRuns(); loadStats(); }
+  });
   // Init custom range to last 30 days
   const today = new Date();
   const from30 = new Date(today - 30*864e5);
@@ -2230,6 +2240,7 @@ function gh(p, o = {}) {
     'Authorization': 'Bearer ' + token,
     'Accept': 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
+    'Cache-Control': 'no-cache',
     ...(o.headers || {})
   };
   // Only set Content-Type on requests that have a body — GET/HEAD requests
@@ -2237,7 +2248,7 @@ function gh(p, o = {}) {
   if (method !== 'GET' && method !== 'HEAD') {
     headers['Content-Type'] = 'application/json';
   }
-  return fetch('https://api.github.com' + p, { ...o, headers })
+  return fetch('https://api.github.com' + p, { ...o, headers, cache: 'no-store' })
     .catch(err => {
       // "Failed to fetch" usually means: expired/revoked token, wrong scope,
       // or a network issue. Give the user an actionable message.
@@ -2490,8 +2501,10 @@ async function loadRuns() {
     allRuns = [...(di.workflow_runs||[]),...(dq.workflow_runs||[]),...(dc.workflow_runs||[])]
       .filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; })
       .sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
-    enrichRunTopics(allRuns.slice(0, 30)).then(() => applyRunFilter());
+    enrichRunTopics(allRuns.slice(0, 50)).then(() => applyRunFilter());
     applyRunFilter();
+    const tsEl = document.getElementById('lastRefreshed');
+    if (tsEl) { const n = new Date(); tsEl.textContent = 'Updated ' + n.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); tsEl.title = 'Last fetched: ' + n.toLocaleString(); }
   } catch(e) {
     document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">❌</div><span>Could not load runs: '+e.message+'</span></div>';
   }
@@ -2529,18 +2542,17 @@ function runDurMs(r) {
 }
 
 function isSkippedRun(r) {
-  // For schedule (cron) runs: only show runs that actually posted.
-  // A real post always has the bookmark step "✅ Posted · TOPIC" in its jobs.
-  // Heartbeat/skip runs never reach that step — they're hidden regardless of duration.
-  // _topicCache[r.id] === false means enrichment completed and found no bookmark (= skip).
+  // For schedule (cron) runs: only show runs that ACTUALLY POSTED.
+  // Real posts have the bookmark step "✅ Posted · TOPIC" in their job steps.
+  // Heartbeat/skip cron runs never reach that step and are filtered out.
   if (r.event === 'schedule') {
-    if (r.conclusion === 'skipped')   return true;
-    if (r.conclusion === 'cancelled') return true;
-    if (_topicCache[r.id] === false)  return true;   // enriched, no bookmark = heartbeat
-    // Not yet enriched — show for now, enrichRunTopics will re-filter after fetching
-    return false;
+    if (r.conclusion === 'skipped')      return true;
+    if (r.conclusion === 'cancelled')    return true;
+    if (_topicCache[r.id] === false)     return true;    // enriched, no bookmark = heartbeat
+    if (_topicCache[r.id] === undefined) return true;    // hide until enrichment confirms
+    return false;  // _topicCache has topic or __posted__ = confirmed real post
   }
-  // workflow_dispatch (manual): only hide explicit skips
+  // workflow_dispatch (manual): always show, only hide explicit GitHub-level skips
   if (r.conclusion === 'skipped') return true;
   return false;
 }
@@ -2551,8 +2563,12 @@ let _triggerFilter = 'all';
 
 function setTriggerFilter(key, btn) {
   _triggerFilter = key;
-  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => b.classList.remove('act-all','act'));
-  btn.classList.add('act-all');
+  // Clear active state from all trigger filter pills
+  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => {
+    b.classList.remove('act-all', 'act', 'act-ok', 'act-fail');
+  });
+  // Apply correct active class: all → act-all, others → act
+  btn.classList.add(key === 'all' ? 'act-all' : 'act');
   applyRunFilter();
 }
 
@@ -2641,9 +2657,10 @@ async function enrichRunTopics(runs) {
   // For schedule runs we MUST enrich to know if they posted (bookmark step present) or were heartbeats.
   // For manual runs we enrich to extract the topic name.
   const toFetch = runs.filter(r =>
-    r.conclusion === 'success' &&
+    r.conclusion !== 'skipped' &&
+    r.conclusion !== 'cancelled' &&
     _topicCache[r.id] === undefined   // not yet fetched
-  ).slice(0, 20);
+  ).slice(0, 50);  // increased from 20 → 50 so history loads topics fully
   if (!toFetch.length) return;
 
   await Promise.all(toFetch.map(async r => {
