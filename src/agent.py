@@ -147,6 +147,15 @@ def run_agent(manual_topic_id: str = None, dry_run: bool = False):
         topic = topic_mgr.get_next_topic()
         log.info(f"Auto-selected topic: {topic['name']}")
 
+    # Write topic to GITHUB_OUTPUT immediately after selection so the workflow
+    # bookmark step "✅ Posted · TOPIC" gets the real name even for auto-selected topics.
+    # This also makes the topic visible in the run detail before posting completes.
+    _gh_out = os.environ.get("GITHUB_OUTPUT", "")
+    if _gh_out:
+        with open(_gh_out, "a") as _gho:
+            _gho.write(f"POSTED_TOPIC={topic['name']}\n")
+    log.info(f"Topic set in GITHUB_OUTPUT: {topic['name']}")
+
     # Generate post
     post_text = generate_post(client, topic)
     log.info("\n--- GENERATED POST ---")
@@ -166,13 +175,6 @@ def run_agent(manual_topic_id: str = None, dry_run: bool = False):
         with open(f"output_post_{topic['id']}.txt", "w") as f:
             f.write(post_text)
         log.info(f"Post saved to output_post_{topic['id']}.txt")
-        # Write topic to GITHUB_OUTPUT even for dry runs so the dashboard
-        # bookmark step can capture the topic name in run history
-        gh_output = os.environ.get("GITHUB_OUTPUT", "")
-        if gh_output:
-            with open(gh_output, "a") as gho:
-                gho.write(f"POSTED_TOPIC={topic['name']}\n")
-                gho.write(f"POSTED_DATE={datetime.now().strftime('%Y-%m-%d')}\n")
         return
 
     # Post to LinkedIn

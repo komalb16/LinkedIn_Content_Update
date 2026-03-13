@@ -1781,7 +1781,7 @@ function getTopicFromRun(r) {
   const runName = r.name || r.display_title || '';
   const parts   = runName.split('·').map(s => s.trim());
   const topicPart = parts.length >= 2 ? parts[parts.length - 1] : '';
-  if (topicPart && topicPart !== 'auto-topic' && topicPart.length > 2) {
+  if (topicPart && topicPart !== 'auto-topic' && topicPart !== 'auto' && topicPart.length > 2) {
     // Prettify known IDs
     for (const [id, name] of Object.entries(TNAMES)) {
       if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
