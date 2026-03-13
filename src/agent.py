@@ -147,15 +147,6 @@ def run_agent(manual_topic_id: str = None, dry_run: bool = False):
         topic = topic_mgr.get_next_topic()
         log.info(f"Auto-selected topic: {topic['name']}")
 
-    # Write topic to GITHUB_OUTPUT immediately after selection so the workflow
-    # bookmark step "✅ Posted · TOPIC" gets the real name even for auto-selected topics.
-    # This also makes the topic visible in the run detail before posting completes.
-    _gh_out = os.environ.get("GITHUB_OUTPUT", "")
-    if _gh_out:
-        with open(_gh_out, "a") as _gho:
-            _gho.write(f"POSTED_TOPIC={topic['name']}\n")
-    log.info(f"Topic set in GITHUB_OUTPUT: {topic['name']}")
-
     # Generate post
     post_text = generate_post(client, topic)
     log.info("\n--- GENERATED POST ---")
