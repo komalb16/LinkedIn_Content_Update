@@ -239,28 +239,28 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
     if diff_secs > WINDOW:
         # Too early — a future cron will catch the right window
         mins_away = int(diff_secs // 60)
-        info(f"⏭️  Not yet time — {time_ist} IST is {mins_away}m away. Exiting (next cron will check again).")
+        info(f"⏭️  Not yet time — {time_str} UTC is {mins_away}m away. Exiting (next cron will check again).")
         _mark_skip()
         sys.exit(0)
     elif diff_secs > 0:
         # Within the window — sleep the remaining gap then post
         wait_mins = int(diff_secs // 60)
         wait_secs = int(diff_secs % 60)
-        info(f"⏱️  Sleeping {wait_mins}m {wait_secs}s until {time_ist} IST...")
+        info(f"⏱️  Sleeping {wait_mins}m {wait_secs}s until {time_str} UTC...")
         remaining = diff_secs
         while remaining > 0:
             time.sleep(min(60, remaining))
             remaining -= 60
             if remaining > 60:
-                info(f"   ... {int(remaining // 60)}m remaining until {time_ist} IST")
-        info(f"✅ Reached {time_ist} IST — starting agent")
+                info(f"   ... {int(remaining // 60)}m remaining until {time_str} UTC")
+        info(f"✅ Reached {time_str} UTC — starting agent")
     elif diff_secs >= -WINDOW:
         # Slightly past the target (cron fired just after) — run immediately
-        info(f"✅ Within window of {time_ist} IST — proceeding immediately")
+        info(f"✅ Within window of {time_str} UTC — proceeding immediately")
     else:
         # More than 90 min past — already ran this window, skip
         mins_past = int(-diff_secs // 60)
-        info(f"⏭️  {time_ist} IST was {mins_past}m ago — already handled. Exiting.")
+        info(f"⏭️  {time_str} UTC was {mins_past}m ago — already handled. Exiting.")
         _mark_skip()
         sys.exit(0)
 
@@ -291,4 +291,4 @@ if __name__ == "__main__":
         today not in cfg.get("skip_dates", []) and
         (cfg["weekly"][day_key]["enabled"] or today in cfg.get("force_dates", []))
     )
-    print(f"\n  → Would post today: {'YES ✅' if would_run else 'NO ⏸️'}\n")
+    print (f"\n  → Would post today: {'YES ✅' if would_run else 'NO ⏸️'}\n")
