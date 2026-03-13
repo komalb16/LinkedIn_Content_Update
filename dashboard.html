@@ -602,7 +602,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <div class="stat-icon">📅</div>
       <div class="slbl">This Week</div>
       <div class="snum" style="color:var(--acc2)" id="s3">—</div>
-      <div class="ssub">successful posts</div>
+      <div class="ssub" id="s3week">Mon – Sun</div>
     </div>
     <div class="stat">
       <div class="stat-icon">🕐</div>
@@ -1647,12 +1647,12 @@ function isSkippedRun(r) {
   return false;
 }
 
-let _statusFilter  = 'all'; // 'all' | 'ok' | 'fail' | 'cancel'
-let _triggerFilter = 'all'; // 'all' | 'manual' | 'schedule'
+let _statusFilter  = 'all';
+let _triggerFilter = 'all';
 
 function setTriggerFilter(key, btn) {
   _triggerFilter = key;
-  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => b.classList.remove('act-all', 'act'));
+  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => b.classList.remove('act-all','act'));
   btn.classList.add(key === 'all' ? 'act-all' : 'act');
   applyRunFilter();
 }
@@ -1685,11 +1685,10 @@ function applyRunFilter() {
   // Remove legacy skipBadge if it exists
   const skipBadge = document.getElementById('skipBadge');
   if (skipBadge) skipBadge.remove();
-  // Apply trigger filter (Manual vs Scheduled)
+  // Apply trigger filter
   let trigRuns = postRuns;
   if (_triggerFilter === 'manual')   trigRuns = postRuns.filter(r => r.event === 'workflow_dispatch');
   if (_triggerFilter === 'schedule') trigRuns = postRuns.filter(r => r.event === 'schedule');
-
   // Apply status filter
   let displayRuns = trigRuns;
   if (_statusFilter === 'ok')     displayRuns = trigRuns.filter(r => r.conclusion === 'success');
@@ -1742,8 +1741,7 @@ const _topicCache = {};
 
 async function enrichRunTopics(runs) {
   const toFetch = runs.filter(r =>
-    r.conclusion !== 'skipped' &&
-    r.conclusion !== 'cancelled' &&
+    r.conclusion === 'success' &&
     !_topicCache[r.id] &&
     !getTopicFromRun(r)
   ).slice(0, 15);
@@ -1759,18 +1757,14 @@ async function enrichRunTopics(runs) {
           // Current workflow: "✅ Posted · TOPIC_NAME"
           if (sn.startsWith('✅ Posted ·')) {
             const topic = sn.replace('✅ Posted ·', '').trim();
-            if (topic && topic !== 'auto-topic') {
-              _topicCache[r.id] = topic;  // already human-readable name
-            }
-            break;
+            if (topic && topic !== 'auto-topic') { _topicCache[r.id] = topic; break; }
           }
           // Legacy: "bookmark_pin TOPIC_NAME" or "TOPIC: NAME"
           if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
             const topic = sn.replace('TOPIC:', '').replace(/^bookmark_pin /, '').trim();
             if (topic && topic !== 'auto' && topic !== 'auto-topic') {
-              _topicCache[r.id] = topic;
+              _topicCache[r.id] = topic; break;
             }
-            break;
           }
         }
       }
@@ -1780,41 +1774,28 @@ async function enrichRunTopics(runs) {
 }
 
 function getTopicFromRun(r) {
-  // Cached value from "✅ Posted · NAME" step is already human-readable — return directly
   if (_topicCache[r.id]) return _topicCache[r.id];
-
-  // Parse run-name field set by workflow YAML run-name:
-  // Current format:  "🖱️ Manual · llm-architecture"   (2 parts)
-  // Legacy format:   "LinkedIn Agent · Manual · kubernetes" (3 parts)
-  const runName   = r.name || r.display_title || '';
-  const parts     = runName.split('·').map(s => s.trim());
-  // Accept topic from last segment if there are 2+ parts
+  // Priority 1: run-name set by YAML
+  // Current format: "🖱️ Manual · llm-architecture" (2 parts)
+  // Legacy format:  "LinkedIn Agent · Manual · topic" (3 parts)
+  const runName = r.name || r.display_title || '';
+  const parts   = runName.split('·').map(s => s.trim());
   const topicPart = parts.length >= 2 ? parts[parts.length - 1] : '';
-
-  if (topicPart && topicPart !== 'auto-topic' && topicPart !== 'auto' && topicPart.length > 2) {
-    // Exact ID match (e.g. "llm-architecture")
+  if (topicPart && topicPart !== 'auto-topic' && topicPart.length > 2) {
+    // Prettify known IDs
     for (const [id, name] of Object.entries(TNAMES)) {
-      if (topicPart.toLowerCase() === id) return name;
-    }
-    // Partial ID match
-    for (const [id, name] of Object.entries(TNAMES)) {
-      if (topicPart.toLowerCase().includes(id)) return name;
-    }
-    // Already a human name (e.g. from older runs)
-    for (const [id, name] of Object.entries(TNAMES)) {
-      if (topicPart.toLowerCase().includes(name.toLowerCase())) return name;
+      if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
     }
     return topicPart.charAt(0).toUpperCase() + topicPart.slice(1);
   }
-
-  // Fallback: scan full title against known topic IDs/names
+  // Priority 2: scan full title against known topic IDs/names
   const title = runName.toLowerCase();
   for (const [id, name] of Object.entries(TNAMES)) {
     if (title.includes(id) || title.includes(name.toLowerCase())) return name;
   }
   const custom = getCustomTopics();
   for (const ct of custom) {
-    if (title.includes((ct.id||'').toLowerCase()) || title.includes((ct.name||'').toLowerCase())) return ct.name;
+    if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
   }
   return null;
 }
@@ -1849,17 +1830,27 @@ async function loadStats() {
     // Successful posts = run reached LinkedIn and the API accepted the post.
     const postedRuns = postRuns.filter(r => r.conclusion === 'success');
 
-    // This-week posts
-    const wk = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const thisWeek = postedRuns.filter(r => new Date(r.created_at) > wk);
+    // This-week posts — current calendar week (Mon 00:00 to now), not rolling 7 days
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon...
+    const daysSinceMon = (dayOfWeek + 6) % 7; // days since last Monday
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - daysSinceMon);
+    weekStart.setHours(0, 0, 0, 0);
+    const thisWeek = postedRuns.filter(r => new Date(r.created_at) >= weekStart);
 
-    // Stat card 1 — "LinkedIn Posts" (total ever successfully posted)
+    // Stat card 1 — total all-time successful posts
     document.getElementById('s1').textContent = postedRuns.length;
 
-    // Stat card 2 — same as s1 (successful = posted); kept for layout
+    // Stat card 2 — same as s1
     document.getElementById('s2').textContent = postedRuns.length;
 
-    // Stat card 3 — posts this week
+    // Stat card 3 — posts this calendar week (Mon–Sun)
+    const weekLabel = document.getElementById('s3week');
+    if (weekLabel) {
+      const opts = {month: 'short', day: 'numeric'};
+      weekLabel.textContent = 'Since ' + weekStart.toLocaleDateString('en-US', opts);
+    }
     document.getElementById('s3').textContent = thisWeek.length;
 
     // Stat card 4 — last post time

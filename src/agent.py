@@ -8,7 +8,7 @@ import os
 import sys
 import json
 import argparse
-from groq import Groq
+from openai import OpenAI
 from datetime import datetime
 from topic_manager import TopicManager
 from linkedin_poster import LinkedInPoster
@@ -84,7 +84,7 @@ Include:
     return post_text
 
 
-def generate_diagram(client: Groq, topic: dict, diagram_type: str) -> str:
+def generate_diagram(client: OpenAI, topic: dict, diagram_type: str) -> str:
     """Generate an SVG diagram for the given topic."""
     log.info(f"Generating {diagram_type} diagram for: {topic['name']}")
     
@@ -129,7 +129,7 @@ def run_agent(manual_topic_id: str = None, dry_run: bool = False):
         log.error("GROQ_API_KEY not set")
         sys.exit(1)
     
-    client = Groq(api_key=api_key)
+    client = OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
     topic_mgr = TopicManager()
     diagram_gen = DiagramGenerator()
     
@@ -166,6 +166,13 @@ def run_agent(manual_topic_id: str = None, dry_run: bool = False):
         with open(f"output_post_{topic['id']}.txt", "w") as f:
             f.write(post_text)
         log.info(f"Post saved to output_post_{topic['id']}.txt")
+        # Write topic to GITHUB_OUTPUT even for dry runs so the dashboard
+        # bookmark step can capture the topic name in run history
+        gh_output = os.environ.get("GITHUB_OUTPUT", "")
+        if gh_output:
+            with open(gh_output, "a") as gho:
+                gho.write(f"POSTED_TOPIC={topic['name']}\n")
+                gho.write(f"POSTED_DATE={datetime.now().strftime('%Y-%m-%d')}\n")
         return
 
     # Post to LinkedIn
