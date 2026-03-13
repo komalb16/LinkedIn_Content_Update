@@ -2,18 +2,9 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="LI Agent"/>
-<meta name="theme-color" content="#080c18" id="themeColorMeta"/>
-<meta name="description" content="LinkedIn content automation dashboard — post, schedule and monitor from anywhere"/>
-<link rel="manifest" href="manifest.json"/>
-<link rel="apple-touch-icon" href="icon-192.png"/>
-<title>LinkedIn Agent Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LinkedIn Agent — Komal Batra</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    THEME SYSTEM: 5 colors × 3 brightness modes = 15 combinations
@@ -116,11 +107,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(79,156,249,.4)}
 /* theme swatches */
 /* ── THEME PICKER ── */
-.theme-strip{display:flex;align-items:center;gap:6px;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:4px 10px}
-.ts-colors{display:flex;gap:5px;align-items:center}
-.ts-sep{width:1px;height:16px;background:var(--bd);flex-shrink:0}
-.tpick-modes{display:flex;gap:2px;align-items:center}
-.cpick{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;padding:0;flex-shrink:0}
+.theme-picker{display:flex;flex-direction:column;gap:5px;align-items:center}
+.tpick-colors{display:flex;gap:5px;align-items:center}
+.tpick-modes {display:flex;gap:3px;align-items:center;background:var(--sur2);border:1px solid var(--bd);border-radius:100px;padding:2px}
 .cpick{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;padding:0;flex-shrink:0}
 .cpick:hover{transform:scale(1.2)}
 .cpick.blue  {background:radial-gradient(circle at 35% 35%,#93c5fd,#2563eb)}
@@ -129,7 +118,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .cpick.teal  {background:radial-gradient(circle at 35% 35%,#5eead4,#0d9488)}
 .cpick.rose  {background:radial-gradient(circle at 35% 35%,#fda4af,#be123c)}
 .cpick.active{box-shadow:0 0 0 2.5px #fff,0 0 0 4.5px var(--acc);transform:scale(1.15)}
-.mpick{padding:3px 7px;border-radius:100px;border:none;font-size:13px;cursor:pointer;color:var(--txd);background:transparent;transition:all var(--tr);white-space:nowrap}
+.mpick{padding:3px 10px;border-radius:100px;border:none;font-size:10px;font-family:var(--fb);font-weight:500;cursor:pointer;color:var(--txd);background:transparent;transition:all var(--tr);white-space:nowrap}
 .mpick.act{background:var(--acc);color:#fff;box-shadow:0 1px 8px rgba(0,0,0,.3)}
 .mpick:not(.act):hover{color:var(--txm);background:var(--sur3)}
 [data-theme="light"] .tbtn.act{background:var(--acc);color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.25)}
@@ -269,7 +258,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 
 /* ── TIMEZONE SELECTOR ── */
-.tz-sel{background:var(--sur2);border:1.5px solid var(--bd);border-radius:8px;padding:4px 8px;color:var(--tx);font-size:11px;font-family:var(--fm);outline:none;cursor:pointer;transition:border-color var(--tr);max-width:200px}
+.tz-sel{background:var(--sur2);border:1.5px solid var(--bd);border-radius:8px;padding:5px 10px;color:var(--tx);font-size:11px;font-family:var(--fm);outline:none;cursor:pointer;transition:border-color var(--tr);max-width:200px}
 .tz-sel:focus,.tz-sel:hover{border-color:var(--bds)}
 
 /* ── RUN DETAIL MODAL ── */
@@ -437,100 +426,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 @keyframes tout{to{transform:translateX(110%);opacity:0}}
 .xl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--txd);font-family:monospace;margin-bottom:10px}
 
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE / MOBILE — full overhaul for PWA
-   ═══════════════════════════════════════════════════════════ */
-
-/* Tablet 960px */
-@media(max-width:960px){
-  .wrap{padding:0 16px 80px}
-  .srow{grid-template-columns:1fr 1fr}
-  .g2{grid-template-columns:1fr}
-  .pb{flex-direction:column;align-items:flex-start;gap:14px}
-  .tgrid{grid-template-columns:1fr}
-  .cc{padding:32px 24px}
-  .preview-body{grid-template-columns:1fr}
-  .preview-diagram{border-top:1px solid var(--bd)}
-  header{gap:10px}
-  .hright{gap:7px}
-  .theme-strip{gap:4px;padding:3px 8px}
-}
-
-/* Mobile 640px */
-@media(max-width:640px){
-  /* header collapses */
-  header{flex-wrap:wrap;padding:12px 0 10px;gap:8px}
-  .logo-name{font-size:13px}
-  .logo-sub{display:none}
-  .hright{width:100%;justify-content:space-between}
-  .theme-strip{gap:4px;padding:3px 8px}
-  .ts-colors{gap:4px}
-  .tpick-modes .mpick{padding:3px 6px;font-size:9px}
-  .gear-btn{width:30px;height:30px;font-size:14px}
-  .cpill{padding:5px 9px;font-size:10px}
-
-  /* stats 2-col */
-  .srow{grid-template-columns:1fr 1fr;gap:10px}
-  .stat{padding:16px 14px}
-  .stat-icon{width:32px;height:32px;font-size:15px;margin-bottom:10px}
-  .sval{font-size:22px}
-  .slbl{font-size:10px}
-
-  /* next post banner */
-  .pb{padding:16px 18px}
-  .pb-r{flex-wrap:wrap;gap:8px}
-  .pb-r .btn{font-size:11px;padding:8px 14px}
-
-  /* schedule day grid — horizontal scroll on very small screens */
-  .day-grid{grid-template-columns:repeat(7,1fr);gap:4px;overflow-x:auto;padding-bottom:4px}
-  .day-toggle{width:30px;height:30px;font-size:13px}
-  .day-label{font-size:9px}
-  .time-val{width:36px;font-size:10px;padding:2px 4px}
-  .time-btn{width:24px;height:18px;font-size:9px}
-
-  /* run history */
-  .rfp{font-size:9px;padding:3px 8px}
-  .ri{padding:10px 12px}
-  .rit{font-size:12px}
-  .rimeta{font-size:10px}
-  .rbadge{font-size:9px;padding:2px 7px}
-  .run-tags{gap:4px}
-  .rtag{font-size:9px;padding:1px 6px}
-
-  /* topic chips */
-  .tch{font-size:11px;padding:6px 11px}
-
-  /* modals fullscreen on mobile */
-  .modal{width:100%!important;max-width:100%!important;border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:90vh;overflow-y:auto}
-  .modal-bg{align-items:flex-end}
-
-  /* connect screen */
-  .cc{padding:28px 20px;border-radius:20px 20px 0 0;position:fixed;bottom:0;width:100%;max-width:100%}
-  #cs{align-items:flex-end;padding:0}
-
-  /* install / QR banners */
-  .install-banner{border-radius:14px;padding:12px 14px}
-  .install-banner h4{font-size:12px}
-  .install-banner p{font-size:10px}
-
-  /* wrap bottom padding = safe area + tab bar */
-  .wrap{padding:0 12px 100px}
-}
-
-/* Tiny phones 380px */
-@media(max-width:380px){
-  .srow{grid-template-columns:1fr 1fr;gap:8px}
-  .sval{font-size:20px}
-  .logo-name{font-size:12px}
-  .cpill span:last-child{display:none}
-  .hright{gap:5px}
-}
-
-/* Safe area insets (iPhone notch / home bar) */
-@supports(padding: max(0px)){
-  .wrap{padding-bottom:max(80px, calc(60px + env(safe-area-inset-bottom)))}
-  header{padding-top:max(18px, calc(12px + env(safe-area-inset-top)))}
-}
+@media(max-width:960px){.srow{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.pb{flex-direction:column;align-items:flex-start}.tgrid{grid-template-columns:1fr}.cc{padding:32px 24px}.preview-body{grid-template-columns:1fr}.preview-diagram{border-top:1px solid var(--bd)}.wrap{padding:0 16px 60px}}
+@media(max-width:600px){.srow{grid-template-columns:1fr 1fr}.day-grid{gap:6px}.rfp{font-size:10px;padding:4px 10px}}
 
 /* ── AI SCAN EFFECT ON DIAGRAM PREVIEW ── */
 .preview-diagram{position:relative;overflow:hidden}
@@ -542,93 +439,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 /* ── PROGRESS BAR SHIMMER ── */
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-
-/* ── PWA INSTALL BANNER ────────────────────────────────────────────────────── */
-.install-banner{display:none;align-items:center;gap:14px;padding:14px 18px;
-  background:linear-gradient(135deg,rgba(79,156,249,0.12),rgba(167,139,250,0.10));
-  border:1px solid rgba(79,156,249,0.25);border-radius:16px;margin-bottom:18px;
-  animation:up .4s ease}
-.install-banner.show{display:flex}
-.install-banner-ico{font-size:28px;flex-shrink:0}
-.install-banner-body{flex:1;min-width:0}
-.install-banner h4{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px}
-.install-banner p{font-size:11px;color:var(--txm);line-height:1.4}
-.install-banner-btns{display:flex;gap:8px;flex-shrink:0}
-[data-theme="light"] .install-banner{background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(124,58,237,0.05));border-color:rgba(37,99,235,0.2)}
-
-
-/* ── #26 ONBOARDING CHECKLIST ──────────────────────────────────────────────── */
-.onboard-card{background:linear-gradient(135deg,rgba(79,156,249,0.09),rgba(167,139,250,0.07));
-  border:1px solid rgba(79,156,249,0.28);border-radius:16px;margin-bottom:18px;
-  overflow:hidden;animation:up .4s ease;transition:all .3s}
-.onboard-card.done{border-color:rgba(52,211,153,0.4);background:linear-gradient(135deg,rgba(52,211,153,0.08),rgba(16,185,129,0.05))}
-[data-mode="light"] .onboard-card{background:linear-gradient(135deg,rgba(37,99,235,0.05),rgba(124,58,237,0.04));border-color:rgba(37,99,235,0.22)}
-[data-mode="light"] .onboard-card.done{border-color:rgba(5,118,66,0.35)}
-.onboard-header{display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;cursor:pointer;user-select:none}
-.onboard-header-left{display:flex;align-items:center;gap:10px}
-.onboard-title{font-size:13px;font-weight:700;color:var(--tx)}
-.onboard-prog-pill{font-size:11px;color:var(--txm);background:var(--bg2);
-  border-radius:20px;padding:2px 9px;border:1px solid var(--bd)}
-.onboard-chevron{font-size:12px;color:var(--txm);transition:transform .2s}
-.onboard-card.collapsed .onboard-chevron{transform:rotate(-90deg)}
-.onboard-body{padding:4px 16px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
-@media(max-width:600px){.onboard-body{grid-template-columns:1fr}}
-.onboard-card.collapsed .onboard-body{display:none}
-.onboard-step{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;
-  border-radius:10px;background:var(--bg2);border:1px solid var(--bd);transition:all .2s}
-.onboard-step.complete{background:rgba(52,211,153,0.07);border-color:rgba(52,211,153,0.25)}
-[data-mode="light"] .onboard-step.complete{background:rgba(5,118,66,0.06);border-color:rgba(5,118,66,0.22)}
-.onboard-check{width:20px;height:20px;min-width:20px;border-radius:50%;border:2px solid var(--bd);
-  display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px;
-  transition:all .25s}
-.onboard-step.complete .onboard-check{background:var(--grn);border-color:var(--grn);color:#fff}
-.onboard-step-text{flex:1}
-.onboard-step-label{font-size:12px;font-weight:600;color:var(--tx);line-height:1.3}
-.onboard-step.complete .onboard-step-label{color:var(--txm);text-decoration:line-through}
-.onboard-step-sub{font-size:10px;color:var(--txd);margin-top:2px;line-height:1.4}
-.onboard-step-action{font-size:10px;color:var(--acc);cursor:pointer;margin-top:3px;font-weight:600}
-.onboard-step-action:hover{text-decoration:underline}
-.onboard-footer{padding:0 16px 12px;display:flex;align-items:center;gap:10px}
-.onboard-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
-.onboard-bar-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));
-  border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1)}
-.onboard-dismiss{font-size:10px;color:var(--txd);cursor:pointer;white-space:nowrap;flex-shrink:0}
-.onboard-dismiss:hover{color:var(--txm)}
-.onboard-complete-msg{text-align:center;padding:14px 16px;font-size:12px;
-  color:var(--grn);font-weight:600;letter-spacing:.02em}
-
-/* ── QR SHARE MODAL ────────────────────────────────────────────────────────── */
-.qr-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
-  z-index:10000;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-.qr-modal-bg.show{display:flex}
-.qr-modal{background:var(--sur);border:1px solid var(--bd);border-radius:24px;
-  padding:32px;max-width:360px;width:calc(100% - 40px);text-align:center;
-  box-shadow:var(--sh);animation:up .3s ease}
-.qr-modal h3{font-size:16px;font-weight:800;color:var(--tx);margin-bottom:6px}
-.qr-modal p{font-size:12px;color:var(--txm);line-height:1.5;margin-bottom:20px}
-#qrCanvas{display:flex;justify-content:center;margin-bottom:16px}
-#qrCanvas canvas,#qrCanvas img{border-radius:12px;border:6px solid white}
-.qr-url-box{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;
-  padding:10px 12px;font-family:var(--fm);font-size:10px;color:var(--txm);
-  word-break:break-all;text-align:left;margin-bottom:16px;max-height:60px;overflow-y:auto}
-.qr-warn{font-size:10px;color:var(--org);margin-bottom:20px;
-  padding:8px 12px;background:rgba(251,146,60,0.08);border-radius:8px;
-  border:1px solid rgba(251,146,60,0.2);text-align:left}
-.qr-btn-row{display:flex;gap:8px;justify-content:center}
-
-/* ── MOBILE NAV BAR (bottom) ──────────────────────────────────────────────── */
-.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;
-  background:var(--sur);border-top:1px solid var(--bd);
-  padding:8px 0 max(8px,env(safe-area-inset-bottom));
-  z-index:900;grid-template-columns:repeat(4,1fr)}
-@media(max-width:640px){.mob-nav{display:grid}}
-.mob-nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:6px 4px;background:none;border:none;cursor:pointer;
-  color:var(--txd);font-size:9px;font-family:var(--fb);font-weight:500;
-  transition:color var(--tr)}
-.mob-nav-btn.active,.mob-nav-btn:hover{color:var(--acc)}
-.mob-nav-ico{font-size:20px;line-height:1}
 </style>
 </head>
 <body>
@@ -641,7 +451,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   <div class="cc">
     <div class="clogo">
       <div class="clogo-ic">🤖</div>
-      <div><h1>LinkedIn Agent</h1><p id="dashSubtitle">Content Dashboard</p></div>
+      <div><h1>LinkedIn Agent</h1><p>Komal Batra · Content Dashboard</p></div>
     </div>
     <h2>Connect GitHub</h2>
     <p>Enter your Personal Access Token to manage posts, view run history, and preview content before publishing.</p>
@@ -672,25 +482,17 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <div class="field">
         <label>Groq API Key (for Dry Run Preview)</label>
         <input class="finp" id="groqKeyInput" type="password" placeholder="gsk_your_groq_api_key_here"/>
-      </div>
-      <div class="field">
-        <label>Your GitHub Repo</label>
-        <input class="finp" id="settingsRepoInput" placeholder="username/repo-name" style="font-family:var(--fm)"/>
-        <p class="fhint">The repo containing your linkedin-agent.yml workflow</p>
         <p class="fhint">Used only for generating post previews in your browser. Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys. Never sent anywhere except Groq's API directly.</p>
       </div>
       <div class="field">
         <label>Your Name (shown in post preview)</label>
-        <input class="finp" id="authorNameInput" type="text" placeholder="e.g. Jane Smith"/>
+        <input class="finp" id="authorNameInput" type="text" placeholder="e.g. Komal Batra"/>
       </div>
       <div class="field">
         <label>Your Role (shown in post preview)</label>
-        <input class="finp" id="authorRoleInput" type="text" placeholder="e.g. Software Engineer at Acme Corp"/>
+        <input class="finp" id="authorRoleInput" type="text" placeholder="e.g. Software Engineer at Microsoft"/>
       </div>
       <button class="btn bp" style="width:100%" onclick="saveSettings()">Save Settings</button>
-      <div style="border-top:1px solid var(--bd);margin:16px 0 12px"></div>
-      <div style="font-size:11px;color:var(--txd);margin-bottom:8px">If the dashboard is stuck or showing stale data, clear the local cache and reconnect.</div>
-      <button class="btn bg" style="width:100%;font-size:12px" onclick="clearCacheAndReconnect()">🔄 Clear Cache &amp; Reconnect</button>
     </div>
   </div>
 </div>
@@ -719,7 +521,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
           <div class="post-meta">
             <div class="post-avatar">👤</div>
             <div>
-              <div class="post-author" id="previewAuthor">Your Name</div>
+              <div class="post-author" id="previewAuthor">Komal Batra</div>
               <div class="post-role" id="previewRole">Software Engineer at Microsoft</div>
             </div>
           </div>
@@ -744,51 +546,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 <!-- ══ DASHBOARD ══ -->
 <div id="db">
-
-<!-- PWA Install Banner -->
-<div class="install-banner" id="installBanner">
-  <div class="install-banner-ico">📲</div>
-  <div class="install-banner-body">
-    <h4>Install as App</h4>
-    <p>Add to your home screen for instant access on any device — works offline too.</p>
-  </div>
-  <div class="install-banner-btns">
-    <button class="btn bp" id="installBtn" onclick="pwaInstall()" style="font-size:11px;padding:7px 14px">Install</button>
-    <button class="btn bg" onclick="document.getElementById('installBanner').classList.remove('show')" style="font-size:11px;padding:7px 10px">✕</button>
-  </div>
-</div>
-
-<!-- #26 Onboarding Checklist -->
-<div class="onboard-card" id="onboardCard" style="display:none">
-  <div class="onboard-header" onclick="toggleChecklist()">
-    <div class="onboard-header-left">
-      <span>🚀</span>
-      <span class="onboard-title">Setup Checklist</span>
-      <span class="onboard-prog-pill" id="onboardPill">0 / 6</span>
-    </div>
-    <span class="onboard-chevron" id="onboardChev">▾</span>
-  </div>
-  <div class="onboard-body" id="onboardBody"></div>
-  <div class="onboard-footer">
-    <div class="onboard-bar-wrap"><div class="onboard-bar-fill" id="onboardBar" style="width:0%"></div></div>
-    <span class="onboard-dismiss" onclick="dismissChecklist()">Dismiss ✕</span>
-  </div>
-</div>
-
-<!-- QR Share Modal -->
-<div class="qr-modal-bg" id="qrBg" onclick="if(event.target===this)closeQR()">
-  <div class="qr-modal">
-    <h3>📱 Open on Another Device</h3>
-    <p>Scan this QR code on your phone or tablet. It will open the dashboard and connect automatically — no token re-entry needed.</p>
-    <div id="qrCanvas"></div>
-    <div class="qr-url-box" id="qrUrl"></div>
-    <div class="qr-warn">⚠️ This link contains your GitHub token. Only scan it on <strong>your own devices</strong> — never share it publicly.</div>
-    <div class="qr-btn-row">
-      <button class="btn bg" onclick="copyQrUrl()" style="font-size:11px;padding:8px 16px">📋 Copy Link</button>
-      <button class="btn bg" onclick="closeQR()" style="font-size:11px;padding:8px 16px">Close</button>
-    </div>
-  </div>
-</div>
 <div class="wrap">
 
   <header>
@@ -796,29 +553,28 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <div class="logo-ic">🤖</div>
       <div>
         <h1>LinkedIn Agent</h1>
-        <p id="repoDisplay" style="font-size:11px;color:var(--txm);font-family:var(--fm)">—</p>
+        <p>komalb16 / LinkedIn_Content_Update</p>
       </div>
     </div>
     <div class="hright">
-      <!-- Inline theme strip -->
-      <div class="theme-strip">
-        <div class="ts-colors">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;color:var(--txd);font-family:var(--fm)">🌍</span>
+        <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Select your timezone"></select>
+      </div>
+      <div class="theme-picker" id="themePicker">
+        <div class="tpick-colors">
           <button class="cpick blue"   onclick="setColor('blue')"   title="Blue"></button>
           <button class="cpick purple" onclick="setColor('purple')" title="Purple"></button>
           <button class="cpick orange" onclick="setColor('orange')" title="Orange"></button>
           <button class="cpick teal"   onclick="setColor('teal')"   title="Teal"></button>
           <button class="cpick rose"   onclick="setColor('rose')"   title="Rose"></button>
         </div>
-        <div class="ts-sep"></div>
         <div class="tpick-modes">
-          <button class="mpick" id="mp-light"  onclick="setMode('light')" >☀️</button>
-          <button class="mpick" id="mp-medium" onclick="setMode('medium')">🌤</button>
-          <button class="mpick act" id="mp-dark" onclick="setMode('dark')">🌙</button>
-          <button class="mpick" id="mp-auto" onclick="setModeAuto()" title="Follow system theme">⚙️</button>
+          <button class="mpick" id="mp-light"  onclick="setMode('light')" >☀️ Light</button>
+          <button class="mpick" id="mp-medium" onclick="setMode('medium')">🌤 Mid</button>
+          <button class="mpick act" id="mp-dark" onclick="setMode('dark')" >🌙 Dark</button>
         </div>
       </div>
-      <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Timezone"></select>
-      <button class="gear-btn" id="qrShareBtn" onclick="openQR()" title="Open on another device" style="display:none">📱</button>
       <div class="gear-btn" onclick="openSettings()" title="Settings">⚙️</div>
       <div class="cpill" onclick="disconnect()" title="Click to disconnect">
         <div class="dot"></div>
@@ -829,7 +585,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   </header>
 
   <!-- STATS -->
-  <div class="srow" id="statsTop">
+  <div class="srow">
     <div class="stat">
       <div class="stat-icon">🚀</div>
       <div class="slbl">Total Posts</div>
@@ -881,6 +637,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     <div class="ch" style="padding:16px 22px 0;display:flex;align-items:center;justify-content:space-between">
       <span class="ct">⏰ Schedule Control</span>
       <div style="display:flex;gap:8px">
+        <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="copyCron()">Copy Cron</button>
         <button class="btn bp" style="font-size:11px;padding:5px 14px" onclick="saveSchedule()" id="saveSchedBtn">💾 Save Schedule</button>
       </div>
     </div>
@@ -903,12 +660,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
     <!-- WEEKLY PANEL -->
     <div class="spanel show" id="panel-weekly">
-      <p style="font-size:11px;color:var(--txd);margin-bottom:14px">Toggle each day on/off and set a different posting time per day. Times shown in <strong id="tzWeeklyNote">your local timezone</strong> and automatically converted to UTC. Saved to <code style="font-size:10px;background:var(--bg2);padding:1px 5px;border-radius:4px">schedule_config.json</code> in your repo.</p>
+      <p style="font-size:11px;color:var(--txd);margin-bottom:14px">Toggle each day on/off and set a different posting time per day. Times are in <strong id="tzWeeklyNote">your timezone</strong>. Saved to <code style="font-size:10px;background:var(--bg2);padding:1px 5px;border-radius:4px">schedule_config.json</code> in your repo.</p>
       <div class="day-grid" id="dayGrid"><!-- built by JS --></div>
       <div class="sleg">
         <span><div class="ldot" style="background:var(--acc)"></div> Active day</span>
         <span><div class="ldot" style="background:var(--txd)"></div> Skipped day</span>
-        <span id="tzLegend">Times shown in your timezone · saved as UTC</span>
+        <span id="tzLegend">Times shown in IST (+5:30)</span>
       </div>
     </div>
 
@@ -999,9 +756,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
   <!-- RUNS LOG -->
   <div class="card">
     <div class="ch">
-      <span class="ct" id="histSection">📋 LinkedIn Post History</span>
+      <span class="ct">📋 LinkedIn Post History</span>
       <div style="display:flex;align-items:center;gap:8px;position:relative">
-        <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button><span id="lastRefreshed" style="font-size:10px;color:var(--txd);margin-left:8px;vertical-align:middle"></span>
+        <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadRuns()">↻ Refresh</button>
         <div style="position:relative">
           <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="toggleExportMenu(event)">⬇ Export ▾</button>
           <div class="export-menu" id="exportMenu">
@@ -1033,10 +790,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <button class="sfp"         id="sfOk"     onclick="setStatusFilter('ok',this)"    >✅ Success</button>
       <button class="sfp"         id="sfFail"   onclick="setStatusFilter('fail',this)"  >❌ Failed</button>
       <button class="sfp"         id="sfCancel" onclick="setStatusFilter('cancel',this)">🚫 Cancelled</button>
-      <span class="filter-divider"></span>
-      <button class="sfp act-all" id="tfAll"    onclick="setTriggerFilter('all',this)"      >All</button>
-      <button class="sfp"         id="tfManual" onclick="setTriggerFilter('manual',this)"   >🖱️ Manual</button>
-      <button class="sfp"         id="tfSched"  onclick="setTriggerFilter('schedule',this)" >⏰ Scheduled</button>
     </div>
 
     <!-- CUSTOM RANGE (shown when Custom selected) -->
@@ -1076,10 +829,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-// REPO is auto-detected from the user's token on connect (see detectRepo())
-// It can also be overridden manually in Settings
-let REPO = localStorage.getItem('agent_repo') || '';
-const WF = localStorage.getItem('agent_wf')  || 'linkedin-agent.yml';
+const REPO = 'komalb16/LinkedIn_Content_Update';
+const WF   = 'linkedin-agent.yml';
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
@@ -1103,51 +854,6 @@ let userTZ = localStorage.getItem('user_tz') || Intl.DateTimeFormat().resolvedOp
 // ── TIMEZONE HELPERS ──────────────────────────────────────────────────────────
 function tzNow()  { return new Date(new Date().toLocaleString('en-US', {timeZone: userTZ})); }
 function tzFmt(d, opts) { return new Date(d).toLocaleString('en-US', {timeZone: userTZ, ...opts}); }
-
-// Convert "HH:MM" in userTZ → "HH:MM" in UTC (for saving to schedule_config)
-// Convert wall-clock HH:MM in an explicit timezone → HH:MM UTC
-// Uses that day's actual DST offset, not a fixed one.
-function wallClockToUtc(hhmm, tzName) {
-  const [h, m] = hhmm.split(':').map(Number);
-  const now = new Date();
-  // Compute offset for the given timezone at today's date
-  const refLocal = new Date(now.toLocaleString('en-US', {timeZone: tzName}));
-  const offsetMs = refLocal - now;
-  const localMs  = (h * 60 + m) * 60000;
-  const utcMs    = ((localMs - offsetMs) % 86400000 + 86400000) % 86400000;
-  const uh = Math.floor(utcMs / 3600000);
-  const um = Math.floor((utcMs % 3600000) / 60000);
-  return String(uh).padStart(2,'0') + ':' + String(um).padStart(2,'0');
-}
-
-function localTimeToUtc(localHHMM) {
-  const [h, m] = localHHMM.split(':').map(Number);
-  // Build a Date for today at that local time, then read its UTC hours/minutes
-  const now = new Date();
-  // Use a reference date string in userTZ to get the offset
-  const refLocal = new Date(now.toLocaleString('en-US', {timeZone: userTZ}));
-  const refUTC   = now;
-  const offsetMs = refLocal - refUTC;   // positive if local is ahead of UTC
-  const localMs  = (h * 60 + m) * 60000;
-  const utcMs    = ((localMs - offsetMs) % 86400000 + 86400000) % 86400000;
-  const uh = Math.floor(utcMs / 3600000);
-  const um = Math.floor((utcMs % 3600000) / 60000);
-  return String(uh).padStart(2,'0') + ':' + String(um).padStart(2,'0');
-}
-
-// Convert "HH:MM" UTC → "HH:MM" in userTZ (for displaying from schedule_config)
-function utcTimeToLocal(utcHHMM) {
-  const [h, m] = utcHHMM.split(':').map(Number);
-  const now = new Date();
-  const refLocal = new Date(now.toLocaleString('en-US', {timeZone: userTZ}));
-  const refUTC   = now;
-  const offsetMs = refLocal - refUTC;
-  const utcMs    = (h * 60 + m) * 60000;
-  const localMs  = ((utcMs + offsetMs) % 86400000 + 86400000) % 86400000;
-  const lh = Math.floor(localMs / 3600000);
-  const lm = Math.floor((localMs % 3600000) / 60000);
-  return String(lh).padStart(2,'0') + ':' + String(lm).padStart(2,'0');
-}
 function tzLabel(){ const off = -new Date().getTimezoneOffset(); const h=Math.floor(Math.abs(off)/60),m=Math.abs(off)%60; return userTZ.split('/').pop().replace(/_/g,' ') + ' (UTC'+(off>=0?'+':'-')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+')'; }
 function tzOffsetMins() {
   // Get offset of userTZ from UTC in minutes (positive = ahead)
@@ -1199,8 +905,9 @@ function setTimezone(tz) {
   localStorage.setItem('user_tz', tz);
   updateTzLabels();
   updNext();
-  buildDayGrid();          // re-display schedule times in new timezone
+  // Re-render runs with new timezone
   if (allRuns.length) applyRunFilter();
+  // Re-render stats
   loadStats();
   toast('Timezone set to ' + tz.split('/').pop().replace(/_/g,' '), 'info');
 }
@@ -1470,28 +1177,6 @@ function updateRestoreBar() {
 }
 
 window.onload = () => {
-  // ── URL-fragment auto-connect (QR scan on new device) ─────────────────────
-  (function checkFragmentConnect() {
-    const hash = location.hash;
-    if (hash.startsWith('#connect=')) {
-      try {
-        const encoded = hash.slice('#connect='.length);
-        const payload = JSON.parse(atob(decodeURIComponent(encoded)));
-        if (payload.token) {
-          token = payload.token;
-          localStorage.setItem('gh_token', token);
-          // Restore shared settings if present
-          if (payload.themeColor) localStorage.setItem('themeColor', payload.themeColor);
-          if (payload.themeMode)  localStorage.setItem('themeMode',  payload.themeMode);
-          if (payload.tz)         localStorage.setItem('user_tz',    payload.tz);
-          // Clear the fragment so the token isn't visible in the address bar
-          history.replaceState(null, '', location.pathname);
-          toast('📱 Auto-connected from QR scan ✓', 'ok');
-        }
-      } catch(e) { console.warn('QR connect parse error', e); }
-    }
-  })();
-
   // Restore saved color + mode
   _themeColor = localStorage.getItem('themeColor') || 'blue';
   _themeMode  = localStorage.getItem('themeMode')  || 'dark';
@@ -1502,14 +1187,6 @@ window.onload = () => {
   loadSettings();
   if (token) silentConn();
   setInterval(updNext, 60000);
-
-  // Auto-refresh run list every 5 minutes — no hard refresh needed
-  setInterval(() => {
-    if (!document.hidden && REPO) { loadRuns(); loadStats(); }
-  }, 5 * 60 * 1000);
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && REPO) { loadRuns(); loadStats(); }
-  });
   // Init custom range to last 30 days
   const today = new Date();
   const from30 = new Date(today - 30*864e5);
@@ -1558,25 +1235,8 @@ window.onload = () => {
 
 // ── THEME ─────────────────────────────────────────────────────────────────────
 // ── THEME: 5 colors × 3 modes ────────────────────────────────────────────────
-
-// #27 System theme auto-sync: derive mode from OS if user hasn't manually chosen
-function _systemPreferredMode() {
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
-  return 'dark';
-}
-let _themeColor   = localStorage.getItem('themeColor') || 'blue';
-let _themeMode    = localStorage.getItem('themeMode')  || _systemPreferredMode();
-let _themeAutoMode = !localStorage.getItem('themeMode'); // true = following OS
-
-// Live-follow OS changes (only when no manual override saved)
-if (window.matchMedia) {
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-    if (_themeAutoMode) { _themeMode = e.matches ? 'dark' : 'light'; applyTheme(); }
-  });
-}
-
-// (appear panel removed — theme strip is inline)
-
+let _themeColor = localStorage.getItem('themeColor') || 'blue';
+let _themeMode  = localStorage.getItem('themeMode')  || 'dark';
 
 function setColor(c) {
   _themeColor = c;
@@ -1584,22 +1244,9 @@ function setColor(c) {
   applyTheme();
 }
 function setMode(m) {
-  _themeMode    = m;
-  _themeAutoMode = false; // user explicitly chose — stop following OS
+  _themeMode = m;
   localStorage.setItem('themeMode', m);
   applyTheme();
-  // Show "Auto" button as available when user is in manual mode
-  const autoBtn = document.getElementById('mp-auto');
-  if (autoBtn) autoBtn.style.opacity = '0.55';
-}
-// Auto mode: clear manual override, re-follow OS preference
-function setModeAuto() {
-  _themeAutoMode = true;
-  _themeMode     = _systemPreferredMode();
-  localStorage.removeItem('themeMode');
-  applyTheme();
-  const autoBtn = document.getElementById('mp-auto');
-  if (autoBtn) autoBtn.style.opacity = '1';
 }
 // Legacy setTheme() called by old code paths — map to mode
 function setTheme(t) {
@@ -1620,17 +1267,8 @@ function applyTheme() {
   // Mode button active state
   ['light','medium','dark'].forEach(m => {
     const el = document.getElementById('mp-' + m);
-    if (el) el.classList.toggle('act', m === _themeMode && !_themeAutoMode);
+    if (el) el.classList.toggle('act', m === _themeMode);
   });
-  // Auto button: highlighted when following OS, dimmed when overridden
-  const autoBtn = document.getElementById('mp-auto');
-  if (autoBtn) {
-    autoBtn.classList.toggle('act', _themeAutoMode);
-    autoBtn.style.opacity = _themeAutoMode ? '1' : '0.55';
-    autoBtn.title = _themeAutoMode
-      ? 'Following system theme (click mode buttons to override)'
-      : 'Click to follow system theme again';
-  }
   // Legacy tbtn support
   document.querySelectorAll('.tbtn').forEach(b => {
     b.classList.toggle('act',
@@ -1650,449 +1288,12 @@ function closeSettings(e) {
 }
 function saveSettings() {
   localStorage.setItem('groq_key', document.getElementById('groqKeyInput').value.trim());
-  const newName = document.getElementById('authorNameInput').value.trim();
-  const newRole = document.getElementById('authorRoleInput').value.trim();
-  if (newName) localStorage.setItem('author_name', newName);
-  if (newRole) localStorage.setItem('author_role', newRole);
-  // Save repo if changed
-  const repoInp = document.getElementById('settingsRepoInput');
-  let repoChanged = false;
-  if (repoInp) {
-    const rv = repoInp.value.trim();
-    if (rv && rv.includes('/') && rv !== REPO) {
-      REPO = rv;
-      localStorage.setItem('agent_repo', rv);
-      updateRepoDisplay();
-      repoChanged = true;
-    }
-  }
+  localStorage.setItem('author_name', document.getElementById('authorNameInput').value.trim() || 'Komal Batra');
+  localStorage.setItem('author_role', document.getElementById('authorRoleInput').value.trim() || 'Software Engineer at Microsoft');
   closeSettings();
-  updateRepoDisplay();
   toast('Settings saved ✓', 'ok');
-  if (repoChanged && token) loadAllData();
 }
-// ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
-(function() {
-  // Only register SW when served from a real origin (GitHub Pages, localhost).
-  // Skip on claude.ai preview, file://, and any origin without a real domain.
-  const host = location.hostname;
-  const skip = !host ||
-               host === 'localhost' && location.protocol === 'file:' ||
-               host.includes('claudeusercontent.com') ||
-               host.includes('claude.ai') ||
-               !('serviceWorker' in navigator);
-  if (skip) return;
-
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
-      .then(reg => {
-        reg.addEventListener('updatefound', () => {
-          const newSW = reg.installing;
-          newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'activated') { window.location.reload(); }
-          });
-        });
-      })
-      .catch(() => {});
-    navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
-  });
-})();
-
-// ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────
-let _deferredInstallPrompt = null;
-
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  _deferredInstallPrompt = e;
-  // Show banner only on the dashboard, not the connect screen
-  if (document.getElementById('db').style.display !== 'none') {
-    document.getElementById('installBanner').classList.add('show');
-  }
-});
-
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').classList.remove('show');
-  _deferredInstallPrompt = null;
-  toast('✅ App installed! Open it from your home screen.', 'ok');
-  localStorage.setItem('pwa_installed', '1');
-});
-
-async function pwaInstall() {
-  if (_deferredInstallPrompt) {
-    _deferredInstallPrompt.prompt();
-    const { outcome } = await _deferredInstallPrompt.userChoice;
-    if (outcome === 'accepted') {
-      _deferredInstallPrompt = null;
-      document.getElementById('installBanner').classList.remove('show');
-    }
-  } else {
-    // Fallback instructions for Safari/iOS
-    openIOSInstallGuide();
-  }
-}
-
-function openIOSInstallGuide() {
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if (isIOS) {
-    toast('Tap the Share button (□↑) then "Add to Home Screen"', 'ok');
-  } else {
-    toast('Use your browser menu → "Install app" or "Add to home screen"', 'ok');
-  }
-}
-
-// Show install banner when dashboard loads if not already installed
-function checkInstallPrompt() {
-  const installed = localStorage.getItem('pwa_installed');
-  const dismissed = localStorage.getItem('pwa_banner_dismissed');
-  if (!installed && !dismissed && !window.matchMedia('(display-mode: standalone)').matches) {
-    // Show after a short delay so the dashboard loads first
-    setTimeout(() => {
-      document.getElementById('installBanner').classList.add('show');
-    }, 2000);
-  }
-}
-
-// ── QR TOKEN SHARE ────────────────────────────────────────────────────────────
-let _qrInstance = null;
-
-function buildShareUrl() {
-  const payload = {
-    token:      token,
-    themeColor: localStorage.getItem('themeColor') || 'blue',
-    themeMode:  localStorage.getItem('themeMode')  || 'dark',
-    tz:         localStorage.getItem('user_tz')    || '',
-  };
-  const encoded = encodeURIComponent(btoa(JSON.stringify(payload)));
-  const base = location.origin + location.pathname;
-  return base + '#connect=' + encoded;
-}
-
-function openQR() {
-  if (!token) { toast('Connect first, then use Share to transfer to another device', 'err'); return; }
-  const url = buildShareUrl();
-  document.getElementById('qrUrl').textContent = url;
-
-  const container = document.getElementById('qrCanvas');
-  container.innerHTML = '';
-  try {
-    _qrInstance = new QRCode(container, {
-      text:         url,
-      width:        220,
-      height:       220,
-      colorDark:    '#000000',
-      colorLight:   '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M,
-    });
-  } catch(e) {
-    container.innerHTML = '<p style="color:var(--red);font-size:12px">QR library not loaded yet — try again in a second.</p>';
-  }
-
-  document.getElementById('qrBg').classList.add('show');
-}
-
-// Convert legacy time_ist string → time_utc string (IST = UTC+5:30)
-function legacyIstToUtc(timeIst) {
-  const [h, m] = (timeIst || '09:30').split(':').map(Number);
-  const totalMin = ((h * 60 + m - 330) + 1440) % 1440; // -5h30m, wrap
-  return String(Math.floor(totalMin/60)).padStart(2,'0') + ':' + String(totalMin%60).padStart(2,'0');
-}
-
-function closeQR() {
-  document.getElementById('qrBg').classList.remove('show');
-}
-
-// ── REPO AUTO-DETECTION ───────────────────────────────────────────────────────
-// After login, search the user's repos for one containing linkedin-agent.yml.
-// If found → store and use it. If multiple → let user pick. If none → prompt.
-async function detectRepo(ghLogin) {
-  // 1. Check if already saved
-  if (localStorage.getItem('agent_repo')) {
-    REPO = localStorage.getItem('agent_repo');
-    updateRepoDisplay();
-    return;
-  }
-
-  try {
-    // 2. Search code for the workflow file across all user repos
-    const r = await gh('/search/code?q=filename:linkedin-agent.yml+user:' + ghLogin + '&per_page=10');
-    if (!r.ok) { showRepoPrompt(); return; }
-    const d = await r.json();
-    const repos = [...new Set((d.items || []).map(i => i.repository.full_name))];
-
-    if (repos.length === 1) {
-      // Exactly one match — auto-configure silently
-      REPO = repos[0];
-      localStorage.setItem('agent_repo', REPO);
-      updateRepoDisplay();
-      toast('✅ Repo auto-detected: ' + REPO, 'ok');
-    } else if (repos.length > 1) {
-      // Multiple matches — ask user to pick
-      showRepoPicker(repos);
-    } else {
-      // No match — maybe they renamed it; ask manually
-      showRepoPrompt();
-    }
-  } catch(e) {
-    showRepoPrompt();
-  }
-}
-
-function updateRepoDisplay() {
-  const el = document.getElementById('repoDisplay');
-  if (el && REPO) {
-    const [owner, name] = REPO.split('/');
-    el.textContent = owner + ' / ' + name;
-  }
-  // Also update subtitle with user name
-  const sub = document.getElementById('dashSubtitle');
-  const name = localStorage.getItem('author_name') || localStorage.getItem('gh_user') || '';
-  if (sub && name) sub.textContent = name + ' · Content Dashboard';
-}
-
-function showRepoPicker(repos) {
-  const options = repos.map(r =>
-    `<button class="btn bg" style="font-size:12px;padding:8px 16px;width:100%;text-align:left" onclick="pickRepo('${r}')">${r}</button>`
-  ).join('');
-  showSetupModal(
-    '🔎 Multiple repos found',
-    'Which repo is your LinkedIn Agent?',
-    options
-  );
-}
-
-function pickRepo(repo) {
-  REPO = repo;
-  localStorage.setItem('agent_repo', REPO);
-  updateRepoDisplay();
-  closeSetupModal();
-  toast('✅ Repo set: ' + REPO, 'ok');
-  loadAllData();
-}
-
-function showRepoPrompt() {
-  showSetupModal(
-    '⚙️ One-time Setup',
-    'Enter your repo (e.g. <code>username/LinkedIn_Content_Update</code>):',
-    `<input class="inp" id="repoInput" placeholder="username/repo-name" style="margin-bottom:10px"
-       value="${localStorage.getItem('agent_repo') || ''}"/>
-     <button class="btn bp" style="width:100%" onclick="saveRepoFromInput()">Save & Continue →</button>`
-  );
-  setTimeout(() => {
-    const inp = document.getElementById('repoInput');
-    if (inp) inp.focus();
-  }, 100);
-}
-
-function saveRepoFromInput() {
-  const v = (document.getElementById('repoInput') || {}).value?.trim();
-  if (!v || !v.includes('/')) { toast('Enter a valid repo like username/repo-name', 'err'); return; }
-  REPO = v;
-  localStorage.setItem('agent_repo', v);
-  updateRepoDisplay();
-  closeSetupModal();
-  toast('✅ Repo saved: ' + REPO, 'ok');
-  loadAllData();
-}
-
-// ── FIRST-RUN SETUP WIZARD ─────────────────────────────────────────────────
-// Shows after first successful login when author_name isn't set yet.
-
-// ── #26 ONBOARDING CHECKLIST ──────────────────────────────────────────────────
-const ONBOARD_STEPS = [
-  {
-    id: 'github',
-    label: 'Connect to GitHub',
-    sub: 'Paste your GitHub token and click Connect',
-    check: () => !!localStorage.getItem('gh_token'),
-    action: null
-  },
-  {
-    id: 'repo',
-    label: 'Repository detected',
-    sub: 'Your LinkedIn Agent repo is linked automatically',
-    check: () => !!REPO,
-    action: null
-  },
-  {
-    id: 'groq',
-    label: 'Add Groq API key',
-    sub: 'Required for Dry Run preview — free at console.groq.com',
-    check: () => !!(localStorage.getItem('groq_key') || '').startsWith('gsk_'),
-    action: 'openSettings()'
-  },
-  {
-    id: 'schedule',
-    label: 'Configure schedule',
-    sub: 'Enable at least one posting day with a time',
-    check: () => {
-      try {
-        const cfg = JSON.parse(localStorage.getItem('schedule_cfg_cache') || '{}');
-        return Object.values(cfg).some(d => d && d.enabled && (d.time_local || d.time_utc));
-      } catch { return false; }
-    },
-    action: "document.getElementById('schedSection') && document.getElementById('schedSection').scrollIntoView({behavior:'smooth'})"
-  },
-  {
-    id: 'topics',
-    label: 'Review your topics',
-    sub: 'Check the topic list — disable or add topics for your field',
-    check: () => !!localStorage.getItem('checklist_topics_ok'),
-    action: "markChecklistStep('topics'); document.getElementById('topicsSection') && document.getElementById('topicsSection').scrollIntoView({behavior:'smooth'})"
-  },
-  {
-    id: 'dryrun',
-    label: 'Try a Dry Run',
-    sub: 'Preview your first AI-generated post before publishing',
-    check: () => !!localStorage.getItem('checklist_dryrun_ok'),
-    action: "isDry=true; document.getElementById('dryToggle') && (document.getElementById('dryToggle').checked=true); handlePost()"
-  }
-];
-
-function renderChecklist() {
-  const card = document.getElementById('onboardCard');
-  if (!card) return;
-  if (localStorage.getItem('checklist_dismissed')) { card.style.display = 'none'; return; }
-
-  const completed = ONBOARD_STEPS.filter(s => s.check()).length;
-  const total     = ONBOARD_STEPS.length;
-
-  // All done — show completion and schedule auto-dismiss
-  if (completed === total) {
-    card.style.display = '';
-    card.classList.add('done');
-    document.getElementById('onboardBody').innerHTML =
-      '<div class="onboard-complete-msg" style="grid-column:1/-1">🎉 All set! You\'re fully configured — enjoy automated LinkedIn posting.</div>';
-    document.getElementById('onboardPill').textContent = '✓ Complete';
-    document.getElementById('onboardBar').style.width = '100%';
-    document.getElementById('onboardBody').style.display = 'block';
-    if (!localStorage.getItem('checklist_dismissed')) {
-      setTimeout(() => dismissChecklist(), 5000);
-    }
-    return;
-  }
-
-  card.style.display = '';
-  card.classList.remove('done');
-  document.getElementById('onboardPill').textContent = completed + ' / ' + total;
-  document.getElementById('onboardBar').style.width  = Math.round(completed/total*100) + '%';
-
-  const body = document.getElementById('onboardBody');
-  body.innerHTML = ONBOARD_STEPS.map(s => {
-    const done = s.check();
-    return `<div class="onboard-step ${done ? 'complete' : ''}" id="os-${s.id}">
-      <div class="onboard-check">${done ? '✓' : ''}</div>
-      <div class="onboard-step-text">
-        <div class="onboard-step-label">${s.label}</div>
-        <div class="onboard-step-sub">${s.sub}</div>
-        ${!done && s.action ? `<div class="onboard-step-action" onclick="${s.action}">Fix this →</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function markChecklistStep(id) {
-  localStorage.setItem('checklist_' + id + '_ok', '1');
-  renderChecklist();
-}
-
-function dismissChecklist() {
-  localStorage.setItem('checklist_dismissed', '1');
-  const card = document.getElementById('onboardCard');
-  if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.style.display='none', 300); }
-}
-
-function toggleChecklist() {
-  const card = document.getElementById('onboardCard');
-  const chev = document.getElementById('onboardChev');
-  if (!card) return;
-  card.classList.toggle('collapsed');
-  if (chev) chev.textContent = card.classList.contains('collapsed') ? '▸' : '▾';
-}
-
-// Cache schedule config when loaded so checklist can read it
-function cacheScheduleForChecklist(cfg) {
-  try { localStorage.setItem('schedule_cfg_cache', JSON.stringify(cfg)); } catch {}
-}
-
-function maybeShowFirstRunWizard() {
-  const name = localStorage.getItem('author_name');
-  const role = localStorage.getItem('author_role');
-  if (name && role) return;   // already configured
-
-  showSetupModal(
-    '👋 Welcome! Quick setup',
-    'This takes 10 seconds and personalises your posts and diagrams.',
-    `<label style="font-size:11px;color:var(--txm);display:block;margin-bottom:4px">Your name (appears on every post)</label>
-     <input class="inp" id="setupName" placeholder="e.g. Jane Smith" style="margin-bottom:12px" value="${name || ''}"/>
-     <label style="font-size:11px;color:var(--txm);display:block;margin-bottom:4px">Your role (shown under your name)</label>
-     <input class="inp" id="setupRole" placeholder="e.g. Senior Engineer at Acme" style="margin-bottom:16px" value="${role || ''}"/>
-     <button class="btn bp" style="width:100%" onclick="saveFirstRunWizard()">Save & Start Posting →</button>
-     <button class="btn bg" style="width:100%;margin-top:8px;font-size:11px" onclick="closeSetupModal()">Skip for now</button>`
-  );
-  setTimeout(() => { const el = document.getElementById('setupName'); if(el) el.focus(); }, 100);
-}
-
-function saveFirstRunWizard() {
-  const name = (document.getElementById('setupName') || {}).value?.trim();
-  const role = (document.getElementById('setupRole') || {}).value?.trim();
-  if (name) localStorage.setItem('author_name', name);
-  if (role) localStorage.setItem('author_role', role);
-  closeSetupModal();
-  updateRepoDisplay();
-  toast('✅ All set! Your posts will be signed as ' + (name || 'you'), 'ok');
-}
-
-// ── GENERIC SETUP MODAL ────────────────────────────────────────────────────────
-function showSetupModal(title, desc, bodyHtml) {
-  let el = document.getElementById('setupModalBg');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'setupModalBg';
-    el.className = 'modal-bg';
-    el.onclick = e => { if (e.target === el) closeSetupModal(); };
-    el.innerHTML = `
-      <div class="modal" style="max-width:420px;padding:32px;text-align:left">
-        <h3 id="setupModalTitle" style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:8px"></h3>
-        <p  id="setupModalDesc"  style="font-size:12px;color:var(--txm);margin-bottom:20px;line-height:1.5"></p>
-        <div id="setupModalBody"></div>
-      </div>`;
-    document.body.appendChild(el);
-  }
-  document.getElementById('setupModalTitle').textContent = title;
-  document.getElementById('setupModalDesc').innerHTML   = desc;
-  document.getElementById('setupModalBody').innerHTML   = bodyHtml;
-  el.classList.add('show');
-}
-
-function closeSetupModal() {
-  const el = document.getElementById('setupModalBg');
-  if (el) el.classList.remove('show');
-}
-
-async function copyQrUrl() {
-  const url = document.getElementById('qrUrl').textContent;
-  try {
-    await navigator.clipboard.writeText(url);
-    toast('🔗 Link copied — paste in any browser to auto-connect', 'ok');
-  } catch(e) {
-    toast('Could not copy — select the link text manually', 'err');
-  }
-}
-
-// ── MOBILE NAV SCROLL ─────────────────────────────────────────────────────────
-function mobScroll(sectionId) {
-  const el = document.getElementById(sectionId);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  // Update active state
-  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
-  const map = { statsTop:'mnHome', schedSection:'mnSched', histSection:'mnHist' };
-  const btn = document.getElementById(map[sectionId]);
-  if (btn) btn.classList.add('active');
-}
-
 function loadSettings() {
-  const repo = document.getElementById('settingsRepoInput');
-  if (repo) repo.value = localStorage.getItem('agent_repo') || REPO || '';
   const gk = localStorage.getItem('groq_key') || '';
   const an = localStorage.getItem('author_name') || '';
   const ar = localStorage.getItem('author_role') || '';
@@ -2117,72 +1318,20 @@ async function connect() {
     }
     const u = await r.json();
     localStorage.setItem('gh_token', token);
-    localStorage.setItem('gh_user', u.login);
-    // Pre-fill author name from GitHub if not already set
-    if (!localStorage.getItem('author_name') && u.name) {
-      localStorage.setItem('author_name', u.name);
-    }
     showDash(u.login);
-    // Auto-detect the user's agent repo, then load data
-    await detectRepo(u.login);
-    if (REPO) {
-      await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
-    }
-    // Show first-run wizard if name/role not set
-    setTimeout(maybeShowFirstRunWizard, 800);
+    await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
     toast('Connected as ' + u.login + ' ✓', 'ok');
-    checkTokenScopes();
   } catch(e) { toast('Failed: ' + e.message, 'err'); }
   finally { setLoad('conSpin','conTxt',false,'Connect'); }
 }
 
 async function silentConn() {
   try {
-    let r;
-    try {
-      r = await gh('/user');
-    } catch(netErr) {
-      if (!navigator.onLine) {
-        showDash(localStorage.getItem('gh_user') || '');
-        updateRepoDisplay();
-        toast('Network unavailable — showing cached data', 'inf');
-        return;
-      }
-      // Online but fetch threw — stale SW intercepting. Unregister and reload.
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r => r.unregister()));
-      }
-      window.location.reload();
-      return;
-    }
-    if (r.status === 401) {
-      localStorage.removeItem('gh_token'); token = ''; return;
-    }
-    if (r.status === 503) {
-      showDash(localStorage.getItem('gh_user') || '');
-      updateRepoDisplay();
-      toast('Network unavailable — showing cached data', 'inf');
-      return;
-    }
-    if (!r.ok) {
-      showDash(localStorage.getItem('gh_user') || '');
-      updateRepoDisplay();
-      return;
-    }
+    const r = await gh('/user');
+    if (!r.ok) { localStorage.removeItem('gh_token'); token = ''; return; }
     const u = await r.json();
-    localStorage.setItem('gh_user', u.login);
-    if (!localStorage.getItem('author_name') && u.name) {
-      localStorage.setItem('author_name', u.name);
-    }
     showDash(u.login);
-    await detectRepo(u.login);
-    if (REPO) {
-      await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
-    }
-    updateRepoDisplay();
-    // Warn if token is missing key scopes
-    checkTokenScopes();
+    await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
   } catch(e) { localStorage.removeItem('gh_token'); token = ''; }
 }
 
@@ -2190,46 +1339,6 @@ function showDash(u) {
   document.getElementById('cs').style.display = 'none';
   document.getElementById('db').style.display = 'block';
   document.getElementById('connUser').textContent = u;
-  // Show QR share button now that we have a token
-  const qrBtn = document.getElementById('qrShareBtn');
-  if (qrBtn) qrBtn.style.display = 'inline-flex';
-  // Check whether to show install banner
-  checkInstallPrompt();
-  // #26 Refresh onboarding checklist
-  setTimeout(renderChecklist, 400);
-  // Update theme-color meta to match current accent
-  const meta = document.getElementById('themeColorMeta');
-  if (meta) {
-    const accent = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim();
-    if (accent) meta.setAttribute('content', accent);
-  }
-}
-
-// ── TOKEN SCOPE CHECK ─────────────────────────────────────────────────────────
-async function checkTokenScopes() {
-  try {
-    const r = await fetch('https://api.github.com/user', {
-      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
-    });
-    const scopes = r.headers.get('x-oauth-scopes') || '';
-    // Fine-grained tokens don't return x-oauth-scopes — skip check for those
-    if (!scopes && token.startsWith('github_pat_')) return;
-    if (scopes && !scopes.includes('workflow') && !scopes.includes('repo')) {
-      toast('⚠️ Token may be missing workflow or repo scope — Save/Post may fail. Re-create token with repo+workflow scopes.', 'err');
-    }
-  } catch(_) {}
-}
-
-// ── Central data loader — call after REPO is confirmed ───────────────────────
-function loadAllData() {
-  if (!REPO) { toast('No repo set — open ⚙️ Settings', 'err'); return; }
-  Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
-}
-
-function clearCacheAndReconnect() {
-  if (!confirm('This will clear all cached data (token, repo, settings) and reload. Continue?')) return;
-  localStorage.clear();
-  location.reload();
 }
 
 function disconnect() {
@@ -2243,29 +1352,16 @@ function disconnect() {
 
 // ── GITHUB API ────────────────────────────────────────────────────────────────
 function gh(p, o = {}) {
-  const method = (o.method || 'GET').toUpperCase();
-  const headers = {
-    'Authorization': 'Bearer ' + token,
-    'Accept': 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'Cache-Control': 'no-cache',
-    ...(o.headers || {})
-  };
-  // Only set Content-Type on requests that have a body — GET/HEAD requests
-  // with Content-Type trigger a CORS preflight that can fail with TypeError.
-  if (method !== 'GET' && method !== 'HEAD') {
-    headers['Content-Type'] = 'application/json';
-  }
-  return fetch('https://api.github.com' + p, { ...o, headers, cache: 'no-store' })
-    .catch(err => {
-      // "Failed to fetch" usually means: expired/revoked token, wrong scope,
-      // or a network issue. Give the user an actionable message.
-      const msg = err.message || 'Network error';
-      if (msg.toLowerCase().includes('fetch')) {
-        throw new TypeError('GitHub API unreachable — check your token has repo+workflow scopes and has not expired');
-      }
-      throw err;
-    });
+  return fetch('https://api.github.com' + p, {
+    ...o,
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json',
+      ...(o.headers || {})
+    }
+  });
 }
 
 // ── HANDLE POST (dry run or live) ─────────────────────────────────────────────
@@ -2279,23 +1375,15 @@ async function handlePost() {
 
 // ── DRY RUN PREVIEW ───────────────────────────────────────────────────────────
 async function showDryRunPreview() {
-  const groqKey = (localStorage.getItem('groq_key') || '').trim();
+  const groqKey = localStorage.getItem('groq_key') || '';
   if (!groqKey) {
-    toast('Add your Groq API key in ⚙️ Settings → "Groq API Key" field', 'err');
-    openSettings();
-    return;
-  }
-  if (!groqKey.startsWith('gsk_')) {
-    toast('Groq key should start with gsk_ — check ⚙️ Settings', 'err');
+    toast('Add your Groq API key in ⚙️ Settings to use Dry Run preview', 'err');
     openSettings();
     return;
   }
 
   // Open modal
   document.getElementById('previewBg').classList.add('show');
-  // #26 Mark dry run step as attempted
-  localStorage.setItem('checklist_dryrun_ok', '1');
-  renderChecklist();
   document.getElementById('postLoading').style.display = 'flex';
   document.getElementById('postContentArea').style.display = 'none';
   document.getElementById('previewDiagram').innerHTML = '';
@@ -2303,8 +1391,8 @@ async function showDryRunPreview() {
   document.getElementById('loadingMsg').textContent = 'Generating post with AI...';
 
   // Set author
-  document.getElementById('previewAuthor').textContent = localStorage.getItem('author_name') || '';
-  document.getElementById('previewRole').textContent = localStorage.getItem('author_role') || '';
+  document.getElementById('previewAuthor').textContent = localStorage.getItem('author_name') || 'Komal Batra';
+  document.getElementById('previewRole').textContent = localStorage.getItem('author_role') || 'Software Engineer at Microsoft';
 
   await generatePreviewPost(groqKey);
 }
@@ -2370,7 +1458,7 @@ Rules:
 }
 
 async function regeneratePost() {
-  const groqKey = (localStorage.getItem('groq_key') || '').trim();
+  const groqKey = localStorage.getItem('groq_key') || '';
   if (!groqKey) { toast('Add Groq API key in ⚙️ Settings', 'err'); return; }
   document.getElementById('postLoading').style.display = 'flex';
   document.getElementById('postContentArea').style.display = 'none';
@@ -2429,7 +1517,7 @@ function generatePreviewSVG(topic) {
     }
   });
 
-  svg += `<text x="200" y="270" text-anchor="middle" fill="#334155" font-size="8" font-family="Arial,sans-serif">Preview diagram • © ${localStorage.getItem('author_name') || localStorage.getItem('gh_user') || 'Author'}</text>`;
+  svg += `<text x="200" y="270" text-anchor="middle" fill="#334155" font-size="8" font-family="Arial,sans-serif">Preview diagram • © Komal Batra</text>`;
   svg += `</svg>`;
   return svg;
 }
@@ -2476,10 +1564,7 @@ async function runNow() {
       toast('🚀 Post triggered! Check LinkedIn in ~2 min', 'ok');
       setTimeout(loadRuns, 4000); setTimeout(loadStats, 6000);
     } else {
-      const txt = await r.text();
-      let msg = r.status;
-      try { msg = JSON.parse(txt).message || msg; } catch(_) { msg = txt || msg; }
-      throw new Error(msg);
+      const e = await r.json(); throw new Error(e.message || 'Failed');
     }
   } catch(e) { toast('Error: ' + e.message, 'err'); }
   finally { setLoad('runSpin','runTxt',false,'▶ Post Now'); }
@@ -2490,10 +1575,6 @@ let allRuns  = [];   // all fetched agent runs
 let runFilter = '30d';
 
 async function loadRuns() {
-  if (!REPO) {
-    document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">⚙️</div><span>Enter your repo in Settings (⚙️) to load posts</span></div>';
-    return;
-  }
   document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">🔄</div><span>Loading...</span></div>';
   try {
     // Workflow-specific endpoint — excludes pages/deploy runs automatically
@@ -2509,15 +1590,8 @@ async function loadRuns() {
     allRuns = [...(di.workflow_runs||[]),...(dq.workflow_runs||[]),...(dc.workflow_runs||[])]
       .filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; })
       .sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
-    // Await full enrichment before rendering — isSkippedRun hides unenriched schedule runs
-    document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">🔍</div><span>Checking which runs are real posts...</span></div>';
-    const needsEnrich = allRuns.filter(r => _topicCache[r.id] === undefined);
-    for (let i = 0; i < needsEnrich.length; i += 50) {
-      await enrichRunTopics(needsEnrich.slice(i, i + 50));
-    }
+    enrichRunTopics(allRuns.slice(0, 30)).then(() => applyRunFilter());
     applyRunFilter();
-    const tsEl = document.getElementById('lastRefreshed');
-    if (tsEl) { const n = new Date(); tsEl.textContent = 'Updated ' + n.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); tsEl.title = n.toLocaleString(); }
   } catch(e) {
     document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">❌</div><span>Could not load runs: '+e.message+'</span></div>';
   }
@@ -2549,36 +1623,27 @@ function getFilterRange() {
   return { from, to };
 }
 
-function runDurMs(r) {
-  if (!r.updated_at || !r.created_at) return 0;
-  return new Date(r.updated_at) - new Date(r.created_at);
-}
-
 function isSkippedRun(r) {
-  // Schedule (cron) runs: only show if enrichment confirmed a real post.
-  if (r.event === 'schedule') {
-    if (r.conclusion === 'skipped')      return true;
-    if (r.conclusion === 'cancelled')    return true;
-    if (_topicCache[r.id] === false)     return true;  // no bookmark = heartbeat
-    if (_topicCache[r.id] === undefined) return true;  // not yet enriched — hide until confirmed
-    return false;  // bookmark found = real post, show it
-  }
-  // workflow_dispatch (manual): ALWAYS show — user triggered it, it's a real run.
-  // Never hide based on enrichment state, only hide GitHub-level skips.
+  // Rule 1 — hide every single schedule/cron run.
+  //   Cron is a 30-min heartbeat that self-cancels when it's not posting
+  //   time.  None of those represent a LinkedIn post, so hide all of them.
+  if (r.event === 'schedule') return true;
+  // Rule 2 — hide non-post outcomes even for manual/dispatch triggers.
+  //   'skipped' = schedule_checker exited early without posting.
+  //   'cancelled' without a real post attempt = infrastructure noise.
+  //   Only keep: success | failure | in_progress | queued
+  //   (failure is kept — user needs to know their manual post failed)
   if (r.conclusion === 'skipped') return true;
+  // Cancelled manual runs: keep if they ran long enough to attempt a post
+  // (>30s), hide otherwise (they were cancelled before doing anything).
+  if (r.conclusion === 'cancelled') {
+    const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
+    return durMs < 30000;   // < 30 s → noise, hide it
+  }
   return false;
 }
 
 let _statusFilter = 'all'; // 'all' | 'ok' | 'fail' | 'cancel'
-
-let _triggerFilter = 'all';
-
-function setTriggerFilter(key, btn) {
-  _triggerFilter = key;
-  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => b.classList.remove('act-all','act'));
-  btn.classList.add(key === 'all' ? 'act-all' : 'act');
-  applyRunFilter();
-}
 
 function setStatusFilter(val, btn) {
   _statusFilter = val;
@@ -2601,10 +1666,7 @@ function applyRunFilter() {
     return d >= from && d <= to;
   });
   // Only LinkedIn post runs — all schedule/cron runs already removed by isSkippedRun
-  let postRuns = filtered.filter(r => !isSkippedRun(r));
-  // Trigger type filter (Manual vs Scheduled)
-  if (_triggerFilter === 'manual')   postRuns = postRuns.filter(r => r.event === 'workflow_dispatch');
-  if (_triggerFilter === 'schedule') postRuns = postRuns.filter(r => r.event === 'schedule');
+  const postRuns = filtered.filter(r => !isSkippedRun(r));
   const totalEl  = document.getElementById('runTotal');
   if (totalEl) totalEl.textContent = postRuns.length + (postRuns.length===1 ? ' post' : ' posts');
   // Remove legacy skipBadge if it exists
@@ -2630,7 +1692,7 @@ function renderRuns(runs) {
     const ico     = ok ? '✅' : fail ? '❌' : running ? '⏳' : '⚪';
     const icls    = ok ? 'ok' : fail ? 'fail' : running ? 'run' : 'oth';
     // schedule events are hidden by isSkippedRun — only manual/dispatch shown here
-    const trig    = r.event==='workflow_dispatch' ? 'manual post' : r.event==='schedule' ? 'scheduled post' : r.event || 'post';
+    const trig    = r.event==='workflow_dispatch' ? 'manual post' : r.event || 'post';
     const bcls    = trig==='manual post' ? 'bman' : 'bdry';
     const t       = new Date(r.created_at);
     const ts      = tzFmt(t,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
@@ -2661,100 +1723,55 @@ function renderRuns(runs) {
 const _topicCache = {};
 
 async function enrichRunTopics(runs) {
-  // Fetch job steps for runs that haven't been enriched yet.
-  // For schedule runs we MUST enrich to know if they posted (bookmark step present) or were heartbeats.
-  // For manual runs we enrich to extract the topic name.
   const toFetch = runs.filter(r =>
-    r.conclusion !== 'skipped' &&
-    r.conclusion !== 'cancelled' &&
-    _topicCache[r.id] === undefined
-  ).slice(0, 50);
+    r.conclusion === 'success' &&
+    !_topicCache[r.id] &&
+    !getTopicFromRun(r)
+  ).slice(0, 15);
   if (!toFetch.length) return;
-
   await Promise.all(toFetch.map(async r => {
     try {
       const resp = await gh('/repos/' + REPO + '/actions/runs/' + r.id + '/jobs');
-      if (!resp.ok) { _topicCache[r.id] = false; return; }
+      if (!resp.ok) return;
       const data = await resp.json();
-      let found = false;
       for (const job of (data.jobs || [])) {
         for (const step of (job.steps || [])) {
           const sn = step.name || '';
-          // Primary: new bookmark step "✅ Posted · TOPIC_NAME"
-          if (sn.startsWith('✅ Posted ·')) {
-            const topic = sn.replace('✅ Posted ·', '').trim();
-            _topicCache[r.id] = (topic && topic !== 'auto-topic') ? topic : '__posted__';
-            found = true;
-            break;
-          }
-          // Legacy fallback: old bookmark_pin or TOPIC: patterns
+          // Bookmark step is named like "bookmark_pin TOPIC_NAME"
           if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
             const topic = sn.replace('TOPIC:', '').replace(/^bookmark_pin /, '').trim();
             if (topic && topic !== 'auto' && topic !== 'auto-topic') {
               _topicCache[r.id] = topic;
-              found = true;
-              break;
             }
           }
         }
-        if (found) break;
       }
-      // Mark as enriched-but-no-bookmark (heartbeat schedule run)
-      if (!found) _topicCache[r.id] = false;
-    } catch(e) {
-      // API call failed (rate limit, network) — leave as undefined so it retries next time
-      // Don't mark as false (heartbeat) since we don't actually know
-      console.warn('[enrich] jobs fetch failed for run', r.id, e.message);
-      // _topicCache[r.id] stays undefined → will be retried on next loadRuns
-    }
+    } catch(e) {}
   }));
   applyRunFilter();
 }
 
 function getTopicFromRun(r) {
-  const cached = _topicCache[r.id];
-  // false = heartbeat (no post); undefined = not yet enriched
-  if (cached === false || cached === undefined) {
-    // Fall through to run-name parsing below
-  } else if (cached === '__posted__') {
-    // We know it posted but topic name wasn't captured — fall through to run-name
-  } else {
-    // cached is the human-readable topic name from the "✅ Posted · NAME" step
-    // Return it directly — no ID lookup needed, it's already the display name
-    return cached;
-  }
-
-  // Fallback: parse run-name set by workflow YAML run-name field
-  // e.g. "🖱️ Manual · llm-architecture"  or  "⏰ Scheduled · auto-topic"
-  const runName   = r.name || r.display_title || '';
-  const parts     = runName.split('·').map(s => s.trim());
-  const topicPart = parts.length >= 2 ? parts[parts.length - 1] : '';
-
-  if (topicPart && topicPart !== 'auto-topic' && topicPart !== 'auto' && topicPart.length > 2) {
-    // Try matching against known IDs (run-name uses topic IDs)
+  if (_topicCache[r.id]) return _topicCache[r.id];
+  // Priority 1: run-name set by YAML e.g. "LinkedIn Agent · Manual · kubernetes"
+  const runName = r.name || r.display_title || '';
+  const parts   = runName.split('·').map(s => s.trim());
+  const topicPart = parts.length >= 3 ? parts[parts.length - 1] : '';
+  if (topicPart && topicPart !== 'auto-topic' && topicPart.length > 2) {
+    // Prettify known IDs
     for (const [id, name] of Object.entries(TNAMES)) {
-      if (topicPart.toLowerCase() === id) return name;
+      if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
     }
-    // Try partial match on ID
-    for (const [id, name] of Object.entries(TNAMES)) {
-      if (topicPart.toLowerCase().includes(id)) return name;
-    }
-    // Try matching against topic names (in case name was used)
-    for (const [id, name] of Object.entries(TNAMES)) {
-      if (topicPart.toLowerCase().includes(name.toLowerCase())) return name;
-    }
-    // Unknown topic — capitalise and return as-is
     return topicPart.charAt(0).toUpperCase() + topicPart.slice(1);
   }
-
-  // Last resort: scan full run title for any known topic ID or name
+  // Priority 2: scan full title against known topic IDs/names
   const title = runName.toLowerCase();
   for (const [id, name] of Object.entries(TNAMES)) {
     if (title.includes(id) || title.includes(name.toLowerCase())) return name;
   }
   const custom = getCustomTopics();
   for (const ct of custom) {
-    if (title.includes((ct.id||'').toLowerCase()) || title.includes((ct.name||'').toLowerCase())) return ct.name;
+    if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
   }
   return null;
 }
@@ -2777,20 +1794,16 @@ function getModeFromRun(r) {
 
 // ── STATS ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
-  if (!REPO) return;
   try {
-    const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100&status=completed');
+    const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100');
     const d = await r.json();
     const runs = d.workflow_runs || [];
 
-    // Enrich ALL runs before counting — isSkippedRun hides unenriched schedule runs
-    const needsEnrich = runs.filter(r => _topicCache[r.id] === undefined);
-    for (let i = 0; i < needsEnrich.length; i += 50) {
-      await enrichRunTopics(needsEnrich.slice(i, i + 50));
-    }
+    // "LinkedIn posts" = non-cron, non-skipped runs only.
+    // isSkippedRun already excludes every schedule event + skipped/fast-cancel.
+    const postRuns = runs.filter(r => !isSkippedRun(r));
 
-    // Real posts = runs not filtered by isSkippedRun
-    const postRuns   = runs.filter(r => !isSkippedRun(r));
+    // Successful posts = run reached LinkedIn and the API accepted the post.
     const postedRuns = postRuns.filter(r => r.conclusion === 'success');
 
     // This-week posts
@@ -2837,13 +1850,13 @@ let schedConfig = {
   paused: false,
   pause_until: null,
   weekly: {
-    mon:{enabled:true, time_utc:'04:00'},
-    tue:{enabled:true, time_utc:'04:00'},
-    wed:{enabled:true, time_utc:'04:00'},
-    thu:{enabled:true, time_utc:'04:00'},
-    fri:{enabled:true, time_utc:'04:00'},
-    sat:{enabled:false,time_utc:'04:30'},
-    sun:{enabled:false,time_utc:'04:30'},
+    mon:{enabled:true, time_ist:'09:30'},
+    tue:{enabled:true, time_ist:'09:30'},
+    wed:{enabled:true, time_ist:'09:30'},
+    thu:{enabled:true, time_ist:'09:30'},
+    fri:{enabled:true, time_ist:'09:30'},
+    sat:{enabled:false,time_ist:'10:00'},
+    sun:{enabled:false,time_ist:'10:00'},
   },
   skip_dates: [],
   force_dates: [],
@@ -2865,18 +1878,7 @@ async function loadSchedule() {
     if (!r.ok) { buildDayGrid(); renderOverrides(); renderPausePanel(); updNext(); return; }
     const d = await r.json();
     const cfg = JSON.parse(atob(d.content));
-    // Migrate legacy time_ist → time_utc on load so old configs still work
-    if (cfg.weekly) {
-      Object.keys(cfg.weekly).forEach(day => {
-        const dc = cfg.weekly[day];
-        if (dc && dc.time_ist && !dc.time_utc) {
-          dc.time_utc = legacyIstToUtc(dc.time_ist);
-          delete dc.time_ist;
-        }
-      });
-    }
     schedConfig = {...schedConfig, ...cfg};
-  cacheScheduleForChecklist(schedConfig.weekly || {});
   } catch(e) { /* file may not exist yet, use defaults */ }
   buildDayGrid();
   renderOverrides();
@@ -2886,7 +1888,6 @@ async function loadSchedule() {
 
 // ── SAVE SCHEDULE TO REPO ─────────────────────────────────────────────────────
 async function saveSchedule() {
-  if (!REPO) { toast('No repo configured — open ⚙️ Settings and enter your repo first', 'err'); return; }
   const btn = document.getElementById('saveSchedBtn');
   btn.disabled = true; btn.textContent = '💾 Saving...';
   try {
@@ -2910,7 +1911,7 @@ async function saveSchedule() {
       toast('✅ Schedule saved to repo', 'ok');
       updNext();
     } else {
-      const txt = await r.text(); let msg; try { msg = JSON.parse(txt).message; } catch(_){msg=txt||r.status;} throw new Error(msg);
+      const e = await r.json(); throw new Error(e.message);
     }
   } catch(e) { toast('Save failed: ' + e.message, 'err'); }
   finally { btn.disabled = false; btn.textContent = '💾 Save Schedule'; }
@@ -2971,21 +1972,9 @@ function buildDayGrid() {
   const grid = document.getElementById('dayGrid');
   grid.innerHTML = '';
   DAYS.forEach((day, i) => {
-    const cfg = schedConfig.weekly[day] || {enabled: true, time_utc: '09:00'};
+    const cfg = schedConfig.weekly[day] || {enabled: true, time_ist: '09:30'};
     const on = cfg.enabled && !schedConfig.paused;
-    let displayLocal;
-    if (cfg.time_local) {
-      if (cfg.time_tz && cfg.time_tz !== userTZ) {
-        const savedUtc = wallClockToUtc(cfg.time_local, cfg.time_tz);
-        displayLocal = utcTimeToLocal(savedUtc);
-      } else {
-        displayLocal = cfg.time_local;
-      }
-    } else {
-      const storedUtc = cfg.time_utc || (cfg.time_ist ? legacyIstToUtc(cfg.time_ist) : '09:00');
-      displayLocal = utcTimeToLocal(storedUtc);
-    }
-    const [h, m] = displayLocal.split(':').map(Number);
+    const [h, m] = (cfg.time_ist || '09:30').split(':').map(Number);
     const col = document.createElement('div');
     col.className = 'day-col' + (cfg.enabled ? '' : ' disabled');
     col.id = 'daycol-' + day;
@@ -3035,15 +2024,9 @@ function onTimeInput(day, el) {
 function onTimeBlur(day, el) {
   const parsed = parseTimeInput(el.value);
   if (parsed) {
-    const localTime = String(parsed.h).padStart(2,'0') + ':' + String(parsed.m).padStart(2,'0');
-    // Store wall-clock time + timezone name — NOT a fixed UTC value.
-    // schedule_checker converts to UTC at runtime each day so DST is always correct.
-    schedConfig.weekly[day].time_local = localTime;
-    schedConfig.weekly[day].time_tz    = userTZ;
-    // Also store current UTC equivalent for legacy fallback only
-    schedConfig.weekly[day].time_utc   = localTimeToUtc(localTime);
-    delete schedConfig.weekly[day].time_ist; // remove old legacy field
-    el.value = localTime;
+    const time = String(parsed.h).padStart(2,'0') + ':' + String(parsed.m).padStart(2,'0');
+    schedConfig.weekly[day].time_ist = time;
+    el.value = time;
     el.style.borderColor = '';
     updNext();
   } else {
@@ -3068,17 +2051,11 @@ function toggleDay(day) {
 }
 
 function adjDayTime(day, deltaMin) {
-  // Read current display value from the input (already in local time)
-  const el = document.getElementById('tmval-' + day);
-  const curLocal = el ? el.value : '09:00';
-  const [h, m] = curLocal.split(':').map(Number);
+  const [h, m] = (schedConfig.weekly[day].time_ist || '09:30').split(':').map(Number);
   const total = ((h*60 + m + deltaMin) + 1440) % 1440;
   const nh = Math.floor(total/60), nm = total % 60;
-  const newLocal = String(nh).padStart(2,'0') + ':' + String(nm).padStart(2,'0');
-  if (el) el.value = newLocal;
-  // Save as UTC
-  schedConfig.weekly[day].time_utc = localTimeToUtc(newLocal);
-  delete schedConfig.weekly[day].time_ist;
+  schedConfig.weekly[day].time_ist = String(nh).padStart(2,'0') + ':' + String(nm).padStart(2,'0');
+  const el = document.getElementById('tmval-' + day); if (el) el.value = schedConfig.weekly[day].time_ist;
   updNext();
 }
 
@@ -3193,29 +2170,7 @@ function updNext() {
     const isSkip  = schedConfig.skip_dates.includes(ds);
     if (isSkip && !isForce) continue;
     if (!cfg.enabled && !isForce) continue;
-    // DST-aware: resolve wall-clock time for THIS specific future date
-    // so that summer/winter schedules are always correct.
-    let ph, pm;
-    if (cfg.time_local) {
-      const savedTz = cfg.time_tz || userTZ;
-      // Convert wall-clock in saved timezone → UTC for the candidate date
-      const dummy = new Date(d);
-      const refLocal = new Date(dummy.toLocaleString('en-US', {timeZone: savedTz}));
-      const offsetMs = refLocal - dummy;
-      const [lh, lm] = cfg.time_local.split(':').map(Number);
-      const localMs  = (lh * 60 + lm) * 60000;
-      const utcMs    = ((localMs - offsetMs) % 86400000 + 86400000) % 86400000;
-      // Convert that UTC back to display timezone
-      const utcH = Math.floor(utcMs / 3600000);
-      const utcM = Math.floor((utcMs % 3600000) / 60000);
-      const utcStr = String(utcH).padStart(2,'0') + ':' + String(utcM).padStart(2,'0');
-      const disp = utcTimeToLocal(utcStr);
-      [ph, pm] = disp.split(':').map(Number);
-    } else {
-      const storedUtc2 = cfg.time_utc || (cfg.time_ist ? legacyIstToUtc(cfg.time_ist) : '09:00');
-      const localDisp = utcTimeToLocal(storedUtc2);
-      [ph, pm] = localDisp.split(':').map(Number);
-    }
+    const [ph,pm] = (cfg.time_ist || '09:30').split(':').map(Number);
     const candidate = new Date(d);
     candidate.setHours(ph, pm, 0, 0);
     if (candidate <= ist) continue;
@@ -3228,6 +2183,11 @@ function updNext() {
   }
   document.getElementById('nxt').textContent = 'No active days in next 14 days';
   document.getElementById('cdt').textContent = '—';
+}
+
+function copyCron() {
+  const c = document.getElementById('cronv')?.textContent || '0 4 * * *';
+  navigator.clipboard?.writeText(c).then(() => toast('Copied: ' + c, 'ok')).catch(() => toast('Cron: ' + c, 'info'));
 }
 
 // ── TOPIC / TYPE ──────────────────────────────────────────────────────────────
@@ -3327,20 +2287,5 @@ function toast(m, t = 'info') {
 
 
 
-<!-- Mobile nav bar (visible only < 640px) -->
-<nav class="mob-nav" id="mobNav">
-  <button class="mob-nav-btn active" onclick="mobScroll('statsTop')" id="mnHome">
-    <span class="mob-nav-ico">🏠</span>Home
-  </button>
-  <button class="mob-nav-btn" onclick="mobScroll('schedSection')" id="mnSched">
-    <span class="mob-nav-ico">📅</span>Schedule
-  </button>
-  <button class="mob-nav-btn" onclick="mobScroll('histSection')" id="mnHist">
-    <span class="mob-nav-ico">📋</span>History
-  </button>
-  <button class="mob-nav-btn" onclick="openQR()" id="mnQR">
-    <span class="mob-nav-ico">📱</span>Share
-  </button>
-</nav>
 </body>
 </html>
