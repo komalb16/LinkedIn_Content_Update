@@ -1628,16 +1628,22 @@ function getFilterRange() {
 }
 
 function isSkippedRun(r) {
-  // Rule 1 — hide every single schedule/cron run.
-  //   Cron is a 30-min heartbeat that self-cancels when it's not posting
-  //   time.  None of those represent a LinkedIn post, so hide all of them.
-  if (r.event === 'schedule') return true;
+  // Rule 1 — hide schedule/cron runs that do not attempt to post.
+  // Cron runs every ~30 minutes. When it's not posting time, the workflow
+  // self-cancels (skipped/cancelled quickly). Those are noise and should be hidden.
+  if (r.event === 'schedule') {
+    // Only hide the schedule heartbeat runs that self-cancel (skipped).
+    // If a schedule run actually succeeded/failed (even quickly), count it.
+    return r.conclusion === 'skipped';
+  }
+
   // Rule 2 — hide non-post outcomes even for manual/dispatch triggers.
   //   'skipped' = schedule_checker exited early without posting.
   //   'cancelled' without a real post attempt = infrastructure noise.
   //   Only keep: success | failure | in_progress | queued
   //   (failure is kept — user needs to know their manual post failed)
   if (r.conclusion === 'skipped') return true;
+
   // Cancelled manual runs: keep if they ran long enough to attempt a post
   // (>30s), hide otherwise (they were cancelled before doing anything).
   if (r.conclusion === 'cancelled') {
@@ -1678,7 +1684,7 @@ function applyRunFilter() {
     const d = new Date(r.created_at);
     return d >= from && d <= to;
   });
-  // Only LinkedIn post runs — all schedule/cron runs already removed by isSkippedRun
+  // Only LinkedIn post runs — hide schedule heartbeats, but keep actual scheduled posts.
   const postRuns = filtered.filter(r => !isSkippedRun(r));
   const totalEl  = document.getElementById('runTotal');
   if (totalEl) totalEl.textContent = postRuns.length + (postRuns.length===1 ? ' post' : ' posts');
