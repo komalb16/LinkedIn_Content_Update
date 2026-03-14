@@ -507,6 +507,10 @@ STRICT: 250-320 words total."""
     )
     if result.get("success"):
         log.info("Posted! ID: " + str(result.get("post_id")))
+        write_github_output("POSTED_TOPIC", topic["name"])
+        write_github_output("POSTED_TITLE", topic["name"])
+        write_github_output("POSTED_DATE", datetime.now().isoformat())
+        write_github_output("POSTED_URL", result.get("url", ""))
         write_github_summary(topic["name"], mode, full_post_text, dry_run=False)
         topic_mgr.save_run_history({
             "timestamp": datetime.now().isoformat(),
