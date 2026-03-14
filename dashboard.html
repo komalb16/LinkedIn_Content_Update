@@ -792,9 +792,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <button class="sfp"         id="sfCancel" onclick="setStatusFilter('cancel',this)">🚫 Cancelled</button>
       <span style="width:1px;background:var(--bd);display:inline-block;height:16px;margin:0 4px;vertical-align:middle"></span>
       <select id="triggerFilter" onchange="setTriggerFilter(this.value)" style="padding:4px 8px;border:1px solid var(--bg3);border-radius:6px;background:var(--bg1);color:var(--tx);font-size:12px;">
-        <option value="all">All Triggers</option>
-        <option value="manual" selected>🖱️ Manual</option>
-        <option value="schedule">⏰ Scheduled</option>
+        <option value="all">All Posts</option>
+        <option value="manual" selected>Manual Posts</option>
+        <option value="schedule">Scheduled Posts</option>
       </select>
     </div>
 
@@ -1699,7 +1699,7 @@ function applyRunFilter() {
   // Apply trigger filter
   let trigRuns = [];
   if (_triggerFilter === 'all') trigRuns = [...postRuns, ...schedulePostsInRange];
-  else if (_triggerFilter === 'manual') trigRuns = postRuns;
+  else if (_triggerFilter === 'manual') trigRuns = postRuns.filter(r => r.event === 'workflow_dispatch');
   else if (_triggerFilter === 'schedule') trigRuns = schedulePostsInRange;
   // Apply status filter
   let displayRuns = trigRuns;
