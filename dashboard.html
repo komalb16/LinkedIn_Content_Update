@@ -1328,6 +1328,8 @@ async function connect() {
     showDash(u.login);
     await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
     toast('Connected as ' + u.login + ' ✓', 'ok');
+    // Auto-refresh every 30 seconds
+    setInterval(async () => { await loadRuns(); await loadStats(); }, 30000);
   } catch(e) { toast('Failed: ' + e.message, 'err'); }
   finally { setLoad('conSpin','conTxt',false,'Connect'); }
 }
@@ -1339,6 +1341,8 @@ async function silentConn() {
     const u = await r.json();
     showDash(u.login);
     await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+    // Auto-refresh every 30 seconds
+    setInterval(async () => { await loadRuns(); await loadStats(); }, 30000);
   } catch(e) { localStorage.removeItem('gh_token'); token = ''; }
 }
 
@@ -1360,6 +1364,7 @@ function disconnect() {
 // ── GITHUB API ────────────────────────────────────────────────────────────────
 function gh(p, o = {}) {
   return fetch('https://api.github.com' + p, {
+    cache: 'no-cache',
     ...o,
     headers: {
       'Authorization': 'Bearer ' + token,
@@ -1756,10 +1761,10 @@ const _topicCache = {};
 
 async function enrichRunTopics(runs) {
   const toFetch = runs.filter(r =>
-    r.conclusion === 'success' &&
     !_topicCache[r.id] &&
-    !getTopicFromRun(r)
-  ).slice(0, 15);
+    !getTopicFromRun(r) &&
+    (r.conclusion === 'success' || (r.event === 'schedule' && r.conclusion === 'cancelled' && (r.updated_at ? (new Date(r.updated_at) - new Date(r.created_at)) / 1000 : 0) > 10))
+  ).slice(0, 25);
   if (!toFetch.length) return;
   await Promise.all(toFetch.map(async r => {
     try {
@@ -1773,7 +1778,7 @@ async function enrichRunTopics(runs) {
             // Current workflow: "✅ Posted · TOPIC_NAME"
             if (sn.startsWith('✅ Posted ·')) {
               const topic = sn.replace('✅ Posted ·', '').trim();
-              if (topic && topic !== 'auto-topic') { _topicCache[r.id] = topic; break; }
+              if (topic && topic !== 'auto-topic' && topic !== 'unknown') { _topicCache[r.id] = topic; break; }
             }
             // Legacy: "bookmark_pin TOPIC_NAME" or "TOPIC: NAME"
             if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
@@ -1826,8 +1831,8 @@ function getTopicFromRun(r) {
   for (const ct of custom) {
     if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
   }
+  if (runName.toLowerCase().includes('auto')) return 'Auto';
   return null;
-}
 
 function getModeFromRun(r) {
   const title = (r.display_title || r.name || '').toLowerCase();
