@@ -801,9 +801,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     <!-- CUSTOM RANGE (shown when Custom selected) -->
     <div class="custom-range" id="customRange">
       <span>From</span>
-      <input type="date" class="cr-inp" id="crFrom" onchange="applyRunFilter()"/>
+      <input type="date" class="cr-inp" id="crFrom"/>
       <span>To</span>
-      <input type="date" class="cr-inp" id="crTo" onchange="applyRunFilter()"/>
+      <input type="date" class="cr-inp" id="crTo"/>
+      <button class="btn bp" style="font-size:11px;padding:4px 8px;margin-left:8px" onclick="applyRunFilter()">Apply</button>
     </div>
 
     <div id="runsList"><div class="run-empty"><div class="run-empty-ico">🔄</div><span>Loading runs...</span></div></div>
