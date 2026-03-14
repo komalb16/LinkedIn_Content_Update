@@ -15,6 +15,7 @@ topic always gets the same style, but adjacent topics look completely different)
 """
 
 import os
+import shutil
 import math
 import hashlib
 import random
@@ -1014,9 +1015,28 @@ class DiagramGenerator:
     def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram"):
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
-        svg = make_diagram(topic_name or topic_id, topic_id, diagram_type)
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(svg)
-        size_kb = os.path.getsize(filename) / 1024
-        log.info(f"Diagram saved: {filename} ({round(size_kb, 1)} KB)")
+        
+        # Check for existing diagram (SVG or PNG)
+        existing_svg = f"{OUTPUT_DIR}/{topic_id}.svg"
+        existing_png = f"{OUTPUT_DIR}/{topic_id}.png"
+        
+        use_existing = False
+        if os.path.exists(existing_svg) and random.random() < 0.5:  # 50% chance to use existing SVG
+            shutil.copy(existing_svg, filename)
+            log.info(f"Using existing SVG diagram: {filename}")
+            use_existing = True
+        elif os.path.exists(existing_png) and random.random() < 0.5:  # 50% chance to use existing PNG
+            # For PNG, copy and treat as SVG (will be converted later)
+            shutil.copy(existing_png, filename.replace('.svg', '.png'))
+            log.info(f"Using existing PNG diagram: {filename.replace('.svg', '.png')}")
+            # Note: This will be handled in linkedin_poster if needed
+            use_existing = True
+        
+        if not use_existing:
+            svg = make_diagram(topic_name or topic_id, topic_id, diagram_type)
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(svg)
+            size_kb = os.path.getsize(filename) / 1024
+            log.info(f"Generated diagram: {filename} ({round(size_kb, 1)} KB)")
+        
         return filename
