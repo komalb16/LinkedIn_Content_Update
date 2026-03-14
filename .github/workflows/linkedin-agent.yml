@@ -128,10 +128,11 @@ jobs:
       #    agent.py writes POSTED_TOPIC to GITHUB_OUTPUT immediately after topic selection,
       #    so this step runs for ALL real posts (including auto-selected topics).
       #    Heartbeat/skip runs never reach this step, so dashboard can filter them out.
-      - name: "✅ Posted · ${{ steps.run_agent.outputs.POSTED_TOPIC || 'unknown' }}"
+      - name: "✅ Posted · ${{ steps.run_agent.outputs.POSTED_TITLE || steps.run_agent.outputs.POSTED_TOPIC || 'unknown' }}"
         if: steps.run_agent.outputs.POSTED_TOPIC != '' && github.event.inputs.dry_run != 'true'
         run: |
           echo "Topic: ${{ steps.run_agent.outputs.POSTED_TOPIC }}"
+          echo "Title: ${{ steps.run_agent.outputs.POSTED_TITLE }}"
           echo "Date:  ${{ steps.run_agent.outputs.POSTED_DATE }}"
           echo "URL:   ${{ steps.run_agent.outputs.POSTED_URL }}"
 
