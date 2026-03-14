@@ -791,9 +791,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <button class="sfp"         id="sfFail"   onclick="setStatusFilter('fail',this)"  >❌ Failed</button>
       <button class="sfp"         id="sfCancel" onclick="setStatusFilter('cancel',this)">🚫 Cancelled</button>
       <span style="width:1px;background:var(--bd);display:inline-block;height:16px;margin:0 4px;vertical-align:middle"></span>
-      <button class="sfp act-all" id="tfAll"    onclick="setTriggerFilter('all',this)"     >All Triggers</button>
-      <button class="sfp"         id="tfManual" onclick="setTriggerFilter('manual',this)"  >🖱️ Manual</button>
-      <button class="sfp"         id="tfSched"  onclick="setTriggerFilter('schedule',this)">⏰ Scheduled</button>
+      <select id="triggerFilter" onchange="setTriggerFilter(this.value)" style="padding:4px 8px;border:1px solid var(--bg3);border-radius:6px;background:var(--bg1);color:var(--tx);font-size:12px;">
+        <option value="all">All Triggers</option>
+        <option value="manual" selected>🖱️ Manual</option>
+        <option value="schedule">⏰ Scheduled</option>
+      </select>
     </div>
 
     <!-- CUSTOM RANGE (shown when Custom selected) -->
@@ -1656,10 +1658,9 @@ function isSkippedRun(r) {
 let _statusFilter  = 'all';
 let _triggerFilter = 'all';
 
-function setTriggerFilter(key, btn) {
-  _triggerFilter = key;
-  document.querySelectorAll('.sfp[id^="tf"]').forEach(b => b.classList.remove('act-all','act'));
-  btn.classList.add(key === 'all' ? 'act-all' : 'act');
+function setTriggerFilter(value) {
+  _triggerFilter = value;
+  document.getElementById('triggerFilter').value = value;
   applyRunFilter();
 }
 
@@ -1686,15 +1687,20 @@ function applyRunFilter() {
   });
   // Only LinkedIn post runs — hide schedule heartbeats, but keep actual scheduled posts.
   const postRuns = filtered.filter(r => !isSkippedRun(r));
+  const schedulePostsInRange = filtered.filter(r => r.event === 'schedule' && (
+    r.conclusion === 'success' ||
+    (r.conclusion === 'cancelled' && (r.updated_at ? (new Date(r.updated_at) - new Date(r.created_at)) / 1000 : 0) > 10)
+  ));
   const totalEl  = document.getElementById('runTotal');
-  if (totalEl) totalEl.textContent = postRuns.length + (postRuns.length===1 ? ' post' : ' posts');
+  if (totalEl) totalEl.textContent = (postRuns.length + schedulePostsInRange.length) + ((postRuns.length + schedulePostsInRange.length)===1 ? ' post' : ' posts');
   // Remove legacy skipBadge if it exists
   const skipBadge = document.getElementById('skipBadge');
   if (skipBadge) skipBadge.remove();
   // Apply trigger filter
-  let trigRuns = postRuns;
-  if (_triggerFilter === 'manual')   trigRuns = postRuns.filter(r => r.event === 'workflow_dispatch');
-  if (_triggerFilter === 'schedule') trigRuns = postRuns.filter(r => r.event === 'schedule');
+  let trigRuns = [];
+  if (_triggerFilter === 'all') trigRuns = [...postRuns, ...schedulePostsInRange];
+  else if (_triggerFilter === 'manual') trigRuns = postRuns;
+  else if (_triggerFilter === 'schedule') trigRuns = schedulePostsInRange;
   // Apply status filter
   let displayRuns = trigRuns;
   if (_statusFilter === 'ok')     displayRuns = trigRuns.filter(r => r.conclusion === 'success');
@@ -1754,23 +1760,37 @@ async function enrichRunTopics(runs) {
   if (!toFetch.length) return;
   await Promise.all(toFetch.map(async r => {
     try {
+      // Try to get topic from job steps first
       const resp = await gh('/repos/' + REPO + '/actions/runs/' + r.id + '/jobs');
-      if (!resp.ok) return;
-      const data = await resp.json();
-      for (const job of (data.jobs || [])) {
-        for (const step of (job.steps || [])) {
-          const sn = step.name || '';
-          // Current workflow: "✅ Posted · TOPIC_NAME"
-          if (sn.startsWith('✅ Posted ·')) {
-            const topic = sn.replace('✅ Posted ·', '').trim();
-            if (topic && topic !== 'auto-topic') { _topicCache[r.id] = topic; break; }
-          }
-          // Legacy: "bookmark_pin TOPIC_NAME" or "TOPIC: NAME"
-          if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
-            const topic = sn.replace('TOPIC:', '').replace(/^bookmark_pin /, '').trim();
-            if (topic && topic !== 'auto' && topic !== 'auto-topic') {
-              _topicCache[r.id] = topic; break;
+      if (resp.ok) {
+        const data = await resp.json();
+        for (const job of (data.jobs || [])) {
+          for (const step of (job.steps || [])) {
+            const sn = step.name || '';
+            // Current workflow: "✅ Posted · TOPIC_NAME"
+            if (sn.startsWith('✅ Posted ·')) {
+              const topic = sn.replace('✅ Posted ·', '').trim();
+              if (topic && topic !== 'auto-topic') { _topicCache[r.id] = topic; break; }
             }
+            // Legacy: "bookmark_pin TOPIC_NAME" or "TOPIC: NAME"
+            if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
+              const topic = sn.replace('TOPIC:', '').replace(/^bookmark_pin /, '').trim();
+              if (topic && topic !== 'auto' && topic !== 'auto-topic') {
+                _topicCache[r.id] = topic; break;
+              }
+            }
+          }
+        }
+      }
+      // If not found in steps, try parsing logs for "Posting about:"
+      if (!_topicCache[r.id]) {
+        const logResp = await gh('/repos/' + REPO + '/actions/runs/' + r.id + '/logs');
+        if (logResp.ok) {
+          const logText = await logResp.text();
+          const match = logText.match(/Posting about:\s*(.+)/);
+          if (match) {
+            const topic = match[1].trim();
+            if (topic && topic !== 'auto-topic') _topicCache[r.id] = topic;
           }
         }
       }
