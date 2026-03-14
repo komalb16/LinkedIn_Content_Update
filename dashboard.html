@@ -1706,6 +1706,8 @@ function applyRunFilter() {
   if (_statusFilter === 'ok')     displayRuns = trigRuns.filter(r => r.conclusion === 'success');
   if (_statusFilter === 'fail')   displayRuns = trigRuns.filter(r => r.conclusion === 'failure');
   if (_statusFilter === 'cancel') displayRuns = trigRuns.filter(r => r.conclusion === 'cancelled');
+  // Update total to reflect displayed count
+  if (totalEl) totalEl.textContent = displayRuns.length + (displayRuns.length === 1 ? ' post' : ' posts');
   renderRuns(displayRuns);
 }
 
