@@ -938,7 +938,7 @@ function openRunDetail(runId) {
   const statusIcon = ok ? '✅' : fail ? '❌' : inprog ? '⏳' : '⚪';
   const statusText = ok ? 'Success' : fail ? 'Failed' : inprog ? 'In Progress' : run.conclusion || run.status;
   const statusCls  = ok ? 'ok' : fail ? 'fail' : inprog ? 'run' : '';
-  const trig = run.event === 'schedule' ? '⏰ Scheduled (cron)' : run.event === 'workflow_dispatch' ? '🖱️ Manual trigger' : run.event;
+  const trig = run.event === 'schedule' ? '⏰ Scheduled' : run.event === 'workflow_dispatch' ? '🖱️ Manual trigger' : run.event;
   const started = tzFmt(run.created_at, {weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false,year:'numeric'});
   const dur = run.updated_at ? Math.round((new Date(run.updated_at) - new Date(run.created_at))/1000) : null;
   const durStr = dur ? (dur > 60 ? Math.floor(dur/60)+'m '+dur%60+'s' : dur+'s') : '—';
