@@ -17,6 +17,7 @@ topic always gets the same style, but adjacent topics look completely different)
 import os
 import math
 import hashlib
+import random
 from datetime import datetime
 from pathlib import Path
 
@@ -50,12 +51,14 @@ PALETTES = {
 
 def get_pal(tid):
     t = tid.lower()
-    if any(x in t for x in ["llm","rag","agent","mlops","ai"]): return PALETTES["ai"]
-    if any(x in t for x in ["kube","docker","aws","cicd","cloud"]): return PALETTES["cloud"]
-    if any(x in t for x in ["zero","devsec","security"]): return PALETTES["security"]
-    if any(x in t for x in ["kafka","data","lake","lakehouse"]): return PALETTES["data"]
-    if any(x in t for x in ["git","devops","solid","api","cicd"]): return PALETTES["devops"]
-    return PALETTES["default"]
+    if any(x in t for x in ["llm","rag","agent","mlops","ai"]): pal = PALETTES["ai"]
+    elif any(x in t for x in ["kube","docker","aws","cicd","cloud"]): pal = PALETTES["cloud"]
+    elif any(x in t for x in ["zero","devsec","security"]): pal = PALETTES["security"]
+    elif any(x in t for x in ["kafka","data","lake","lakehouse"]): pal = PALETTES["data"]
+    elif any(x in t for x in ["git","devops","solid","api","cicd"]): pal = PALETTES["devops"]
+    else: pal = PALETTES["default"]
+    # Randomize the color order for variety
+    return random.sample(pal, len(pal))
 
 # ── Utilities ──────────────────────────────────────────────────────────────────
 def xe(t): return str(t).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
@@ -988,8 +991,8 @@ def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "") -> str:
             break
 
     if style_idx is None:
-        h = int(hashlib.md5(topic_id.encode()).hexdigest(), 16)
-        style_idx = h % len(STYLES)
+        # Randomize style for variety instead of deterministic
+        style_idx = random.randint(0, len(STYLES) - 1)
 
     fn = STYLES[style_idx]
     try:
