@@ -1960,6 +1960,13 @@ async function saveSchedule() {
   const btn = document.getElementById('saveSchedBtn');
   btn.disabled = true; btn.textContent = '💾 Saving...';
   try {
+    // Set time_local and time_tz for DST-aware scheduling
+    for (const day of DAYS) {
+      if (schedConfig.weekly[day]) {
+        schedConfig.weekly[day].time_local = schedConfig.weekly[day].time_ist;
+        schedConfig.weekly[day].time_tz = userTZ;
+      }
+    }
     schedConfig.updated_at = new Date().toISOString();
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(schedConfig, null, 2))));
     // Get current SHA if file exists
