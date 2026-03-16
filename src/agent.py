@@ -10,6 +10,7 @@ from datetime import datetime
 from topic_manager import TopicManager
 from diagram_generator import DiagramGenerator
 from logger import get_logger
+import notifier
 
 log = get_logger("agent")
 

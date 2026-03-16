@@ -104,8 +104,8 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || vars.TELEGRAM_CHAT_ID }}
           # Optional: set AUTHOR_NAME as a repo variable (Settings → Variables)
           # to personalise post signatures and diagram watermarks.
           # Falls back to your GitHub username automatically if not set.
@@ -171,11 +171,11 @@ jobs:
           POST_DATE:    ${{ steps.run_agent.outputs.POSTED_DATE }}
           LINKEDIN_POST_URL: ${{ steps.run_agent.outputs.POSTED_URL }}
           # Notification channels (same as used by notifier.py)
-          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL }}
-          NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS }}
-          NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL }}
-          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL || vars.NOTIFY_EMAIL }}
+          NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS || vars.NOTIFY_EMAIL_PASS || secrets.NOTIFY_EMAIL_PASSWORD || vars.NOTIFY_EMAIL_PASSWORD }}
+          NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL || vars.NOTIFY_TO_EMAIL }}
+          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID || vars.TELEGRAM_CHAT_ID }}
         run: |
           python src/update_profile_readme.py || echo "::warning::Profile README update failed (non-fatal)"
 
@@ -186,11 +186,11 @@ jobs:
         env:
           LINKEDIN_TOKEN_DATE: ${{ secrets.LINKEDIN_TOKEN_DATE }}
           # Notification channels
-          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL }}
-          NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS }}
-          NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL }}
-          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+          NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL || vars.NOTIFY_EMAIL }}
+          NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS || vars.NOTIFY_EMAIL_PASS || secrets.NOTIFY_EMAIL_PASSWORD || vars.NOTIFY_EMAIL_PASSWORD }}
+          NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL || vars.NOTIFY_TO_EMAIL }}
+          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID || vars.TELEGRAM_CHAT_ID }}
         run: |
           python src/check_token_expiry.py
 

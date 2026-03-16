@@ -141,7 +141,9 @@ def _send_telegram(subject: str, preview: str, topic: str):
         missing = []
         if not bot_token: missing.append("TELEGRAM_BOT_TOKEN")
         if not chat_id:   missing.append("TELEGRAM_CHAT_ID")
-        log.info(f"Telegram: not configured (missing secrets: {', '.join(missing)})")
+        log.warning(f"Telegram: not configured (missing env: {', '.join(missing)})")
+        # Log all available env vars (keys only) to help debug
+        log.debug(f"Available env vars: {list(os.environ.keys())}")
         return None
 
     # ── Validate token format ──────────────────────────────────────────────
