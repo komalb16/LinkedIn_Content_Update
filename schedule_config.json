@@ -29,7 +29,7 @@
     },
     "sat": {
       "enabled": true,
-      "time_ist": "02:20",
+      "time_ist": "11:20",
       "time_utc": "20:50"
     },
     "sun": {
@@ -40,5 +40,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-13T22:13:06.640Z"
+  "updated_at": "2026-03-14T02:06:16.649Z"
 }
