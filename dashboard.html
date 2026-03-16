@@ -1707,6 +1707,8 @@ function applyRunFilter() {
   if (_triggerFilter === 'all') trigRuns = [...postRuns, ...schedulePostsInRange];
   else if (_triggerFilter === 'manual') trigRuns = postRuns.filter(r => r.event === 'workflow_dispatch');
   else if (_triggerFilter === 'schedule') trigRuns = schedulePostsInRange;
+  // Hide schedule runs that didn't actually post (show as 'Auto')
+  trigRuns = trigRuns.filter(r => !(r.event === 'schedule' && getTopicFromRun(r) === 'Auto'));
   // Apply status filter
   let displayRuns = trigRuns;
   if (_statusFilter === 'ok')     displayRuns = trigRuns.filter(r => r.conclusion === 'success');
