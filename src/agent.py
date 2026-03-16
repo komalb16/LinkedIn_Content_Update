@@ -68,40 +68,49 @@ TONE_STYLES = [
 ]
 
 # ── FORMAT A: STRUCTURED ──────────────────────────────────────────────────────
-POST_SYSTEM_STRUCTURED = """You are a highly opinionated Staff Engineer and tech leader.
-You write viral, scroll-stopping LinkedIn posts with rich formatting.
+POST_SYSTEM_STRUCTURED = """You are an opinionated Staff Engineer and tech lead.
+You write visually stunning, technically deep LinkedIn posts.
 
 OUTPUT FORMAT:
-Return a JSON object containing:
+Return a JSON object:
 {
-  "post": "The full post text with rich formatting (emojis, lists, etc.)",
-  "diagram_query": "A search query to find a relevant High Quality diagram online (e.g. 'ByteByteGo system design for X')",
-  "hook_variation": "A creative alternative hook for this same post"
+  "post": "The full post text with rich formatting",
+  "diagram_query": "Search query for a ByteByteGo style diagram",
+  "hook_variation": "Alternative hook"
 }
 
-HUMAN TOUCH & STRUCTURE BLEND:
-- Follow the EXAMPLE structure — but add personal anecdotes/first-person views.
-- Mix short punchy sentences with longer descriptive ones.
-- Length: 250-350 words.
+STYLE & LAYOUT RULES:
+1. STRUCTURE: Use a clear 1, 2, 3 breakdown using these EXACT emojis for the headers: 🚀 1., 🤔 2., and ⚡ 3.
+2. VISUALS: Include at least one TECHNICAL EMOJI DIAGRAM or comparison block like:
+```
+🟦 Input → 🟩 Processing → 🟥 Output
+```
+3. TONE: Authoritative, "hard-won wisdom", myth-busting.
+4. BANNED: "robust", "crucial", "delve", "landscape", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented", "game-changer", "leverage", "navigating", "holistic".
 
-🚨 3 things nobody tells you about System Design
+═══════════════ MANDATORY STRUCTURE EXAMPLE ═══════════════
+[Topic Name]
 
-[Brief Personal Anecdote/Observation - 2-3 sentences max]
+🚨 [Punchy Hook / Myth-busting Intro]
 
-🚀 1. Scalability isn't about traffic.
-[Insight]
+[Brief technical context]
 
-🤔 2. The CAP Theorem isn't a choice.
-[Insight]
+🚀 1. [Technical Reality/Insight]
+[Technical details]
 
-⚡ 3. Caching & load balancing decide performance.
-[Insight]
+```
+[Emoji-based ASCII diagram or Comparison Table here]
+```
 
-💬 What's the most overlooked system design principle?
-#SystemDesign #Architecture #SoftwareEngineering
+🤔 2. [Second Technical Insight]
+[Technical details]
+
+⚡ 3. [Third Technical Insight]
+[Technical details]
+
+💬 [Call to action question]
+#Tech #Architecture #SoftwareEngineering
 ═══════════════ END EXAMPLE ═══════════════
-
-BANNED: "robust", "crucial", "delve", "landscape", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented", "unpack", "dive deep", "game-changer", "leverage", "interplay", "navigating", "holistic".
 """
 
 # ── FORMAT B: CONVERSATIONAL ──────────────────────────────────────────────────
@@ -142,7 +151,8 @@ STYLE:
 """
 
 def _pick_post_system():
-    return random.choice([POST_SYSTEM_STRUCTURED, POST_SYSTEM_CONVERSATIONAL])
+    # Favor structured format (the user loves it)
+    return random.choices([POST_SYSTEM_STRUCTURED, POST_SYSTEM_CONVERSATIONAL], weights=[0.8, 0.2])[0]
 
 # ── DIAGRAM SOURCING ─────────────────────────────────────────────────────────
 
@@ -236,12 +246,12 @@ def fetch_rss_news(category="tech", max_items=5):
                 if title: articles.append({"title": title, "description": desc, "topic_id": "news"})
             if len(articles) >= max_items: break
         except: continue
-    return articles[:max_items]
+    return list(articles)[:int(max_items)] if articles else []
 
 def generate_news_post(news_type="ai"):
     articles = fetch_rss_news(news_type)
     if not articles: return None
-    news_text = "\n".join([f"- {a['title']}" for a in articles[:3]])
+    news_text = "\n".join([f"- {a['title']}" for a in list(articles)[:3]])
     prompt = f"News:\n{news_text}\n\nWrite a post reacting to the best story."
     return call_ai(prompt, NEWS_SYSTEM)
 

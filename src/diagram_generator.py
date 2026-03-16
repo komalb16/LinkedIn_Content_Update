@@ -23,7 +23,7 @@ from datetime import datetime
 from pathlib import Path
 
 try:
-    _DIAGRAM_AUTHOR = os.environ.get("USER_NAME", os.environ.get("AUTHOR_NAME", "Komal Batra"))
+    _DIAGRAM_AUTHOR = os.environ.get("USER_NAME") or os.environ.get("AUTHOR_NAME") or "Komal Batra"
 except Exception:
     _DIAGRAM_AUTHOR = "Komal Batra"
 

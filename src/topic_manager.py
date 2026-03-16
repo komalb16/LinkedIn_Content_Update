@@ -203,7 +203,7 @@ class TopicManager:
 
     def _save_history(self):
         with open(HISTORY_FILE, "w") as f:
-            json.dump(self.history[-50:], f, indent=2)
+            json.dump(list(self.history)[-50:], f, indent=2)
 
     def _load_topics(self):
         """Merge hardcoded TOPICS with topics_config.json overrides from the dashboard."""
@@ -284,11 +284,11 @@ class TopicManager:
         print("-"*60)
         for t in self.topics:
             tag = " [custom]" if t.get("category") == "Custom" else ""
-            print("  --topic " + t["id"].ljust(28) + t["name"] + tag)
+            print("  --topic " + str(t["id"]).ljust(28) + str(t["name"]) + tag)
         # Also show hidden ones for visibility
         hidden = [t for t in TOPICS if t.get("hidden", False)]
         if hidden:
             print("\n  Hidden (will not be auto-selected):")
             for t in hidden:
-                print("  [hidden] " + t["id"].ljust(25) + t["name"])
+                print("  [hidden] " + str(t["id"]).ljust(25) + str(t["name"]))
         print("-"*60 + "\n")
