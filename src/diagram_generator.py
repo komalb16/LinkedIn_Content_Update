@@ -1199,6 +1199,346 @@ def _style_layered_flow(topic_id, topic_name, C):
     return _wrap(svg, W, H, topic_name, "Conceptual Layers", accent, bg_top, bg_bot)
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 11 — ECOSYSTEM TREE (RAG STACK)
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_ecosystem_tree(topic_id, topic_name, C):
+    W, H = 1000, 850
+    accent = C[0]
+    bg_top = lighten(accent, 0.95)
+    bg_bot = lighten(accent, 0.98)
+
+    svg = ""
+    # Central Hub
+    cx, cy = W/2, H/2 - 20
+    
+    # 3D Stack / Server Illustration in center
+    svg += f'<rect x="{cx-60}" y="{cy-80}" width="120" height="160" rx="10" fill="{darken(accent,0.6)}"/>'
+    svg += f'<path d="M {cx-40} {cy-100} Q {cx} {cy-110} {cx+40} {cy-100} L {cx+60} {cy-80} L {cx-60} {cy-80} Z" fill="{lighten(accent,0.4)}"/>'
+    svg += f'<rect x="{cx-50}" y="{cy-60}" width="100" height="15" rx="4" fill="{lighten(accent,0.2)}"/>'
+    svg += f'<rect x="{cx-50}" y="{cy-30}" width="100" height="15" rx="4" fill="{lighten(accent,0.2)}"/>'
+    svg += f'<rect x="{cx-50}" y="{cy}" width="100" height="15" rx="4" fill="{lighten(accent,0.2)}"/>'
+    svg += f'<rect x="{cx-50}" y="{cy+30}" width="100" height="15" rx="4" fill="{lighten(accent,0.2)}"/>'
+
+    GROUPS = [
+        # (title, x, y, spine_dir, items)
+        ("Ingest/Data Processing", cx-250, cy-70, "left_down", ["Kubeflow", "Apache Airflow", "Apache Nifi", "LangChain Loaders", "Haystack Pipelines", "OpenSearch"]),
+        ("Retrieval & Ranking", cx-150, cy-220, "up_horiz", ["Elasticsearch", "Haystack Retrivers", "JinaAI", "Weaviate", "FAISS"]),
+        ("LLM Frameworks", cx+150, cy-220, "up_horiz", ["LlamaIndex", "LangChain", "Huggingface", "Haystack", "CrewAI"]),
+        ("Embedding Model", cx+280, cy-120, "right_down", ["HuggingFace", "LLMWare", "Sentence Transformers", "JinaAI", "Cognita", "Nomic"]),
+        ("Vector Database", cx+250, cy+180, "right_down", ["Milvus", "Weaviate", "PgVector", "Chroma", "Qdrant"]),
+        ("LLM", cx, cy+180, "down_split", ["Phi-2", "Deepseek", "Qwen", "LLaMa", "Mistral", "Gemma"]),
+        ("Frontend Frameworks", cx-250, cy+180, "left_down", ["NextJS", "SvelteKit", "Streamlit", "VueJS"])
+    ]
+
+    for i, (g_title, gx, gy, sdir, items) in enumerate(GROUPS):
+        col = C[i % len(C)]
+        # Connector from Center to Bubble
+        svg += f'<path d="M {cx} {cy} L {gx} {gy}" stroke="{col}" stroke-width="3" fill="none" class="flow" style="animation-delay:{i*0.1:.2f}s"/>'
+        svg += f'<circle cx="{cx}" cy="{cy}" r="6" fill="{col}"/>'
+        
+        # Draw Spine
+        if sdir == "left_down":
+            svg += f'<path d="M {gx-50} {gy} L {gx-80} {gy} L {gx-80} {gy+(len(items)*40)}" stroke="gray" stroke-width="2" fill="none"/>'
+            for j, item in enumerate(items):
+                ix, iy = gx-80, gy + 30 + j*40
+                svg += f'<line x1="{ix}" y1="{iy}" x2="{ix-20}" y2="{iy}" stroke="gray" stroke-width="2"/>'
+                svg += f'<text x="{ix-30}" y="{iy+4}" text-anchor="end" fill="black" font-size="11" font-weight="600">{xe(item)}</text>'
+        
+        elif sdir == "right_down":
+            svg += f'<path d="M {gx+50} {gy} L {gx+80} {gy} L {gx+80} {gy+(len(items)*40)}" stroke="gray" stroke-width="2" fill="none"/>'
+            for j, item in enumerate(items):
+                ix, iy = gx+80, gy + 30 + j*40
+                svg += f'<line x1="{ix}" y1="{iy}" x2="{ix+20}" y2="{iy}" stroke="gray" stroke-width="2"/>'
+                svg += f'<text x="{ix+30}" y="{iy+4}" text-anchor="start" fill="black" font-size="11" font-weight="600">{xe(item)}</text>'
+        
+        elif sdir == "up_horiz":
+            svg += f'<path d="M {gx} {gy-40} L {gx} {gy-70} L {gx-100} {gy-70} L {gx+100} {gy-70}" stroke="gray" stroke-width="2" fill="none"/>'
+            for j, item in enumerate(items):
+                ix = gx - 90 + j*45
+                iy = gy - 70
+                y_offset = -20 if j % 2 == 0 else 20
+                svg += f'<line x1="{ix}" y1="{iy}" x2="{ix}" y2="{iy+y_offset}" stroke="gray" stroke-width="2"/>'
+                svg += f'<text x="{ix}" y="{iy+(y_offset*1.5)+4}" text-anchor="middle" fill="black" font-size="10" font-weight="600">{xe(item)}</text>'
+                
+        elif sdir == "down_split":
+            svg += f'<path d="M {gx} {gy+40} L {gx} {gy+80} M {gx-60} {gy+80} L {gx+60} {gy+80} L {gx+60} {gy+160} M {gx-60} {gy+80} L {gx-60} {gy+160}" stroke="gray" stroke-width="2" fill="none"/>'
+            for j, item in enumerate(items):
+                # Split roughly in half
+                if j < len(items)/2:
+                    ix, iy = gx - 60, gy + 100 + j*35
+                    svg += f'<line x1="{ix}" y1="{iy}" x2="{ix-20}" y2="{iy}" stroke="gray" stroke-width="2"/>'
+                    svg += f'<text x="{ix-30}" y="{iy+4}" text-anchor="end" fill="black" font-size="11" font-weight="600">{xe(item)}</text>'
+                else:
+                    k = j - int(len(items)/2)
+                    ix, iy = gx + 60, gy + 100 + k*35
+                    svg += f'<line x1="{ix}" y1="{iy}" x2="{ix+20}" y2="{iy}" stroke="gray" stroke-width="2"/>'
+                    svg += f'<text x="{ix+30}" y="{iy+4}" text-anchor="start" fill="black" font-size="11" font-weight="600">{xe(item)}</text>'
+
+        # Draw Bubble (over lines)
+        svg += f'<circle cx="{gx}" cy="{gy}" r="45" fill="white" stroke="{col}" stroke-width="3" class="fi" style="animation-delay:{i*0.1+0.2:.2f}s"/>'
+        parts = g_title.split()
+        if len(parts) == 1:
+            svg += f'<text x="{gx}" y="{gy+5}" text-anchor="middle" fill="{darken(col,0.4)}" font-size="12" font-weight="800">{xe(parts[0])}</text>'
+        elif len(parts) == 2:
+            svg += f'<text x="{gx}" y="{gy-5}" text-anchor="middle" fill="{darken(col,0.4)}" font-size="11" font-weight="800">{xe(parts[0])}</text>'
+            svg += f'<text x="{gx}" y="{gy+10}" text-anchor="middle" fill="{darken(col,0.4)}" font-size="11" font-weight="800">{xe(parts[1])}</text>'
+        else:
+            svg += f'<text x="{gx}" y="{gy-10}" text-anchor="middle" fill="{darken(col,0.4)}" font-size="11" font-weight="800">{xe(parts[0])}</text>'
+            svg += f'<text x="{gx}" y="{gy+5}" text-anchor="middle" fill="{darken(col,0.4)}" font-size="11" font-weight="800">{xe(parts[1])}</text>'
+            svg += f'<text x="{gx}" y="{gy+20}" text-anchor="middle" fill="{darken(col,0.4)}" font-size="11" font-weight="800">{xe(" ".join(parts[2:]))}</text>'
+
+    return _wrap(svg, W, H, topic_name, "Data & AI Pipeline ecosystem map", accent, bg_top, bg_bot)
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 12 — HONEYCOMB MAP
+# ══════════════════════════════════════════════════════════════════════════════
+import math
+def _hex_poly(cx, cy, r):
+    pts = []
+    for i in range(6):
+        angle_deg = 60 * i + 30
+        angle_rad = math.pi / 180 * angle_deg
+        pts.append(f"{cx + r * math.cos(angle_rad)},{cy + r * math.sin(angle_rad)}")
+    return " ".join(pts)
+
+def _style_honeycomb_map(topic_id, topic_name, C):
+    W, H = 1000, 950
+    accent = C[0]
+    bg_top = lighten(accent, 0.98)
+    bg_bot = lighten(accent, 0.99)
+
+    svg = ""
+    HexR = 50
+    HexW = math.sqrt(3) * HexR
+    HexH = 2 * HexR
+    
+    cx_center = W/2
+    cy_center = H/2 - 20
+
+    # Layout:
+    # Row 1: Agentic AI
+    # Row 2: Deep Learning, Machine Learning, NLP, Generative AI
+    # Row 3: AI Ethics, Computer Vision, Robotics, AI Agents
+    # We will hardcode approximate coordinates to cluster 9 hexes based on standard rendering
+    # Actually, a manual cluster layout coordinates relative to center:
+    coords = [
+        (0, -110, "AI Agents", C[0]),
+        (-80, -55, "Agentic AI", C[1]),
+        (80, -55, "Generative AI", C[2]),
+        (-160, 0, "Deep Learning", C[3]),
+        (0, 0, "Machine\nLearning", C[4]),
+        (160, 0, "NLP", C[5]),
+        (-80, 55, "AI Ethics &\nGovernance", C[0]),
+        (80, 55, "Computer\nVision", C[1]),
+        (160, -110, "Robotics &\nAuto Sys", C[2]), # moved slightly
+    ]
+
+    # Draw hexes
+    for i, (dx, dy, txt, col) in enumerate(coords):
+        hx, hy = cx_center + dx, cy_center + dy
+        svg += f'<polygon points="{_hex_poly(hx, hy, HexR)}" fill="{darken(col,0.2)}" stroke="{darken(col,0.4)}" stroke-width="4" class="pu" style="animation-delay:{i*0.1:.2f}s"/>'
+        parts = txt.split('\n')
+        if len(parts) == 1:
+            svg += f'<text x="{hx}" y="{hy+5}" text-anchor="middle" fill="white" font-size="12" font-weight="700">{xe(parts[0])}</text>'
+        else:
+            svg += f'<text x="{hx}" y="{hy-2}" text-anchor="middle" fill="white" font-size="11" font-weight="700">{xe(parts[0])}</text>'
+            svg += f'<text x="{hx}" y="{hy+12}" text-anchor="middle" fill="white" font-size="11" font-weight="700">{xe(parts[1])}</text>'
+
+    # Surrounding Cards
+    CARDS = [
+        ("AI Agents", cx_center-400, cy_center-280, ["Multi-agent systems", "Prompt engineering"], ["LangChain", "AutoGen"]),
+        ("Agentic AI", cx_center-150, cy_center-280, ["Reasoning algorithms", "Task orchestration"], ["AutoGPT", "BabyAGI"]),
+        ("Generative AI", cx_center+100, cy_center-280, ["Prompt chaining", "Multimodal models"], ["GPT / Claude", "MidJourney"]),
+        ("Deep Learning", cx_center-450, cy_center-20, ["Neural net architecture", "GPU optimization"], ["PyTorch", "TensorFlow"]),
+        ("Machine Learning", cx_center-450, cy_center+180, ["Data preprocessing", "Hyperparameter tuning"], ["Scikit-learn", "XGBoost"]),
+        ("AI Ethics", cx_center-150, cy_center+280, ["Bias mitigation", "XAI design"], ["AI Fairness 360", "SHAP"]),
+        ("Computer Vision", cx_center+100, cy_center+280, ["Image preprocessing", "Object detection"], ["OpenCV", "YOLOv8"]),
+        ("NLP", cx_center+350, cy_center+80, ["Text embedding", "Semantic search"], ["Hugging Face", "Pinecone"]),
+    ]
+
+    for title, rx, ry, skills, tech in CARDS:
+        # Draw connector path vaguely towards center
+        c_cx, c_cy = rx + 120, ry + 60
+        svg += f'<path d="M {c_cx} {c_cy} L {cx_center} {cy_center}" stroke="{accent}" stroke-width="2" stroke-dasharray="8 4" fill="none" class="flow" opacity="0.4"/>'
+        
+        # Draw Card
+        cw, ch = 240, 160
+        svg += f'<rect x="{rx}" y="{ry}" width="{cw}" height="{ch}" rx="8" fill="white" stroke="{lighten(accent,0.5)}" stroke-width="2" class="box-sd"/>'
+        svg += f'<text x="{rx+10}" y="{ry+20}" font-size="14" font-weight="800" fill="{darken(accent,0.3)}">{xe(title)}</text>'
+        
+        # Skills column
+        svg += f'<text x="{rx+10}" y="{ry+45}" font-size="11" font-weight="700" fill="gray">Skills:</text>'
+        for si, s in enumerate(skills):
+            svg += f'<circle cx="{rx+15}" cy="{ry+60+si*15}" r="2" fill="black"/>'
+            svg += f'<text x="{rx+22}" y="{ry+63+si*15}" font-size="10" fill="black">{xe(s)}</text>'
+            
+        # Tech column
+        tx_start = rx + 120
+        svg += f'<text x="{tx_start}" y="{ry+45}" font-size="11" font-weight="700" fill="gray">Technologies:</text>'
+        for ti, t in enumerate(tech):
+            svg += f'<circle cx="{tx_start+5}" cy="{ry+60+ti*15}" r="2" fill="black"/>'
+            svg += f'<text x="{tx_start+12}" y="{ry+63+ti*15}" font-size="10" fill="black">{xe(t)}</text>'
+
+    return _wrap(svg, W, H, topic_name, "Skills & Technologies Map", accent, bg_top, bg_bot)
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 13 — PARALLEL PIPELINES
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_parallel_pipelines(topic_id, topic_name, C):
+    W, H = 1000, 850
+    accent = C[0]
+    bg_top = lighten(accent, 0.94)
+    bg_bot = lighten(accent, 0.96)
+    
+    COLUMNS = [
+        ("LLM", C[0], ["Choose Cloud", "Tokenization", "Context Understanding", "[SPLIT: Apply Layers | Use Weights]", "Token Prediction", "Output Construct"]),
+        ("Generative AI", C[1], ["Input Collection", "Feature Mapping", "Pattern Learning", "[SPLIT: Leverage models | Identify latent]", "Content Gen", "Refinement"]),
+        ("AI Agents", C[2], ["Task Triggered", "Intent Detection", "[SPLIT: Understand | Classify]", "Rule Execution", "Tool / API Call", "Result Gen"]),
+        ("Agentic AI", C[3], ["[SPLIT: Receive Obj | Understand Cxt]", "[SPLIT: Analyze Env | Identify Constr]", "Reasoning & Planning", "Autonomous Execution", "Real-time Monitor"])
+    ]
+    
+    svg = ""
+    col_w = W / len(COLUMNS)
+    
+    for c_idx, (col_title, col_color, steps) in enumerate(COLUMNS):
+        cx = (c_idx * col_w) + (col_w / 2)
+        
+        # Column Background Header
+        svg += f'<rect x="{cx - col_w/2 + 5}" y="50" width="{col_w-10}" height="40" rx="4" fill="{col_color}"/>'
+        svg += f'<text x="{cx}" y="75" text-anchor="middle" fill="white" font-size="16" font-weight="bold">{xe(col_title)}</text>'
+        
+        # Lane Background
+        svg += f'<rect x="{cx - col_w/2 + 5}" y="95" width="{col_w-10}" height="{H-150}" fill="{lighten(col_color,0.9)}" stroke="{lighten(col_color,0.7)}" stroke-width="1"/>'
+        
+        step_h = (H-200) / max(len(steps), 1)
+        cy_current = 140
+        
+        for s_idx, step_txt in enumerate(steps):
+            
+            # Draw vertical line from previous step (except first)
+            if s_idx > 0:
+                prev_y = cy_current - step_h
+                svg += f'<line x1="{cx}" y1="{prev_y+20}" x2="{cx}" y2="{cy_current-20}" stroke="{darken(col_color,0.2)}" stroke-width="2" class="flow" style="animation-delay:{c_idx*0.2 + s_idx*0.1:.2f}s"/>'
+                svg += f'<polygon points="{cx},{cy_current-15} {cx-4},{cy_current-22} {cx+4},{cy_current-22}" fill="{darken(col_color,0.2)}"/>'
+            
+            if step_txt.startswith("[SPLIT:"):
+                # Handle parallel split node
+                inner = step_txt.replace("[SPLIT:", "").replace("]", "").strip()
+                left_txt, right_txt = inner.split("|")
+                
+                # Split lines
+                lx, rx = cx - 50, cx + 50
+                svg += f'<path d="M {cx} {cy_current-20} L {cx} {cy_current-10} L {lx} {cy_current-10} L {lx} {cy_current}" fill="none" stroke="{darken(col_color,0.2)}" stroke-width="2"/>'
+                svg += f'<path d="M {cx} {cy_current-20} L {cx} {cy_current-10} L {rx} {cy_current-10} L {rx} {cy_current}" fill="none" stroke="{darken(col_color,0.2)}" stroke-width="2"/>'
+                
+                # Left Node
+                svg += f'<circle cx="{lx}" cy="{cy_current+10}" r="15" fill="white" stroke="{col_color}" stroke-width="2"/>'
+                svg += f'<text x="{lx}" y="{cy_current+40}" text-anchor="middle" fill="black" font-size="10">{xe(left_txt.strip())}</text>'
+                
+                # Right Node
+                svg += f'<circle cx="{rx}" cy="{cy_current+10}" r="15" fill="white" stroke="{col_color}" stroke-width="2"/>'
+                svg += f'<text x="{rx}" y="{cy_current+40}" text-anchor="middle" fill="black" font-size="10">{xe(right_txt.strip())}</text>'
+                
+                # Merge lines back to center for next step
+                svg += f'<path d="M {lx} {cy_current+50} L {lx} {cy_current+60} L {cx} {cy_current+60} L {cx} {cy_current+70}" fill="none" stroke="{darken(col_color,0.2)}" stroke-width="2"/>'
+                svg += f'<path d="M {rx} {cy_current+50} L {rx} {cy_current+60} L {cx} {cy_current+60} L {cx} {cy_current+70}" fill="none" stroke="{darken(col_color,0.2)}" stroke-width="2"/>'
+                
+                cy_current += step_h + 30
+            else:
+                # Normal single node
+                svg += f'<circle cx="{cx}" cy="{cy_current}" r="18" fill="white" stroke="{col_color}" stroke-width="3" class="pu"/>'
+                svg += f'<text x="{cx}" y="{cy_current+4}" text-anchor="middle" fill="{darken(col_color,0.2)}" font-size="12" font-weight="bold">{s_idx+1}</text>'
+                svg += f'<text x="{cx}" y="{cy_current+35}" text-anchor="middle" fill="black" font-size="11" font-weight="600">{xe(step_txt)}</text>'
+                
+                cy_current += step_h
+
+    return _wrap(svg, W, H, topic_name, "Evolution & Execution Pipeline", accent, bg_top, bg_bot)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 14 — WINDING ROADMAP
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_winding_roadmap(topic_id, topic_name, C):
+    W, H = 1000, 1100
+    accent = C[0]
+    bg_top = lighten(accent, 0.94)
+    bg_bot = lighten(accent, 0.97)
+
+    svg = ""
+    
+    # Roadmap Steps (Title, subtitle, array of points)
+    STEPS = [
+        ("1. Start with the Basics", "AI -> ML -> DL -> GenAI", ["Learn how models generate data", "Clarity saves months later"]),
+        ("2. Master Core Concepts", "Math Foundations", ["Probability & Stats", "Linear Algebra", "Calculus basics"]),
+        ("3. Foundation Models", "Get Hands-on", ["GPT, Llama, Gemini, Claude", "Understand training & usage"]),
+        ("4. GenAI Dev Stack", "Practical Tools", ["Python, LangChain", "Vector DBs, Hugging Face"]),
+        ("5. Model Training", "The Lifecycle", ["Dataset -> Tokenization", "Training -> Eval -> Deploy"]),
+        ("6. Build AI Agents", "The Future is Agentic", ["Memory & Tool usage", "Autonomy + Human control"]),
+        ("7. Vision Models", "Text is just the start", ["GANs & Image Gen", "Vision + Language leap"]),
+        ("8. Keep Learning", "Build. Ship. Iterate.", ["DeepLearning.AI, Kaggle", "Google Labs, Nvidia"])
+    ]
+    
+    # Path coordinates
+    cx = W/2
+    y_start = 80
+    y_step = 110
+    
+    # Draw the main winding background path
+    path_d = f"M {cx} {y_start} "
+    for i in range(len(STEPS)-1):
+        # alternate swinging left and right
+        swing = 150 if i % 2 == 0 else -150
+        cy1 = y_start + (i)*y_step
+        cy2 = y_start + (i+1)*y_step
+        path_d += f"C {cx+swing} {cy1+y_step/2}, {cx+swing} {cy2-y_step/2}, {cx} {cy2} "
+        
+    svg += f'<path d="{path_d}" fill="none" class="flow" stroke="{lighten(accent,0.8)}" stroke-width="40" stroke-linecap="round"/>'
+    svg += f'<path d="{path_d}" fill="none" class="flow" stroke="{accent}" stroke-width="6" stroke-dasharray="12 12" stroke-linecap="round"/>'
+
+    for i, (title, sub, bullets) in enumerate(STEPS):
+        col = C[i % len(C)]
+        cy = y_start + i * y_step
+        
+        # Node on path
+        svg += f'<circle cx="{cx}" cy="{cy}" r="25" fill="{col}" stroke="white" stroke-width="4" class="pu" style="animation-delay:{i*0.1:.2f}s"/>'
+        svg += f'<text x="{cx}" y="{cy+8}" text-anchor="middle" fill="white" font-size="20" font-weight="900">{i+1}</text>'
+        
+        # Determine Card position (alternate left/right of path)
+        is_left = (i % 2 == 1)
+        card_w = 320
+        card_h = 90
+        
+        if is_left:
+            card_x = cx - card_w - 60
+            # Connector
+            svg += f'<path d="M {cx-25} {cy} L {card_x+card_w} {cy}" stroke="{col}" stroke-width="3" fill="none" opacity="0.5"/>'
+        else:
+            card_x = cx + 60
+            # Connector
+            svg += f'<path d="M {cx+25} {cy} L {card_x} {cy}" stroke="{col}" stroke-width="3" fill="none" opacity="0.5"/>'
+            
+        card_y = cy - card_h/2
+        
+        # Draw Card
+        svg += f'<rect x="{card_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="12" fill="white" stroke="{col}" stroke-width="2" class="box-sd" style="animation-delay:{i*0.1+0.1:.2f}s"/>'
+        
+        # Title Background tab
+        svg += f'<path d="M {card_x} {card_y+12} Q {card_x} {card_y} {card_x+12} {card_y} L {card_x+card_w-12} {card_y} Q {card_x+card_w} {card_y} {card_x+card_w} {card_y+12} L {card_x+card_w} {card_y+30} L {card_x} {card_y+30} Z" fill="{lighten(col,0.85)}"/>'
+        svg += f'<text x="{card_x+15}" y="{card_y+20}" font-size="14" font-weight="900" fill="{darken(col,0.4)}">{xe(title)}</text>'
+        
+        # Subtitle
+        svg += f'<text x="{card_x+15}" y="{card_y+45}" font-size="11" font-weight="700" fill="{darken(col,0.1)}">{xe(sub)}</text>'
+        
+        # Bullets
+        for b_idx, bull in enumerate(bullets):
+            svg += f'<circle cx="{card_x+20}" cy="{card_y+62+b_idx*16}" r="3" fill="{col}"/>'
+            svg += f'<text x="{card_x+30}" y="{card_y+66+b_idx*16}" font-size="11" fill="#444">{xe(bull)}</text>'
+
+
+    return _wrap(svg, W, H, topic_name, "Step-by-Step Learning Guide", accent, bg_top, bg_bot)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  DISPATCH — pick style per topic (override map + hash fallback)
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -1215,6 +1555,10 @@ STYLES = [
     _style_data_evolution,  # 8 — 3-tier data evolution
     _style_horizontal_tree, # 9 — horizontal tree branches
     _style_layered_flow,    # 10 — layered horizontal flow
+    _style_ecosystem_tree,  # 11 — central core with orthogonal branches
+    _style_honeycomb_map,   # 12 — honeycomb hex core with remote cards
+    _style_parallel_pipelines, # 13 — parallel vertical sequences
+    _style_winding_roadmap, # 14 - winding path with alternating nodes
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -1237,6 +1581,10 @@ TOPIC_STYLE_OVERRIDES = {
     "data-evolution":    8,   # 3-tier data evolution
     "ml-algorithms":     9,   # horizontal tree
     "ai-disciplines":    10,  # layered horizontal flow
+    "rag-stack":         11,  # ecosystem tree
+    "ai-skills-map":     12,  # honeycomb map
+    "llm-vs-agentic":    13,  # parallel pipelines
+    "genai-roadmap":     14,  # winding roadmap
 }
 
 
