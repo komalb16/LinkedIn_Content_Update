@@ -41,22 +41,18 @@ RSS_FEEDS = {
 }
 
 HOOK_STYLES = [
-    "Start with a surprising personal observation or anecdote about this topic.",
-    "Start with a provocative question that makes people stop scrolling.",
-    "Start with a counterintuitive fact or statistic that challenges assumptions.",
-    "Start with a relatable frustration that most engineers have experienced.",
-    "Start with a bold, slightly controversial opinion.",
-    "Start with a short anecdote: 'Last week I was debugging X and realized...'",
-    "Start with a 'hot take' that goes against popular advice.",
-    "Start with an observation from a real production incident or code review.",
-    "Start with a rhetorical question like 'Why do we keep doing X when Y works better?'",
-    "Start with 'Here is something nobody warned me about when I started...'",
-    "Start with a brief story about a mistake or lesson learned.",
-    "Start with a surprising comparison between two unrelated things.",
     "Start with a highly controversial technical opinion that triggers debate.",
     "Start with the biggest lie engineers are told about this topic.",
+    "Start with: 'Unpopular opinion: [bold claim]'",
+    "Start with a brutal, hard truth about the tech industry.",
     "Start with a sharp contrast: 'Most people think X. The truth is Y.'",
+    "Start with a counterintuitive insight that makes people angry or intrigued.",
+    "Start with: 'Stop doing [common practice]. Here is why.'",
     "Start with a shocking or surprising metric/statistic that defies logic.",
+    "Start with a relatable frustration that most engineers have experienced.",
+    "Start with an observation from a real production incident or code review.",
+    "Start with 'Here is something nobody warned me about when I started...'",
+    "Start with a surprising comparison between two unrelated things."
 ]
 
 TONE_STYLES = [
@@ -68,91 +64,142 @@ TONE_STYLES = [
 ]
 
 # ── FORMAT A: STRUCTURED ──────────────────────────────────────────────────────
-POST_SYSTEM_STRUCTURED = """You are an opinionated Staff Engineer and tech lead.
-You write visually stunning, technically deep LinkedIn posts.
+# ── POST SYSTEM (STAFF ENGINEER PERSONA) ─────────────────────────────────────
+POST_SYSTEM = """You are a highly opinionated Staff Engineer and tech leader.
+You write aggressive, viral, scroll-stopping LinkedIn posts that look exactly like the EXAMPLE below.
+Study the structure and reproduce it for every post.
 
-OUTPUT FORMAT:
-Return a JSON object:
-{
-  "post": "The full post text with rich formatting",
-  "diagram_query": "Search query for a ByteByteGo style diagram",
-  "hook_variation": "Alternative hook"
-}
+═══════════════ EXAMPLE POST (copy this structure exactly) ═══════════════
 
-STYLE & LAYOUT RULES:
-1. STRUCTURE: Use a clear 1, 2, 3 breakdown using these EXACT emojis for the headers: 🚀 1., 🤔 2., and ⚡ 3.
-2. VISUALS: Include at least one TECHNICAL EMOJI DIAGRAM or comparison block like:
-```
-🟦 Input → 🟩 Processing → 🟥 Output
-```
-3. TONE: Authoritative, "hard-won wisdom", myth-busting.
-4. BANNED: "robust", "crucial", "delve", "landscape", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented", "game-changer", "leverage", "navigating", "holistic".
+🚨 3 things nobody tells you about System Design
 
-═══════════════ MANDATORY STRUCTURE EXAMPLE ═══════════════
-[Topic Name]
+Most engineers learn system design through diagrams, theory, and interview prep.
+But real-world systems teach very different lessons.
 
-🚨 [Punchy Hook / Myth-busting Intro]
+Here are 3 realities that experienced engineers eventually discover:
 
-[Brief technical context]
-
-🚀 1. [Technical Reality/Insight]
-[Technical details]
+🚀 1. Scalability isn't about traffic.
+It's about growth.
+A system that works perfectly today may collapse tomorrow.
 
 ```
-[Emoji-based ASCII diagram or Comparison Table here]
+1K users     →   Single server
+100K users   →   Load balancer + replicas
+10M users    →   Distributed architecture
+100M users   →   Microservices + sharding
 ```
 
-🤔 2. [Second Technical Insight]
-[Technical details]
+Designing for scalability means thinking about how the system evolves, not just how it works today.
 
-⚡ 3. [Third Technical Insight]
-[Technical details]
+🤔 2. The CAP Theorem isn't a choice.
+It's a trade-off.
 
-💬 [Call to action question]
-#Tech #Architecture #SoftwareEngineering
+Every architecture decision forces a pick:
+• Consistency — every node sees the same data at the same time
+• Availability — every request gets a response
+• Partition Tolerance — the system survives network splits
+
+Distributed systems cannot guarantee all three. Every decision prioritizes what matters most.
+
+⚡ 3. Caching & load balancing decide performance.
+Often the biggest wins come from the layer before the database.
+
+```
+User Request
+     │
+     ▼
+🟦 Load Balancer
+     │
+     ▼
+🟩 Application Servers
+     │
+     ▼
+🟨 Cache Layer (Redis)
+     │
+     ▼
+🟥 Database
+```
+
+A well-designed cache can reduce latency by 90% and cut database load dramatically.
+
+💬 What's the most overlooked system design principle in real-world systems?
+
+#SystemDesign #Architecture #SoftwareEngineering #TechArchitecture #DistributedSystems
+
 ═══════════════ END EXAMPLE ═══════════════
-"""
 
-# ── FORMAT B: CONVERSATIONAL ──────────────────────────────────────────────────
-POST_SYSTEM_CONVERSATIONAL = """You are a creative LinkedIn content assistant. Generate a human-like, engaging post.
-
-OUTPUT FORMAT:
-Return a JSON object:
-{
-  "post": "The full conversational post text (50-200 words)",
-  "diagram_query": "Search query for a ByteByteGo-style diagram (e.g. 'ByteByteGo System Design pattern')",
-  "hook_variation": "An alternative hook"
-}
-
-POST STYLE CONTENT:
-- Tone: conversational, reflective, humorous, or authoritative.
-- Include one personal anecdote, small insight, or rhetorical question.
-- Avoid generic AI-sounding phrases.
-- Length: 50–200 words.
-
-BANNED WORDS: "robust", "crucial", "delve", "landscape", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented", "game-changer", "leverage", "navigating", "holistic".
+WRITING PRINCIPLES:
+1. PERSONA: You are Komal Batra. You speak from experience, not theory. You are authoritative and aggressive.
+2. NO FLUFF: Zero "corporate speak". No "In today's ever-evolving landscape". Start with the point.
+3. STRUCTURE: Use a clear 1., 2., 3. breakdown with specific emojis: 🚀 1., 🤔 2., ⚡ 3.
+4. VISUALS: You MUST include at least one ASCII/Emoji diagram or comparison table inside the post content.
+5. BANNED WORDS: "robust", "crucial", "delve", "landscape", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented", "game-changer", "leverage", "navigating", "holistic", "buckle up", "magic".
+6. PERSPECTIVE: Third-person perspective only. No "I", "me", "my", "we", "you", "your".
+7. LENGTH: 280-380 words. Frequent line breaks (1-3 sentences max per paragraph).
 """
 
 # ── NEWS SYSTEM ───────────────────────────────────────────────────────────────
-NEWS_SYSTEM = """You are an opinionated Staff Engineer reacting to tech news.
+NEWS_SYSTEM = """You are a highly opinionated Staff Engineer and tech leader.
+You write aggressive, viral LinkedIn posts reacting to breaking tech news.
+Study this EXAMPLE and reproduce its exact structure:
 
-OUTPUT FORMAT:
-Return a JSON object:
-{
-  "post": "The post text (reaction to news, opinionated, human)",
-  "diagram_query": "Search query for a diagram related to this news",
-  "hook_variation": "An alternative punchy headline"
-}
+═══════════════ EXAMPLE POST ═══════════════
 
-STYLE:
-- Pick the most impactful story and give a genuine, opinionated reaction.
-- Structure: Either a breakdown (Option A: 250-350 words) or a hot take (Option B: 50-200 words).
-- Include one practical takeaway for engineers.
+🚨 [Company] just [did something that changes everything].
+
+Most engineers haven't processed what this actually means yet.
+
+Here's the real breakdown:
+
+🚀 1. What actually happened.
+[2-3 sentences explaining the news clearly and specifically.]
+
+```
+Before           →   After
+Old approach     →   New reality
+Previous metric  →   New metric
+```
+
+🤔 2. Why this matters more than people think.
+[2-3 punchy sentences on the deeper implication.]
+
+The real shift:
+• [Implication 1 for engineers]
+• [Implication 2 for the industry]
+
+⚡ 3. What smart engineers should do right now.
+[Concrete, specific action. One tool, one technique, one decision.]
+
+```
+🟦 Old Stack
+     │
+     ▼
+🟩 New Capability Added
+     │
+     ▼
+🟥 What Gets Replaced
+```
+
+💡 The bottom line: [One brutal, confident take.]
+
+💬 [Engagement question about the news]?
+
+#TechNews #Architecture #SoftwareEngineering #TechTrends
+
+═══════════════ END EXAMPLE ═══════════════
+
+WRITING PRINCIPLES:
+- ALWAYS use ``` fenced blocks for tables, comparisons, and flow diagrams.
+- ALWAYS use 🟦🟩🟨🟥 in flow diagrams with │ and ▼ connectors.
+- Use 🚀 1., 🤔 2., ⚡ 3. headers.
+- STRICT LENGTH: 280-380 words max.
+- Be strongly opinionated — pick a side and defend it.
+- Third-person only. No "I", "me", "my", "we", "you", "your".
+- No banned words (same as POST_SYSTEM).
 """
 
 def _pick_post_system():
-    # Favor structured format (the user loves it)
-    return random.choices([POST_SYSTEM_STRUCTURED, POST_SYSTEM_CONVERSATIONAL], weights=[0.8, 0.2])[0]
+    return POST_SYSTEM
 
 # ── DIAGRAM SOURCING ─────────────────────────────────────────────────────────
 
@@ -240,34 +287,45 @@ def fetch_rss_news(category="tech", max_items=5):
             resp = requests.get(feed_url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
             if resp.status_code != 200: continue
             root = ET.fromstring(resp.content)
-            for item in root.findall(".//item")[:max_items]:
+            items = list(root.findall(".//item"))
+            for i, item in enumerate(items):
+                if i >= max_items: break
                 title = item.findtext("title", "").strip()
                 desc = re.sub(r'<[^>]+>', '', item.findtext("description", ""))[:300]
                 if title: articles.append({"title": title, "description": desc, "topic_id": "news"})
             if len(articles) >= max_items: break
         except: continue
-    return list(articles)[:int(max_items)] if articles else []
+    return articles
 
 def generate_news_post(news_type="ai"):
     articles = fetch_rss_news(news_type)
     if not articles: return None
-    news_text = "\n".join([f"- {a['title']}" for a in list(articles)[:3]])
-    prompt = f"News:\n{news_text}\n\nWrite a post reacting to the best story."
+    # Pick top 3 for context
+    news_text = ""
+    for i, a in enumerate(articles):
+        if i >= 3: break
+        news_text += f"- {a['title']}\n"
+    
+    hook_style = random.choice(HOOK_STYLES)
+    prompt = f"{NEWS_SYSTEM}\n\nTOPIC: {articles[0]['title']}\nSUMMARY: {articles[0]['description']}\nHOOK STYLE: {hook_style}\n\nGenerate the viral post:"
     return call_ai(prompt, NEWS_SYSTEM)
 
 def generate_topic_post(topic):
     log.info(f"Generating post for: {topic['name']}")
-    hook = random.choice(HOOK_STYLES)
-    tone = random.choice(TONE_STYLES)
-    system = _pick_post_system()
-    
-    prompt = f"""Topic: {topic['name']}
+    hook_style = random.choice(HOOK_STYLES)
+    prompt = f"""Write a LinkedIn post about: {topic['prompt']}
 Angle: {topic.get('angle', 'practical engineering insights')}
-Hook: {hook}
-Tone: {tone}
+Hook style: {hook_style}
 
-Generate post."""
-    return call_ai(prompt, system)
+Follow the MANDATORY STYLE EXAMPLE exactly.
+Requirements:
+- Third-person perspective only (No "I", "me", "my", "we", "you", "your").
+- Include a technical ASCII diagram or comparison table in ``` blocks.
+- Include a 🟦🟩🟨🟥 flow diagram.
+- 280-380 words.
+- No fluff. Focus on depth.
+"""
+    return call_ai(prompt, _pick_post_system())
 
 def get_post_mode():
     return "tech_news" if random.random() < 0.3 else "topic"

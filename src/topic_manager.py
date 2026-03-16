@@ -34,9 +34,9 @@ TOPICS = [
         "id": "ai-agents-2026",
         "name": "AI Agents in 2026",
         "category": "AI",
-        "prompt": "The state of autonomous AI agents heading into 2026 — Agentic frameworks like LangGraph, AutoGen v2, and CrewAI, MCP protocol adoption, multi-agent orchestration, and how agent reliability has evolved from research toy to production workload",
-        "angle": "What changed in 12 months: better planning, tool use, memory, and the real failure modes still unsolved",
-        "diagram_subject": "Multi-Agent System Architecture 2026: orchestrator, planner, sub-agents, MCP tool servers, memory store, human-in-the-loop",
+        "prompt": "The state of autonomous AI agents in 2026 — why simple chains failed and why LangGraph-style state machines won. Adopting the MCP protocol for tool use, and why human-in-the-loop is still the only way to achieve 99% reliability.",
+        "angle": "Stop building simple agents. If your agent doesn't have a state machine and persistent memory, it's just a fancy script. Here is what 2026 engineering looks like.",
+        "diagram_subject": "Modern Agentic Architecture: LangGraph nodes, state transitions, MCP tool servers, and human-in-the-loop validation gate",
         "diagram_type": "Architecture Diagram",
         "emoji": "🤖",
     },
@@ -180,6 +180,16 @@ TOPICS = [
         "diagram_type": "Architecture Diagram",
         "emoji": "🌊",
     },
+    {
+        "id": "data-evolution",
+        "name": "Data Architecture Evolution",
+        "category": "Data",
+        "prompt": "The evolution of data architecture into the 3-tier model (Sources -> Lakehouse -> Consumers) and why it's the industry standard.",
+        "angle": "Why the lakehouse paradigm solves the problems of both data lakes and warehouses.",
+        "diagram_subject": "3-Tier Data Architecture: Sources, Data Platform, and Consumers",
+        "diagram_type": "Architecture Diagram",
+        "emoji": "📊",
+    },
 ]
 
 
@@ -203,7 +213,9 @@ class TopicManager:
 
     def _save_history(self):
         with open(HISTORY_FILE, "w") as f:
-            json.dump(list(self.history)[-50:], f, indent=2)
+            # Save last 50 entries
+            history_list = list(self.history)
+            json.dump(history_list[-50:], f, indent=2)
 
     def _load_topics(self):
         """Merge hardcoded TOPICS with topics_config.json overrides from the dashboard."""

@@ -946,6 +946,61 @@ def _style_card_grid(topic_id, topic_name, C):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 8 — 3-TIER DATA EVOLUTION
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_data_evolution(topic_id, topic_name, C):
+    W, H = 900, 580
+    accent = C[0]
+    bg_top = lighten(accent, 0.90)
+    bg_bot = lighten(accent, 0.95)
+
+    svg = ""
+    # Tiers setup
+    tiers = [
+        ("Data Sources",    ["APIs & SaaS", "Databases (CDC)", "IoT / Streaming", "Logs & Events"], C[1]),
+        ("Data Lakehouse",  ["Ingestion Layer", "Storage (Iceberg)", "Processing (Spark)", "Serving Engine"], C[0]),
+        ("Data Consumers",  ["BI Dashboards", "ML / AI Models", "Data Apps", "Reverse ETL"], C[2])
+    ]
+
+    # Draw the main flow arrows in background
+    svg += f'<path d="M 230 {H//2} L 310 {H//2}" fill="none" stroke="{C[1]}" stroke-width="3" stroke-dasharray="8 4" class="flow"/>'
+    svg += f'<polygon points="310,{H//2} 300,{H//2-6} 300,{H//2+6}" fill="{C[1]}" class="pu"/>'
+    svg += f'<path d="M 590 {H//2} L 670 {H//2}" fill="none" stroke="{C[0]}" stroke-width="3" stroke-dasharray="8 4" class="flow"/>'
+    svg += f'<polygon points="670,{H//2} 660,{H//2-6} 660,{H//2+6}" fill="{C[0]}" class="pu"/>'
+
+    x_offsets = [40, 320, 680]
+    widths = [180, 260, 180]
+
+    for ti, (title, items, col) in enumerate(tiers):
+        tx = x_offsets[ti]
+        tw = widths[ti]
+        th = 400
+        ty = 90
+        delay = f"animation-delay:{ti*0.1:.2f}s"
+        
+        # Tier background
+        svg += f'<rect x="{tx}" y="{ty}" width="{tw}" height="{th}" rx="12" fill="{lighten(col, 0.85)}" stroke="{lighten(col, 0.4)}" stroke-width="1.5" class="fi" style="{delay}"/>'
+        
+        # Tier header
+        svg += f'<rect x="{tx}" y="{ty}" width="{tw}" height="36" rx="12" fill="{col}"/>'
+        svg += f'<rect x="{tx}" y="{ty+20}" width="{tw}" height="16" fill="{col}"/>'
+        svg += f'<text x="{tx+tw//2}" y="{ty+22}" text-anchor="middle" fill="white" font-size="12" font-weight="800" letter-spacing="0.5">{xe(title.upper())}</text>'
+        
+        # Items
+        n_items = len(items)
+        ih = (th - 60) // n_items - 12
+        for ii, item in enumerate(items):
+            iy = ty + 50 + ii * (ih + 12)
+            icol = C[(ti + ii + 1) % len(C)]
+            idelay = f"animation-delay:{ti*0.1 + ii*0.05 + 0.1:.2f}s"
+            svg += f'<rect x="{tx+16}" y="{iy}" width="{tw-32}" height="{ih}" rx="8" fill="white" stroke="{lighten(icol, 0.3)}" stroke-width="1.5" class="fi" style="{idelay}"/>'
+            svg += f'<circle cx="{tx+32}" cy="{iy+ih//2}" r="6" fill="{icol}" class="pu"/>'
+            svg += f'<text x="{tx+46}" y="{iy+ih//2+4}" fill="{darken(icol, 0.1)}" font-size="10" font-weight="700">{xe(item)}</text>'
+
+    return _wrap(svg, W, H, topic_name, "3-Tier Data Architecture", accent, bg_top, bg_bot)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  DISPATCH — pick style per topic (override map + hash fallback)
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -958,6 +1013,7 @@ STYLES = [
     _style_comparison,      # 5 — side-by-side matrix
     _style_orbit,           # 6 — central hub + inner + outer rings
     _style_card_grid,       # 7 — grouped card layout
+    _style_data_evolution,  # 8 — 3-tier data evolution
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -977,6 +1033,7 @@ TOPIC_STYLE_OVERRIDES = {
     "devsecops":         0,   # vertical flow — shift-left pipeline
     "data-lakehouse":    2,   # pyramid — medallion architecture layers
     "kafka-streaming":   5,   # comparison — vs other brokers
+    "data-evolution":    8,   # 3-tier data evolution
 }
 
 
