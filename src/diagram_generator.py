@@ -1001,8 +1001,207 @@ def _style_data_evolution(topic_id, topic_name, C):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 9 — HORIZONTAL TREE
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_horizontal_tree(topic_id, topic_name, C):
+    W, H = 900, 640
+    accent = C[0]
+    bg_top = lighten(accent, 0.92)
+    bg_bot = lighten(accent, 0.96)
+
+    TREE_DATA = {
+        "ml-algorithms": {
+            "root": "Machine Learning",
+            "branches": [
+                ("Supervised", [
+                    ("Classification", ["Naïve Bayes", "Logistic Reg.", "KNN", "Random Forest", "SVM"]),
+                    ("Regression", ["Decision Tree", "Linear Reg.", "Lasso Reg."])
+                ]),
+                ("Unsupervised", [
+                    ("Clustering", ["K-Means", "DBSCAN", "PCA"]),
+                    ("Association", ["Apriori", "FP-Growth"]),
+                    ("Anomaly", ["Isolation Forest"])
+                ]),
+                ("Reinforcement", [
+                    ("Model-Free", ["Q-Learning", "Policy Opt."]),
+                    ("Model-Based", ["Learn Model", "Given Model"])
+                ])
+            ]
+        }
+    }
+    tid = topic_id.lower()
+    tree = TREE_DATA.get(tid)
+    if not tree:
+        tree = TREE_DATA["ml-algorithms"]
+
+    svg = ""
+    # We have 4 levels: root(L0), branches(L1), sub-branches(L2), leaves(L3)
+    # x-coordinates for each level
+    X0, X1, X2, X3 = 30, 240, 450, 680
+    Y_start = 80
+    Y_avail = H - Y_start - 40
+
+    root_name = tree["root"]
+    branches = tree["branches"]
+
+    # Calculate total leaves to distribute vertical space
+    total_leaves = sum(sum(len(sub[1]) for sub in b[1]) for b in branches)
+    leaf_h = Y_avail / max(total_leaves, 1)
+
+    cy_root = Y_start + Y_avail / 2
+
+    # Draw Root Node
+    rw, rh = 140, 36
+    svg += f'<rect x="{X0}" y="{cy_root-rh/2}" width="{rw}" height="{rh}" rx="8" fill="{C[0]}" class="fi"/>'
+    svg += f'<text x="{X0+rw/2}" y="{cy_root+5}" text-anchor="middle" fill="white" font-size="12" font-weight="800">{xe(root_name)}</text>'
+
+    current_leaf_y = Y_start + leaf_h / 2
+
+    for b_idx, (b_name, sub_branches) in enumerate(branches):
+        b_col = C[(b_idx + 1) % len(C)]
+        
+        # Calculate branch Y center based on its leaves
+        b_leaves = sum(len(sub[1]) for sub in sub_branches)
+        b_cy = current_leaf_y + (b_leaves * leaf_h) / 2 - leaf_h / 2
+
+        # Curve from Root to Branch
+        svg += f'<path d="M {X0+rw} {cy_root} C {X0+rw+40} {cy_root}, {X1-40} {b_cy}, {X1} {b_cy}" fill="none" stroke="{b_col}" stroke-width="2" class="flow" style="animation-delay:{b_idx*0.1:.2f}s"/>'
+        
+        # Draw Branch Node
+        bw, bh = 120, 30
+        svg += f'<rect x="{X1}" y="{b_cy-bh/2}" width="{bw}" height="{bh}" rx="6" fill="{lighten(b_col,0.7)}" stroke="{b_col}" stroke-width="1.5" class="fi" style="animation-delay:{b_idx*0.15:.2f}s"/>'
+        svg += f'<text x="{X1+bw/2}" y="{b_cy+4}" text-anchor="middle" fill="{darken(b_col,0.2)}" font-size="11" font-weight="700">{xe(b_name)}</text>'
+
+        for sb_idx, (sb_name, leaves) in enumerate(sub_branches):
+            sb_leaves = len(leaves)
+            sb_cy = current_leaf_y + (sb_leaves * leaf_h) / 2 - leaf_h / 2
+
+            # Curve from Branch to Sub-branch
+            svg += f'<path d="M {X1+bw} {b_cy} C {X1+bw+30} {b_cy}, {X2-30} {sb_cy}, {X2} {sb_cy}" fill="none" stroke="{b_col}" stroke-width="1.5" stroke-dasharray="4 2"/>'
+            
+            # Draw Sub-branch Node
+            sbw, sbh = 110, 26
+            svg += f'<rect x="{X2}" y="{sb_cy-sbh/2}" width="{sbw}" height="{sbh}" rx="6" fill="{lighten(b_col,0.4)}" stroke="{b_col}" stroke-width="1" class="fi" style="animation-delay:{b_idx*0.15 + sb_idx*0.05:.2f}s"/>'
+            svg += f'<text x="{X2+sbw/2}" y="{sb_cy+4}" text-anchor="middle" fill="{darken(b_col,0.4)}" font-size="10" font-weight="600">{xe(sb_name)}</text>'
+
+            for l_idx, leaf_name in enumerate(leaves):
+                l_cy = current_leaf_y
+                
+                # Curve from Sub-branch to Leaf
+                svg += f'<path d="M {X2+sbw} {sb_cy} C {X2+sbw+20} {sb_cy}, {X3-20} {l_cy}, {X3} {l_cy}" fill="none" stroke="{lighten(b_col,0.2)}" stroke-width="1" class="flow"/>'
+                
+                # Draw Leaf Node
+                lw, lh = 170, 22
+                svg += f'<rect x="{X3}" y="{l_cy-lh/2}" width="{lw}" height="{lh}" rx="4" fill="{lighten(b_col,0.85)}" stroke="{lighten(b_col,0.2)}" stroke-width="1" class="fi" style="animation-delay:{b_idx*0.15 + sb_idx*0.05 + l_idx*0.02:.2f}s"/>'
+                svg += f'<text x="{X3+10}" y="{l_cy+3}" text-anchor="start" fill="{darken(b_col,0.3)}" font-size="9.5" font-weight="600">{xe(leaf_name)}</text>'
+                
+                current_leaf_y += leaf_h
+
+    return _wrap(svg, W, H, topic_name, "Algorithm Taxonomy", accent, bg_top, bg_bot)
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 10 — LAYERED HORIZONTAL FLOW
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_layered_flow(topic_id, topic_name, C):
+    W, H = 900, 720
+    accent = C[0]
+    bg_top = lighten(accent, 0.94)
+    bg_bot = lighten(accent, 0.98)
+
+    LAYERS_DATA = {
+        "ai-disciplines": [
+            ("Artificial\nIntelligence", "Neural Network\nComputer Vision\nNLP", C[0]),
+            ("Machine\nLearning", "Unsupervised\nSupervised\nReinforcement", C[1]),
+            ("Deep\nLearning", "[IMAGE] -> [Hidden Layers] -> [Prediction]", C[2]),
+            ("Generative\nAI", "[User] -> [LLM + Tools] -> [Output]", C[3]),
+            ("RAG\nSystems", "[User] -> [Retriever] -> [Augment] -> [Generator]", C[4]),
+            ("AI\nAgents", "[User] -> [Agent Loop (Brain+Memory+Tools)]", C[5])
+        ]
+    }
+    
+    tid = topic_id.lower()
+    layers = LAYERS_DATA.get(tid)
+    if not layers:
+        layers = LAYERS_DATA["ai-disciplines"]
+
+    svg = ""
+    n_layers = len(layers)
+    pad = 20
+    avail_h = H - 100
+    lh = avail_h // n_layers - 12
+    ly = 70
+
+    for i, (title, content, col) in enumerate(layers):
+        delay = f"animation-delay:{i*0.1:.2f}s"
+        
+        # Lane Background
+        svg += f'<rect x="{pad}" y="{ly}" width="{W-pad*2}" height="{lh}" rx="12" fill="{lighten(col, 0.90)}" stroke="{lighten(col, 0.6)}" stroke-width="1.5" class="fi" style="{delay}"/>'
+        
+        # Left Title Block
+        title_w = 140
+        svg += f'<rect x="{pad}" y="{ly}" width="{title_w}" height="{lh}" rx="12" fill="{lighten(col,0.1)}"/>'
+        # Fix corners to connect seamlessly
+        svg += f'<rect x="{pad+title_w-15}" y="{ly}" width="15" height="{lh}" fill="{lighten(col,0.1)}"/>'
+        svg += f'<line x1="{pad+title_w}" y1="{ly}" x2="{pad+title_w}" y2="{ly+lh}" stroke="{col}" stroke-width="3"/>'
+        
+        cy = ly + lh/2
+        
+        # Draw Icon Placeholder
+        svg += f'<circle cx="{pad+title_w/2}" cy="{cy-12}" r="16" fill="white" opacity="0.2"/>'
+        svg += f'<text x="{pad+title_w/2}" y="{cy-8}" text-anchor="middle" fill="white" font-size="14">⚙️</text>'
+        
+        t_lines = title.split('\n')
+        for ti, tln in enumerate(t_lines):
+            svg += f'<text x="{pad+title_w/2}" y="{cy+14+ti*14}" text-anchor="middle" fill="white" font-size="12" font-weight="800">{xe(tln)}</text>'
+
+        # Right Content Area (Simplified abstract representations based on the string hint)
+        cx_start = pad + title_w + 30
+        avail_w = W - pad*2 - title_w - 60
+        
+        svg += f'<g class="fi" style="animation-delay:{i*0.1+0.2:.2f}s">'
+        
+        # Super simplified parsing of the content string to render visual blocks
+        if "->" in content:
+            # Flow sequence
+            steps = [s.strip(" []") for s in content.split("->")]
+            step_w = min(130, avail_w // len(steps) - 30)
+            step_spacing = avail_w // len(steps)
+            
+            for si, step in enumerate(steps):
+                sx = cx_start + si * step_spacing
+                if si < len(steps) - 1:
+                    nx = cx_start + (si+1) * step_spacing
+                    svg += f'<line x1="{sx+step_w}" y1="{cy}" x2="{nx}" y2="{cy}" stroke="{col}" stroke-width="2" class="flow"/>'
+                    svg += f'<polygon points="{nx},{cy} {nx-6},{cy-4} {nx-6},{cy+4}" fill="{col}" class="pu"/>'
+                
+                svg += f'<rect x="{sx}" y="{cy-18}" width="{step_w}" height="36" rx="6" fill="white" stroke="{col}" stroke-width="1.5"/>'
+                svg += f'<text x="{sx+step_w/2}" y="{cy+4}" text-anchor="middle" fill="{darken(col,0.2)}" font-size="10" font-weight="700">{xe(clamp(step,18))}</text>'
+
+        else:
+            # Bulleted clustering
+            bullets = content.split('\n')
+            bw = 140
+            spacing = avail_w // max(len(bullets), 1)
+            for bi, bull in enumerate(bullets):
+                bx = cx_start + bi * spacing
+                svg += f'<rect x="{bx}" y="{cy-14}" width="{bw}" height="28" rx="14" fill="white" stroke="{lighten(col,0.3)}" stroke-width="1.5"/>'
+                svg += f'<circle cx="{bx+14}" cy="{cy}" r="4" fill="{col}"/>'
+                svg += f'<text x="{bx+26}" y="{cy+4}" fill="{darken(col,0.4)}" font-size="10" font-weight="600">{xe(bull)}</text>'
+                
+                # Draw connecting abstract lines to center title to simulate the image
+                if i < 2:  # For AI and ML
+                    ly_target = cy - 40 + bi*40
+                    svg += f'<path d="M {pad+title_w+10} {cy} C {pad+title_w+40} {cy}, {bx-20} {cy}, {bx} {cy}" fill="none" stroke="{lighten(col,0.5)}" stroke-width="1"/>'
+
+        svg += '</g>'
+        ly += lh + 12
+
+    return _wrap(svg, W, H, topic_name, "Conceptual Layers", accent, bg_top, bg_bot)
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  DISPATCH — pick style per topic (override map + hash fallback)
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 STYLES = [
     _style_vertical_flow,   # 0 — numbered pipeline steps
@@ -1014,6 +1213,8 @@ STYLES = [
     _style_orbit,           # 6 — central hub + inner + outer rings
     _style_card_grid,       # 7 — grouped card layout
     _style_data_evolution,  # 8 — 3-tier data evolution
+    _style_horizontal_tree, # 9 — horizontal tree branches
+    _style_layered_flow,    # 10 — layered horizontal flow
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -1034,6 +1235,8 @@ TOPIC_STYLE_OVERRIDES = {
     "data-lakehouse":    2,   # pyramid — medallion architecture layers
     "kafka-streaming":   5,   # comparison — vs other brokers
     "data-evolution":    8,   # 3-tier data evolution
+    "ml-algorithms":     9,   # horizontal tree
+    "ai-disciplines":    10,  # layered horizontal flow
 }
 
 

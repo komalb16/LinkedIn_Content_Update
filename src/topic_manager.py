@@ -190,6 +190,26 @@ TOPICS = [
         "diagram_type": "Architecture Diagram",
         "emoji": "📊",
     },
+    {
+        "id": "ml-algorithms",
+        "name": "Machine Learning Algorithms",
+        "category": "Data Science",
+        "prompt": "The taxonomy of Machine Learning algorithms every data scientist must know: Supervised, Unsupervised, and Reinforcement Learning.",
+        "angle": "A structured breakdown of when to use which ML algorithm to solve real-world problems.",
+        "diagram_subject": "Machine Learning Algorithms taxonomy tree: supervised, unsupervised, reinforcement",
+        "diagram_type": "Taxonomy Tree",
+        "emoji": "🌲",
+    },
+    {
+        "id": "ai-disciplines",
+        "name": "Comparing Major AI Disciplines",
+        "category": "AI",
+        "prompt": "Comparing the major AI disciplines: Artificial Intelligence vs Machine Learning vs Deep Learning vs Generative AI vs RAG vs AI Agents.",
+        "angle": "Clearing up the buzzwords. How the progression of AI technologies stack upon each other.",
+        "diagram_subject": "AI Disciplines layered comparison flow: AI -> ML -> DL -> GenAI -> RAG -> Agents",
+        "diagram_type": "Conceptual Layers",
+        "emoji": "🧠",
+    },
 ]
 
 
