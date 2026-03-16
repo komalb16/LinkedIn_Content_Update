@@ -1537,6 +1537,95 @@ def _style_winding_roadmap(topic_id, topic_name, C):
 
     return _wrap(svg, W, H, topic_name, "Step-by-Step Learning Guide", accent, bg_top, bg_bot)
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 15 — VERTICAL TIMELINE
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_vertical_timeline(topic_id, topic_name, C):
+    W, H = 1000, 1100
+    accent = C[0]
+    bg_top = lighten(accent, 0.96)
+    bg_bot = lighten(accent, 0.98)
+
+    svg = ""
+    
+    # Roadmap Steps (Title, subtitle, array of points). The layout from image: L, R, R, L, R, L, R, R
+    STEPS = [
+        ("1. What is Generative AI", "AI -> ML -> DL -> GenAI", ["Learn how models generate data", "Clarity saves months later"], "L"),
+        ("2. Important Concepts", "Math Foundations", ["Probability & Stats", "Linear Algebra", "Calculus basics"], "R"),
+        ("3. Foundation Models", "Get Hands-on", ["GPT, Llama, Gemini, Claude", "Understand training & usage"], "R"),
+        ("4. GenAI Dev Stack", "Practical Tools", ["Python, LangChain", "Vector DBs, Hugging Face"], "L"),
+        ("5. Training a Foundation Model", "The Lifecycle", ["Dataset -> Tokenization", "Training -> Eval -> Deploy"], "R"),
+        ("6. Building AI Agents", "The Future is Agentic", ["Memory & Tool usage", "Autonomy + Human control"], "L"),
+        ("7. GenAI Models for Computer Vision", "Text is just the start", ["GANs & Image Gen", "Vision + Language leap"], "R"),
+        ("8. GenAI Learning Resources", "Build. Ship. Iterate.", ["DeepLearning.AI, Kaggle", "Google Labs, Nvidia"], "R")
+    ]
+    
+    # Path coordinates
+    cx = W/2
+    y_start = 80
+    y_step = 120
+    
+    # Main vertical dashed path
+    svg += f'<line x1="{cx}" y1="{y_start-20}" x2="{cx}" y2="{H-50}" stroke="gray" stroke-width="8" class="flow" stroke-linecap="round"/>'
+    svg += f'<line x1="{cx}" y1="{y_start-20}" x2="{cx}" y2="{H-50}" stroke="white" stroke-width="2" stroke-dasharray="12 12" stroke-linecap="round"/>'
+
+    for i, (title, sub, bullets, side) in enumerate(STEPS):
+        col = C[i % len(C)]
+        cy = y_start + i * y_step
+        
+        # Determine Card position based on prescribed side
+        is_left = (side == "L")
+        card_w = 400
+        card_h = 100
+        
+        if is_left:
+            card_x = cx - card_w - 60
+            # Connector dashed arrow
+            svg += f'<path d="M {cx-10} {cy} L {card_x+card_w} {cy}" stroke="gray" stroke-width="3" stroke-dasharray="5 5" fill="none" class="flow"/>'
+            svg += f'<polygon points="{card_x+card_w+5},{cy} {card_x+card_w-5},{cy-5} {card_x+card_w-5},{cy+5}" fill="gray"/>'
+        else:
+            card_x = cx + 60
+            # Connector dashed arrow from timeline to card
+            svg += f'<path d="M {cx+10} {cy} L {card_x} {cy}" stroke="gray" stroke-width="3" stroke-dasharray="5 5" fill="none" class="flow"/>'
+            svg += f'<polygon points="{card_x-5},{cy} {card_x+5},{cy-5} {card_x+5},{cy+5}" fill="gray"/>'
+            
+        card_y = cy - card_h/2
+        
+        # Draw dotted background box
+        svg += f'<rect x="{card_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="12" fill="white" stroke="{col}" stroke-width="3" stroke-dasharray="10 5" class="box-sd" style="animation-delay:{i*0.1:.2f}s"/>'
+        
+        # Header Badge
+        header_w = 280
+        hx = card_x + card_w/2 - header_w/2
+        hy = card_y - 12
+        svg += f'<rect x="{hx}" y="{hy}" width="{header_w}" height="24" rx="12" fill="{col}"/>'
+        svg += f'<circle cx="{hx}" cy="{hy+12}" r="16" fill="{darken(col,0.3)}"/>'
+        svg += f'<text x="{hx}" y="{hy+18}" text-anchor="middle" fill="white" font-size="16" font-weight="900">{i+1}</text>'
+        
+        # Render title properly inside badge
+        parts = title.split(" ", 1)
+        tit_text = parts[1] if len(parts) > 1 else title
+        svg += f'<text x="{hx+25}" y="{hy+16}" text-anchor="start" fill="white" font-size="12" font-weight="800">{xe(tit_text)}</text>'
+        
+        # Subtitle and Info
+        svg += f'<text x="{card_x+card_w/2}" y="{card_y+35}" text-anchor="middle" font-size="12" font-weight="800" fill="{darken(col,0.4)}">{xe(sub)}</text>'
+        
+        # Content elements
+        box_w = 160
+        left_bx = card_x + 20
+        right_bx = card_x + card_w - box_w - 20
+        
+        # Left internal box
+        svg += f'<rect x="{left_bx}" y="{card_y+50}" width="{box_w}" height="35" rx="6" fill="{lighten(col, 0.9)}"/>'
+        svg += f'<text x="{left_bx+box_w/2}" y="{card_y+72}" text-anchor="middle" font-size="10" fill="gray" font-weight="600">{xe(bullets[0])}</text>'
+        
+        # Right internal box 
+        if len(bullets) > 1:
+            svg += f'<rect x="{right_bx}" y="{card_y+50}" width="{box_w}" height="35" rx="6" fill="{lighten(col, 0.95)}"/>'
+            svg += f'<text x="{right_bx+box_w/2}" y="{card_y+72}" text-anchor="middle" font-size="10" fill="gray" font-weight="600">{xe(bullets[1])}</text>'
+
+    return _wrap(svg, W, H, topic_name, "Concept & Tool Overview Strategy", accent, bg_top, bg_bot)
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  DISPATCH — pick style per topic (override map + hash fallback)
@@ -1559,6 +1648,7 @@ STYLES = [
     _style_honeycomb_map,   # 12 — honeycomb hex core with remote cards
     _style_parallel_pipelines, # 13 — parallel vertical sequences
     _style_winding_roadmap, # 14 - winding path with alternating nodes
+    _style_vertical_timeline, # 15 - central static vertical dashed line
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -1584,7 +1674,7 @@ TOPIC_STYLE_OVERRIDES = {
     "rag-stack":         11,  # ecosystem tree
     "ai-skills-map":     12,  # honeycomb map
     "llm-vs-agentic":    13,  # parallel pipelines
-    "genai-roadmap":     14,  # winding roadmap
+    "genai-roadmap":     15,  # vertical dashed timeline (overriding winding 14)
 }
 
 
