@@ -49,22 +49,13 @@ HOOK_STYLES = [
     "Start with a counterintuitive insight that makes people angry or intrigued.",
     "Start with: 'Stop doing [common practice]. Here is why.'",
     "Start with a shocking or surprising metric/statistic that defies logic.",
-    "Start with a relatable frustration that most engineers have experienced.",
-    "Start with an observation from a real production incident or code review.",
-    "Start with 'Here is something nobody warned me about when I started...'",
-    "Start with a surprising comparison between two unrelated things."
 ]
 
-TONE_STYLES = [
-    "conversational and friendly, like chatting with a colleague over coffee",
-    "reflective and thoughtful, sharing hard-won wisdom",
-    "slightly humorous and self-deprecating, keeping it real",
-    "authoritative but approachable, like a senior mentor",
-    "storytelling mode — weave the insight into a brief narrative",
-]
+# ── WORD LIMIT NOTE ──────────────────────────────────────────────────────────
+# LinkedIn hard limit = 3000 chars ≈ 420 words.
+# Target 250-320 words so there is room for the prepended topic title.
+# Both POST_SYSTEM and prompts enforce this consistently.
 
-# ── FORMAT A: STRUCTURED ──────────────────────────────────────────────────────
-# ── POST SYSTEM (STAFF ENGINEER PERSONA) ─────────────────────────────────────
 POST_SYSTEM = """You are a highly opinionated Staff Engineer and tech leader.
 You write aggressive, viral, scroll-stopping LinkedIn posts that look exactly like the EXAMPLE below.
 Study the structure and reproduce it for every post.
@@ -121,24 +112,35 @@ User Request
 ```
 
 A well-designed cache can reduce latency by 90% and cut database load dramatically.
+But scaling further introduces complexity:
+• Database sharding → data distribution challenges
+• Query routing → consistency tradeoffs
+• Replication → eventual consistency risk
+
+💡 This is why engineers struggle with system design interviews.
+It's not about memorizing architectures.
+It's about understanding trade-offs, constraints, and how systems evolve.
 
 💬 What's the most overlooked system design principle in real-world systems?
 
-#SystemDesign #Architecture #SoftwareEngineering #TechArchitecture #DistributedSystems
+#SystemDesign #DistributedSystems #Scalability #SoftwareEngineering #TechArchitecture
 
 ═══════════════ END EXAMPLE ═══════════════
 
-WRITING PRINCIPLES:
-1. PERSONA: You are Komal Batra. You speak from experience, not theory. You are authoritative and aggressive.
-2. NO FLUFF: Zero "corporate speak". No "In today's ever-evolving landscape". Start with the point.
-3. STRUCTURE: Use a clear 1., 2., 3. breakdown with specific emojis: 🚀 1., 🤔 2., ⚡ 3.
-4. VISUALS: You MUST include at least one ASCII/Emoji diagram or comparison table inside the post content.
-5. BANNED WORDS: "robust", "crucial", "delve", "landscape", "realm", "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented", "game-changer", "leverage", "navigating", "holistic", "buckle up", "magic".
-6. PERSPECTIVE: Third-person perspective only. No "I", "me", "my", "we", "you", "your".
-7. LENGTH: 280-380 words. Frequent line breaks (1-3 sentences max per paragraph).
+RULES (non-negotiable):
+- ALWAYS use ``` fenced blocks for tables, flow diagrams, and ASCII art
+- ALWAYS use 🟦🟩🟨🟥 emoji squares in flow diagrams with │ and ▼ connectors
+- ALWAYS use numbered sections with emoji prefix (🚀 1., 🤔 2., ⚡ 3.)
+- ALWAYS end with 💬 + engagement question + blank line + 5-7 hashtags
+- STRICT LENGTH: 280-380 words. No more.
+- Every paragraph is 1-3 sentences max. Frequent line breaks.
+- Third-person perspective only. No "I", "me", "my", "we", "you", "your"
+- Never reference current month or year
+- No banned words: "robust", "crucial", "delve", "landscape", "testament", "realm",
+  "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented"
+- Do NOT add any copyright or signature
 """
 
-# ── NEWS SYSTEM ───────────────────────────────────────────────────────────────
 NEWS_SYSTEM = """You are a highly opinionated Staff Engineer and tech leader.
 You write aggressive, viral LinkedIn posts reacting to breaking tech news.
 Study this EXAMPLE and reproduce its exact structure:
@@ -166,6 +168,7 @@ Previous metric  →   New metric
 The real shift:
 • [Implication 1 for engineers]
 • [Implication 2 for the industry]
+• [Implication 3 for the future]
 
 ⚡ 3. What smart engineers should do right now.
 [Concrete, specific action. One tool, one technique, one decision.]
@@ -181,255 +184,364 @@ The real shift:
 ```
 
 💡 The bottom line: [One brutal, confident take.]
+[One more punchy sentence.]
 
 💬 [Engagement question about the news]?
 
-#TechNews #Architecture #SoftwareEngineering #TechTrends
+#[Relevant] #[Hashtags] #[Here] #[5to7] #[Total]
 
 ═══════════════ END EXAMPLE ═══════════════
 
-WRITING PRINCIPLES:
-- ALWAYS use ``` fenced blocks for tables, comparisons, and flow diagrams.
-- ALWAYS use 🟦🟩🟨🟥 in flow diagrams with │ and ▼ connectors.
-- Use 🚀 1., 🤔 2., ⚡ 3. headers.
-- STRICT LENGTH: 280-380 words max.
-- Be strongly opinionated — pick a side and defend it.
-- Third-person only. No "I", "me", "my", "we", "you", "your".
-- No banned words (same as POST_SYSTEM).
+RULES (non-negotiable):
+- ALWAYS use ``` fenced blocks for tables, comparisons, and flow diagrams
+- ALWAYS use 🟦🟩🟨🟥 in flow diagrams with │ and ▼ connectors
+- ALWAYS use numbered sections with emoji prefix
+- ALWAYS end with 💬 + question + hashtags
+- Be strongly opinionated — pick a side and defend it
+- STRICT LENGTH: 280-380 words max
+- Third-person only. No "I", "me", "my", "we", "you", "your"
+- Never reference current month or year
+- No banned words: "robust", "crucial", "delve", "landscape", "testament", "realm",
+  "ever-evolving", "foster", "tapestry", "seamless", "synergy", "paradigm", "unprecedented"
+- Do NOT add any copyright or signature
 """
 
-def _pick_post_system():
-    return POST_SYSTEM
+# DIAGRAM_SYSTEM removed — diagrams are generated locally by DiagramGenerator.
+# No LLM call is needed for diagram generation.
 
-# ── DIAGRAM SOURCING ─────────────────────────────────────────────────────────
-
-# Golden Seed URLs for common technical topics (ByteByteGo style)
-DIAGRAM_LIBRARY = {
-    "system design": "https://assets.bytebytego.com/diagrams/0324-system-design-blueprint.png",
-    "microservices": "https://assets.bytebytego.com/diagrams/0396-typical-microservice-architecture.png",
-    "api gateway": "https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fa5d572a6-c679-43d9-affa-54cc711a4b75_2250x2504.png",
-    "load balancer": "https://assets.bytebytego.com/diagrams/0324-system-design-blueprint.png",
-    "caching": "https://assets.bytebytego.com/diagrams/0324-system-design-blueprint.png",
-    "azure": "https://assets.bytebytego.com/diagrams/0324-system-design-blueprint.png",
-    "data engineering": "https://assets.bytebytego.com/diagrams/0324-system-design-blueprint.png",
-    "architecture": "https://assets.bytebytego.com/diagrams/0324-system-design-blueprint.png"
-}
-
-def find_online_diagram(query):
-    """Search online or library for a high quality diagram."""
-    query_lower = query.lower()
-    
-    # Avoid explicitly branded searches if not requested
-    if "bytebytego" in query_lower:
-        log.info(f"Targeting ByteByteGo diagram for: {query}")
-    else:
-        log.info(f"Sourcing generic online diagram for: {query}")
-
-    for keyword, url in DIAGRAM_LIBRARY.items():
-        if keyword in query_lower:
-            log.info(f"Matched seed library: {keyword}")
-            return url
-    return None
-
-def download_image(url, topic_id):
-    """Download image to a local file."""
-    try:
-        ext = ".png" if ".png" in url.lower() else ".jpg"
-        path = f"assets/external_diagrams/{topic_id}{ext}"
-        os.makedirs("assets/external_diagrams", exist_ok=True)
-        resp = requests.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
-        if resp.status_code == 200:
-            with open(path, "wb") as f:
-                f.write(resp.content)
-            return path
-    except Exception as e:
-        log.warning(f"Failed download: {e}")
-    return None
-
-# ── CORE FUNCTIONS ────────────────────────────────────────────────────────────
 
 def call_ai(prompt, system):
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         raise ValueError("GROQ_API_KEY secret not set")
-    headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
+    headers = {
+        "Authorization": "Bearer " + api_key,
+        "Content-Type": "application/json"
+    }
     payload = {
         "model": MODEL,
-        "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-        "max_tokens": 1024,
-        "temperature": 0.92
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": 1024,   # 250-320 words ≈ 400-500 tokens; 1024 is plenty
+        "temperature": 0.85
     }
     resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=30)
+    if resp.status_code != 200:
+        log.error("Groq error: " + resp.text)
     resp.raise_for_status()
-    raw = resp.json()["choices"][0]["message"]["content"].strip()
-    
-    # Robust JSON extraction via regex
-    try:
-        match = re.search(r'\{.*\}', raw, re.DOTALL)
-        if match:
-            json_str = match.group(0)
-            return json.loads(json_str)
-        return json.loads(raw)
-    except Exception as e:
-        log.warning(f"Failed JSON extraction/parse: {e}")
-        # Clean up potential markdown artifacts if raw is used
-        clean_post = re.sub(r'^```json\s*|\s*```$', '', raw, flags=re.MULTILINE).strip()
-        if clean_post.startswith('{'):
-             try: return json.loads(clean_post)
-             except: pass
-        return {"post": clean_post, "diagram_query": "technical diagram", "hook_variation": "Check this out!"}
+    # Robust JSON extraction via regex no longer needed since we are not enforcing JSON responses
+    return resp.json()["choices"][0]["message"]["content"].strip()
+
 
 def fetch_rss_news(category="tech", max_items=5):
-    articles = []
+    """Fetch latest news from RSS feeds."""
     feeds = RSS_FEEDS.get(category, RSS_FEEDS["tech"])
+    articles = []
     for feed_url in feeds:
         try:
             resp = requests.get(feed_url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-            if resp.status_code != 200: continue
+            if resp.status_code != 200:
+                continue
             root = ET.fromstring(resp.content)
-            items = list(root.findall(".//item"))
-            for i, item in enumerate(items):
-                if i >= max_items: break
+            items = root.findall(".//item")
+            for item in items[:max_items]:
                 title = item.findtext("title", "").strip()
-                desc = re.sub(r'<[^>]+>', '', item.findtext("description", ""))[:300]
-                if title: articles.append({"title": title, "description": desc, "topic_id": "news"})
-            if len(articles) >= max_items: break
-        except: continue
-    return articles
+                desc = item.findtext("description", "").strip()
+                link = item.findtext("link", "").strip()
+                pub_date = item.findtext("pubDate", "").strip()
+                desc = re.sub(r'<[^>]+>', '', desc)[:300]
+                if title and len(title) > 10:
+                    articles.append({
+                        "title": title,
+                        "description": desc,
+                        "link": link,
+                        "date": pub_date,
+                    })
+            if len(articles) >= max_items:
+                break
+        except Exception as e:
+            log.warning("RSS fetch failed for " + feed_url + ": " + str(e))
+            continue
+    return articles[:max_items]
+
 
 def generate_news_post(news_type="ai"):
-    articles = fetch_rss_news(news_type)
-    if not articles: return None
-    # Pick top 3 for context
+    """Fetch latest news and generate a post about it."""
+    log.info("Fetching latest " + news_type + " news...")
+    articles = fetch_rss_news(news_type, max_items=5)
+
+    if not articles:
+        log.warning("No news fetched, falling back to topic post")
+        return None
+
     news_text = ""
-    for i, a in enumerate(articles):
-        if i >= 3: break
-        news_text += f"- {a['title']}\n"
-    
-    hook_style = random.choice(HOOK_STYLES)
-    prompt = f"{NEWS_SYSTEM}\n\nTOPIC: {articles[0]['title']}\nSUMMARY: {articles[0]['description']}\nHOOK STYLE: {hook_style}\n\nGenerate the viral post:"
+    for i, a in enumerate(articles[:3]):
+        news_text += f"\n{i+1}. {a['title']}\n   {a['description'][:200]}\n"
+
+    log.info("Fetched " + str(len(articles)) + " news articles")
+
+    hook = random.choice(HOOK_STYLES)
+    prompt = f"""Latest {news_type} tech news:
+{news_text}
+
+Hook style: {hook}
+
+Pick the most impactful story and write a LinkedIn post reacting to it.
+Follow the EXAMPLE structure from your system prompt exactly.
+Requirements:
+- Mention the actual company, product, or number from the news
+- Include a ``` fenced comparison/before-after table using → arrows
+- Include a ``` fenced flow diagram using 🟦🟩🟨🟥 with │ and ▼ connectors
+- 3 numbered sections with emoji headers
+- Strong, opinionated take — pick a side
+- 280-380 words total"""
+
     return call_ai(prompt, NEWS_SYSTEM)
 
-def generate_topic_post(topic):
-    log.info(f"Generating post for: {topic['name']}")
-    hook_style = random.choice(HOOK_STYLES)
-    prompt = f"""Write a LinkedIn post about: {topic['prompt']}
-Angle: {topic.get('angle', 'practical engineering insights')}
-Hook style: {hook_style}
 
-Follow the MANDATORY STYLE EXAMPLE exactly.
+def generate_topic_post(topic):
+    """Generate a post about a specific technical topic."""
+    log.info("Generating post: " + topic["name"])
+    hook = random.choice(HOOK_STYLES)
+    prompt = f"""Write a LinkedIn post about: {topic["prompt"]}
+Angle: {topic.get("angle", "practical insights")}
+
+Hook style: {hook}
+
 Requirements:
-- Third-person perspective only (No "I", "me", "my", "we", "you", "your").
-- Include a technical ASCII diagram or comparison table in ``` blocks.
-- Include a 🟦🟩🟨🟥 flow diagram.
-- 280-380 words.
-- No fluff. Focus on depth.
-"""
-    return call_ai(prompt, _pick_post_system())
+- Follow the EXAMPLE structure from your system prompt exactly
+- Include a ``` fenced flow diagram using 🟦🟩🟨🟥 squares with │ and ▼ connectors
+- Include a ``` fenced comparison table using → arrows
+- Use 3 numbered sections with emoji headers (🚀 1., 🤔 2., ⚡ 3.)
+- ONE specific real tool, metric, or example (e.g. "Redis cuts latency by 90%")
+- Do NOT mention the current month or year
+- 280-380 words total"""
+    return call_ai(prompt, POST_SYSTEM)
+
 
 def get_post_mode():
-    return "tech_news" if random.random() < 0.3 else "topic"
+    """Randomly decide what type of post to generate for variety."""
+    # 40% news posts, 60% technical topic posts
+    rand = random.random()
+    if rand < 0.15:
+        return "ai_news"
+    elif rand < 0.25:
+        return "layoff_news"
+    elif rand < 0.35:
+        return "tools_news"
+    elif rand < 0.40:
+        return "tech_news"
+    else:
+        return "topic"
+
 
 def write_github_output(key, value):
+    """Write key=value to GITHUB_OUTPUT for use in subsequent workflow steps."""
     gho = os.environ.get("GITHUB_OUTPUT")
-    if gho:
-        with open(gho, "a") as f: f.write(f"{key}={value}\n")
+    if not gho:
+        return
+    try:
+        with open(gho, "a") as f:
+            f.write(f"{key}={value}\n")
+    except Exception as e:
+        log.warning(f"Could not write GITHUB_OUTPUT: {e}")
 
-def write_github_summary(topic_name, mode, post_text, dry_run=False):
+
+def write_github_summary(topic_name, mode, post_preview, dry_run=False):
+    """Write job summary to GitHub Actions step summary file."""
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
-    if summary_file:
+    if not summary_file:
+        return
+    try:
+        preview = post_preview[:300].replace("\n", "\n> ") if post_preview else "—"
+        status  = "🧪 Dry Run" if dry_run else "✅ Published"
+        lines = [
+            f"## {status} — LinkedIn Post",
+            f"| Field | Value |",
+            f"|-------|-------|",
+            f"| **Topic** | {topic_name} |",
+            f"| **Mode** | {mode} |",
+            f"| **Dry Run** | {'Yes' if dry_run else 'No'} |",
+            f"",
+            f"### Post Preview",
+            f"> {preview}",
+        ]
         with open(summary_file, "a", encoding="utf-8") as f:
-            f.write(f"\n### {'🧪 Dry Run' if dry_run else '✅ Published'}: {topic_name}\nMode: {mode}\n\n```text\n{post_text}\n```\n")
+            f.write("\n".join(lines) + "\n")
+        log.info("GitHub step summary written")
+    except Exception as e:
+        log.warning(f"Could not write step summary: {e}")
+
 
 def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False):
-    log.info("Agent started (Komal Batra)")
+    log.info("=" * 60)
+    log.info("LinkedIn Agent — Komal Batra — " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    log.info("Mode: " + ("DRY RUN" if dry_run else "LIVE"))
+    log.info("=" * 60)
+
+    # ── CHECK SCHEDULE ────────────────────────────────────────────────────────
+    try:
+        from schedule_checker import check_and_wait
+        check_and_wait(dry_run=dry_run, manual=manual)
+    except SystemExit:
+        raise  # clean skip — propagate so GH Actions marks as success
+    except Exception as e:
+        log.warning(f"schedule_checker error (non-fatal, continuing): {e}")
+
     topic_mgr = TopicManager()
     diagram_gen = DiagramGenerator()
-    
-    # 1. Determine Mode & Generate
-    mode = force_news or get_post_mode()
-    data = None
+
+    if not dry_run:
+        from linkedin_poster import LinkedInPoster
+        poster = LinkedInPoster(
+            access_token=os.environ.get("LINKEDIN_ACCESS_TOKEN"),
+            person_urn=os.environ.get("LINKEDIN_PERSON_URN"),
+        )
+
+    post_text = None
     topic = None
 
-    if mode in ["ai_news", "layoff_news", "tools_news", "tech_news"]:
-        data = generate_news_post(mode.replace("_news", ""))
-        if not data: mode = "topic"
-
-    if mode == "topic" or not data:
-        topic = topic_mgr.get_topic(manual_topic_id) if manual_topic_id else topic_mgr.get_next_topic()
-        if topic:
-            data = generate_topic_post(topic)
-        else:
-            log.error("No topic found")
-            return
-
-    if not data:
-        log.error("Generation failed completely")
-        return
-
-    post_text = data.get("post", "No post generated")
-    diagram_query = data.get("diagram_query", topic["name"] if topic else "tech concept")
-
-    # 2. Diagram Logic
-    diagram_path = None
-    # Only try online sourcing 20% of the time to favor original generation
-    if diagram_query and random.random() < 0.20:
-        online_url = find_online_diagram(diagram_query)
-        if online_url:
-            diagram_path = download_image(online_url, topic.get("id", "news") if topic else "news")
-            if diagram_path: log.info(f"External diagram: {diagram_path}")
-
-    if not diagram_path:
-        log.info("Local SVG generation fallback")
-        d_type = topic_mgr.get_diagram_type_for_topic(topic) if topic else "vertical_flow"
-        diagram_path = diagram_gen.save_svg(None, topic.get("id", "news") if topic else "news", topic["name"] if topic else "Tech", d_type)
-
-    # 3. Output
-    topic_name = topic["name"] if topic else "News"
-    title_line = f"📌 {topic_name}\n\n" if topic else ""
-    full_text = title_line + post_text
-    
-    # Pre-set some outputs for the dashboard/workflow
-    write_github_output("POSTED_TOPIC", topic["id"] if topic else "news")
-    write_github_output("POSTED_TITLE", topic_name)
-    write_github_output("POSTED_DATE", datetime.now().strftime("%Y-%m-%d"))
-    
-    if dry_run:
-        with open("dry_run_post.txt", "w", encoding="utf-8") as f: f.write(full_text)
-        write_github_summary(topic["name"] if topic else "News", mode, full_text, dry_run=True)
-        log.info("DRY RUN complete")
-        return
-
-    # 4. Post
-    from linkedin_poster import LinkedInPoster
-    token = os.environ.get("LINKEDIN_ACCESS_TOKEN")
-    urn = os.environ.get("LINKEDIN_PERSON_URN")
-    poster = LinkedInPoster(token, urn)
-    result = poster.create_post_with_image(full_text, diagram_path, topic["name"] if topic else "News")
-    
-    if result.get("success"):
-        log.info("Success!")
-        post_url = result.get("post_url", "")
-        if post_url:
-            write_github_output("POSTED_URL", post_url)
-            
-        if topic:
-            topic_mgr.save_run_history({"timestamp": datetime.now().isoformat(), "topic_id": topic["id"], "mode": mode, "status": "success"})
-        write_github_summary(topic_name, mode, full_text, dry_run=False)
-        
-        # 5. Notify
-        try:
-            notifier.notify_all(topic_name, full_text, is_dry_run=False)
-        except Exception as e:
-            log.warning(f"Notification failed: {e}")
+    # Determine post mode
+    if manual_topic_id:
+        mode = "topic"
+    elif force_news:
+        mode = force_news
     else:
-        log.error(f"Failed: {result.get('error')}")
+        mode = get_post_mode()
+
+    log.info("Post mode: " + mode)
+    write_github_output("POST_MODE", mode)
+
+    # ── GENERATE POST ─────────────────────────────────────────────────────────
+    if mode == "ai_news":
+        post_text = generate_news_post("ai")
+        if not post_text:
+            mode = "topic"
+
+    elif mode == "layoff_news":
+        articles = fetch_rss_news("layoffs", 5)
+        layoff_articles = [a for a in articles if any(
+            w in a["title"].lower()
+            for w in ["layoff", "laid off", "cut", "job", "workforce", "redundan", "downsize"]
+        )]
+        if layoff_articles:
+            news_text = "\n".join([f"- {a['title']}: {a['description'][:200]}" for a in layoff_articles[:3]])
+            hook = random.choice(HOOK_STYLES)
+            prompt = f"""Latest tech industry layoff news:
+{news_text}
+
+{hook}
+
+Write an analytical LinkedIn post breaking down these layoffs.
+What does this mean for tech workers, the industry, and AI's role?
+Be empathetic but also analytical. Share actionable advice.
+Do NOT mention current month or year.
+STRICT: 250-320 words total."""
+            post_text = call_ai(prompt, NEWS_SYSTEM)
+        if not post_text:
+            mode = "topic"
+
+    elif mode == "tools_news":
+        articles = fetch_rss_news("tools", 5)
+        tool_articles = [a for a in articles if any(
+            w in a["title"].lower()
+            for w in ["launch", "release", "new", "introduce", "tool", "platform", "open source", "github", "api", "model"]
+        )]
+        if tool_articles:
+            news_text = "\n".join([f"- {a['title']}: {a['description'][:200]}" for a in tool_articles[:3]])
+            hook = random.choice(HOOK_STYLES)
+            prompt = f"""Latest new tech tools and launches:
+{news_text}
+
+{hook}
+
+Write a LinkedIn post about one of these new tools/launches.
+Provide an expert breakdown: Is this a game-changer? Who should care? What problem does it solve?
+Include practical use cases.
+Do NOT mention current month or year.
+STRICT: 250-320 words total."""
+            post_text = call_ai(prompt, NEWS_SYSTEM)
+        if not post_text:
+            mode = "topic"
+
+    elif mode == "tech_news":
+        post_text = generate_news_post("tech")
+        if not post_text:
+            mode = "topic"
+
+    if mode == "topic" or not post_text:
+        topic = topic_mgr.get_topic(manual_topic_id) if manual_topic_id else topic_mgr.get_next_topic()
+
+    if topic:
+        write_github_output("POST_TOPIC", topic.get("name", ""))
+        log.info("Topic: " + topic["name"])
+        post_text = generate_topic_post(topic)
+
+    log.info("POST:\n" + post_text)
+
+    # ── GENERATE DIAGRAM (local — no LLM call needed) ─────────────────────────
+    if not topic:
+        topic = topic_mgr.get_next_topic()
+
+    diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
+    diagram_path = diagram_gen.save_svg(None, topic["id"], topic["name"], diagram_type)
+    log.info("Diagram saved: " + diagram_path)
+
+    if dry_run:
+        with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
+            f.write(post_text)
+        write_github_summary(topic["name"], mode, post_text, dry_run=True)
+        log.info("DRY RUN complete. Post saved.")
+        return
+
+    # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
+    # Always write POST_TOPIC before posting (covers news modes where topic resolved late)
+    write_github_output("POST_TOPIC", topic.get("name", mode))
+
+    # Prepend topic title as visible first line — build full text BEFORE truncation
+    # so linkedin_poster._truncate_text() accounts for the title too
+    title_line = f"📌 {topic['name']}\n\n"
+    full_post_text = title_line + post_text if not post_text.strip().startswith("📌") else post_text
+
+    result = poster.create_post_with_image(
+        text=full_post_text,
+        image_path=diagram_path,
+        title=topic["name"],
+    )
+    if result.get("success"):
+        log.info("Posted! ID: " + str(result.get("post_id")))
+        write_github_summary(topic["name"], mode, full_post_text, dry_run=False)
+        topic_mgr.save_run_history({
+            "timestamp": datetime.now().isoformat(),
+            "topic_id": topic["id"],
+            "mode": mode,
+            "status": "success"
+        })
+        try:
+            from notifier import notify_all
+            notify_all(
+                topic=topic["name"],
+                post_preview=post_text,
+                is_dry_run=dry_run
+            )
+        except Exception as e:
+            log.warning("Notification error (non-fatal): " + str(e))
+    else:
+        log.error("Failed: " + str(result.get("error")))
         sys.exit(1)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--topic", default=None)
+    parser.add_argument("--topic", type=str, default=None)
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--news", default=None)
+    parser.add_argument("--manual", action="store_true", help="Manual trigger: skip schedule sleep, run immediately")
+    parser.add_argument("--news", type=str, default=None, help="Force news mode: ai_news, layoff_news, tools_news, tech_news")
+    parser.add_argument("--list-topics", action="store_true")
     args = parser.parse_args()
-    run_agent(manual_topic_id=args.topic, dry_run=args.dry_run, force_news=args.news)
+    if args.list_topics:
+        TopicManager().list_topics()
+        sys.exit(0)
+    run_agent(manual_topic_id=args.topic, dry_run=args.dry_run, force_news=args.news, manual=args.manual)
