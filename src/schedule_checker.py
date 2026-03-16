@@ -241,7 +241,7 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         mins_away = int(diff_secs // 60)
         info(f"⏭️  Not yet time — {time_str} UTC is {mins_away}m away. Exiting (next cron will check again).")
         _mark_skip()
-        sys.exit(1)
+        sys.exit(0)
     elif diff_secs > 0:
         # Within the window — sleep the remaining gap then post
         wait_mins = int(diff_secs // 60)
@@ -262,7 +262,7 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         mins_past = int(-diff_secs // 60)
         info(f"⏭️  {time_str} UTC was {mins_past}m ago — already handled. Exiting.")
         _mark_skip()
-        sys.exit(1)
+        sys.exit(0)
 
 
 # ─── Quick diagnostic (python src/schedule_checker.py) ───────────────────────
