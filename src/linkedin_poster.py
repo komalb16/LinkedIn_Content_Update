@@ -132,10 +132,17 @@ class LinkedInPoster:
     def create_post_with_image(self, text, image_path, title=""):
         """Post text + diagram image to LinkedIn."""
         try:
-            # Step 1: Convert SVG to PNG
-            png_bytes = self._svg_to_png_bytes(image_path)
+            # Step 1: Get image bytes
+            if image_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+                log.info(f"Uploading native image: {image_path}")
+                with open(image_path, "rb") as f:
+                    png_bytes = f.read()
+            else:
+                # Fallback/Default: Convert SVG to PNG
+                png_bytes = self._svg_to_png_bytes(image_path)
+
             if not png_bytes:
-                log.warning("Image conversion failed — posting text only")
+                log.warning("Image processing failed — posting text only")
                 return self.create_text_post(text)
 
             # Step 2: Register upload

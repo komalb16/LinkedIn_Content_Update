@@ -183,10 +183,8 @@ TOPICS = [
 ]
 
 
-# topics_config.json lives next to topic_manager.py in the repo.
-# The dashboard writes it whenever topics are hidden/shown/added/removed.
-# Format: { "hidden_ids": ["ai-agents-2025"], "custom_topics": [{"id":"..","name":"..","prompt":".."}] }
-TOPICS_CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "topics_config.json")
+# topics_config.json lives in the root directory.
+TOPICS_CONFIG_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "topics_config.json")
 
 
 class TopicManager:

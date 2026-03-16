@@ -553,7 +553,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <div class="logo-ic">🤖</div>
       <div>
         <h1>LinkedIn Agent</h1>
-        <p>komalb16 / LinkedIn_Content_Update</p>
+        <p id="ownerLabel">komalb16 / LinkedIn_Content_Update</p>
       </div>
     </div>
     <div class="hright">
@@ -792,8 +792,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <button class="sfp"         id="sfCancel" onclick="setStatusFilter('cancel',this)">🚫 Cancelled</button>
       <span style="width:1px;background:var(--bd);display:inline-block;height:16px;margin:0 4px;vertical-align:middle"></span>
       <select id="triggerFilter" onchange="setTriggerFilter(this.value)" style="padding:4px 8px;border:1px solid var(--bg3);border-radius:6px;background:var(--bg1);color:var(--tx);font-size:12px;">
-        <option value="all">All Posts</option>
-        <option value="manual" selected>Manual Posts</option>
+        <option value="all" selected>All Posts</option>
+        <option value="manual">Manual Posts</option>
         <option value="schedule">Scheduled Posts</option>
       </select>
     </div>
@@ -1307,6 +1307,10 @@ function loadSettings() {
   if (gk) document.getElementById('groqKeyInput').value = gk;
   if (an) document.getElementById('authorNameInput').value = an;
   if (ar) document.getElementById('authorRoleInput').value = ar;
+  if (an) {
+    const el = document.getElementById('ownerLabel');
+    if (el) el.textContent = an;
+  }
 }
 
 // ── CONNECT ───────────────────────────────────────────────────────────────────
@@ -1334,6 +1338,12 @@ async function connect() {
   finally { setLoad('conSpin','conTxt',false,'Connect'); }
 }
 
+function updateOwnerLabel(u) {
+  const an = localStorage.getItem('author_name');
+  const el = document.getElementById('ownerLabel');
+  if (el) el.textContent = an || u || 'LinkedIn Agent';
+}
+
 async function silentConn() {
   try {
     const r = await gh('/user');
@@ -1350,6 +1360,7 @@ function showDash(u) {
   document.getElementById('cs').style.display = 'none';
   document.getElementById('db').style.display = 'block';
   document.getElementById('connUser').textContent = u;
+  updateOwnerLabel(u);
 }
 
 function disconnect() {
@@ -1412,28 +1423,39 @@ async function showDryRunPreview() {
 async function generatePreviewPost(groqKey) {
   const topic = topicName && topicName !== 'Auto-select' ? topicName : pickRandomTopic();
   const hooks = [
-    'Start with a shocking/surprising statistic about the topic.',
-    'Start with a bold controversial opinion about the topic.',
-    'Start with a relatable scenario in 2 sentences max.',
-    'Start with a direct provocative question about the topic.',
-    'Start with a counterintuitive insight that challenges assumptions.',
-    'Start with a hot take that most engineers would debate.',
-    'Start with "3 things nobody tells you about [topic]:"',
+    'Start with a surprising personal observation or anecdote.',
+    'Start with a provocative question that makes people stop scrolling.',
+    'Start with a counterintuitive fact that challenges assumptions.',
+    'Start with a relatable frustration most engineers have experienced.',
+    'Start with a bold, slightly controversial opinion.',
+    'Start with a short story: "Last week I was debugging X and realized..."',
+    'Start with a rhetorical question like "Why do we keep doing X?"',
+    'Start with a brief story about a mistake or lesson learned.',
+  ];
+  const tones = [
+    'conversational and friendly, like chatting with a colleague',
+    'reflective and thoughtful, sharing hard-won wisdom',
+    'slightly humorous and self-deprecating',
+    'authoritative but approachable, like a senior mentor',
   ];
   const hook = hooks[Math.floor(Math.random() * hooks.length)];
+  const tone = tones[Math.floor(Math.random() * tones.length)];
 
-  const systemPrompt = `You are a senior software engineer writing LinkedIn posts. 
+  const systemPrompt = `You are a creative LinkedIn content assistant. Generate a professional, human-like, engaging post.
 Rules:
 - ${hook}
+- Tone: ${tone}
 - Write about: ${topic}
-- 150-250 words
-- Use 3-5 relevant emojis naturally
-- Write in first person ("I've seen", "In my experience")
-- Include specific technical examples, numbers, or commands
-- End with 1 engaging question for readers
+- 50-200 words. Short and punchy beats long and generic.
+- Mix short, punchy sentences with longer descriptive ones
+- Include one personal anecdote, insight, or rhetorical question
+- Occasionally use first person ("I've noticed", "In my experience")
+- End with a subtle call-to-action or question for readers
 - Add 3-5 relevant hashtags at the end
-- NEVER start with "As we dive into", "In today's world", or mention months/years
-- Sound human and opinionated, not like a textbook`;
+- NEVER start with "As we dive into", "In today's world", or any generic opener
+- NEVER use: "robust", "crucial", "delve", "landscape", "testament", "realm", "seamless", "synergy", "paradigm", "unprecedented", "game-changer", "leverage", "navigating", "holistic"
+- Sound like a real person, NOT like ChatGPT
+- Return ONLY the post text, no JSON or headers`;
 
   try {
     const res = await fetch(GROQ_API, {
@@ -1442,6 +1464,7 @@ Rules:
       body: JSON.stringify({
         model: GROQ_MODEL,
         max_tokens: 600,
+        temperature: 0.92,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Write a LinkedIn post about: ${topic}` }
@@ -1636,33 +1659,29 @@ function getFilterRange() {
 }
 
 function isSkippedRun(r) {
-  // Rule 1 — hide schedule/cron runs that do not attempt to post.
-  // Cron runs every ~30 minutes. When it's not posting time, the workflow
-  // self-cancels (skipped/cancelled quickly). Those are noise and should be hidden.
+  // Cron heartbeats carry the "schedule" event and usually "skipped" or "cancelled"
+  // outcome when they don't fire a post.
   if (r.event === 'schedule') {
-    // Hide the schedule heartbeat runs that self-cancel (skipped or cancelled).
-    // If a schedule run actually succeeded/failed (even quickly), count it.
+    // If it succeeded or failed (real attempt), show it.
+    // If it was skipped or cancelled (heartbeat), hide it.
     return r.conclusion === 'skipped' || r.conclusion === 'cancelled';
   }
 
-  // Rule 2 — hide non-post outcomes even for manual/dispatch triggers.
-  //   'skipped' = schedule_checker exited early without posting.
-  //   'cancelled' without a real post attempt = infrastructure noise.
-  //   Only keep: success | failure | in_progress | queued
-  //   (failure is kept — user needs to know their manual post failed)
+  // For manual/dispatch, we show everything EXCEPT "skipped".
+  // "cancelled" might be a real attempt that was stopped, so we keep it if it ran a bit.
   if (r.conclusion === 'skipped') return true;
 
-  // Cancelled manual runs: keep if they ran long enough to attempt a post
-  // (>30s), hide otherwise (they were cancelled before doing anything).
   if (r.conclusion === 'cancelled') {
     const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
-    return durMs < 30000;   // < 30 s → noise, hide it
+    // If cancelled in under 15s, it likely never even reached the agent logic.
+    return durMs < 15000;
   }
   return false;
 }
 
 let _statusFilter  = 'all';
 let _triggerFilter = 'all';
+let _enrichmentDone = false;
 
 function setTriggerFilter(value) {
   _triggerFilter = value;
@@ -1691,29 +1710,33 @@ function applyRunFilter() {
     const d = new Date(r.created_at);
     return d >= from && d <= to;
   });
-  // Only LinkedIn post runs — hide schedule heartbeats, but keep actual scheduled posts.
-  const postRuns = filtered.filter(r => !isSkippedRun(r));
-  const schedulePostsInRange = filtered.filter(r => r.event === 'schedule' && (
-    r.conclusion === 'success' ||
-    (r.conclusion === 'cancelled' && (r.updated_at ? (new Date(r.updated_at) - new Date(r.created_at)) / 1000 : 0) > 10)
-  ));
-  const totalEl  = document.getElementById('runTotal');
-  if (totalEl) totalEl.textContent = (postRuns.length + schedulePostsInRange.length) + ((postRuns.length + schedulePostsInRange.length)===1 ? ' post' : ' posts');
+  // Separate real posts from cron heartbeats.
+  // Manual/dispatch runs: show all except skipped.
+  // Scheduled runs: show successful ones + failed ones (real post attempts).
+  //   Cron heartbeats (skipped/cancelled quickly) are hidden by isSkippedRun().
+  const realPosts = filtered.filter(r => !isSkippedRun(r));
+
+  const totalEl = document.getElementById('runTotal');
   // Remove legacy skipBadge if it exists
   const skipBadge = document.getElementById('skipBadge');
   if (skipBadge) skipBadge.remove();
+
   // Apply trigger filter
   let trigRuns = [];
-  if (_triggerFilter === 'all') trigRuns = [...postRuns, ...schedulePostsInRange];
-  else if (_triggerFilter === 'manual') trigRuns = postRuns.filter(r => r.event === 'workflow_dispatch');
-  else if (_triggerFilter === 'schedule') trigRuns = schedulePostsInRange;
-  // Hide schedule runs that didn't actually post (show as 'Auto')
-  trigRuns = trigRuns.filter(r => !(r.event === 'schedule' && getTopicFromRun(r) === 'Auto'));
+  if (_triggerFilter === 'all') {
+    trigRuns = realPosts;
+  } else if (_triggerFilter === 'manual') {
+    trigRuns = realPosts.filter(r => r.event === 'workflow_dispatch');
+  } else if (_triggerFilter === 'schedule') {
+    trigRuns = realPosts.filter(r => r.event === 'schedule');
+  }
+
   // Apply status filter
   let displayRuns = trigRuns;
   if (_statusFilter === 'ok')     displayRuns = trigRuns.filter(r => r.conclusion === 'success');
   if (_statusFilter === 'fail')   displayRuns = trigRuns.filter(r => r.conclusion === 'failure');
   if (_statusFilter === 'cancel') displayRuns = trigRuns.filter(r => r.conclusion === 'cancelled');
+
   // Update total to reflect displayed count
   if (totalEl) totalEl.textContent = displayRuns.length + (displayRuns.length === 1 ? ' post' : ' posts');
   renderRuns(displayRuns);
@@ -1730,9 +1753,9 @@ function renderRuns(runs) {
     const running = r.status==='in_progress' || r.status==='queued';
     const ico     = ok ? '✅' : fail ? '❌' : running ? '⏳' : '⚪';
     const icls    = ok ? 'ok' : fail ? 'fail' : running ? 'run' : 'oth';
-    // schedule events are hidden by isSkippedRun — only manual/dispatch shown here
-    const trig    = r.event==='workflow_dispatch' ? 'manual post' : r.event || 'post';
-    const bcls    = trig==='manual post' ? 'bman' : 'bdry';
+    const isManual = r.event === 'workflow_dispatch';
+    const trig    = isManual ? 'manual post' : (r.event === 'schedule' ? 'scheduled' : (r.event || 'post'));
+    const bcls    = isManual ? 'bman' : (r.event === 'schedule' ? 'bsch' : 'bdry');
     const t       = new Date(r.created_at);
     const ts      = tzFmt(t,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
     const dur     = r.updated_at ? Math.round((new Date(r.updated_at) - t) / 1000) : null;
@@ -1741,8 +1764,9 @@ function renderRuns(runs) {
     const mode    = getModeFromRun(r);
     const isDryRun= (r.display_title||r.name||'').toLowerCase().includes('dry');
     let tags = '';
-    if (topic)  tags += `<span class="rtag rtag-topic">🎯 ${topic}</span>`;
-    else        tags += `<span class="rtag rtag-topic">🎲 Auto topic</span>`;
+    if (topic && topic !== 'Auto')  tags += `<span class="rtag rtag-topic">🎯 ${topic}</span>`;
+    else if (_enrichmentDone)       tags += `<span class="rtag rtag-topic">🎲 Auto topic</span>`;
+    else                            tags += `<span class="rtag rtag-topic">⏳ Loading topic...</span>`;
     if (mode)   tags += `<span class="rtag rtag-mode">${mode}</span>`;
     if (isDryRun) tags += `<span class="rtag rtag-dry">🧪 dry run</span>`;
     return `<div class="ri" onclick="openRunDetail(${r.id})" title="Click for details" style="cursor:pointer">
@@ -1762,12 +1786,12 @@ function renderRuns(runs) {
 const _topicCache = {};
 
 async function enrichRunTopics(runs) {
+  // Enrich ALL successful/failed runs (both manual and scheduled) to get actual topic names
   const toFetch = runs.filter(r =>
     !_topicCache[r.id] &&
-    !getTopicFromRun(r) &&
-    (r.conclusion === 'success' || (r.event === 'schedule' && r.conclusion === 'cancelled' && (r.updated_at ? (new Date(r.updated_at) - new Date(r.created_at)) / 1000 : 0) > 10))
-  ).slice(0, 25);
-  if (!toFetch.length) return;
+    (r.conclusion === 'success' || r.conclusion === 'failure')
+  ).slice(0, 30);
+  if (!toFetch.length) { _enrichmentDone = true; applyRunFilter(); return; }
   await Promise.all(toFetch.map(async r => {
     try {
       // Try to get topic from job steps first
@@ -1792,24 +1816,14 @@ async function enrichRunTopics(runs) {
           }
         }
       }
-      // If not found in steps, try parsing logs for "Posting about:"
-      if (!_topicCache[r.id]) {
-        const logResp = await gh('/repos/' + REPO + '/actions/runs/' + r.id + '/logs');
-        if (logResp.ok) {
-          const logText = await logResp.text();
-          const match = logText.match(/Posting about:\s*(.+)/);
-          if (match) {
-            const topic = match[1].trim();
-            if (topic && topic !== 'auto-topic') _topicCache[r.id] = topic;
-          }
-        }
-      }
     } catch(e) {}
   }));
+  _enrichmentDone = true;
   applyRunFilter();
 }
 
 function getTopicFromRun(r) {
+  // Priority 0: enriched topic from workflow job steps (most reliable)
   if (_topicCache[r.id]) return _topicCache[r.id];
   // Priority 1: run-name set by YAML
   // Current format: "🖱️ Manual · llm-architecture" (2 parts)
@@ -1817,14 +1831,21 @@ function getTopicFromRun(r) {
   const runName = r.name || r.display_title || '';
   const parts   = runName.split('·').map(s => s.trim());
   const topicPart = parts.length >= 2 ? parts[parts.length - 1] : '';
-  if (topicPart && topicPart !== 'auto-topic' && topicPart !== 'auto' && topicPart.length > 2) {
+  // Skip generic values — these are NOT actual topic names
+  const genericValues = ['auto', 'auto-topic', 'auto-select', 'auto-selected', ''];
+  if (topicPart && !genericValues.includes(topicPart.toLowerCase()) && topicPart.length > 2) {
     // Prettify known IDs
     for (const [id, name] of Object.entries(TNAMES)) {
       if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
     }
+    // Check custom topics too
+    const custom = getCustomTopics();
+    for (const ct of custom) {
+      if (topicPart.toLowerCase() === ct.id || topicPart.toLowerCase().includes(ct.id)) return ct.name;
+    }
     return topicPart.charAt(0).toUpperCase() + topicPart.slice(1);
   }
-  // Priority 2: scan full title against known topic IDs/names
+  // Priority 2: scan full title against known topic IDs/names (but skip 'auto' matches)
   const title = runName.toLowerCase();
   for (const [id, name] of Object.entries(TNAMES)) {
     if (title.includes(id) || title.includes(name.toLowerCase())) return name;
@@ -1833,7 +1854,7 @@ function getTopicFromRun(r) {
   for (const ct of custom) {
     if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
   }
-  if (runName.toLowerCase().includes('auto')) return 'Auto';
+  // Don't return 'Auto' — return null so UI can show "loading" or "auto topic" appropriately
   return null;
 }
 
@@ -1845,12 +1866,17 @@ function getModeFromRun(r) {
   if (title.includes('tools_news') || title.includes('tools-news')) return '🔧 Tools News';
   if (title.includes('tech_news') || title.includes('tech-news'))   return '📡 Tech News';
   if (title.includes('news'))                                        return '📰 News';
-  // If a specific topic was in run name → it was a topic post
+  // If the topic was enriched from the workflow step, it was a real topic post
+  if (_topicCache[r.id]) return '🏗️ Topic Post';
+  // If a specific topic id was in run name → it was a topic post
   const runName  = r.name || r.display_title || '';
   const parts    = runName.split('·').map(s => s.trim());
-  const topicPart = parts.length >= 3 ? parts[parts.length-1] : '';
-  if (topicPart && topicPart !== 'auto-topic') return '🏗️ Topic Post';
-  return '🎲 Auto';
+  const topicPart = parts.length >= 2 ? parts[parts.length-1] : '';
+  const genericValues = ['auto', 'auto-topic', 'auto-select', ''];
+  if (topicPart && !genericValues.includes(topicPart.toLowerCase())) return '🏗️ Topic Post';
+  // For runs where enrichment hasn't loaded yet, don't show a mode
+  if (!_enrichmentDone) return null;
+  return '🏗️ Topic Post';
 }
 
 // ── STATS ─────────────────────────────────────────────────────────────────────

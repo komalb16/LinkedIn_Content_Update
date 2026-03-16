@@ -23,10 +23,9 @@ from datetime import datetime
 from pathlib import Path
 
 try:
-    import os as _os
-    _DIAGRAM_AUTHOR = _os.environ.get("AUTHOR_NAME") or _os.environ.get("GITHUB_ACTOR") or "Author"
+    _DIAGRAM_AUTHOR = os.environ.get("USER_NAME", os.environ.get("AUTHOR_NAME", "Komal Batra"))
 except Exception:
-    _DIAGRAM_AUTHOR = "Author"
+    _DIAGRAM_AUTHOR = "Komal Batra"
 
 try:
     from logger import get_logger

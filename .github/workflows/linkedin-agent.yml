@@ -110,6 +110,7 @@ jobs:
           # to personalise post signatures and diagram watermarks.
           # Falls back to your GitHub username automatically if not set.
           AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
+          USER_NAME: ${{ vars.USER_NAME || vars.AUTHOR_NAME || github.actor }}
           GH_EVENT_NAME: ${{ github.event_name }}
         run: |
           ARGS=""
