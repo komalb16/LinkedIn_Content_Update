@@ -324,7 +324,9 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
 
     # 4. Post
     from linkedin_poster import LinkedInPoster
-    poster = LinkedInPoster()
+    token = os.environ.get("LINKEDIN_ACCESS_TOKEN")
+    urn = os.environ.get("LINKEDIN_PERSON_URN")
+    poster = LinkedInPoster(token, urn)
     result = poster.create_post_with_image(full_text, diagram_path, topic["name"] if topic else "News")
     
     if result.get("success"):
