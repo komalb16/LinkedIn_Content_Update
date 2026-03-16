@@ -990,8 +990,8 @@ def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "") -> str:
             style_idx = idx
             break
 
-    if style_idx is None:
-        # Randomize style for variety instead of deterministic
+    # Add 30% chance for a totally random style, even if overridden
+    if style_idx is None or random.random() < 0.30:
         style_idx = random.randint(0, len(STYLES) - 1)
 
     fn = STYLES[style_idx]

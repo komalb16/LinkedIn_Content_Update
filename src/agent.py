@@ -83,10 +83,9 @@ HUMAN TOUCH & STRUCTURE BLEND:
 - Mix short punchy sentences with longer descriptive ones.
 - Length: 250-350 words.
 
-═══════════════ EXAMPLE POST STRUCTURE ═══════════════
 🚨 3 things nobody tells you about System Design
 
-[Personal Anecdote/Observation about the topic]
+[Brief Personal Anecdote/Observation - 2-3 sentences max]
 
 🚀 1. Scalability isn't about traffic.
 [Insight]
@@ -205,12 +204,22 @@ def call_ai(prompt, system):
     resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=30)
     resp.raise_for_status()
     raw = resp.json()["choices"][0]["message"]["content"].strip()
+    
+    # Robust JSON extraction via regex
     try:
-        data = json.loads(raw)
-        return data
+        match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if match:
+            json_str = match.group(0)
+            return json.loads(json_str)
+        return json.loads(raw)
     except Exception as e:
-        log.warning(f"Failed JSON parse: {e}")
-        return {"post": raw, "diagram_query": "technical diagram", "hook_variation": "Check this out!"}
+        log.warning(f"Failed JSON extraction/parse: {e}")
+        # Clean up potential markdown artifacts if raw is used
+        clean_post = re.sub(r'^```json\s*|\s*```$', '', raw, flags=re.MULTILINE).strip()
+        if clean_post.startswith('{'):
+             try: return json.loads(clean_post)
+             except: pass
+        return {"post": clean_post, "diagram_query": "technical diagram", "hook_variation": "Check this out!"}
 
 def fetch_rss_news(category="tech", max_items=5):
     articles = []
@@ -338,6 +347,12 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
         if topic:
             topic_mgr.save_run_history({"timestamp": datetime.now().isoformat(), "topic_id": topic["id"], "mode": mode, "status": "success"})
         write_github_summary(topic_name, mode, full_text, dry_run=False)
+        
+        # 5. Notify
+        try:
+            notifier.notify_all(topic_name, full_text, is_dry_run=False)
+        except Exception as e:
+            log.warning(f"Notification failed: {e}")
     else:
         log.error(f"Failed: {result.get('error')}")
         sys.exit(1)

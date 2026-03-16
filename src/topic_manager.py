@@ -259,7 +259,7 @@ class TopicManager:
         raise ValueError("Topic not found: " + topic_id)
 
     def get_next_topic(self):
-        recent_ids = [h["topic_id"] for h in self.history[-6:]]
+        recent_ids = [h["topic_id"] for h in self.history[-12:]]
         available = [t for t in self.topics if t["id"] not in recent_ids]
         if not available:
             available = self.topics  # all have been used recently — full reset
