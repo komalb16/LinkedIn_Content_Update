@@ -1640,9 +1640,9 @@ function isSkippedRun(r) {
   // Cron runs every ~30 minutes. When it's not posting time, the workflow
   // self-cancels (skipped/cancelled quickly). Those are noise and should be hidden.
   if (r.event === 'schedule') {
-    // Only hide the schedule heartbeat runs that self-cancel (skipped).
+    // Hide the schedule heartbeat runs that self-cancel (skipped or cancelled).
     // If a schedule run actually succeeded/failed (even quickly), count it.
-    return r.conclusion === 'skipped';
+    return r.conclusion === 'skipped' || r.conclusion === 'cancelled';
   }
 
   // Rule 2 — hide non-post outcomes even for manual/dispatch triggers.
