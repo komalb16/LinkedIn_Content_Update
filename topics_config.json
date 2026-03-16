@@ -54,7 +54,11 @@
     {
       "id": "agentic-ai",
       "name": "Agentic AI"
+    },
+    {
+      "id": "langchain",
+      "name": "LangChain"
     }
   ],
-  "updated_at": "2026-03-16T20:16:52.519Z"
+  "updated_at": "2026-03-16T21:43:35.628Z"
 }
