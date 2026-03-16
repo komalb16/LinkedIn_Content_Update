@@ -141,7 +141,7 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
 <rect x="0" y="{H-31}" width="{W}" height="1" fill="{foot_bdr}"/>
 <text x="18" y="{H-11}" fill="{foot_txt}" font-size="8.5">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>
 <rect x="{W-220}" y="{H-24}" width="208" height="18" rx="9" fill="{rgba(accent,0.12)}" stroke="{accent}" stroke-width="1"/>
-<text x="{W-116}" y="{H-12}" text-anchor="middle" fill="{accent}" font-size="9" font-weight="800" letter-spacing="0.5">AI · copyright {xe(_DIAGRAM_AUTHOR)}</text>
+<text x="{W-116}" y="{H-12}" text-anchor="middle" fill="{accent}" font-size="9" font-weight="800" letter-spacing="0.8">AI (c) Komal Batra</text>
 </svg>'''
 
 
