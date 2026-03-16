@@ -1328,8 +1328,8 @@ async function connect() {
     showDash(u.login);
     await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
     toast('Connected as ' + u.login + ' ✓', 'ok');
-    // Auto-refresh every 30 seconds
-    setInterval(async () => { await loadRuns(); await loadStats(); }, 30000);
+    // Auto-refresh every 5 minutes
+    setInterval(async () => { await loadRuns(); await loadStats(); }, 300000);
   } catch(e) { toast('Failed: ' + e.message, 'err'); }
   finally { setLoad('conSpin','conTxt',false,'Connect'); }
 }
@@ -1341,8 +1341,8 @@ async function silentConn() {
     const u = await r.json();
     showDash(u.login);
     await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
-    // Auto-refresh every 30 seconds
-    setInterval(async () => { await loadRuns(); await loadStats(); }, 30000);
+    // Auto-refresh every 5 minutes
+    setInterval(async () => { await loadRuns(); await loadStats(); }, 300000);
   } catch(e) { localStorage.removeItem('gh_token'); token = ''; }
 }
 
@@ -1833,6 +1833,7 @@ function getTopicFromRun(r) {
   }
   if (runName.toLowerCase().includes('auto')) return 'Auto';
   return null;
+}
 
 function getModeFromRun(r) {
   const title = (r.display_title || r.name || '').toLowerCase();
