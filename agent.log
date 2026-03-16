@@ -881,3 +881,42 @@ Period.
 22:10:45  [topics      ]  INFO      Topic pool: 26 active topic(s) (of 27 total)
 22:10:45  [diagrams    ]  INFO      Diagram output dir: diagrams/
 22:10:45  [agent       ]  INFO      Generating post for: Azure
+23:13:33  [agent       ]  INFO      Agent started (Komal Batra)
+23:13:33  [topics      ]  INFO      topics_config.json: hiding 1 topic(s): {'ai-agents-2025'}
+23:13:33  [topics      ]  INFO      topics_config.json: 10 custom topic(s) added
+23:13:33  [topics      ]  INFO      Topic pool: 27 active topic(s) (of 28 total)
+23:13:33  [diagrams    ]  INFO      Diagram output dir: diagrams/
+23:13:33  [agent       ]  INFO      Generating post for: Data Architecture Evolution
+23:13:47  [diagrams    ]  INFO      Diagram output dir: diagrams/
+23:13:47  [diagrams    ]  INFO      Generated diagram: diagrams/data-evolution_20260315_231347.svg (7.1 KB)
+12:39:55  [agent       ]  INFO      ============================================================
+12:39:55  [agent       ]  INFO      LinkedIn Agent — Komal Batra — 2026-03-16 12:39:55
+12:39:55  [agent       ]  INFO      Mode: DRY RUN
+12:39:55  [agent       ]  INFO      ============================================================
+12:39:55  [schedule    ]  INFO      Found schedule_config.json at: schedule_config.json
+12:39:55  [schedule    ]  INFO      Schedule check — 2026-03-16 (MON) — IST 16:39 — trigger: DRY-RUN
+12:39:55  [schedule    ]  INFO      Skipping time-of-day sleep (DRY-RUN) — running immediately
+12:39:55  [topics      ]  INFO      topics_config.json: hiding 1 topic(s): {'ai-agents-2025'}
+12:39:55  [topics      ]  INFO      topics_config.json: 10 custom topic(s) added
+12:39:55  [topics      ]  INFO      Topic pool: 29 active topic(s) (of 30 total)
+12:39:55  [diagrams    ]  INFO      Diagram output dir: diagrams/
+12:39:55  [agent       ]  INFO      Post mode: topic
+12:39:55  [agent       ]  INFO      Topic: Machine Learning Algorithms
+12:39:55  [agent       ]  INFO      Generating post: Machine Learning Algorithms
+12:40:10  [diagrams    ]  INFO      Diagram output dir: diagrams/
+12:40:10  [diagrams    ]  INFO      Generated diagram: diagrams/ml-algorithms_20260316_124010.svg (14.6 KB)
+12:40:10  [diagrams    ]  INFO      Generated diagram: diagrams/ai-disciplines_20260316_124010.svg (12.5 KB)
+15:47:48  [diagrams    ]  INFO      Diagram output dir: diagrams/
+15:47:48  [diagrams    ]  INFO      Generated diagram: diagrams/rag-stack_20260316_154748.svg (4.9 KB)
+15:47:48  [diagrams    ]  INFO      Generated diagram: diagrams/ai-skills-map_20260316_154748.svg (7.2 KB)
+15:47:48  [diagrams    ]  INFO      Generated diagram: diagrams/llm-vs-agentic_20260316_154748.svg (13.5 KB)
+15:51:12  [diagrams    ]  INFO      Diagram output dir: diagrams/
+15:51:12  [diagrams    ]  INFO      Generated diagram: diagrams/rag-stack_20260316_155112.svg (18.1 KB)
+15:51:12  [diagrams    ]  INFO      Generated diagram: diagrams/ai-skills-map_20260316_155112.svg (13.5 KB)
+15:51:12  [diagrams    ]  INFO      Generated diagram: diagrams/llm-vs-agentic_20260316_155112.svg (18.2 KB)
+15:51:12  [diagrams    ]  INFO      Generated diagram: diagrams/genai-roadmap_20260316_155112.svg (11.4 KB)
+15:54:44  [diagrams    ]  INFO      Diagram output dir: diagrams/
+15:54:44  [diagrams    ]  INFO      Generated diagram: diagrams/rag-stack_20260316_155444.svg (13.7 KB)
+15:54:44  [diagrams    ]  INFO      Generated diagram: diagrams/ai-skills-map_20260316_155444.svg (13.7 KB)
+15:54:44  [diagrams    ]  INFO      Generated diagram: diagrams/llm-vs-agentic_20260316_155444.svg (18.2 KB)
+15:54:44  [diagrams    ]  INFO      Generated diagram: diagrams/genai-roadmap_20260316_155444.svg (11.8 KB)

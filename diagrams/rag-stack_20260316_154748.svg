@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" style="display:block;font-family:Arial,sans-serif;overflow:hidden">
+<defs>
+  <linearGradient id="HG" x1="0" x2="1" y1="0" y2="0">
+    <stop offset="0%" stop-color="#621135"/>
+    <stop offset="100%" stop-color="#8E194D"/>
+  </linearGradient>
+  <linearGradient id="BG" x1="0" x2="0" y1="0" y2="1">
+    <stop offset="0%" stop-color="#FBEBF2"/>
+    <stop offset="100%" stop-color="#FDF4F8"/>
+  </linearGradient>
+</defs>
+<style>
+  @keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fr{0%{stroke-dashoffset:24}100%{stroke-dashoffset:0}}
+  @keyframes pu{0%,100%{opacity:1}50%{opacity:0.55}}
+  .fi{animation:fd .5s ease-out both}
+  .flow{stroke-dasharray:8 4;animation:fr 1.4s linear infinite}
+  .pu{animation:pu 2.2s ease-in-out infinite}
+</style>
+<rect width="900" height="600" fill="url(#BG)"/>
+<pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.65" fill="rgba(219,39,119,0.1)"/></pattern><rect width="900" height="600" fill="url(#dots)"/>
+<rect x="0" y="0" width="900" height="58" fill="url(#HG)"/>
+<rect x="0" y="56" width="900" height="2" fill="#DB2777" opacity="0.7"/>
+<rect x="16" y="13" width="113" height="18" rx="9" fill="rgba(219,39,119,0.25)" stroke="rgba(219,39,119,0.55)" stroke-width="1"/>
+<text x="28" y="25" fill="white" font-size="8" font-weight="700" letter-spacing="1.6">PYRAMID MODEL</text>
+<text x="450" y="40" text-anchor="middle" fill="white" font-size="20" font-weight="900" letter-spacing="-0.3">Open Source RAG Stack</text>
+<polygon points="350,75 550,75 613,166 287,166" fill="#F8D8E6" stroke="#DB2777" stroke-width="1.8" class="fi" style="animation-delay:0.00s"/><polygon points="350,75 358,75 295,166 287,166" fill="#DB2777"/><circle cx="376" cy="120" r="13" fill="#DB2777"/><text x="376" y="125" text-anchor="middle" fill="white" font-size="12" font-weight="900">5</text><text x="450" y="115" text-anchor="middle" fill="#C5236B" font-size="13" font-weight="800">Foundation</text><text x="450" y="132" text-anchor="middle" fill="#475569" font-size="9.5">Core infrastructure and platform services</text><polygon points="287,169 613,169 676,260 224,260" fill="#D2EBF1" stroke="#0891B2" stroke-width="1.8" class="fi" style="animation-delay:0.09s"/><polygon points="287,169 295,169 232,260 224,260" fill="#0891B2"/><circle cx="313" cy="214" r="13" fill="#0891B2"/><text x="313" y="219" text-anchor="middle" fill="white" font-size="12" font-weight="900">4</text><text x="450" y="209" text-anchor="middle" fill="#0782A0" font-size="13" font-weight="800">Data Layer</text><text x="450" y="226" text-anchor="middle" fill="#475569" font-size="9.5">Storage, caching, and streaming systems</text><polygon points="224,263 676,263 739,354 161,354" fill="#D7E2FB" stroke="#2563EB" stroke-width="1.8" class="fi" style="animation-delay:0.18s"/><polygon points="224,263 232,263 169,354 161,354" fill="#2563EB"/><circle cx="250" cy="308" r="13" fill="#2563EB"/><text x="250" y="313" text-anchor="middle" fill="white" font-size="12" font-weight="900">3</text><text x="450" y="303" text-anchor="middle" fill="#2159D3" font-size="13" font-weight="800">Service Layer</text><text x="450" y="320" text-anchor="middle" fill="#475569" font-size="9.5">Business logic and API endpoints</text><polygon points="161,357 739,357 802,448 98,448" fill="#D2ECE4" stroke="#059669" stroke-width="1.8" class="fi" style="animation-delay:0.27s"/><polygon points="161,357 169,357 106,448 98,448" fill="#059669"/><circle cx="187" cy="402" r="13" fill="#059669"/><text x="187" y="407" text-anchor="middle" fill="white" font-size="12" font-weight="900">2</text><text x="450" y="397" text-anchor="middle" fill="#04875E" font-size="13" font-weight="800">Integration</text><text x="450" y="414" text-anchor="middle" fill="#475569" font-size="9.5">Third-party services, messaging, and events</text><polygon points="98,451 802,451 865,542 35,542" fill="#F8E6D2" stroke="#D97706" stroke-width="1.8" class="fi" style="animation-delay:0.36s"/><polygon points="98,451 106,451 43,542 35,542" fill="#D97706"/><circle cx="124" cy="496" r="13" fill="#D97706"/><text x="124" y="501" text-anchor="middle" fill="white" font-size="12" font-weight="900">1</text><text x="450" y="491" text-anchor="middle" fill="#C36B05" font-size="13" font-weight="800">User / Client</text><text x="450" y="508" text-anchor="middle" fill="#475569" font-size="9.5">Web, mobile, and CLI consumers</text>
+<rect x="0" y="570" width="900" height="30" fill="#FDF4F8"/>
+<rect x="0" y="569" width="900" height="1" fill="#E2E8F0"/>
+<text x="18" y="589" fill="#94A3B8" font-size="8.5">March 2026 · Komal Batra</text>
+<rect x="680" y="576" width="208" height="18" rx="9" fill="rgba(219,39,119,0.12)" stroke="#DB2777" stroke-width="1"/>
+<text x="784" y="588" text-anchor="middle" fill="#DB2777" font-size="9" font-weight="800" letter-spacing="0.8">AI (c) Komal Batra</text>
+</svg>
