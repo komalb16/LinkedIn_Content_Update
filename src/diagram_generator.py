@@ -46,18 +46,21 @@ PALETTES = {
     "security": ["#DC2626","#D97706","#7C3AED","#2563EB","#059669","#DB2777"],
     "data":     ["#059669","#7C3AED","#2563EB","#0891B2","#D97706","#DC2626"],
     "devops":   ["#059669","#2563EB","#7C3AED","#D97706","#DC2626","#0891B2"],
+    "career":   ["#7C3AED","#DB2777","#D97706","#059669","#2563EB","#0891B2"],
     "default":  ["#2563EB","#7C3AED","#059669","#D97706","#DC2626","#0891B2"],
 }
 
-def get_pal(tid):
-    t = tid.lower()
-    if any(x in t for x in ["llm","rag","agent","mlops","ai"]): pal = PALETTES["ai"]
+def get_pal(tid, topic_name=""):
+    t = ((tid or "") + " " + (topic_name or "")).lower()
+    if any(x in t for x in ["llm","rag","agent","mlops","ai","genai","agentic"]): pal = PALETTES["ai"]
     elif any(x in t for x in ["kube","docker","aws","cicd","cloud"]): pal = PALETTES["cloud"]
     elif any(x in t for x in ["zero","devsec","security"]): pal = PALETTES["security"]
     elif any(x in t for x in ["kafka","data","lake","lakehouse"]): pal = PALETTES["data"]
-    elif any(x in t for x in ["git","devops","solid","api","cicd"]): pal = PALETTES["devops"]
+    elif any(x in t for x in ["git","devops","solid","api"]): pal = PALETTES["devops"]
+    elif any(x in t for x in ["career","skill","learn","roadmap","job","growth","tips",
+                               "engineer","developer","branding","prompt","interview",
+                               "brand","leadership","talent","discipline"]): pal = PALETTES["career"]
     else: pal = PALETTES["default"]
-    # Randomize the color order for variety
     return random.sample(pal, len(pal))
 
 # ── Utilities ──────────────────────────────────────────────────────────────────
@@ -1674,23 +1677,59 @@ TOPIC_STYLE_OVERRIDES = {
     "rag-stack":         11,  # ecosystem tree
     "ai-skills-map":     12,  # honeycomb map
     "llm-vs-agentic":    13,  # parallel pipelines
-    "genai-roadmap":     15,  # vertical dashed timeline (overriding winding 14)
+    "genai-roadmap":     15, # vertical dashed timeline (overriding winding 14)
+  # ── Career / Skills / Learning (also matches custom topic names) ───────
+    "career":        7,
+    "skill":         7,
+    "talent":        7,
+    "discipline":    6,
+    "learning":      14,
+    "roadmap":       14,
+    "job":           5,
+    "role":          5,
+    "interview":     7,
+    "brand":         2,
+    "prompt":        7,
+    "growth":        2,
+    "leadership":    1,
+    "tips":          0,
+    "bootcamp":      0,
+    "course":        0,
+    "certification": 3,
 }
 
 
 def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "") -> str:
-    C = get_pal(topic_id)
+    C = get_pal(topic_id, topic_name)
     tid = topic_id.lower()
+    name_lower = topic_name.lower()
 
     style_idx = None
+    is_known = False
+
+    # Pass 1: match on topic ID
     for key, idx in TOPIC_STYLE_OVERRIDES.items():
         if key in tid:
             style_idx = idx
+            is_known = True
             break
 
-    # Add 30% chance for a totally random style, even if overridden
-    if style_idx is None or random.random() < 0.30:
-        style_idx = random.randint(0, len(STYLES) - 1)
+    # Pass 2: match on topic NAME (catches custom topics with arbitrary IDs)
+    if not is_known:
+        for key, idx in TOPIC_STYLE_OVERRIDES.items():
+            if key in name_lower:
+                style_idx = idx
+                is_known = True
+                break
+
+    if is_known:
+        # Known topics: 30% chance of style variation
+        if random.random() < 0.30:
+            style_idx = random.randint(0, len(STYLES) - 1)
+    else:
+        # Completely unknown topic → always card grid, never a random wrong style
+        style_idx = 7
+        log.info(f"Unknown topic '{topic_name}' — using card grid fallback")
 
     fn = STYLES[style_idx]
     try:
