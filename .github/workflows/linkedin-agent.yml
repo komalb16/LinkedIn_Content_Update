@@ -17,8 +17,9 @@ on:
     - cron: "0 6  * * *"  #  6 AM UTC =  2 AM EDT
     - cron: "0 14 * * *"  #  2 PM UTC = 10 AM EDT  ← morning posts
     - cron: "0 22 * * *"  # 10 PM UTC =  6 PM EDT  ← evening posts
-
-  # Manual trigger from GitHub UI — with optional inputs
+    - cron: "0 1  * * *"   # ← new, covers late-night Friday
+  
+    # Manual trigger from GitHub UI — with optional inputs
   workflow_dispatch:
     inputs:
       topic_id:
@@ -59,7 +60,7 @@ jobs:
   post-to-linkedin:
     name: Generate & Post Content
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 360
 
     steps:
       # 1. Checkout repository

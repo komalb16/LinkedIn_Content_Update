@@ -4082,21 +4082,27 @@ Rules:
     }
 
     function isSkippedRun(r) {
-      // Cron heartbeats carry the "schedule" event and usually "skipped" or "cancelled"
-      // outcome when they don't fire a post.
-      if (r.event === 'schedule') {
-        // If it succeeded or failed (real attempt), show it.
-        // If it was skipped or cancelled (heartbeat), hide it.
-        return r.conclusion === 'skipped' || r.conclusion === 'cancelled';
-      }
-
-      // For manual/dispatch, we show everything EXCEPT "skipped".
-      // "cancelled" might be a real attempt that was stopped, so we keep it if it ran a bit.
+      // Always hide skipped runs
       if (r.conclusion === 'skipped') return true;
 
+      if (r.event === 'schedule') {
+        // Hide cancelled scheduled runs (timeout kills, heartbeat cancels)
+        if (r.conclusion === 'cancelled') return true;
+
+        // Hide scheduled runs that succeeded but never posted
+        // A real post has its topic enriched from the "✅ Posted ·" step
+        // A cron heartbeat exits(0) cleanly — success but no topic
+        if (r.conclusion === 'success' && _enrichmentDone && !_topicCache[r.id]) {
+          // Give it benefit of the doubt if enrichment didn't fetch this run
+          const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
+          if (fetched) return true; // fetched but empty = no post step found = heartbeat
+        }
+        return false;
+      }
+
+      // Manual dispatch: hide only fast cancels (< 15s)
       if (r.conclusion === 'cancelled') {
         const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
-        // If cancelled in under 15s, it likely never even reached the agent logic.
         return durMs < 15000;
       }
       return false;
@@ -4240,6 +4246,12 @@ Rules:
             }
           }
         } catch (e) { }
+        // Mark as fetched even if no topic found
+        // null = fetched but no "✅ Posted ·" step = cron heartbeat
+        // undefined = not fetched yet
+        if (!Object.prototype.hasOwnProperty.call(_topicCache, r.id)) {
+          _topicCache[r.id] = null;
+        }
       }));
       _enrichmentDone = true;
       applyRunFilter();
@@ -4247,7 +4259,7 @@ Rules:
 
     function getTopicFromRun(r) {
       // Priority 0: enriched topic from workflow job steps (most reliable)
-      if (_topicCache[r.id]) return _topicCache[r.id];
+      if (_topicCache[r.id] !== undefined) return _topicCache[r.id] || null;
       // Priority 1: run-name set by YAML
       // Current format: "🖱️ Manual · llm-architecture" (2 parts)
       // Legacy format:  "LinkedIn Agent · Manual · topic" (3 parts)
