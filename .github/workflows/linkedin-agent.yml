@@ -159,6 +159,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add src/.topic_history.json || true
           git diff --staged --quiet || git commit -m "chore: update topic history [skip ci]"
+          git pull --rebase origin main || true
           git push || true
 
       # 9. Update GitHub Profile README with latest post  (#18)

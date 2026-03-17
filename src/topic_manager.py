@@ -275,7 +275,7 @@ class TopicManager:
         with open(HISTORY_FILE, "w") as f:
             # Save last 50 entries
             history_list = list(self.history)
-            json.dump(history_list[-50:], f, indent=2)
+            json.dump(history_list[-100:], f, indent=2)
 
     def _load_topics(self):
         """Merge hardcoded TOPICS with topics_config.json overrides from the dashboard."""
@@ -331,11 +331,11 @@ class TopicManager:
         raise ValueError("Topic not found: " + topic_id)
 
     def get_next_topic(self):
-        recent_ids = [h["topic_id"] for h in self.history[-12:]]
+        recent_ids = [h["topic_id"] for h in self.history[-35:]]
         available = [t for t in self.topics if t["id"] not in recent_ids]
         if not available:
             available = self.topics  # all have been used recently — full reset
-        recent_categories = [h.get("category") for h in self.history[-3:]]
+        recent_categories = [h.get("category") for h in self.history[-5:]]
         prioritized = [t for t in available if t["category"] not in recent_categories]
         pool = prioritized if prioritized else available
         chosen = random.choice(pool)

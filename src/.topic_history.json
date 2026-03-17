@@ -1,1 +1,247 @@
-[]
+[
+  {
+    "timestamp": "2026-02-09T23:02:17.243111",
+    "topic_id": "aws-architecture",
+    "topic_name": "Aws Architecture",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-10T23:02:17.243111",
+    "topic_id": "ai-agents-2026",
+    "topic_name": "Ai Agents 2026",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-11T23:02:17.243111",
+    "topic_id": "ai-innovation-experiments",
+    "topic_name": "Ai Innovation Experiments",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-12T23:02:17.243111",
+    "topic_id": "ai-skills-map",
+    "topic_name": "Ai Skills Map",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-13T23:02:17.243111",
+    "topic_id": "system-design",
+    "topic_name": "System Design",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-14T23:02:17.243111",
+    "topic_id": "llm",
+    "topic_name": "Llm",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-15T23:02:17.243111",
+    "topic_id": "solid-principles",
+    "topic_name": "Solid Principles",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-16T23:02:17.243111",
+    "topic_id": "agentic-ai",
+    "topic_name": "Agentic Ai",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-17T23:02:17.243111",
+    "topic_id": "ai-myths-misconceptions",
+    "topic_name": "Ai Myths Misconceptions",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-18T23:02:17.243111",
+    "topic_id": "llm-architecture",
+    "topic_name": "Llm Architecture",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-19T23:02:17.243111",
+    "topic_id": "ai-disciplines",
+    "topic_name": "Ai Disciplines",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-20T23:02:17.243111",
+    "topic_id": "ml-algorithms",
+    "topic_name": "Ml Algorithms",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-21T23:02:17.243111",
+    "topic_id": "llm-vs-agentic",
+    "topic_name": "Llm Vs Agentic",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-22T23:02:17.243111",
+    "topic_id": "genai-roadmap",
+    "topic_name": "Genai Roadmap",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-23T23:02:17.243111",
+    "topic_id": "data-evolution",
+    "topic_name": "Data Evolution",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-24T23:02:17.243111",
+    "topic_id": "rag-stack",
+    "topic_name": "Rag Stack",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-25T23:02:17.243111",
+    "topic_id": "api-design",
+    "topic_name": "Api Design",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-26T23:02:17.243111",
+    "topic_id": "langchain",
+    "topic_name": "Langchain",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-27T23:02:17.243111",
+    "topic_id": "copilot",
+    "topic_name": "Copilot",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-02-28T23:02:17.243111",
+    "topic_id": "git-workflow",
+    "topic_name": "Git Workflow",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-01T23:02:17.243111",
+    "topic_id": "data-engineering",
+    "topic_name": "Data Engineering",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-02T23:02:17.243111",
+    "topic_id": "ai-trends-industry-insights",
+    "topic_name": "Ai Trends Industry Insights",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-03T23:02:17.243111",
+    "topic_id": "docker-cheatsheet",
+    "topic_name": "Docker Cheatsheet",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-04T23:02:17.243111",
+    "topic_id": "data-lakehouse",
+    "topic_name": "Data Lakehouse",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-05T23:02:17.243111",
+    "topic_id": "ai-in-real-world-applications",
+    "topic_name": "Ai In Real World Applications",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-06T23:02:17.243111",
+    "topic_id": "kubernetes-mastery",
+    "topic_name": "Kubernetes Mastery",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-07T23:02:17.243111",
+    "topic_id": "ai-career-skills",
+    "topic_name": "Ai Career Skills",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-08T23:02:17.243111",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-09T23:02:17.243111",
+    "topic_id": "devsecops",
+    "topic_name": "Devsecops",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-10T23:02:17.243111",
+    "topic_id": "microsoft-365",
+    "topic_name": "Microsoft 365",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-11T23:02:17.243111",
+    "topic_id": "responsible-ethical-ai",
+    "topic_name": "Responsible Ethical Ai",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-12T23:02:17.243111",
+    "topic_id": "azure",
+    "topic_name": "Azure",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-13T23:02:17.243111",
+    "topic_id": "rag-systems",
+    "topic_name": "Rag Systems",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-14T23:02:17.243111",
+    "topic_id": "kafka-streaming",
+    "topic_name": "Kafka Streaming",
+    "mode": "topic",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-03-15T23:02:17.243111",
+    "topic_id": "mlops-pipeline",
+    "topic_name": "Mlops Pipeline",
+    "mode": "topic",
+    "status": "success"
+  }
+]
