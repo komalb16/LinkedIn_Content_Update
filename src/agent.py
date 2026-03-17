@@ -482,8 +482,14 @@ STRICT: 250-320 words total."""
     log.info("POST:\n" + post_text)
 
     # ── GENERATE DIAGRAM (local — no LLM call needed) ─────────────────────────
+    # ── GENERATE DIAGRAM (local — no LLM call needed) ─────────────────────────
     if not topic:
         topic = topic_mgr.get_next_topic()
+
+    # Single authoritative write — after topic is fully resolved in ALL paths
+    write_github_output("POST_TOPIC",   topic.get("name", ""))
+    write_github_output("POSTED_TOPIC", topic.get("name", ""))
+    log.info(f"Final topic resolved: {topic['name']} (mode: {mode})")
 
     diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
     diagram_path = diagram_gen.save_svg(None, topic["id"], topic["name"], diagram_type)
