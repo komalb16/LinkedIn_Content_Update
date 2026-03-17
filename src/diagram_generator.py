@@ -1628,7 +1628,287 @@ def _style_vertical_timeline(topic_id, topic_name, C):
             svg += f'<text x="{right_bx+box_w/2}" y="{card_y+72}" text-anchor="middle" font-size="10" fill="gray" font-weight="600">{xe(bullets[1])}</text>'
 
     return _wrap(svg, W, H, topic_name, "Concept & Tool Overview Strategy", accent, bg_top, bg_bot)
+# ════════════════════════════════════════════════════════════════════════════
+#  PASTE THESE 4 FUNCTIONS INTO diagram_generator.py
+#  Location: right before the STYLES = [ list
+# ════════════════════════════════════════════════════════════════════════════
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 16 — INFOGRAPHIC PANELS  (white bg, coloured section boxes, dashed arrows)
+#  Inspired by: RAG Design Patterns reference image
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_infographic_panels(topic_id, topic_name, C, structure=None):
+    W, H = 900, 680
+    accent = C[0]
+    bg = "#FAFAFA"
+    sections = structure["sections"] if structure else [
+        {"id":1,"label":"Pattern 1","desc":"First approach"},
+        {"id":2,"label":"Pattern 2","desc":"Second approach"},
+        {"id":3,"label":"Pattern 3","desc":"Third approach"},
+        {"id":4,"label":"Pattern 4","desc":"Fourth approach"},
+        {"id":5,"label":"Pattern 5","desc":"Fifth approach"},
+        {"id":6,"label":"Pattern 6","desc":"Sixth approach"},
+    ]
+    subtitle = structure["subtitle"] if structure else "Key Patterns"
+
+    svg = ""
+    svg += f'<rect width="{W}" height="{H}" fill="{bg}"/>'
+    svg += f'<rect x="0" y="0" width="6" height="{H}" fill="{accent}"/>'
+
+    # Large title — two lines, mixed weight
+    words = topic_name.split()
+    mid = max(1, len(words)//2)
+    t1 = " ".join(words[:mid]); t2 = " ".join(words[mid:])
+    svg += f'<text x="30" y="48" fill="#111" font-size="32" font-weight="900" font-family="Arial,sans-serif">{xe(t1)}</text>'
+    if t2:
+        svg += f'<text x="30" y="82" fill="{accent}" font-size="28" font-weight="700" font-family="Arial,sans-serif">{xe(t2)}</text>'
+    svg += f'<text x="30" y="108" fill="#888" font-size="13" font-family="Arial,sans-serif">{xe(subtitle)}</text>'
+    svg += f'<line x1="30" y1="118" x2="{W-30}" y2="118" stroke="#E5E7EB" stroke-width="1.5"/>'
+
+    n = len(sections)
+    cols = 3 if n >= 5 else 2
+    rows = math.ceil(n / cols)
+    pad = 28; gap = 12
+    avail_w = W - pad*2 - gap*(cols-1)
+    avail_h = H - 130 - pad - gap*(rows-1)
+    cw = avail_w // cols
+    ch = avail_h // rows
+    panel_colors = [C[i % len(C)] for i in range(n)]
+
+    for i, sec in enumerate(sections):
+        col_idx = i % cols; row_idx = i // cols
+        px = pad + col_idx*(cw+gap)
+        py = 130 + row_idx*(ch+gap)
+        pc = panel_colors[i]
+        delay = f"animation-delay:{i*0.08:.2f}s"
+
+        svg += f'<rect x="{px}" y="{py}" width="{cw}" height="{ch}" rx="10" fill="white" stroke="{lighten(pc,0.55)}" stroke-width="1.5" class="fi" style="{delay}"/>'
+        svg += f'<rect x="{px}" y="{py}" width="5" height="{ch}" rx="2" fill="{pc}"/>'
+        pill_w = len(sec["label"])*8 + 20
+        svg += f'<rect x="{px+14}" y="{py+12}" width="{pill_w}" height="22" rx="11" fill="{pc}"/>'
+        svg += f'<text x="{px+24}" y="{py+27}" fill="white" font-size="10" font-weight="800" font-family="Arial,sans-serif">{xe(sec["label"])}</text>'
+        svg += f'<circle cx="{px+cw-18}" cy="{py+18}" r="12" fill="{lighten(pc,0.85)}" stroke="{pc}" stroke-width="1.5"/>'
+        svg += f'<text x="{px+cw-18}" y="{py+23}" text-anchor="middle" fill="{pc}" font-size="11" font-weight="900" font-family="Arial,sans-serif">{sec["id"]}</text>'
+        desc_lines = wrap_lines(sec["desc"], cw//7)
+        for li, ln in enumerate(desc_lines[:3]):
+            svg += f'<text x="{px+14}" y="{py+50+li*16}" fill="#374151" font-size="11" font-family="Arial,sans-serif">{xe(ln)}</text>'
+
+        if col_idx < cols-1 and i < n-1:
+            ax1 = px+cw; ay = py+ch//2; ax2 = px+cw+gap
+            svg += f'<line x1="{ax1}" y1="{ay}" x2="{ax2}" y2="{ay}" stroke="{lighten(pc,0.3)}" stroke-width="1.5" stroke-dasharray="4 3"/>'
+            svg += f'<polygon points="{ax2+4},{ay} {ax2-4},{ay-4} {ax2-4},{ay+4}" fill="{lighten(pc,0.3)}"/>'
+
+    svg += f'<rect x="0" y="{H-28}" width="{W}" height="28" fill="{lighten(accent,0.92)}"/>'
+    svg += f'<text x="18" y="{H-10}" fill="#6B7280" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<rect x="{W-200}" y="{H-22}" width="188" height="16" rx="8" fill="{rgba(accent,0.15)}" stroke="{accent}" stroke-width="1"/>'
+    svg += f'<text x="{W-106}" y="{H-11}" text-anchor="middle" fill="{accent}" font-size="8.5" font-weight="800" font-family="Arial,sans-serif">AI (c) Komal Batra</text>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 17 — CHALKBOARD  (dark textured, chalk outlines, contrast sections)
+#  Inspired by: "What is Agentic AI?" chalkboard image
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_chalkboard(topic_id, topic_name, C, structure=None):
+    W, H = 900, 660
+    chalk_white = "#F5F0E8"; chalk_dim = "#C8BFA8"
+    bg_dark = "#1A1F1A"; accent = C[0]
+    sections = structure["sections"] if structure else [
+        {"id":1,"label":"Concept A","desc":"First key idea"},
+        {"id":2,"label":"Concept B","desc":"Second key idea"},
+        {"id":3,"label":"Concept C","desc":"Third key idea"},
+        {"id":4,"label":"Concept D","desc":"Fourth key idea"},
+    ]
+    subtitle = structure["subtitle"] if structure else ""
+    mid = len(sections)//2
+    not_group = sections[:mid] if mid > 0 else sections[:1]
+    is_group   = sections[mid:] if mid > 0 else sections[1:]
+
+    svg = ""
+    svg += f'<rect width="{W}" height="{H}" fill="{bg_dark}"/>'
+    for xi in range(0, W, 40):
+        for yi in range(0, H, 40):
+            svg += f'<circle cx="{xi+random.randint(-3,3)}" cy="{yi+random.randint(-3,3)}" r="0.4" fill="{chalk_dim}" opacity="0.15"/>'
+
+    title_short = clamp(topic_name, 38)
+    tw = len(title_short)*17 + 40
+    svg += f'<rect x="{(W-tw)//2}" y="18" width="{tw}" height="46" rx="23" fill="none" stroke="{chalk_white}" stroke-width="2.5"/>'
+    svg += f'<text x="{W//2}" y="49" text-anchor="middle" fill="{chalk_white}" font-size="24" font-weight="900" font-family="Georgia,serif">{xe(title_short)}</text>'
+    if subtitle:
+        svg += f'<text x="{W//2}" y="82" text-anchor="middle" fill="{chalk_dim}" font-size="12" font-family="Arial,sans-serif">{xe(subtitle)}</text>'
+
+    box1_y = 96; box1_h = max(120, len(not_group)*70)
+    svg += f'<rect x="24" y="{box1_y}" width="{W//2-36}" height="{box1_h}" rx="8" fill="{rgba(chalk_white,0.04)}" stroke="{chalk_dim}" stroke-width="1.5" stroke-dasharray="8 4"/>'
+    svg += f'<rect x="40" y="{box1_y-9}" width="140" height="18" rx="9" fill="{bg_dark}"/>'
+    svg += f'<text x="48" y="{box1_y+3}" fill="#E57373" font-size="11" font-weight="700" font-family="Arial,sans-serif">These are NOT ›</text>'
+
+    for i, sec in enumerate(not_group):
+        sy = box1_y + 20 + i*68
+        svg += f'<text x="40" y="{sy+14}" fill="{chalk_white}" font-size="14" font-weight="800" font-family="Arial,sans-serif">{xe(sec["label"])}</text>'
+        desc_parts = sec["desc"].split("→") if "→" in sec["desc"] else [sec["desc"]]
+        for pi, part in enumerate(desc_parts[:4]):
+            bx = 40 + pi*120
+            svg += f'<rect x="{bx}" y="{sy+22}" width="110" height="26" rx="5" fill="none" stroke="{chalk_dim}" stroke-width="1"/>'
+            svg += f'<text x="{bx+55}" y="{sy+39}" text-anchor="middle" fill="{chalk_dim}" font-size="9" font-family="Arial,sans-serif">{xe(clamp(part.strip(),14))}</text>'
+            if pi < len(desc_parts)-1:
+                svg += f'<line x1="{bx+110}" y1="{sy+35}" x2="{bx+120}" y2="{sy+35}" stroke="{chalk_dim}" stroke-width="1.5"/>'
+                svg += f'<polygon points="{bx+122},{sy+35} {bx+118},{sy+32} {bx+118},{sy+38}" fill="{chalk_dim}"/>'
+
+    box2_y = 96; box2_w = W//2 - 36; box2_x = W//2 + 12
+    box2_h = max(120, len(is_group)*80 + 40)
+    svg += f'<rect x="{box2_x}" y="{box2_y}" width="{box2_w}" height="{box2_h}" rx="8" fill="{rgba(accent,0.08)}" stroke="{accent}" stroke-width="2" stroke-dasharray="10 4"/>'
+    svg += f'<rect x="{box2_x+16}" y="{box2_y-9}" width="140" height="18" rx="9" fill="{bg_dark}"/>'
+    svg += f'<text x="{box2_x+24}" y="{box2_y+3}" fill="{accent}" font-size="11" font-weight="700" font-family="Arial,sans-serif">This IS ›</text>'
+
+    for i, sec in enumerate(is_group):
+        sy = box2_y + 20 + i*76
+        svg += f'<text x="{box2_x+14}" y="{sy+14}" fill="{chalk_white}" font-size="13" font-weight="800" font-family="Arial,sans-serif">{xe(sec["label"])}</text>'
+        components = sec["desc"].split("+") if "+" in sec["desc"] else sec["desc"].split(",")
+        n_comp = min(len(components), 4)
+        comp_w = (box2_w-28) // n_comp
+        for ci, comp in enumerate(components[:4]):
+            bx = box2_x+14 + ci*comp_w
+            svg += f'<rect x="{bx}" y="{sy+20}" width="{comp_w-4}" height="32" rx="6" fill="{rgba(accent,0.15)}" stroke="{accent}" stroke-width="1"/>'
+            svg += f'<text x="{bx+comp_w//2}" y="{sy+40}" text-anchor="middle" fill="{chalk_white}" font-size="9" font-weight="700" font-family="Arial,sans-serif">{xe(clamp(comp.strip(),12))}</text>'
+
+    svg += f'<text x="18" y="{H-10}" fill="{chalk_dim}" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="{W-18}" y="{H-10}" text-anchor="end" fill="{accent}" font-size="9" font-weight="800" font-family="Arial,sans-serif">AI (c) Komal Batra</text>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 18 — DARK COLUMN FLOW  (black bg, 3 accent columns, circle nodes)
+#  Inspired by: "RAG vs Agentic RAG vs AI Memory" evolution image
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_dark_column_flow(topic_id, topic_name, C, structure=None):
+    W, H = 900, 660
+    bg = "#0D0D0D"; accent = C[0]
+    sections = structure["sections"] if structure else [
+        {"id":1,"label":"Approach A","desc":"Step 1 → Step 2 → Step 3"},
+        {"id":2,"label":"Approach B","desc":"Step 1 → Branch → Step 3"},
+        {"id":3,"label":"Approach C","desc":"Step 1 → Memory → Step 3"},
+    ]
+    subtitle = structure["subtitle"] if structure else ""
+    n_cols = min(len(sections), 3)
+    col_colors = [C[i % len(C)] for i in range(n_cols)]
+    col_w = (W - 60) // n_cols
+    node_r = 22
+
+    svg = ""
+    svg += f'<rect width="{W}" height="{H}" fill="{bg}"/>'
+    svg += f'<text x="{W//2}" y="38" text-anchor="middle" fill="white" font-size="22" font-weight="900" font-family="Arial,sans-serif">{xe(clamp(topic_name,48))}</text>'
+    if subtitle:
+        svg += f'<text x="{W//2}" y="58" text-anchor="middle" fill="#888" font-size="12" font-family="Arial,sans-serif">{xe(subtitle)}</text>'
+
+    for ci in range(n_cols):
+        sec = sections[ci]; col = col_colors[ci]
+        cx = 30 + ci*col_w + col_w//2
+        if ci > 0:
+            svg += f'<line x1="{30+ci*col_w}" y1="70" x2="{30+ci*col_w}" y2="{H-30}" stroke="#333" stroke-width="1" stroke-dasharray="6 4"/>'
+        hw = len(sec["label"])*9+24
+        svg += f'<rect x="{cx-hw//2}" y="70" width="{hw}" height="26" rx="13" fill="{col}" opacity="0.9"/>'
+        svg += f'<text x="{cx}" y="87" text-anchor="middle" fill="white" font-size="11" font-weight="800" font-family="Arial,sans-serif">{xe(sec["label"])}</text>'
+
+        steps = [s.strip() for s in sec["desc"].replace("→","|").split("|")]
+        n_steps = len(steps)
+        avail_h = H - 140
+        step_gap = min(90, avail_h // max(n_steps, 1))
+        start_y = 118
+
+        for si, step in enumerate(steps):
+            ny = start_y + si*step_gap
+            delay = f"animation-delay:{ci*0.15+si*0.1:.2f}s"
+            if si > 0:
+                prev_y = start_y + (si-1)*step_gap
+                svg += f'<line x1="{cx}" y1="{prev_y+node_r}" x2="{cx}" y2="{ny-node_r}" stroke="{col}" stroke-width="2" class="flow" style="{delay}"/>'
+                svg += f'<polygon points="{cx},{ny-node_r+2} {cx-5},{ny-node_r-6} {cx+5},{ny-node_r-6}" fill="{col}"/>'
+
+            if "," in step and si == n_steps-2:
+                branches = [b.strip() for b in step.split(",")]
+                branch_spacing = 80
+                bstart = cx - (len(branches)-1)*branch_spacing//2
+                for bi, branch in enumerate(branches):
+                    bx = bstart + bi*branch_spacing
+                    svg += f'<line x1="{cx}" y1="{ny-node_r}" x2="{bx}" y2="{ny}" stroke="{col}" stroke-width="1.5" stroke-dasharray="4 2"/>'
+                    svg += f'<circle cx="{bx}" cy="{ny}" r="{node_r-6}" fill="{rgba(col,0.2)}" stroke="{col}" stroke-width="1.5" class="fi" style="{delay}"/>'
+                    svg += f'<text x="{bx}" y="{ny+4}" text-anchor="middle" fill="{col}" font-size="8" font-weight="700" font-family="Arial,sans-serif">{xe(clamp(branch,10))}</text>'
+            else:
+                svg += f'<circle cx="{cx}" cy="{ny}" r="{node_r}" fill="{rgba(col,0.18)}" stroke="{col}" stroke-width="2" class="fi" style="{delay}"/>'
+                svg += f'<circle cx="{cx}" cy="{ny}" r="{node_r-5}" fill="{rgba(col,0.08)}"/>'
+                label_lines = wrap_lines(step, 12)
+                for li, ln in enumerate(label_lines[:2]):
+                    svg += f'<text x="{cx}" y="{ny+node_r+14+li*13}" text-anchor="middle" fill="{lighten(col,0.5)}" font-size="9.5" font-family="Arial,sans-serif">{xe(ln)}</text>'
+
+    svg += f'<text x="18" y="{H-8}" fill="#555" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="{W-18}" y="{H-8}" text-anchor="end" fill="{C[0]}" font-size="9" font-weight="800" font-family="Arial,sans-serif">AI (c) Komal Batra</text>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 19 — THREE PANEL  (3 unequal bordered panels, bold headers, numbered steps)
+#  Inspired by: Docker Client/Host/Hub infographic image
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_three_panel(topic_id, topic_name, C, structure=None):
+    W, H = 900, 620
+    bg = "#F8F9FA"; accent = C[0]
+    sections = structure["sections"] if structure else [
+        {"id":1,"label":"Component 1","desc":"First player in the system"},
+        {"id":2,"label":"Component 2","desc":"Second player in the system"},
+        {"id":3,"label":"Component 3","desc":"Third player in the system"},
+    ]
+    subtitle = structure["subtitle"] if structure else ""
+    n_panels = min(len(sections), 3)
+    widths = [220, 270, 220] if n_panels == 3 else ([340, 340] if n_panels == 2 else [W-60])
+    gaps = 15
+    total_w = sum(widths) + gaps*(n_panels-1)
+    start_x = (W - total_w)//2
+
+    svg = ""
+    svg += f'<rect width="{W}" height="{H}" fill="{bg}"/>'
+    svg += f'<rect x="18" y="16" width="60" height="22" rx="4" fill="{C[0]}"/>'
+    svg += f'<text x="48" y="31" text-anchor="middle" fill="white" font-size="10" font-weight="800" font-family="Arial,sans-serif">komalb</text>'
+
+    words = topic_name.split()
+    bold_words = words[:2]; rest_words = words[2:]
+    svg += f'<text x="90" y="32" fill="#111" font-size="18" font-weight="400" font-family="Arial,sans-serif">Inside the <tspan font-weight="900" fill="{C[0]}">{xe(" ".join(bold_words))}</tspan> {xe(" ".join(rest_words))}</text>'
+
+    px = start_x
+    for i in range(n_panels):
+        pw = widths[i]; pc = C[i % len(C)]; sec = sections[i]
+        panel_h = H - 100
+        svg += f'<rect x="{px}" y="56" width="{pw}" height="{panel_h}" rx="10" fill="white" stroke="{lighten(pc,0.5)}" stroke-width="1.5"/>'
+        svg += f'<rect x="{px}" y="56" width="{pw}" height="36" rx="10" fill="{pc}"/>'
+        svg += f'<rect x="{px}" y="74" width="{pw}" height="18" fill="{pc}"/>'
+        svg += f'<text x="{px+pw//2}" y="79" text-anchor="middle" fill="white" font-size="12" font-weight="900" letter-spacing="1" font-family="Arial,sans-serif">{xe(sec["label"].upper())}</text>'
+
+        content_lines = sec["desc"].split(",") if "," in sec["desc"] else [sec["desc"]]
+        for ci2, line in enumerate(content_lines[:4]):
+            ly = 110 + ci2*52
+            svg += f'<rect x="{px+12}" y="{ly}" width="{pw-24}" height="40" rx="6" fill="{lighten(pc,0.90)}" stroke="{lighten(pc,0.6)}" stroke-width="1"/>'
+            svg += f'<rect x="{px+12}" y="{ly}" width="4" height="40" rx="2" fill="{pc}"/>'
+            lns = wrap_lines(line.strip(), (pw-30)//7)
+            for li2, ln in enumerate(lns[:2]):
+                svg += f'<text x="{px+22}" y="{ly+16+li2*14}" fill="#1F2937" font-size="10" font-weight="600" font-family="Arial,sans-serif">{xe(ln)}</text>'
+
+        if i < n_panels-1:
+            ax = px+pw+2; ay = 56+panel_h//2
+            svg += f'<polygon points="{ax+gaps},{ay} {ax+4},{ay-10} {ax+4},{ay+10}" fill="{pc}"/>'
+            svg += f'<line x1="{ax}" y1="{ay}" x2="{ax+gaps}" y2="{ay}" stroke="{pc}" stroke-width="3"/>'
+        px += pw + gaps
+
+    step_y = H - 38
+    svg += f'<rect x="0" y="{step_y-12}" width="{W}" height="50" fill="{lighten(C[0],0.94)}"/>'
+    col_w2 = W // max(n_panels, 1)
+    for si in range(n_panels):
+        sec = sections[si]; sx = 18 + si*col_w2
+        svg += f'<circle cx="{sx+10}" cy="{step_y+6}" r="9" fill="{C[si%len(C)]}"/>'
+        svg += f'<text x="{sx+10}" y="{step_y+10}" text-anchor="middle" fill="white" font-size="9" font-weight="900" font-family="Arial,sans-serif">{si+1}</text>'
+        svg += f'<text x="{sx+24}" y="{step_y+10}" fill="#374151" font-size="9" font-family="Arial,sans-serif">{xe(clamp(sec["desc"], col_w2//6))}</text>'
+
+    svg += f'<rect x="0" y="{H-22}" width="{W}" height="22" fill="{C[0]}"/>'
+    svg += f'<text x="18" y="{H-7}" fill="white" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="{W-18}" y="{H-7}" text-anchor="end" fill="white" font-size="9" font-weight="800" font-family="Arial,sans-serif">AI (c) Komal Batra</text>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  DISPATCH — pick style per topic (override map + hash fallback)
@@ -1652,6 +1932,10 @@ STYLES = [
     _style_parallel_pipelines, # 13 — parallel vertical sequences
     _style_winding_roadmap, # 14 - winding path with alternating nodes
     _style_vertical_timeline, # 15 - central static vertical dashed line
+    _style_infographic_panels,  # 16
+    _style_chalkboard,          # 17
+    _style_dark_column_flow,    # 18
+    _style_three_panel,         # 19
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -1696,10 +1980,13 @@ TOPIC_STYLE_OVERRIDES = {
     "bootcamp":      0,
     "course":        0,
     "certification": 3,
+    "rag-systems":      16,   # infographic panels — 7 RAG patterns
+    "agentic-ai":       18,   # dark column flow — RAG vs Agentic vs Memory
+    "docker-cheatsheet": 19,  # three panel — Client/Host/Hub
 }
 
 
-def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "") -> str:
+def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "", structure: dict = None) -> str:
     C = get_pal(topic_id, topic_name)
     tid = topic_id.lower()
     name_lower = topic_name.lower()
@@ -1733,6 +2020,9 @@ def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "") -> str:
 
     fn = STYLES[style_idx]
     try:
+        import inspect
+        if "structure" in inspect.signature(fn).parameters:
+            return fn(topic_id, topic_name, C, structure=structure)
         return fn(topic_id, topic_name, C)
     except Exception as e:
         log.warning(f"Style {style_idx} failed ({e}), falling back to card grid")
@@ -1748,7 +2038,7 @@ class DiagramGenerator:
         Path(OUTPUT_DIR).mkdir(exist_ok=True)
         log.info("Diagram output dir: " + OUTPUT_DIR + "/")
 
-    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram"):
+    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None):
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
         
@@ -1769,7 +2059,7 @@ class DiagramGenerator:
             use_existing = True
         
         if not use_existing:
-            svg = make_diagram(topic_name or topic_id, topic_id, diagram_type)
+            svg = make_diagram(topic_name or topic_id, topic_id, diagram_type, structure=structure)
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(svg)
             size_kb = os.path.getsize(filename) / 1024

@@ -252,6 +252,213 @@ TOPICS = [
     },
 ]
 
+# ─── DIAGRAM STRUCTURES ───────────────────────────────────────────────────────
+DIAGRAM_STRUCTURES = {
+    "llm-architecture": {
+        "style": 1, "subtitle": "How LLMs Actually Work",
+        "sections": [
+            {"id":1,"label":"Tokenisation",   "desc":"Raw text split into sub-word tokens"},
+            {"id":2,"label":"Embedding",      "desc":"Tokens mapped to dense vectors"},
+            {"id":3,"label":"Attention",      "desc":"Multi-head self-attention mechanism"},
+            {"id":4,"label":"Feed-Forward",   "desc":"Transform and project hidden states"},
+            {"id":5,"label":"Output Layer",   "desc":"Project to vocabulary, sample token"},
+        ]
+    },
+    "rag-systems": {
+        "style": 16, "subtitle": "7 Patterns Every AI Engineer Must Know",
+        "sections": [
+            {"id":1,"label":"Naive RAG",           "desc":"Documents → Vector DB → LLM"},
+            {"id":2,"label":"Retrieve-and-Rerank", "desc":"Reranker filters retrieved context"},
+            {"id":3,"label":"Multimodal RAG",      "desc":"Text, images, audio, video"},
+            {"id":4,"label":"Graph RAG",            "desc":"Knowledge graphs + vector search"},
+            {"id":5,"label":"Hybrid RAG",           "desc":"Vector + structured retrieval"},
+            {"id":6,"label":"Agentic RAG",          "desc":"Agent routes retrieval decisions"},
+            {"id":7,"label":"Multi-Agent RAG",      "desc":"Specialised agents collaborate"},
+        ]
+    },
+    "ai-agents-2026": {
+        "style": 17, "subtitle": "What Real Agentic AI Looks Like",
+        "sections": [
+            {"id":1,"label":"NOT: LLM Chatbot", "desc":"Query → Prompt → LLM → Output"},
+            {"id":2,"label":"NOT: RPA",          "desc":"Script trigger, no reasoning loop"},
+            {"id":3,"label":"NOT: Basic RAG",    "desc":"Retrieval only, no planning"},
+            {"id":4,"label":"IS: Agentic AI",    "desc":"Memory + Tools + Planning + Feedback"},
+        ]
+    },
+    "mlops-pipeline": {
+        "style": 0, "subtitle": "From Raw Data to Production",
+        "sections": [
+            {"id":1,"label":"Data Validation",     "desc":"Schema checks, dedup, quality gates"},
+            {"id":2,"label":"Feature Engineering", "desc":"Feast feature store, versioning"},
+            {"id":3,"label":"Training",            "desc":"Distributed GPU cluster training"},
+            {"id":4,"label":"Experiment Tracking", "desc":"MLflow metrics and artefacts"},
+            {"id":5,"label":"Model Registry",      "desc":"Versioned models, approval gate"},
+            {"id":6,"label":"Serving + Monitor",   "desc":"Triton, drift detection, retraining"},
+        ]
+    },
+    "kubernetes-mastery": {
+        "style": 4, "subtitle": "Concepts Every K8s Engineer Must Know",
+        "sections": [
+            {"id":1,"label":"Pod",        "desc":"Smallest deployable unit"},
+            {"id":2,"label":"Deployment", "desc":"Manages replica sets and rollouts"},
+            {"id":3,"label":"Service",    "desc":"Stable network endpoint"},
+            {"id":4,"label":"Ingress",    "desc":"HTTP routing and TLS termination"},
+            {"id":5,"label":"HPA",        "desc":"Horizontal pod autoscaling"},
+            {"id":6,"label":"RBAC",       "desc":"Role-based access control"},
+        ]
+    },
+    "docker-cheatsheet": {
+        "style": 19, "subtitle": "3 Players Behind Every docker build",
+        "sections": [
+            {"id":1,"label":"Docker Client", "desc":"CLI sends API requests to daemon"},
+            {"id":2,"label":"Docker Host",   "desc":"Daemon builds layers, caches, stores image"},
+            {"id":3,"label":"Docker Hub",    "desc":"Registry for sharing and deployment"},
+        ]
+    },
+    "aws-architecture": {
+        "style": 6, "subtitle": "Core Services Every Cloud Engineer Must Know",
+        "sections": [
+            {"id":1,"label":"Compute",  "desc":"EC2, Lambda, ECS, Fargate"},
+            {"id":2,"label":"Storage",  "desc":"S3, EBS, EFS, Glacier"},
+            {"id":3,"label":"Database", "desc":"RDS, DynamoDB, ElastiCache"},
+            {"id":4,"label":"Network",  "desc":"VPC, ALB, CloudFront, Route53"},
+            {"id":5,"label":"Security", "desc":"IAM, KMS, GuardDuty, Secrets Manager"},
+        ]
+    },
+    "cicd-pipelines": {
+        "style": 0, "subtitle": "From Commit to Production",
+        "sections": [
+            {"id":1,"label":"Code Commit",    "desc":"Pre-commit hooks, linting"},
+            {"id":2,"label":"CI Build",       "desc":"Tests, SAST scan in parallel"},
+            {"id":3,"label":"Image Build",    "desc":"Docker multi-stage, layer cache"},
+            {"id":4,"label":"Security Scan",  "desc":"Trivy CVE, Snyk SCA, SBOM"},
+            {"id":5,"label":"Stage Deploy",   "desc":"Helm upgrade, smoke tests"},
+            {"id":6,"label":"Production",     "desc":"Blue/green, canary, feature flags"},
+        ]
+    },
+    "system-design": {
+        "style": 7, "subtitle": "Principles Every Senior Engineer Must Master",
+        "sections": [
+            {"id":1,"label":"Client Layer",   "desc":"Browser, mobile, desktop"},
+            {"id":2,"label":"Edge + CDN",     "desc":"Cache at the network edge"},
+            {"id":3,"label":"API Gateway",    "desc":"Rate limiting, auth, routing"},
+            {"id":4,"label":"Microservices",  "desc":"Bounded domain services"},
+            {"id":5,"label":"Data Layer",     "desc":"Primary DB and read replicas"},
+            {"id":6,"label":"Observability",  "desc":"Metrics, traces, SLO alerts"},
+        ]
+    },
+    "api-design": {
+        "style": 5, "subtitle": "REST vs GraphQL vs gRPC vs WebSocket",
+        "sections": [
+            {"id":1,"label":"REST",      "desc":"Stateless, HTTP, JSON, OpenAPI"},
+            {"id":2,"label":"GraphQL",   "desc":"Client-driven queries, single endpoint"},
+            {"id":3,"label":"gRPC",      "desc":"Protobuf, bi-directional, fast"},
+            {"id":4,"label":"WebSocket", "desc":"Full-duplex, real-time streams"},
+            {"id":5,"label":"AsyncAPI",  "desc":"Event-driven, message brokers"},
+        ]
+    },
+    "kafka-streaming": {
+        "style": 5, "subtitle": "vs Other Streaming Platforms",
+        "sections": [
+            {"id":1,"label":"Kafka",         "desc":"Millions/s, configurable retention"},
+            {"id":2,"label":"RabbitMQ",      "desc":"Task queue, 100k/s, no replay"},
+            {"id":3,"label":"Redis Streams", "desc":"Low-latency, memory-first"},
+            {"id":4,"label":"Kinesis",       "desc":"AWS-native, 7-day retention"},
+            {"id":5,"label":"Pulsar",        "desc":"Multi-tenant, infinite retention"},
+        ]
+    },
+    "zero-trust": {
+        "style": 1, "subtitle": "Never Trust. Always Verify.",
+        "sections": [
+            {"id":1,"label":"Identity",      "desc":"IdP, MFA, PAM, SPIFFE certs"},
+            {"id":2,"label":"Policy Engine", "desc":"OPA rules, ABAC, time-limits"},
+            {"id":3,"label":"Network",       "desc":"Micro-segmentation, mTLS"},
+            {"id":4,"label":"Device",        "desc":"Posture checks, EDR"},
+            {"id":5,"label":"Data",          "desc":"DLP, encryption, Vault"},
+        ]
+    },
+    "devsecops": {
+        "style": 0, "subtitle": "Shift Security Left",
+        "sections": [
+            {"id":1,"label":"Pre-commit",     "desc":"gitleaks, detect-secrets hooks"},
+            {"id":2,"label":"Pull Request",   "desc":"Semgrep SAST, CodeQL analysis"},
+            {"id":3,"label":"Build Stage",    "desc":"SCA, Snyk, SBOM generation"},
+            {"id":4,"label":"Container Scan", "desc":"Trivy, cosign signing"},
+            {"id":5,"label":"Deploy Gate",    "desc":"tfsec, checkov, OPA policy"},
+            {"id":6,"label":"Runtime",        "desc":"Falco, SIEM, SOAR remediate"},
+        ]
+    },
+    "data-lakehouse": {
+        "style": 2, "subtitle": "Why Companies Are Moving Here",
+        "sections": [
+            {"id":1,"label":"Raw Ingestion", "desc":"Batch, CDC, streaming, APIs"},
+            {"id":2,"label":"Open Format",   "desc":"Delta Lake, Iceberg, Hudi"},
+            {"id":3,"label":"Compute Layer", "desc":"Spark, Trino, Flink"},
+            {"id":4,"label":"Governance",    "desc":"Catalog, lineage, quality checks"},
+            {"id":5,"label":"Consumers",     "desc":"BI dashboards, ML models, data apps"},
+        ]
+    },
+    "solid-principles": {
+        "style": 2, "subtitle": "5 Principles Every Engineer Must Know",
+        "sections": [
+            {"id":1,"label":"S — SRP","desc":"One class, one responsibility"},
+            {"id":2,"label":"O — OCP","desc":"Open to extend, closed to modify"},
+            {"id":3,"label":"L — LSP","desc":"Subtypes must be substitutable"},
+            {"id":4,"label":"I — ISP","desc":"No client forced onto unused methods"},
+            {"id":5,"label":"D — DIP","desc":"Depend on abstractions, not concretions"},
+        ]
+    },
+    "ai-disciplines": {
+        "style": 10, "subtitle": "AI vs ML vs DL vs GenAI vs RAG vs Agents",
+        "sections": [
+            {"id":1,"label":"Artificial Intelligence","desc":"Broad field of intelligent systems"},
+            {"id":2,"label":"Machine Learning",       "desc":"Learn from data without explicit rules"},
+            {"id":3,"label":"Deep Learning",          "desc":"Neural networks with many layers"},
+            {"id":4,"label":"Generative AI",          "desc":"Create new content from patterns"},
+            {"id":5,"label":"RAG Systems",            "desc":"Ground LLMs in retrieved knowledge"},
+            {"id":6,"label":"AI Agents",              "desc":"Autonomous tool-using reasoning loops"},
+        ]
+    },
+    "data-evolution": {
+        "style": 8, "subtitle": "Sources → Lakehouse → Consumers",
+        "sections": [
+            {"id":1,"label":"Data Sources",   "desc":"APIs, CDC, IoT, logs, events"},
+            {"id":2,"label":"Data Lakehouse", "desc":"Ingestion, open format, compute"},
+            {"id":3,"label":"Data Consumers", "desc":"BI, ML models, data apps"},
+        ]
+    },
+    "agentic-ai": {
+        "style": 18, "subtitle": "RAG vs Agentic RAG vs AI Memory",
+        "sections": [
+            {"id":1,"label":"RAG",          "desc":"Query → Embed → Vector → Context → LLM"},
+            {"id":2,"label":"Agentic RAG",  "desc":"Agent routes: web search, DB, APIs"},
+            {"id":3,"label":"AI Memory",    "desc":"Search + store memory across sessions"},
+        ]
+    },
+    "git-workflow": {
+        "style": 3, "subtitle": "Commands That Separate Juniors from Seniors",
+        "sections": [
+            {"id":1,"label":"Branch",    "desc":"main + develop + feature/* strategy"},
+            {"id":2,"label":"Commit",    "desc":"Conventional commits, GPG signed"},
+            {"id":3,"label":"PR Flow",   "desc":"2-reviewer gate, squash merge"},
+            {"id":4,"label":"Rebase",    "desc":"Clean history, no merge noise"},
+            {"id":5,"label":"Recovery",  "desc":"reset, reflog, cherry-pick"},
+        ]
+    },
+}
+
+DEFAULT_STRUCTURE = {
+    "style": 7,
+    "subtitle": "What Every Engineer Should Know",
+    "sections": [
+        {"id":1,"label":"The Problem",    "desc":"Why this matters right now"},
+        {"id":2,"label":"Core Concept",   "desc":"The fundamental idea"},
+        {"id":3,"label":"How It Works",   "desc":"The mechanism underneath"},
+        {"id":4,"label":"Best Practices", "desc":"What production systems do"},
+        {"id":5,"label":"Common Mistakes","desc":"What most engineers get wrong"},
+        {"id":6,"label":"Key Takeaway",   "desc":"The one thing to remember"},
+    ]
+}
 
 # topics_config.json lives in the root directory.
 TOPICS_CONFIG_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "topics_config.json")
@@ -344,6 +551,30 @@ class TopicManager:
 
     def get_diagram_type_for_topic(self, topic):
         return topic.get("diagram_type", "Architecture Diagram")
+
+    def get_diagram_structure(self, topic):
+        """Return diagram structure for this topic — matched sections for post + diagram."""
+        tid = topic["id"]
+        name_lower = topic["name"].lower()
+        if tid in DIAGRAM_STRUCTURES:
+            return DIAGRAM_STRUCTURES[tid]
+        for key in DIAGRAM_STRUCTURES:
+            if key in tid or tid in key:
+                return DIAGRAM_STRUCTURES[key]
+        for key in DIAGRAM_STRUCTURES:
+            if key.replace("-", " ") in name_lower:
+                return DIAGRAM_STRUCTURES[key]
+        # Dynamic default using the topic's own name
+        default = dict(DEFAULT_STRUCTURE)
+        default["sections"] = [
+            {"id":1,"label":"The Problem",    "desc":f"Why {topic['name']} matters now"},
+            {"id":2,"label":"Core Concept",   "desc":"The fundamental idea"},
+            {"id":3,"label":"How It Works",   "desc":"The mechanism underneath"},
+            {"id":4,"label":"Best Practices", "desc":"What production systems do"},
+            {"id":5,"label":"Common Mistakes","desc":"What most engineers get wrong"},
+            {"id":6,"label":"Key Takeaway",   "desc":f"The one thing to remember"},
+        ]
+        return default
 
     def save_run_history(self, entry):
         self.history.append(entry)
