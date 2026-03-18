@@ -3834,6 +3834,18 @@
       });
     }
 
+    function decodeBase64Utf8(base64) {
+      const clean = (base64 || '').replace(/\s+/g, '');
+      const bytes = Uint8Array.from(atob(clean), c => c.charCodeAt(0));
+      return new TextDecoder().decode(bytes);
+    }
+
+    function blobFromBase64(base64, mime) {
+      const clean = (base64 || '').replace(/\s+/g, '');
+      const bytes = Uint8Array.from(atob(clean), c => c.charCodeAt(0));
+      return new Blob([bytes], { type: mime || 'application/octet-stream' });
+    }
+
     async function downloadArtifactZipBuffer(artifactId) {
       let lastStatus = 'unknown';
       for (let attempt = 0; attempt < 8; attempt++) {
@@ -3986,54 +3998,37 @@ async function handlePost() {
     }
 
     async function fetchPreviewBundle(run) {
-      let artifact = null;
-      for (let attempt = 0; attempt < 8; attempt++) {
-        const artResp = await gh('/repos/' + REPO + `/actions/runs/${run.id}/artifacts`);
-        if (!artResp.ok) {
-          throw new Error('Could not list preview artifacts');
+      for (let attempt = 0; attempt < 20; attempt++) {
+        const resp = await gh('/repos/' + REPO + '/contents/preview_cache/latest_preview.json?ref=preview-cache');
+        if (resp.ok) {
+          const data = await resp.json();
+          const preview = JSON.parse(decodeBase64Utf8(data.content || ''));
+          if (String(preview.run_id) === String(run.id)) {
+            let diagram = null;
+            if (preview.diagram?.kind === 'svg') {
+              diagram = { type: 'svg', content: preview.diagram.content };
+            } else if (preview.diagram?.kind === 'binary') {
+              diagram = {
+                type: 'image',
+                ext: (preview.diagram.filename || '').split('.').pop().toLowerCase(),
+                blob: blobFromBase64(preview.diagram.base64, preview.diagram.mime)
+              };
+            }
+            return {
+              payload: preview.payload,
+              postText: preview.post_text,
+              diagram,
+              runId: run.id,
+              runNumber: run.run_number,
+              artifactName: `preview-cache:${data.sha || 'latest'}`
+            };
+          }
+        } else if (resp.status !== 404) {
+          throw new Error(`Could not fetch preview cache (status ${resp.status})`);
         }
-        const artData = await artResp.json();
-        artifact = (artData.artifacts || []).find(a => a.name === `diagrams-${run.run_number}`) || (artData.artifacts || [])[0];
-        if (artifact) break;
         await sleep(2500);
       }
-      if (!artifact) throw new Error('No preview artifact was uploaded for this run');
-
-      const zipBuffer = await downloadArtifactZipBuffer(artifact.id);
-      const zip = await JSZip.loadAsync(zipBuffer);
-      const files = Object.keys(zip.files);
-
-      const payloadName = files.find(name => name.endsWith('.json') && name.includes('preview_payload_'));
-      const postName = files.find(name => name.endsWith('.txt') && name.includes('output_post_'));
-      if (!payloadName || !postName) throw new Error('Preview artifact is missing post metadata or post text');
-
-      const payload = JSON.parse(await zip.file(payloadName).async('string'));
-      const postText = await zip.file(postName).async('string');
-      const diagramName = files.find(name => payload.diagram_file && name.endsWith(payload.diagram_file))
-        || files.find(name => /\.(svg|png|gif)$/i.test(name));
-
-      let diagram = null;
-      if (diagramName) {
-        const ext = diagramName.split('.').pop().toLowerCase();
-        if (ext === 'svg') {
-          diagram = { type: 'svg', content: await zip.file(diagramName).async('string') };
-        } else {
-          diagram = {
-            type: 'image',
-            ext,
-            blob: await zip.file(diagramName).async('blob')
-          };
-        }
-      }
-
-      return {
-        payload,
-        postText,
-        diagram,
-        runId: run.id,
-        runNumber: run.run_number,
-        artifactName: artifact.name
-      };
+      throw new Error('Preview cache was not published for this run');
     }
 
     function renderPreviewBundle(bundle, run) {
@@ -4256,6 +4251,9 @@ async function runNow(options = {}) {
     }
 
     function isSkippedRun(r) {
+      const title = (r.display_title || r.name || '').toLowerCase();
+      if (title.includes('dry-run')) return true;
+
       // Always hide skipped runs
       if (r.conclusion === 'skipped') return true;
 
@@ -4278,6 +4276,10 @@ async function runNow(options = {}) {
       if (r.conclusion === 'cancelled') {
         const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
         return durMs < 15000;
+      }
+      if (r.event === 'workflow_dispatch' && r.conclusion === 'success' && _enrichmentDone) {
+        const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
+        if (fetched && !_topicCache[r.id]) return true;
       }
       return false;
     }
@@ -4460,6 +4462,7 @@ async function runNow(options = {}) {
 
     function getModeFromRun(r) {
       const title = (r.display_title || r.name || '').toLowerCase();
+      if (title.includes('dry-run')) return '🧪 Dry Run';
       // Check explicit mode markers in run title (from run-name YAML or step summary)
       if (title.includes('ai_news') || title.includes('ai-news')) return '🤖 AI News';
       if (title.includes('layoff')) return '💼 Layoff News';

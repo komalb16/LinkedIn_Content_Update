@@ -1,7 +1,7 @@
 name: 🤖 LinkedIn Agent
 
 run-name: >-
-  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.post_mode || 'auto' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
+  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.dry_run == 'true' && 'dry-run' || 'live' }} · ${{ github.event.inputs.post_mode || 'auto' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
 
 # ─── Triggers ───────────────────────────────────────────────────────────────
 on:
@@ -177,6 +177,17 @@ jobs:
           echo "Title: ${{ steps.run_agent.outputs.POSTED_TITLE }}"
           echo "Date:  ${{ steps.run_agent.outputs.POSTED_DATE }}"
           echo "URL:   ${{ steps.run_agent.outputs.POSTED_URL }}"
+
+      - name: 🧪 Publish Preview Cache
+        if: success() && github.event.inputs.dry_run == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          python src/publish_preview_cache.py
 
       # 8. Upload diagrams as artifacts (always, even on failure)
       - name: 📁 Upload Diagrams
