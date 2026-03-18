@@ -642,6 +642,58 @@ def _visual_coherence_issues(topic, diagram_type, structure=None):
     return issues
 
 
+def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
+    text = _cleanup_generated_post(post_text or "")
+    issues = list(_post_quality_issues(topic, text, structure, diagram_type))
+    score = 100
+
+    score -= len(issues) * 12
+
+    trailing_lines = "\n".join(text.splitlines()[-4:])
+    if "?" not in trailing_lines and "💬" not in text and "ðŸ’¬" not in text:
+        issues.append("End with a real discussion prompt that starts with 💬.")
+        score -= 10
+
+    hashtags = re.findall(r"(?<!\w)#\w+", text)
+    if not 4 <= len(hashtags) <= 7:
+        issues.append("Use 4 to 7 clean hashtags at the end.")
+        score -= 8
+
+    if text.count("```") < 4:
+        issues.append("Include both the fenced flow diagram and the fenced comparison/table block.")
+        score -= 10
+
+    first_line = text.splitlines()[0].strip().lower() if text.splitlines() else ""
+    weak_openers = ("today", "in today's", "this post", "let's talk", "here's")
+    if any(first_line.startswith(opener) for opener in weak_openers):
+        issues.append("Strengthen the hook so the first line makes a sharper claim or observation.")
+        score -= 8
+
+    word_count = len(re.findall(r"\b\w+\b", text))
+    if word_count < 140 or word_count > 340:
+        issues.append("Keep the post in the LinkedIn sweet spot: roughly 140 to 340 words.")
+        score -= 6
+
+    if structure and structure.get("sections"):
+        labels = [s.get("label", "") for s in structure.get("sections", [])]
+        covered = sum(1 for label in labels if _label_in_post(label, text.lower()))
+        if labels:
+            score += min(8, covered * 2)
+
+    if structure and structure.get("rows") and diagram_type == "Observability Map":
+        row_terms = ("input", "retrieval", "runtime", "quality")
+        covered = sum(1 for term in row_terms if term in text.lower())
+        score += min(8, covered * 2)
+
+    score = max(0, min(100, score))
+    return {
+        "score": score,
+        "issues": issues[:8],
+        "word_count": word_count,
+        "hashtag_count": len(hashtags),
+    }
+
+
 def _extract_visual_title(post_text, fallback_title):
     for raw_line in (post_text or "").splitlines():
         line = raw_line.strip()
@@ -716,7 +768,7 @@ def write_github_output(key, value):
         log.warning(f"Could not write GITHUB_OUTPUT: {e}")
 
 
-def write_github_summary(topic_name, mode, post_preview, dry_run=False):
+def write_github_summary(topic_name, mode, post_preview, dry_run=False, score_card=None):
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
     if not summary_file:
         return
@@ -730,10 +782,24 @@ def write_github_summary(topic_name, mode, post_preview, dry_run=False):
             f"| **Topic** | {topic_name} |",
             f"| **Mode** | {mode} |",
             f"| **Dry Run** | {'Yes' if dry_run else 'No'} |",
+        ]
+        if score_card:
+            lines.extend([
+                f"| **Quality Score** | {score_card.get('score', '—')} / 100 |",
+                f"| **Word Count** | {score_card.get('word_count', '—')} |",
+                f"| **Hashtags** | {score_card.get('hashtag_count', '—')} |",
+            ])
+            if score_card.get("issues"):
+                lines.extend([
+                    f"",
+                    f"### Quality Notes",
+                    *[f"- {issue}" for issue in score_card["issues"][:5]],
+                ])
+        lines.extend([
             f"",
             f"### Post Preview",
             f"> {preview}",
-        ]
+        ])
         with open(summary_file, "a", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")
         log.info("GitHub step summary written")
@@ -880,8 +946,29 @@ Write a LinkedIn post that:
         log.info("Fallback topic for diagram/history: " + topic["name"])
 
     post_text = _finalize_post_text(topic, post_text)
+    score_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
+    score_structure = structure or topic_mgr.get_diagram_structure(topic)
+    score_card = _score_post_candidate(topic, post_text, score_structure, score_diagram_type)
+    if mode == "topic" and score_card["score"] < 75:
+        log.warning(
+            f"Low post quality score ({score_card['score']}/100). Regenerating once with the same topic."
+        )
+        regen_structure = score_structure
+        regen_diagram_type = score_diagram_type
+        post_text = generate_topic_post(topic, regen_structure, regen_diagram_type)
+        post_text = _finalize_post_text(topic, post_text)
+        score_card = _score_post_candidate(topic, post_text, regen_structure, regen_diagram_type)
+
+    log.info(
+        f"Quality score: {score_card['score']}/100 | "
+        f"words={score_card['word_count']} | hashtags={score_card['hashtag_count']}"
+    )
+    if score_card["issues"]:
+        log.warning("Quality notes: " + " | ".join(score_card["issues"][:5]))
+
     write_github_output("POST_TOPIC",   topic.get("name", ""))
     write_github_output("POSTED_TOPIC", topic.get("name", ""))
+    write_github_output("POST_QUALITY_SCORE", str(score_card["score"]))
     log.info(f"Final topic resolved: {topic['name']} (mode: {mode})")
     log.info("POST:\n" + post_text)
 
@@ -904,7 +991,7 @@ Write a LinkedIn post that:
     if dry_run:
         with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
             f.write(post_text)
-        write_github_summary(topic["name"], mode, post_text, dry_run=True)
+        write_github_summary(topic["name"], mode, post_text, dry_run=True, score_card=score_card)
         log.info("DRY RUN complete. Post saved.")
         return
 
@@ -927,7 +1014,7 @@ Write a LinkedIn post that:
         write_github_output("POSTED_TITLE", topic.get("name", ""))
         write_github_output("POSTED_DATE",  datetime.now().strftime("%Y-%m-%d"))
         write_github_output("POSTED_URL",   result.get("post_url", ""))
-        write_github_summary(topic["name"], mode, full_post_text, dry_run=False)
+        write_github_summary(topic["name"], mode, full_post_text, dry_run=False, score_card=score_card)
         topic_mgr.save_run_history({
             "timestamp":  datetime.now().isoformat(),
             "topic_id":   topic["id"],
