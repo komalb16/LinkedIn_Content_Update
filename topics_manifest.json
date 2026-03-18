@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "updated_at": "2026-03-18T00:00:00Z",
+  "builtin_topics": [
+    { "id": "llm-architecture", "name": "LLM Architecture", "emoji": "🤖" },
+    { "id": "ai-agents-2025", "name": "AI Agents 2025", "emoji": "🤖" },
+    { "id": "mlops-pipeline", "name": "MLOps Pipeline", "emoji": "⚙️" },
+    { "id": "rag-systems", "name": "RAG Systems", "emoji": "🔍" },
+    { "id": "kubernetes-mastery", "name": "Kubernetes", "emoji": "☸️" },
+    { "id": "docker-cheatsheet", "name": "Docker", "emoji": "🐳" },
+    { "id": "aws-architecture", "name": "AWS Architecture", "emoji": "☁️" },
+    { "id": "cicd-pipelines", "name": "CI/CD Pipelines", "emoji": "🚀" },
+    { "id": "system-design", "name": "System Design", "emoji": "🏗️" },
+    { "id": "api-design", "name": "API Design", "emoji": "🔌" },
+    { "id": "git-workflow", "name": "Git Workflow", "emoji": "🌿" },
+    { "id": "solid-principles", "name": "SOLID Principles", "emoji": "📐" },
+    { "id": "zero-trust", "name": "Zero Trust", "emoji": "🔐" },
+    { "id": "devsecops", "name": "DevSecOps", "emoji": "🛡️" },
+    { "id": "data-lakehouse", "name": "Data Lakehouse", "emoji": "📊" },
+    { "id": "kafka-streaming", "name": "Kafka Streaming", "emoji": "🌊" }
+  ]
+}

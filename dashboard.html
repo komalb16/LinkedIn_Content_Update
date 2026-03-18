@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LinkedIn Agent — Komal Batra</title>
+  <title>LinkedIn Content Ops Console</title>
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
@@ -619,17 +619,43 @@
       gap: 12px
     }
 
+    .logo-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .product-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      padding: 3px 9px;
+      border: 1px solid var(--bd);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--txm);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase
+    }
+
     .logo-ic {
       width: 38px;
       height: 38px;
-      background: linear-gradient(135deg, var(--acc), var(--acc2));
-      border-radius: 11px;
+      background: linear-gradient(135deg, rgba(79, 156, 249, 0.16), rgba(167, 139, 250, 0.18));
+      border: 1px solid var(--bd);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      animation: logo-pulse 3s ease-in-out infinite;
-      box-shadow: 0 0 20px rgba(79, 156, 249, 0.4)
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--tx);
+      letter-spacing: 0.8px;
+      animation: none;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06)
     }
 
     @keyframes logo-pulse {
@@ -646,14 +672,21 @@
 
     .logo h1 {
       font-family: var(--fh);
-      font-size: 15px;
-      font-weight: 700
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em
     }
 
     .logo p {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--txd);
       margin-top: 1px
+    }
+
+    .header-note {
+      font-size: 11px;
+      color: var(--txm);
+      font-family: var(--fm)
     }
 
     .hright {
@@ -790,13 +823,13 @@
       display: flex;
       align-items: center;
       gap: 7px;
-      padding: 6px 12px;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.2);
+      padding: 7px 12px;
+      background: linear-gradient(180deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.04));
+      border: 1px solid rgba(34, 197, 94, 0.18);
       border-radius: 100px;
       font-size: 11px;
       color: var(--grn);
-      font-family: monospace;
+      font-family: var(--fm);
       cursor: pointer;
       transition: all var(--tr)
     }
@@ -946,9 +979,9 @@
 
     /* ── POST BANNER ── */
     .pb {
-      background: linear-gradient(135deg, var(--sur), var(--bg2));
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), var(--sur));
       border: 1px solid var(--bd);
-      border-radius: 18px;
+      border-radius: 20px;
       padding: 24px 28px;
       margin-bottom: 22px;
       display: flex;
@@ -959,7 +992,7 @@
 
     .pb-l h2 {
       font-family: var(--fh);
-      font-size: 17px;
+      font-size: 21px;
       font-weight: 700;
       margin-bottom: 5px
     }
@@ -967,6 +1000,31 @@
     .pb-l p {
       font-size: 13px;
       color: var(--txm)
+    }
+
+    .pb-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(79, 156, 249, 0.08);
+      border: 1px solid rgba(79, 156, 249, 0.14);
+      color: var(--acc);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase
+    }
+
+    .pb-meta {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--txd);
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap
     }
 
     .pb-r {
@@ -2894,13 +2952,15 @@
 
       <header>
         <div class="logo">
-          <div class="logo-ic">🤖</div>
-          <div>
-            <h1>LinkedIn Agent</h1>
+          <div class="logo-ic">CO</div>
+          <div class="logo-meta">
+            <span class="product-badge">Content Ops Console</span>
+            <h1>LinkedIn Publishing Control Center</h1>
             <p id="ownerLabel">Komal Batra / LinkedIn_Content_Update</p>
           </div>
         </div>
         <div class="hright">
+          <div class="header-note">Repository-backed scheduling, preview, and publishing</div>
           <div style="display:flex;align-items:center;gap:6px">
             <span style="font-size:10px;color:var(--txd);font-family:var(--fm)">🌍</span>
             <select class="tz-sel" id="tzSel" onchange="setTimezone(this.value)" title="Select your timezone"></select>
@@ -2959,8 +3019,14 @@
       <!-- POST NOW -->
       <div class="pb">
         <div class="pb-l">
-          <h2>🚀 Post to LinkedIn</h2>
-          <p>Enable Dry Run to preview the generated post and diagram before publishing.</p>
+          <div class="pb-kicker">Publishing Workflow</div>
+          <h2>Review the next LinkedIn post before it goes live</h2>
+          <p>Use Dry Run to inspect the generated copy, diagram, and topic selection before publishing to LinkedIn.</p>
+          <div class="pb-meta">
+            <span>Repo-driven topics</span>
+            <span>Quality-scored drafts</span>
+            <span>Schedule-aware execution</span>
+          </div>
         </div>
         <div class="pb-r">
           <div class="dry" id="dryBtn" onclick="toggleDry()">
@@ -3085,74 +3151,7 @@
               <div class="tc" onclick="selType('t',this)">🔧 Tech Topic</div>
             </div>
             <div class="xl">Select topic (or add your own)</div>
-            <div class="tgrid" id="tgrid">
-              <div class="tch ach sel" data-id="" data-name="Auto-select" onclick="selTopic(this)" data-builtin="1">🎲
-                Auto-select</div>
-              <div class="tch" data-id="llm-architecture" data-name="LLM Architecture" onclick="selTopic(this)"
-                data-builtin="1">🤖 LLM Architecture<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('llm-architecture',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="ai-agents-2025" data-name="AI Agents 2025" onclick="selTopic(this)"
-                data-builtin="1">🤖 AI Agents 2025<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('ai-agents-2025',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="mlops-pipeline" data-name="MLOps Pipeline" onclick="selTopic(this)"
-                data-builtin="1">⚙️ MLOps Pipeline<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('mlops-pipeline',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="rag-systems" data-name="RAG Systems" onclick="selTopic(this)" data-builtin="1">
-                🔍 RAG Systems<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('rag-systems',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="kubernetes-mastery" data-name="Kubernetes" onclick="selTopic(this)"
-                data-builtin="1">☸️ Kubernetes<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('kubernetes-mastery',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="docker-cheatsheet" data-name="Docker" onclick="selTopic(this)" data-builtin="1">
-                🐳 Docker<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('docker-cheatsheet',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="aws-architecture" data-name="AWS Architecture" onclick="selTopic(this)"
-                data-builtin="1">☁️ AWS Architecture<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('aws-architecture',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="cicd-pipelines" data-name="CI/CD Pipelines" onclick="selTopic(this)"
-                data-builtin="1">🚀 CI/CD Pipelines<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('cicd-pipelines',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="system-design" data-name="System Design" onclick="selTopic(this)"
-                data-builtin="1">🏗️ System Design<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('system-design',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="api-design" data-name="API Design" onclick="selTopic(this)" data-builtin="1">🔌
-                API Design<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('api-design',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="git-workflow" data-name="Git Workflow" onclick="selTopic(this)"
-                data-builtin="1">🌿 Git Workflow<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('git-workflow',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="solid-principles" data-name="SOLID Principles" onclick="selTopic(this)"
-                data-builtin="1">📐 SOLID Principles<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('solid-principles',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="zero-trust" data-name="Zero Trust" onclick="selTopic(this)" data-builtin="1">🔐
-                Zero Trust<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('zero-trust',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="devsecops" data-name="DevSecOps" onclick="selTopic(this)" data-builtin="1">🛡️
-                DevSecOps<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('devsecops',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="data-lakehouse" data-name="Data Lakehouse" onclick="selTopic(this)"
-                data-builtin="1">📊 Data Lakehouse<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('data-lakehouse',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-              <div class="tch" data-id="kafka-streaming" data-name="Kafka Streaming" onclick="selTopic(this)"
-                data-builtin="1">🌊 Kafka Streaming<button class="del-chip hide-chip"
-                  onclick="event.stopPropagation();hideBuiltinTopic('kafka-streaming',this.parentElement)"
-                  title="Hide topic">✕</button></div>
-            </div>
+            <div class="tgrid" id="tgrid"></div>
             <!-- Add custom topic -->
             <div class="add-topic-row">
               <input class="add-topic-inp" id="customTopicInp" placeholder="Add your own topic e.g. GraphQL APIs..."
@@ -3262,17 +3261,25 @@
     const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions';
     const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
-    // Topic id → display name map
-    const TNAMES = {
-      'llm-architecture': 'LLM Architecture', 'ai-agents-2025': 'AI Agents 2025',
-      'mlops-pipeline': 'MLOps Pipeline', 'rag-systems': 'RAG Systems',
-      'kubernetes-mastery': 'Kubernetes', 'docker-cheatsheet': 'Docker',
-      'aws-architecture': 'AWS Architecture', 'cicd-pipelines': 'CI/CD',
-      'system-design': 'System Design', 'api-design': 'API Design',
-      'git-workflow': 'Git Workflow', 'solid-principles': 'SOLID',
-      'zero-trust': 'Zero Trust', 'devsecops': 'DevSecOps',
-      'data-lakehouse': 'Data Lakehouse', 'kafka-streaming': 'Kafka'
-    };
+    const DEFAULT_BUILTIN_TOPICS = [
+      { id: 'llm-architecture', name: 'LLM Architecture', emoji: '🤖' },
+      { id: 'ai-agents-2025', name: 'AI Agents 2025', emoji: '🤖' },
+      { id: 'mlops-pipeline', name: 'MLOps Pipeline', emoji: '⚙️' },
+      { id: 'rag-systems', name: 'RAG Systems', emoji: '🔍' },
+      { id: 'kubernetes-mastery', name: 'Kubernetes', emoji: '☸️' },
+      { id: 'docker-cheatsheet', name: 'Docker', emoji: '🐳' },
+      { id: 'aws-architecture', name: 'AWS Architecture', emoji: '☁️' },
+      { id: 'cicd-pipelines', name: 'CI/CD Pipelines', emoji: '🚀' },
+      { id: 'system-design', name: 'System Design', emoji: '🏗️' },
+      { id: 'api-design', name: 'API Design', emoji: '🔌' },
+      { id: 'git-workflow', name: 'Git Workflow', emoji: '🌿' },
+      { id: 'solid-principles', name: 'SOLID Principles', emoji: '📐' },
+      { id: 'zero-trust', name: 'Zero Trust', emoji: '🔐' },
+      { id: 'devsecops', name: 'DevSecOps', emoji: '🛡️' },
+      { id: 'data-lakehouse', name: 'Data Lakehouse', emoji: '📊' },
+      { id: 'kafka-streaming', name: 'Kafka Streaming', emoji: '🌊' },
+    ];
+    let BUILTIN_TOPICS = [...DEFAULT_BUILTIN_TOPICS];
 
     // ── STATE ─────────────────────────────────────────────────────────────────────
     let token = localStorage.getItem('gh_token') || '';
@@ -3548,40 +3555,28 @@
     }
     function saveHiddenTopics(arr) { localStorage.setItem('hidden_topics', JSON.stringify(arr)); }
 
-    function hideBuiltinTopic(id, el) {
+    function hideBuiltinTopic(id) {
       if (!id) return;
+      const entry = BUILTIN_TOPICS.find(t => t.id === id);
       const hidden = getHiddenTopics();
       if (!hidden.includes(id)) hidden.push(id);
       saveHiddenTopics(hidden);
-      el.classList.add('hidden-topic');
-      const btn = el.querySelector('.hide-chip');
-      if (btn) { btn.textContent = '↩'; btn.title = 'Restore topic'; btn.onclick = function (e) { e.stopPropagation(); restoreBuiltinTopic(id, el); }; }
-      updateRestoreBar();
+      renderTopicGrid();
       pushTopicsConfig();
-      toast(`"${el.dataset.name}" hidden — saved to repo`, 'info');
+      toast(`"${entry?.name || id}" hidden — saved to repo`, 'info');
     }
 
-    function restoreBuiltinTopic(id, el) {
+    function restoreBuiltinTopic(id) {
+      const entry = BUILTIN_TOPICS.find(t => t.id === id);
       const hidden = getHiddenTopics().filter(h => h !== id);
       saveHiddenTopics(hidden);
-      el.classList.remove('hidden-topic');
-      const btn = el.querySelector('.hide-chip');
-      if (btn) { btn.textContent = '✕'; btn.title = 'Hide topic'; btn.onclick = function (e) { e.stopPropagation(); hideBuiltinTopic(id, el); }; }
-      updateRestoreBar();
+      renderTopicGrid();
       pushTopicsConfig();
-      toast(`"${el.dataset.name}" restored — saved to repo`, 'ok');
+      toast(`"${entry?.name || id}" restored — saved to repo`, 'ok');
     }
 
     function applyHiddenTopics() {
-      const hidden = getHiddenTopics();
-      hidden.forEach(id => {
-        const el = document.querySelector(`.tch[data-id="${id}"]`);
-        if (!el) return;
-        el.classList.add('hidden-topic');
-        const btn = el.querySelector('.hide-chip');
-        if (btn) { btn.textContent = '↩'; btn.title = 'Restore topic'; btn.onclick = function (e) { e.stopPropagation(); restoreBuiltinTopic(id, el); }; }
-      });
-      updateRestoreBar();
+      renderTopicGrid();
     }
 
     function updateRestoreBar() {
@@ -3596,11 +3591,11 @@
       }
       if (!hidden.length) { bar.style.display = 'none'; return; }
       bar.style.display = 'flex';
+      const builtinMap = getBuiltinTopicMap();
       bar.innerHTML = '<span style="font-size:10px;color:var(--txd);font-family:var(--fm)">Hidden:</span>' +
         hidden.map(id => {
-          const el = document.querySelector(`.tch[data-id="${id}"]`);
-          const name = el ? el.dataset.name : id;
-          return `<button class="restore-btn" onclick="restoreBuiltinTopic('${id}', document.querySelector('.tch[data-id=\'${id}\']'))">↩ ${name}</button>`;
+          const name = builtinMap[id] || id;
+          return `<button class="restore-btn" onclick="restoreBuiltinTopic('${id}')">↩ ${name}</button>`;
         }).join('');
     }
 
@@ -3610,8 +3605,7 @@
       _themeMode = localStorage.getItem('themeMode') || 'dark';
       applyTheme();
       initTzSelector();
-      applyHiddenTopics();
-      loadCustomTopics();
+      renderTopicGrid();
       loadSettings();
       if (token) silentConn();
       setInterval(updNext, 60000);
@@ -3753,7 +3747,7 @@
         const u = await r.json();
         localStorage.setItem('gh_token', token);
         showDash(u.login);
-        await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+        await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo(), loadBuiltinTopicsManifest()]);
         toast('Connected as ' + u.login + ' ✓', 'ok');
         // Auto-refresh every 5 minutes
         setInterval(async () => { await loadRuns(); await loadStats(); }, 300000);
@@ -3773,7 +3767,7 @@
         if (!r.ok) { localStorage.removeItem('gh_token'); token = ''; return; }
         const u = await r.json();
         showDash(u.login);
-        await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo()]);
+        await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo(), loadBuiltinTopicsManifest()]);
         // Auto-refresh every 5 minutes
         setInterval(async () => { await loadRuns(); await loadStats(); }, 300000);
       } catch (e) { localStorage.removeItem('gh_token'); token = ''; }
@@ -4004,7 +3998,10 @@ Rules:
     }
 
     function pickRandomTopic() {
-      const topics = Object.values(TNAMES);
+      const hidden = new Set(getHiddenTopics());
+      const topics = getAllTopicEntries()
+        .filter(t => !t.builtin || !hidden.has(t.id))
+        .map(t => t.name);
       return topics[Math.floor(Math.random() * topics.length)];
     }
 
@@ -4270,24 +4267,15 @@ Rules:
       const genericValues = ['auto', 'auto-topic', 'auto-select', 'auto-selected', ''];
       if (topicPart && !genericValues.includes(topicPart.toLowerCase()) && topicPart.length > 2) {
         // Prettify known IDs
-        for (const [id, name] of Object.entries(TNAMES)) {
-          if (topicPart.toLowerCase() === id || topicPart.toLowerCase().includes(id)) return name;
-        }
-        // Check custom topics too
-        const custom = getCustomTopics();
-        for (const ct of custom) {
-          if (topicPart.toLowerCase() === ct.id || topicPart.toLowerCase().includes(ct.id)) return ct.name;
+        for (const topic of getAllTopicEntries()) {
+          if (topicPart.toLowerCase() === topic.id || topicPart.toLowerCase().includes(topic.id)) return topic.name;
         }
         return topicPart.charAt(0).toUpperCase() + topicPart.slice(1);
       }
       // Priority 2: scan full title against known topic IDs/names (but skip 'auto' matches)
       const title = runName.toLowerCase();
-      for (const [id, name] of Object.entries(TNAMES)) {
-        if (title.includes(id) || title.includes(name.toLowerCase())) return name;
-      }
-      const custom = getCustomTopics();
-      for (const ct of custom) {
-        if (title.includes(ct.id) || title.includes(ct.name.toLowerCase())) return ct.name;
+      for (const topic of getAllTopicEntries()) {
+        if (title.includes(topic.id) || title.includes(topic.name.toLowerCase())) return topic.name;
       }
       // Don't return 'Auto' — return null so UI can show "loading" or "auto topic" appropriately
       return null;
@@ -4510,12 +4498,33 @@ Rules:
         // Repo is authoritative — overwrite localStorage
         if (Array.isArray(cfg.hidden_ids)) saveHiddenTopics(cfg.hidden_ids);
         if (Array.isArray(cfg.custom_topics)) saveCustomTopics(cfg.custom_topics);
-        applyHiddenTopics();
-        loadCustomTopics();
+        renderTopicGrid();
         console.log('[topics] synced from repo topics_config.json:', cfg);
       } catch (e) {
         // File doesn't exist yet — localStorage fallback is fine
         console.log('[topics] topics_config.json not in repo yet, using localStorage');
+      }
+    }
+
+    async function loadBuiltinTopicsManifest() {
+      if (!token) return;
+      try {
+        const r = await gh('/repos/' + REPO + '/contents/topics_manifest.json');
+        if (!r.ok) return;
+        const d = await r.json();
+        if (!d || !d.content) return;
+        const manifest = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g, '')))));
+        if (Array.isArray(manifest.builtin_topics) && manifest.builtin_topics.length) {
+          BUILTIN_TOPICS = manifest.builtin_topics.map(t => ({
+            id: t.id,
+            name: t.name,
+            emoji: t.emoji || '•'
+          }));
+          renderTopicGrid();
+          console.log('[topics] synced builtin topics from topics_manifest.json:', manifest);
+        }
+      } catch (e) {
+        console.log('[topics] topics_manifest.json not available, using dashboard fallback');
       }
     }
 
@@ -4770,14 +4779,74 @@ Rules:
       localStorage.setItem('custom_topics', JSON.stringify(topics));
     }
 
-    function loadCustomTopics() {
-      const custom = getCustomTopics();
+    function getBuiltinTopicMap() {
+      return Object.fromEntries(BUILTIN_TOPICS.map(t => [t.id, t.name]));
+    }
+
+    function getAllTopicEntries() {
+      const custom = getCustomTopics().map(ct => ({
+        id: ct.id,
+        name: ct.name,
+        emoji: ct.emoji || '✏️',
+        builtin: false
+      }));
+      const builtins = BUILTIN_TOPICS.map(t => ({ ...t, builtin: true }));
+      return [...builtins, ...custom];
+    }
+
+    function renderTopicGrid() {
       const grid = document.getElementById('tgrid');
-      custom.forEach(ct => {
-        if (!document.querySelector(`.tch[data-id="${ct.id}"]`)) {
-          addCustomChip(ct.id, ct.name, grid);
-        }
+      if (!grid) return;
+      const hidden = new Set(getHiddenTopics());
+      const entries = getAllTopicEntries();
+
+      grid.innerHTML = '';
+
+      const autoChip = document.createElement('div');
+      autoChip.className = 'tch ach' + (!topicId ? ' sel' : '');
+      autoChip.dataset.id = '';
+      autoChip.dataset.name = 'Auto-select';
+      autoChip.dataset.builtin = '1';
+      autoChip.textContent = '🎲 Auto-select';
+      autoChip.onclick = function () { selTopic(this); };
+      grid.appendChild(autoChip);
+
+      entries.forEach(topic => {
+        const chip = document.createElement('div');
+        chip.className = 'tch' + (!topic.builtin ? ' custom' : '') + (topicId === topic.id ? ' sel' : '');
+        if (topic.builtin && hidden.has(topic.id)) chip.classList.add('hidden-topic');
+        chip.dataset.id = topic.id;
+        chip.dataset.name = topic.name;
+        chip.dataset.builtin = topic.builtin ? '1' : '0';
+        chip.onclick = function () { selTopic(this); };
+
+        const text = document.createTextNode(`${topic.emoji || '✏️'} ${topic.name}`);
+        chip.appendChild(text);
+
+        const btn = document.createElement('button');
+        btn.className = 'del-chip' + (topic.builtin ? ' hide-chip' : '');
+        btn.title = topic.builtin ? (hidden.has(topic.id) ? 'Restore topic' : 'Hide topic') : 'Remove';
+        btn.textContent = topic.builtin ? (hidden.has(topic.id) ? '↩' : '✕') : '✕';
+        btn.onclick = function (e) {
+          e.stopPropagation();
+          if (topic.builtin) {
+            if (hidden.has(topic.id)) restoreBuiltinTopic(topic.id);
+            else hideBuiltinTopic(topic.id);
+          } else {
+            removeCustomTopic(topic.id);
+          }
+        };
+        chip.appendChild(btn);
+        grid.appendChild(chip);
       });
+
+      if (topicId && !document.querySelector(`.tch[data-id="${topicId}"]`)) {
+        topicId = '';
+        topicName = 'Auto-select';
+        autoChip.classList.add('sel');
+      }
+
+      updateRestoreBar();
     }
 
     function addCustomTopic() {
@@ -4785,35 +4854,28 @@ Rules:
       const name = inp.value.trim();
       if (!name) { toast('Enter a topic name', 'err'); return; }
       const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      if (document.querySelector(`.tch[data-id="${id}"]`)) {
+      if (getAllTopicEntries().some(t => t.id === id)) {
         toast('Topic already exists', 'err'); return;
       }
-      const grid = document.getElementById('tgrid');
-      addCustomChip(id, name, grid);
-      // Save to localStorage
       const custom = getCustomTopics();
       custom.push({ id, name });
       saveCustomTopics(custom);
       inp.value = '';
+      renderTopicGrid();
       pushTopicsConfig();
       toast(`✅ "${name}" added and saved to repo`, 'ok');
     }
 
-    function addCustomChip(id, name, grid) {
-      const chip = document.createElement('div');
-      chip.className = 'tch custom';
-      chip.dataset.id = id;
-      chip.dataset.name = name;
-      chip.onclick = function () { selTopic(this); };
-      chip.innerHTML = `✏️ ${name}<button class="del-chip" onclick="event.stopPropagation();removeCustomTopic('${id}',this.parentElement)" title="Remove">✕</button>`;
-      grid.appendChild(chip);
-    }
-
-    function removeCustomTopic(id, el) {
-      if (!confirm(`Remove "${el.dataset.name}" from your topic list?`)) return;
-      el.remove();
+    function removeCustomTopic(id) {
+      const entry = getAllTopicEntries().find(t => t.id === id);
+      if (!confirm(`Remove "${entry?.name || id}" from your topic list?`)) return;
       const custom = getCustomTopics().filter(c => c.id !== id);
       saveCustomTopics(custom);
+      if (topicId === id) {
+        topicId = '';
+        topicName = 'Auto-select';
+      }
+      renderTopicGrid();
       pushTopicsConfig();
       toast('Topic removed and saved to repo', 'info');
     }
