@@ -747,6 +747,10 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type):
     if len(entities) >= 2:
         return f"{entities[0]} vs {entities[1]}"
 
+    title_like_fallbacks = {"Decision Tree", "7 Layers", "Signal vs Noise", "Lane Map", "Observability Map"}
+    if fallback_title and diagram_type in title_like_fallbacks:
+        return fallback_title[:54]
+
     weak_openers = (
         "i'm", "i am", "here's", "the fact that", "this led me", "nobody talks",
         "our ", "today", "in today's", "let's", "three years ago",
@@ -758,6 +762,8 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type):
         line = re.sub(r"^[\"'`•\-\s]+", "", line)
         line = re.sub(r"\s+", " ", line)
         if line.lower().startswith(weak_openers):
+            continue
+        if '"' in raw_line or "'" in raw_line:
             continue
         if len(line) >= 12:
             return line[:54]
@@ -806,6 +812,7 @@ def _build_comparison_structure_from_post(post_text, title):
 
 def _infer_diagram_type_from_post(post_text, fallback_type):
     text = (post_text or "").lower()
+    strong_editorial = {"Decision Tree", "7 Layers", "Signal vs Noise", "Lane Map", "Observability Map"}
     if "decision tree" in text or "when not to use" in text or "should i" in text:
         return "Decision Tree"
     if "7 layers" in text or "layer 1" in text:
@@ -818,6 +825,8 @@ def _infer_diagram_type_from_post(post_text, fallback_type):
         return "Comparison Table"
     if "timeline" in text or "roadmap" in text:
         return "Timeline"
+    if fallback_type in strong_editorial:
+        return fallback_type
     if "flow" in text or "→" in post_text or "▼" in post_text:
         return "Flow Chart"
     return fallback_type
