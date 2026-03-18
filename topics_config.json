@@ -62,7 +62,11 @@
     {
       "id": "ai-observability",
       "name": "AI Observability"
+    },
+    {
+      "id": "enterprise-ai",
+      "name": "Enterprise AI"
     }
   ],
-  "updated_at": "2026-03-18T00:25:22.094Z"
+  "updated_at": "2026-03-18T00:37:56.504Z"
 }
