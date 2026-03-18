@@ -2422,6 +2422,7 @@ def _style_notebook(topic_id, topic_name, C, structure=None):
     # ── Pick data ────────────────────────────────────────────────────────────
     if structure and "rows" in structure:
         data = structure
+    else:
         tid = topic_id.lower()
         name_lower = topic_name.lower()
         data = None
@@ -2727,6 +2728,8 @@ TOPIC_STYLE_OVERRIDES = {
 DIAGRAM_TYPE_STYLE_MAP = {
     "architecture diagram": 7,
     "architecture": 7,
+    "observability map": 20,
+    "observability": 20,
     "flow chart": 0,
     "flow": 0,
     "comparison table": 5,

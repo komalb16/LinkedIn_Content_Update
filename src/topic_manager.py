@@ -288,7 +288,7 @@ TOPICS = [
         "prompt": "AI observability in production: tracing prompts, retrieval paths, tool calls, latency, token spend, and failure modes across agent workflows.",
         "angle": "If you cannot observe prompts, context, tool use, and user outcomes, you are flying blind in production AI.",
         "diagram_subject": "AI observability stack: prompts, traces, retrieval, tools, latency, feedback, and alerts",
-        "diagram_type": "Architecture Diagram",
+        "diagram_type": "Observability Map",
         "emoji": "📡",
     },
     {
@@ -549,14 +549,45 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "ai-observability": {
-        "style": 7, "subtitle": "What to trace in production AI",
-        "sections": [
-            {"id":1,"label":"Prompts",      "desc":"Inputs, system prompts, and rewrites"},
-            {"id":2,"label":"Retrieval",    "desc":"Chunks, scores, and rerank decisions"},
-            {"id":3,"label":"Tool Calls",   "desc":"Latency, failures, and side effects"},
-            {"id":4,"label":"Cost",         "desc":"Token usage, throughput, and spend"},
-            {"id":5,"label":"Quality",      "desc":"User feedback, hallucinations, and regressions"},
-            {"id":6,"label":"Alerts",       "desc":"SLOs, anomalies, and escalation paths"},
+        "style": 20, "subtitle": "What to trace in production AI",
+        "rows": [
+            {
+                "label": "1. Capture Inputs",
+                "type": "chips",
+                "chips": ["User Prompt", "System Prompt", "Context Window", "Rewrite"],
+                "chip_color": "#EEF2FF",
+                "chip_border": "#2563EB",
+                "chip_text": "#1E3A8A",
+            },
+            {
+                "label": "2. Retrieval Path",
+                "type": "columns",
+                "columns": [
+                    {"glyph": "R", "title": "Retrieval", "items": ["Query", "Chunks", "Scores"]},
+                    {"glyph": "K", "title": "Context", "items": ["Citations", "Filters", "Rerank"]},
+                    {"glyph": "T", "title": "Tools", "items": ["Calls", "Latency", "Failures"]},
+                ],
+            },
+            {
+                "label": "3. Runtime Signals",
+                "type": "banner",
+                "text": "Latency · Token Spend · Errors · Rate Limits · Throughput",
+                "color": "#E0F2E9",
+                "border": "#059669",
+                "text_color": "#065F46",
+            },
+            {
+                "label": "4. Quality Signals",
+                "type": "obs",
+                "items": [
+                    "Hallucinations, groundedness, task success, and user feedback",
+                    "Regression checks across prompts, retrieval, and tool-use paths",
+                    "Alerts when quality drops, costs spike, or retries start climbing",
+                ],
+                "color": "#FDF2F8",
+                "border": "#DB2777",
+                "text_color": "#9D174D",
+            },
         ]
     },
     "multimodal-ai-systems": {
@@ -606,6 +637,7 @@ INFERRED_DIAGRAM_TYPES = [
     (("decision tree", "should i", "when to use", "when not to use", "choose", "adoption framework"), "Decision Tree"),
     (("7 layers", "seven layers", "layers", "stack", "strategy"), "7 Layers"),
     (("signal vs noise", "signal or noise", "hype", "worth it", "real or hype"), "Signal vs Noise"),
+    (("observability", "tracing", "telemetry", "monitoring", "alerts"), "Observability Map"),
     (("mcp", "a2a", "protocol", "agentic", "agent workflow", "orchestration"), "Lane Map"),
     (("roadmap", "journey", "learning path"), "Winding Roadmap"),
     (("compare", "vs", "versus", "comparison"), "Comparison Table"),
@@ -769,6 +801,39 @@ class TopicManager:
                     {"id": 2, "label": "Tools", "desc": "Discover -> Connect -> Authorise -> Call -> Return"},
                     {"id": 3, "label": "Control", "desc": "Plan -> Observe -> Reflect -> Correct -> Finish"},
                     {"id": 4, "label": "Scale", "desc": "Delegate -> Coordinate -> Track -> Handoff -> Outcome"},
+                ],
+            }
+
+        if diagram_type == "Observability Map":
+            return {
+                "style": 20,
+                "subtitle": f"What to trace in {base_name}",
+                "rows": [
+                    {
+                        "label": "1. Inputs",
+                        "type": "chips",
+                        "chips": ["Prompt", "System", "Context", "Rewrite"],
+                        "chip_color": "#EEF2FF",
+                        "chip_border": "#2563EB",
+                        "chip_text": "#1E3A8A",
+                    },
+                    {
+                        "label": "2. Retrieval + Tools",
+                        "type": "columns",
+                        "columns": [
+                            {"glyph": "R", "title": "Retrieval", "items": ["Query", "Chunks", "Scores"]},
+                            {"glyph": "T", "title": "Tools", "items": ["Calls", "Latency", "Retries"]},
+                            {"glyph": "Q", "title": "Quality", "items": ["Feedback", "Failures", "Alerts"]},
+                        ],
+                    },
+                    {
+                        "label": "3. Runtime",
+                        "type": "banner",
+                        "text": "Latency · Throughput · Errors · Token Spend · Escalation",
+                        "color": "#E0F2E9",
+                        "border": "#059669",
+                        "text_color": "#065F46",
+                    },
                 ],
             }
 

@@ -23,6 +23,11 @@ class LinkedInPoster:
         }
         log.info("LinkedIn poster initialized for: " + person_urn)
 
+    def _normalize_post_text(self, text):
+        cleaned = (text or "").replace("hashtag#", "#").strip()
+        cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+        return cleaned
+
     def _svg_to_png_bytes(self, svg_path):
         """Convert SVG to PNG bytes using cairosvg."""
         try:
@@ -132,6 +137,7 @@ class LinkedInPoster:
     def create_post_with_image(self, text, image_path, title=""):
         """Post text + diagram image to LinkedIn."""
         try:
+            text = self._normalize_post_text(text)
             # Step 1: Get image bytes
             if image_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
                 log.info(f"Uploading native image: {image_path}")
@@ -177,6 +183,7 @@ class LinkedInPoster:
     def create_text_post(self, text):
         """Post text only to LinkedIn."""
         try:
+            text = self._normalize_post_text(text)
             result = self._create_ugc_post(text, asset=None)
             return result
         except Exception as e:

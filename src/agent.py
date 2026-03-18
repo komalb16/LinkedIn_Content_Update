@@ -19,6 +19,31 @@ MODEL = "llama-3.3-70b-versatile"
 
 USER_NAME = os.environ.get("USER_NAME", os.environ.get("AUTHOR_NAME", "Komal Batra"))
 
+KNOWN_TOOL_NAMES = {
+    "Elasticsearch",
+    "LanguageTool",
+    "New Relic",
+    "GitHub Actions",
+    "GitLab CI",
+    "Commitlint",
+    "Trivy",
+    "Jenkins",
+    "Datadog",
+    "Grafana",
+    "Prometheus",
+    "OpenTelemetry",
+    "LangSmith",
+    "Pinecone",
+    "Weaviate",
+    "pgvector",
+    "OpenSearch",
+    "Azure AI Foundry",
+    "Microsoft 365 Copilot",
+    "GitHub Copilot",
+}
+
+METRIC_PATTERN = re.compile(r"(<\s*\d+\s*(?:ms|s|sec|%))|(\b\d+\s*%)|(\b\d+\s*(?:ms|s|sec|tokens?)\b)", re.I)
+
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
 RSS_FEEDS = {
     "ai": [
@@ -388,6 +413,11 @@ def _build_post_template_instructions(diagram_type, structure=None):
             "Each section should describe one operating lane or system role. "
             "Emphasize how the lanes connect, hand off work, and fail in production."
         ),
+        "Observability Map": (
+            "Write this like an operating checklist for production AI. "
+            "Focus on where signals enter, where context changes, what can fail silently, "
+            "and which alerts tell you quality is slipping before users complain."
+        ),
         "Comparison Table": (
             "Write this as a practical comparison. "
             "Do not just list differences; make a recommendation about when each option wins."
@@ -421,6 +451,18 @@ The diagram has exactly {n} sections — cover them in this order:
 {section_list}
 
 Match each label word-for-word. End with a poll listing all {n} options."""
+    elif structure and structure.get("rows"):
+        rows = structure["rows"]
+        n = len(rows)
+        row_list = "\n".join(
+            f"  {idx+1}. {row.get('label', f'Row {idx+1}')} — {row.get('text', row.get('type', 'row'))}"
+            for idx, row in enumerate(rows)
+        )
+        structure_block = f"""
+The diagram has exactly {n} rows — cover them in this order:
+{row_list}
+
+Match the row labels closely so the text and image stay coherent."""
     else:
         structure_block = ""
 
@@ -438,13 +480,25 @@ Length target: {length}
 {structure_block}
 
 Requirements:
-- ONE real tool, metric, or named example per section — no generic descriptions
+- Do not invent personal incidents, team stories, tool names, or metrics that were not explicitly provided in the topic
+- If the topic does not include a concrete metric, use qualitative language instead of numbers
+- If the topic does not include named tools, keep examples generic instead of dropping in brand names
 - Include a ``` fenced flow diagram using 🟦🟩🟨🟥 squares with │ and ▼ connectors
 - Include a ``` fenced comparison or before/after table using → arrows
 - The hook must be the very first line — no warming up, no preamble
 - Never mention the current month or year
 """
-    return _cleanup_generated_post(call_ai(prompt, _build_post_system()))
+    post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
+    issues = _post_quality_issues(topic, post_text, structure, diagram_type)
+    if issues:
+        revision_prompt = (
+            prompt
+            + "\nRevision feedback:\n- "
+            + "\n- ".join(issues[:5])
+            + "\nRewrite the post from scratch and fix every issue above."
+        )
+        post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
+    return _cleanup_generated_post(post_text)
 
 
 def _cleanup_generated_post(text):
@@ -502,6 +556,90 @@ def _cleanup_generated_post(text):
         text = "\n".join(split_lines).strip()
 
     return text
+
+
+def _topic_text_blob(topic):
+    return " ".join(
+        str(topic.get(k, ""))
+        for k in ("name", "prompt", "angle", "diagram_subject", "diagram_type", "category")
+    )
+
+
+def _detect_named_tools(text):
+    lowered = (text or "").lower()
+    return {
+        tool for tool in KNOWN_TOOL_NAMES
+        if tool.lower() in lowered
+    }
+
+
+def _label_in_post(label, lowered_post):
+    words = [w for w in re.split(r"[^a-z0-9]+", (label or "").lower()) if len(w) > 2]
+    if not words:
+        return False
+    return any(word in lowered_post for word in words)
+
+
+def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
+    issues = []
+    cleaned = _cleanup_generated_post(post_text or "")
+    lowered = cleaned.lower()
+    topic_blob = _topic_text_blob(topic).lower()
+
+    if "hashtag#" in (post_text or ""):
+        issues.append("Convert every 'hashtag#' token into a normal hashtag like '#AI'.")
+
+    if METRIC_PATTERN.search(cleaned) and not METRIC_PATTERN.search(topic_blob):
+        issues.append("Remove unsupported numeric claims and metrics unless the topic explicitly provided them.")
+
+    allowed_tools = _detect_named_tools(topic_blob)
+    unsupported_tools = sorted(_detect_named_tools(cleaned) - allowed_tools)
+    if unsupported_tools:
+        issues.append(
+            "Remove unsupported named tool mentions that were not provided in the topic: "
+            + ", ".join(unsupported_tools[:4])
+        )
+
+    if re.search(r"\bour production\b|\bour team\b|\bwe cut\b|\bI quickly diagnosed\b|\bjust failed\b", cleaned, re.I):
+        issues.append("Do not invent a first-person incident or case study unless the topic explicitly includes one.")
+
+    if diagram_type == "Observability Map" or "observability" in topic_blob:
+        expected_terms = ("prompt", "retrieval", "tool", "latency", "cost", "quality", "alert")
+        matched = sum(1 for term in expected_terms if term in lowered)
+        if matched < 4:
+            issues.append("Make the post explicitly cover observability signals like prompts, retrieval, tool calls, cost, quality, and alerts.")
+
+    if structure and structure.get("sections"):
+        labels = [s.get("label", "") for s in structure.get("sections", [])]
+        covered = sum(1 for label in labels if _label_in_post(label, lowered))
+        if labels and covered < max(2, len(labels) // 2):
+            issues.append("Align the post more closely to the planned diagram labels so the image and text tell the same story.")
+
+    if structure and structure.get("rows") and diagram_type == "Observability Map":
+        row_terms = ("input", "retrieval", "runtime", "quality")
+        covered = sum(1 for term in row_terms if term in lowered)
+        if covered < 3:
+            issues.append("Align the post to the observability map structure: inputs, retrieval, runtime signals, and quality signals.")
+
+    return issues
+
+
+def _finalize_post_text(topic, post_text):
+    finalized = _cleanup_generated_post(post_text or "")
+    finalized = finalized.replace("hashtag#", "#").strip()
+    if not finalized:
+        return finalized
+    return finalized
+
+
+def _visual_coherence_issues(topic, diagram_type, structure=None):
+    topic_blob = _topic_text_blob(topic).lower()
+    issues = []
+    if "observability" in topic_blob and diagram_type in {"Architecture Diagram", "Architecture"}:
+        issues.append("Observability topics should not use the generic architecture diagram fallback.")
+    if structure and structure.get("rows") and diagram_type in {"Architecture Diagram", "Architecture"}:
+        issues.append("Structured notebook-style diagrams need a matching non-generic diagram type.")
+    return issues
 
 
 def _extract_visual_title(post_text, fallback_title):
@@ -729,9 +867,11 @@ Write a LinkedIn post that:
         log.info("Topic selected: " + topic["name"])
         structure = topic_mgr.get_diagram_structure(topic)
         planned_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
-        log.info(f"Structure: '{structure['subtitle']}' ({len(structure['sections'])} sections)")
+        structure_items = structure.get("sections") or structure.get("rows") or []
+        log.info(f"Structure: '{structure['subtitle']}' ({len(structure_items)} items)")
         log.info(f"Planned topic diagram type: {planned_diagram_type}")
         post_text = generate_topic_post(topic, structure, planned_diagram_type)
+        post_text = _finalize_post_text(topic, post_text)
 
     # ── FALLBACK TOPIC for news posts ─────────────────────────────────────────
     if not topic:
@@ -739,6 +879,7 @@ Write a LinkedIn post that:
         structure = topic_mgr.get_diagram_structure(topic)
         log.info("Fallback topic for diagram/history: " + topic["name"])
 
+    post_text = _finalize_post_text(topic, post_text)
     write_github_output("POST_TOPIC",   topic.get("name", ""))
     write_github_output("POSTED_TOPIC", topic.get("name", ""))
     log.info(f"Final topic resolved: {topic['name']} (mode: {mode})")
@@ -749,6 +890,11 @@ Write a LinkedIn post that:
     diagram_title, diagram_type, diagram_structure = _resolve_visual_metadata(
         topic, post_text, mode, fallback_diagram_type, structure
     )
+    visual_issues = _visual_coherence_issues(topic, diagram_type, diagram_structure)
+    if visual_issues:
+        log.warning("Visual coherence override: " + " | ".join(visual_issues))
+        diagram_type = fallback_diagram_type
+        diagram_structure = topic_mgr.get_diagram_structure(topic)
     log.info(f"Visual metadata: title='{diagram_title}', type='{diagram_type}'")
     diagram_path = diagram_gen.save_svg(
         None, topic["id"], diagram_title, diagram_type, structure=diagram_structure
@@ -769,6 +915,7 @@ Write a LinkedIn post that:
         if not post_text.strip().startswith("📌")
         else post_text
     )
+    full_post_text = _finalize_post_text(topic, full_post_text)
 
     result = poster.create_post_with_image(
         text=full_post_text,
