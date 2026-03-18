@@ -8,6 +8,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     /* ═══════════════════════════════════════════════════════════════
    THEME SYSTEM: 5 colors × 3 brightness modes = 15 combinations
@@ -2880,11 +2881,10 @@
       </div>
       <div class="mbody">
         <div class="field">
-          <label>Groq API Key (for Dry Run Preview)</label>
+          <label>Groq API Key (optional, no longer required for preview)</label>
           <input class="finp" id="groqKeyInput" type="password" placeholder="gsk_your_groq_api_key_here" />
-          <p class="fhint">Used only for generating post previews in your browser. Get a free key at <a
-              href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys. Never sent anywhere
-            except Groq's API directly.</p>
+          <p class="fhint">Dry Run preview now uses the real GitHub Actions pipeline. This key is kept only for
+            optional browser-side experiments and is not required for normal preview or publishing.</p>
         </div>
         <div class="field">
           <label>Your Name (shown in post preview)</label>
@@ -2905,7 +2905,7 @@
       <div class="preview-head">
         <div>
           <h3>🧪 Dry Run Preview</h3>
-          <p style="font-size:12px;color:var(--txd);margin-top:3px">This post will NOT be published to LinkedIn</p>
+          <p style="font-size:12px;color:var(--txd);margin-top:3px">Dry run preview from the live backend. Publish only if you approve it.</p>
         </div>
         <div class="tags">
           <div class="tag" id="previewTopicTag">Auto</div>
@@ -2937,8 +2937,9 @@
         </div>
       </div>
       <div class="preview-foot">
-        <span class="note">✅ Happy with this? Click Post Now (without Dry Run) to publish</span>
+        <span class="note" id="previewNote">Preview generated from the live backend workflow.</span>
         <div style="display:flex;gap:8px">
+          <button class="btn bp" onclick="approvePreviewPost()" id="previewPostBtn" disabled>Post to LinkedIn</button>
           <button class="btn bg" onclick="regeneratePost()">↻ Regenerate</button>
           <button class="btn bg" onclick="closePreview()">Close</button>
         </div>
@@ -3300,6 +3301,8 @@
     let topicId = '';
     let topicName = 'Auto-select';
     let lastGenPost = '';
+    let previewBundle = null;
+    let previewDiagramUrl = null;
 
     // ── INIT ──────────────────────────────────────────────────────────────────────
 
@@ -3804,123 +3807,231 @@
       });
     }
 
+    function ghBinary(url, extraHeaders = {}) {
+      return fetch(url, {
+        cache: 'no-cache',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Accept': 'application/octet-stream',
+          ...extraHeaders
+        }
+      });
+    }
+
     // ── HANDLE POST (dry run or live) ─────────────────────────────────────────────
-    async function handlePost() {
+async function handlePost() {
       if (isDry) {
         await showDryRunPreview();
       } else {
-        await runNow();
+        await runNow({ topicId, dryRun: false });
       }
     }
 
     // ── DRY RUN PREVIEW ───────────────────────────────────────────────────────────
     async function showDryRunPreview() {
-      const groqKey = localStorage.getItem('groq_key') || '';
-      if (!groqKey) {
-        toast('Add your Groq API key in ⚙️ Settings to use Dry Run preview', 'err');
-        openSettings();
-        return;
+      previewBundle = null;
+      if (previewDiagramUrl) {
+        URL.revokeObjectURL(previewDiagramUrl);
+        previewDiagramUrl = null;
       }
-
-      // Open modal
       document.getElementById('previewBg').classList.add('show');
       document.getElementById('postLoading').style.display = 'flex';
       document.getElementById('postContentArea').style.display = 'none';
       document.getElementById('previewDiagram').innerHTML = '';
       document.getElementById('previewTopicTag').textContent = topicName || 'Auto';
-      document.getElementById('loadingMsg').textContent = 'Generating post with AI...';
+      document.getElementById('loadingMsg').textContent = 'Starting backend dry run...';
+      document.getElementById('previewNote').textContent = 'Preview generated from the live backend workflow.';
+      document.getElementById('previewPostBtn').disabled = true;
+      document.getElementById('previewPostBtn').textContent = 'Post to LinkedIn';
 
-      // Set author
       document.getElementById('previewAuthor').textContent = localStorage.getItem('author_name') || 'Komal Batra';
       document.getElementById('previewRole').textContent = localStorage.getItem('author_role') || 'Software Engineer at Microsoft';
-
-      await generatePreviewPost(groqKey);
+      await generatePreviewFromBackend();
     }
 
-    async function generatePreviewPost(groqKey) {
-      const topic = topicName && topicName !== 'Auto-select' ? topicName : pickRandomTopic();
-      const hooks = [
-        'Start with a surprising personal observation or anecdote.',
-        'Start with a provocative question that makes people stop scrolling.',
-        'Start with a counterintuitive fact that challenges assumptions.',
-        'Start with a relatable frustration most engineers have experienced.',
-        'Start with a bold, slightly controversial opinion.',
-        'Start with a short story: "Last week I was debugging X and realized..."',
-        'Start with a rhetorical question like "Why do we keep doing X?"',
-        'Start with a brief story about a mistake or lesson learned.',
-      ];
-      const tones = [
-        'conversational and friendly, like chatting with a colleague',
-        'reflective and thoughtful, sharing hard-won wisdom',
-        'slightly humorous and self-deprecating',
-        'authoritative but approachable, like a senior mentor',
-      ];
-      const hook = hooks[Math.floor(Math.random() * hooks.length)];
-      const tone = tones[Math.floor(Math.random() * tones.length)];
-
-      const systemPrompt = `You are a creative LinkedIn content assistant. Generate a professional, human-like, engaging post.
-Rules:
-- ${hook}
-- Tone: ${tone}
-- Write about: ${topic}
-- 50-200 words. Short and punchy beats long and generic.
-- Mix short, punchy sentences with longer descriptive ones
-- Include one personal anecdote, insight, or rhetorical question
-- Occasionally use first person ("I've noticed", "In my experience")
-- End with a subtle call-to-action or question for readers
-- Add 3-5 relevant hashtags at the end
-- NEVER start with "As we dive into", "In today's world", or any generic opener
-- NEVER use: "robust", "crucial", "delve", "landscape", "testament", "realm", "seamless", "synergy", "paradigm", "unprecedented", "game-changer", "leverage", "navigating", "holistic"
-- Sound like a real person, NOT like ChatGPT
-- Return ONLY the post text, no JSON or headers`;
-
+    async function generatePreviewFromBackend() {
       try {
-        const res = await fetch(GROQ_API, {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + groqKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: GROQ_MODEL,
-            max_tokens: 600,
-            temperature: 0.92,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: `Write a LinkedIn post about: ${topic}` }
-            ]
-          })
-        });
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error?.message || 'Groq API error');
-        }
-        const data = await res.json();
-        lastGenPost = data.choices[0].message.content;
-
-        // Show content
-        document.getElementById('postLoading').style.display = 'none';
-        document.getElementById('postContentArea').style.display = 'block';
-        document.getElementById('postText').textContent = lastGenPost;
-
-        // Generate diagram
-        const svg = generatePreviewSVG(topic);
-        document.getElementById('previewDiagram').innerHTML = svg;
+        const dispatchedAt = Date.now();
+        await dispatchWorkflowRun({ topicId, dryRun: true });
+        document.getElementById('loadingMsg').textContent = 'Queued. Waiting for GitHub Actions to start...';
+        const run = await waitForDispatchedRun(dispatchedAt);
+        document.getElementById('loadingMsg').textContent = `Running backend preview (Run #${run.run_number})...`;
+        const completedRun = await waitForRunCompletion(run.id);
+        const bundle = await fetchPreviewBundle(completedRun);
+        renderPreviewBundle(bundle, completedRun);
       } catch (e) {
-        document.getElementById('loadingMsg').textContent = 'Error: ' + e.message + '. Check your Groq key in Settings.';
-        toast('Groq error: ' + e.message, 'err');
+        document.getElementById('loadingMsg').textContent = 'Preview failed: ' + e.message;
+        toast('Preview failed: ' + e.message, 'err');
       }
     }
 
     async function regeneratePost() {
-      const groqKey = localStorage.getItem('groq_key') || '';
-      if (!groqKey) { toast('Add Groq API key in ⚙️ Settings', 'err'); return; }
       document.getElementById('postLoading').style.display = 'flex';
       document.getElementById('postContentArea').style.display = 'none';
-      document.getElementById('loadingMsg').textContent = 'Regenerating...';
-      await generatePreviewPost(groqKey);
+      document.getElementById('previewDiagram').innerHTML = '';
+      document.getElementById('loadingMsg').textContent = 'Regenerating from backend...';
+      document.getElementById('previewPostBtn').disabled = true;
+      document.getElementById('previewPostBtn').textContent = 'Post to LinkedIn';
+      await generatePreviewFromBackend();
     }
 
     function closePreview(e) {
       if (!e || e.target === document.getElementById('previewBg')) {
         document.getElementById('previewBg').classList.remove('show');
+        previewBundle = null;
+        if (previewDiagramUrl) {
+          URL.revokeObjectURL(previewDiagramUrl);
+          previewDiagramUrl = null;
+        }
+      }
+    }
+
+    async function dispatchWorkflowRun({ topicId = '', dryRun = false, approvedRunId = '', approvedArtifactName = '' } = {}) {
+      const inp = { dry_run: dryRun ? 'true' : 'false' };
+      if (topicId) inp.topic_id = topicId;
+      if (approvedRunId) inp.approved_run_id = String(approvedRunId);
+      if (approvedArtifactName) inp.approved_artifact_name = approvedArtifactName;
+      const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/dispatches', {
+        method: 'POST',
+        body: JSON.stringify({ ref: 'main', inputs: inp })
+      });
+      if (r.status !== 204) {
+        const e = await r.json().catch(() => ({}));
+        throw new Error(e.message || 'Failed to dispatch workflow');
+      }
+    }
+
+    async function waitForDispatchedRun(dispatchedAtMs) {
+      const maxAttempts = 30;
+      for (let i = 0; i < maxAttempts; i++) {
+        const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?event=workflow_dispatch&per_page=10');
+        const d = await r.json();
+        const runs = (d.workflow_runs || []).filter(run =>
+          new Date(run.created_at).getTime() >= dispatchedAtMs - 5000
+        );
+        if (runs.length) return runs[0];
+        await new Promise(res => setTimeout(res, 3000));
+      }
+      throw new Error('Timed out waiting for the preview run to appear');
+    }
+
+    async function waitForRunCompletion(runId) {
+      const maxAttempts = 120;
+      for (let i = 0; i < maxAttempts; i++) {
+        const r = await gh('/repos/' + REPO + '/actions/runs/' + runId);
+        const run = await r.json();
+        if (run.status === 'completed') {
+          if (run.conclusion !== 'success') {
+            throw new Error(`Preview run finished with status: ${run.conclusion}`);
+          }
+          return run;
+        }
+        await new Promise(res => setTimeout(res, 5000));
+      }
+      throw new Error('Timed out waiting for the preview run to complete');
+    }
+
+    async function fetchPreviewBundle(run) {
+      const artResp = await gh('/repos/' + REPO + `/actions/runs/${run.id}/artifacts`);
+      const artData = await artResp.json();
+      const artifact = (artData.artifacts || []).find(a => a.name === `diagrams-${run.run_number}`) || (artData.artifacts || [])[0];
+      if (!artifact) throw new Error('No preview artifact was uploaded for this run');
+
+      const zipResp = await ghBinary(artifact.archive_download_url);
+      if (!zipResp.ok) throw new Error('Could not download preview artifact');
+      const zipBuffer = await zipResp.arrayBuffer();
+      const zip = await JSZip.loadAsync(zipBuffer);
+      const files = Object.keys(zip.files);
+
+      const payloadName = files.find(name => name.endsWith('.json') && name.includes('preview_payload_'));
+      const postName = files.find(name => name.endsWith('.txt') && name.includes('output_post_'));
+      if (!payloadName || !postName) throw new Error('Preview artifact is missing post metadata or post text');
+
+      const payload = JSON.parse(await zip.file(payloadName).async('string'));
+      const postText = await zip.file(postName).async('string');
+      const diagramName = files.find(name => payload.diagram_file && name.endsWith(payload.diagram_file))
+        || files.find(name => /\.(svg|png|gif)$/i.test(name));
+
+      let diagram = null;
+      if (diagramName) {
+        const ext = diagramName.split('.').pop().toLowerCase();
+        if (ext === 'svg') {
+          diagram = { type: 'svg', content: await zip.file(diagramName).async('string') };
+        } else {
+          diagram = {
+            type: 'image',
+            ext,
+            blob: await zip.file(diagramName).async('blob')
+          };
+        }
+      }
+
+      return {
+        payload,
+        postText,
+        diagram,
+        runId: run.id,
+        runNumber: run.run_number,
+        artifactName: artifact.name
+      };
+    }
+
+    function renderPreviewBundle(bundle, run) {
+      previewBundle = bundle;
+      lastGenPost = bundle.postText;
+
+      document.getElementById('postLoading').style.display = 'none';
+      document.getElementById('postContentArea').style.display = 'block';
+      document.getElementById('postText').textContent = bundle.postText;
+      document.getElementById('previewTopicTag').textContent = bundle.payload.topic_name || topicName || 'Auto';
+
+      const noteParts = [
+        `Run #${run.run_number}`,
+        bundle.payload.quality_score ? `Quality ${bundle.payload.quality_score}/100` : null,
+        bundle.payload.diagram_type || null
+      ].filter(Boolean);
+      document.getElementById('previewNote').textContent = noteParts.join(' · ');
+
+      const diagramEl = document.getElementById('previewDiagram');
+      diagramEl.innerHTML = '';
+      if (previewDiagramUrl) {
+        URL.revokeObjectURL(previewDiagramUrl);
+        previewDiagramUrl = null;
+      }
+
+      if (bundle.diagram?.type === 'svg') {
+        diagramEl.innerHTML = bundle.diagram.content;
+      } else if (bundle.diagram?.type === 'image') {
+        previewDiagramUrl = URL.createObjectURL(bundle.diagram.blob);
+        diagramEl.innerHTML = `<img src="${previewDiagramUrl}" alt="Generated diagram preview" style="width:100%;height:auto;border-radius:12px;display:block" />`;
+      } else {
+        diagramEl.innerHTML = '<div class="post-loading" style="min-height:180px"><p>No diagram artifact found for this preview run.</p></div>';
+      }
+
+      document.getElementById('previewPostBtn').disabled = !(bundle.payload.topic_id && bundle.runId && bundle.artifactName);
+      document.getElementById('previewPostBtn').textContent = 'Post to LinkedIn';
+    }
+
+    async function approvePreviewPost() {
+      if (!(previewBundle?.payload?.topic_id && previewBundle?.runId && previewBundle?.artifactName)) {
+        toast('Preview topic is not ready yet', 'err');
+        return;
+      }
+      const ok = confirm(`Post "${previewBundle.payload.topic_name}" to LinkedIn now?`);
+      if (!ok) return;
+      const btn = document.getElementById('previewPostBtn');
+      btn.disabled = true;
+      btn.textContent = 'Posting...';
+      try {
+        await runNow({
+          topicId: previewBundle.payload.topic_id,
+          dryRun: false,
+          approvedRunId: previewBundle.runId,
+          approvedArtifactName: previewBundle.artifactName
+        });
+        closePreview();
+      } finally {
+        btn.textContent = 'Post to LinkedIn';
       }
     }
 
@@ -4006,21 +4117,26 @@ Rules:
     }
 
     // ── LIVE POST ─────────────────────────────────────────────────────────────────
-    async function runNow() {
+async function runNow(options = {}) {
       setLoad('runSpin', 'runTxt', true, 'Triggering...');
       try {
-        const inp = { dry_run: 'false' };
-        if (topicId) inp.topic_id = topicId;
-        const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/dispatches', {
-          method: 'POST',
-          body: JSON.stringify({ ref: 'main', inputs: inp })
-        });
-        if (r.status === 204) {
-          toast('🚀 Post triggered! Check LinkedIn in ~2 min', 'ok');
-          setTimeout(loadRuns, 4000); setTimeout(loadStats, 6000);
-        } else {
-          const e = await r.json(); throw new Error(e.message || 'Failed');
-        }
+        const resolved = typeof options === 'string'
+          ? { topicId: options, dryRun: false }
+          : {
+            topicId: topicId,
+            dryRun: false,
+            approvedRunId: '',
+            approvedArtifactName: '',
+            ...options
+          };
+        await dispatchWorkflowRun(resolved);
+        toast(
+          resolved.approvedRunId
+            ? '🚀 Approved preview dispatched for LinkedIn posting'
+            : (resolved.dryRun ? '🧪 Dry run triggered!' : '🚀 Post triggered! Check LinkedIn in ~2 min'),
+          'ok'
+        );
+        setTimeout(loadRuns, 4000); setTimeout(loadStats, 6000);
       } catch (e) { toast('Error: ' + e.message, 'err'); }
       finally { setLoad('runSpin', 'runTxt', false, '▶ Post Now'); }
     }

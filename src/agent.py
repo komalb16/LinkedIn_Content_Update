@@ -968,6 +968,7 @@ Write a LinkedIn post that:
 
     write_github_output("POST_TOPIC",   topic.get("name", ""))
     write_github_output("POSTED_TOPIC", topic.get("name", ""))
+    write_github_output("POST_TOPIC_ID", topic.get("id", ""))
     write_github_output("POST_QUALITY_SCORE", str(score_card["score"]))
     log.info(f"Final topic resolved: {topic['name']} (mode: {mode})")
     log.info("POST:\n" + post_text)
@@ -989,9 +990,28 @@ Write a LinkedIn post that:
     log.info("Diagram saved: " + diagram_path)
 
     if dry_run:
+        title_line = f"📌 {topic['name']}\n\n"
+        full_post_text = (
+            title_line + post_text
+            if not post_text.strip().startswith("📌")
+            else post_text
+        )
+        full_post_text = _finalize_post_text(topic, full_post_text)
         with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
-            f.write(post_text)
-        write_github_summary(topic["name"], mode, post_text, dry_run=True, score_card=score_card)
+            f.write(full_post_text)
+        with open("preview_payload_" + topic["id"] + ".json", "w", encoding="utf-8") as f:
+            json.dump({
+                "topic_id": topic["id"],
+                "topic_name": topic["name"],
+                "mode": mode,
+                "diagram_type": diagram_type,
+                "diagram_title": diagram_title,
+                "diagram_file": os.path.basename(diagram_path),
+                "post_file": "output_post_" + topic["id"] + ".txt",
+                "quality_score": score_card["score"],
+                "quality_notes": score_card["issues"],
+            }, f, indent=2)
+        write_github_summary(topic["name"], mode, full_post_text, dry_run=True, score_card=score_card)
         log.info("DRY RUN complete. Post saved.")
         return
 

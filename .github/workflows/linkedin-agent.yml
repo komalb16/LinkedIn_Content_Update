@@ -1,7 +1,7 @@
 name: 🤖 LinkedIn Agent
 
 run-name: >-
-  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.topic_id || 'auto' }}
+  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
 
 # ─── Triggers ───────────────────────────────────────────────────────────────
 on:
@@ -54,6 +54,16 @@ on:
         options:
           - "false"
           - "true"
+      approved_run_id:
+        description: "Approved preview run ID (posts exact preview artifact)"
+        required: false
+        default: ""
+        type: string
+      approved_artifact_name:
+        description: "Approved preview artifact name"
+        required: false
+        default: ""
+        type: string
 
 # ─── Job ─────────────────────────────────────────────────────────────────────
 jobs:
@@ -95,6 +105,7 @@ jobs:
           echo "  Trigger   : ${{ github.event_name }}"
           echo "  Topic     : ${{ github.event.inputs.topic_id || 'auto' }}"
           echo "  Dry run   : ${{ github.event.inputs.dry_run || 'false' }}"
+          echo "  Approved  : ${{ github.event.inputs.approved_run_id || 'no' }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
       # 6. Run the agent
@@ -113,18 +124,26 @@ jobs:
           AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
           USER_NAME: ${{ vars.USER_NAME || vars.AUTHOR_NAME || github.actor }}
           GH_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          ARGS=""
+          if [ -n "${{ github.event.inputs.approved_run_id }}" ] && [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
+            python post_approved_preview.py \
+              --run-id "${{ github.event.inputs.approved_run_id }}" \
+              --artifact-name "${{ github.event.inputs.approved_artifact_name }}"
+          else
+            ARGS=""
 
-          if [ -n "${{ github.event.inputs.topic_id }}" ]; then
-            ARGS="$ARGS --topic ${{ github.event.inputs.topic_id }}"
+            if [ -n "${{ github.event.inputs.topic_id }}" ]; then
+              ARGS="$ARGS --topic ${{ github.event.inputs.topic_id }}"
+            fi
+
+            if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+              ARGS="$ARGS --dry-run"
+            fi
+
+            python agent.py $ARGS
           fi
-
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            ARGS="$ARGS --dry-run"
-          fi
-
-          python agent.py $ARGS
 
       # 7. Bookmark — dashboard reads this step name to identify real posts and extract topic.
       #    agent.py writes POSTED_TOPIC to GITHUB_OUTPUT immediately after topic selection,
@@ -147,7 +166,9 @@ jobs:
           path: |
             src/diagrams/*.svg
             src/diagrams/*.png
+            src/diagrams/*.gif
             src/output_post_*.txt
+            src/preview_payload_*.json
             src/agent.log
           retention-days: 30
 
