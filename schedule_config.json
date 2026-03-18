@@ -18,9 +18,9 @@
     },
     "wed": {
       "enabled": true,
-      "time_ist": "17:15",
+      "time_ist": "18:15",
       "time_utc": "04:00",
-      "time_local": "17:15",
+      "time_local": "18:15",
       "time_tz": "America/New_York"
     },
     "thu": {
@@ -54,5 +54,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-17T03:08:46.343Z"
+  "updated_at": "2026-03-18T21:23:36.236Z"
 }
