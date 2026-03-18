@@ -3030,6 +3030,14 @@
           </div>
         </div>
         <div class="pb-r">
+          <select class="tz-sel" id="postModeSel" onchange="setPostMode(this.value)" title="Choose generation mode">
+            <option value="auto">Auto mode</option>
+            <option value="topic">Topic only</option>
+            <option value="ai_news">AI news</option>
+            <option value="tools_news">Tools news</option>
+            <option value="tech_news">Tech news</option>
+            <option value="layoff_news">Layoff news</option>
+          </select>
           <div class="dry" id="dryBtn" onclick="toggleDry()">
             <div class="sw"></div>
             <span id="dryLbl">Dry Run</span>
@@ -3300,6 +3308,7 @@
     }
     let topicId = '';
     let topicName = 'Auto-select';
+    let postMode = localStorage.getItem('post_mode') || 'auto';
     let lastGenPost = '';
     let previewBundle = null;
     let previewDiagramUrl = null;
@@ -3336,6 +3345,11 @@
         sel.insertAdjacentHTML('afterbegin', `<option value="${userTZ}" selected>🌍 ${userTZ.replace('_', ' ')}</option>`);
       }
       updateTzLabels();
+    }
+
+    function setPostMode(value) {
+      postMode = value || 'auto';
+      localStorage.setItem('post_mode', postMode);
     }
 
     function setTimezone(tz) {
@@ -3608,6 +3622,8 @@
       _themeMode = localStorage.getItem('themeMode') || 'dark';
       applyTheme();
       initTzSelector();
+      const postModeSel = document.getElementById('postModeSel');
+      if (postModeSel) postModeSel.value = postMode;
       renderTopicGrid();
       loadSettings();
       if (token) silentConn();
@@ -3886,9 +3902,10 @@ async function handlePost() {
       }
     }
 
-    async function dispatchWorkflowRun({ topicId = '', dryRun = false, approvedRunId = '', approvedArtifactName = '' } = {}) {
+    async function dispatchWorkflowRun({ topicId = '', dryRun = false, approvedRunId = '', approvedArtifactName = '', postMode: requestedMode = postMode } = {}) {
       const inp = { dry_run: dryRun ? 'true' : 'false' };
       if (topicId) inp.topic_id = topicId;
+      if (requestedMode) inp.post_mode = requestedMode;
       if (approvedRunId) inp.approved_run_id = String(approvedRunId);
       if (approvedArtifactName) inp.approved_artifact_name = approvedArtifactName;
       const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/dispatches', {
@@ -4027,7 +4044,8 @@ async function handlePost() {
           topicId: previewBundle.payload.topic_id,
           dryRun: false,
           approvedRunId: previewBundle.runId,
-          approvedArtifactName: previewBundle.artifactName
+          approvedArtifactName: previewBundle.artifactName,
+          postMode: previewBundle.payload.mode || postMode
         });
         closePreview();
       } finally {

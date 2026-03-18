@@ -809,7 +809,7 @@ def write_github_summary(topic_name, mode, post_preview, dry_run=False, score_ca
 
 # ─── MAIN AGENT ───────────────────────────────────────────────────────────────
 
-def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False):
+def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False, forced_mode=None):
     log.info("=" * 60)
     log.info("LinkedIn Agent — Komal Batra — " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     log.info("Mode: " + ("DRY RUN" if dry_run else "LIVE"))
@@ -837,7 +837,9 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
     topic     = None
     structure = None
 
-    if manual_topic_id:
+    if forced_mode and forced_mode not in ("", "auto"):
+        mode = forced_mode
+    elif manual_topic_id:
         mode = "topic"
     elif force_news:
         mode = force_news
@@ -1003,6 +1005,7 @@ Write a LinkedIn post that:
             json.dump({
                 "topic_id": topic["id"],
                 "topic_name": topic["name"],
+                "category": topic.get("category", ""),
                 "mode": mode,
                 "diagram_type": diagram_type,
                 "diagram_title": diagram_title,
@@ -1039,6 +1042,7 @@ Write a LinkedIn post that:
             "timestamp":  datetime.now().isoformat(),
             "topic_id":   topic["id"],
             "topic_name": topic["name"],
+            "category":   topic.get("category", ""),
             "mode":       mode,
             "status":     "success",
         })
@@ -1053,6 +1057,7 @@ Write a LinkedIn post that:
             "timestamp":  datetime.now().isoformat(),
             "topic_id":   topic["id"],
             "topic_name": topic["name"],
+            "category":   topic.get("category", ""),
             "mode":       mode,
             "status":     "failed",
         })
@@ -1067,6 +1072,8 @@ if __name__ == "__main__":
                         help="Skip schedule sleep, run immediately")
     parser.add_argument("--news", type=str, default=None,
                         help="Force news mode: ai_news, layoff_news, tools_news, tech_news")
+    parser.add_argument("--mode", type=str, default=None,
+                        help="Force post mode: auto, topic, ai_news, layoff_news, tools_news, tech_news")
     parser.add_argument("--list-topics", action="store_true")
     args = parser.parse_args()
     if args.list_topics:
@@ -1077,4 +1084,5 @@ if __name__ == "__main__":
         dry_run=args.dry_run,
         force_news=args.news,
         manual=args.manual,
+        forced_mode=args.mode,
     )

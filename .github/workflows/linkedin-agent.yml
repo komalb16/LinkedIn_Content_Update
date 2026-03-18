@@ -1,7 +1,7 @@
 name: 🤖 LinkedIn Agent
 
 run-name: >-
-  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
+  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.post_mode || 'auto' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
 
 # ─── Triggers ───────────────────────────────────────────────────────────────
 on:
@@ -54,6 +54,18 @@ on:
         options:
           - "false"
           - "true"
+      post_mode:
+        description: "Generation mode"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - "auto"
+          - "topic"
+          - "ai_news"
+          - "tools_news"
+          - "tech_news"
+          - "layoff_news"
       approved_run_id:
         description: "Approved preview run ID (posts exact preview artifact)"
         required: false
@@ -104,6 +116,7 @@ jobs:
           echo "  Run time  : $(date '+%Y-%m-%d %H:%M %Z')"
           echo "  Trigger   : ${{ github.event_name }}"
           echo "  Topic     : ${{ github.event.inputs.topic_id || 'auto' }}"
+          echo "  Post mode : ${{ github.event.inputs.post_mode || 'auto' }}"
           echo "  Dry run   : ${{ github.event.inputs.dry_run || 'false' }}"
           echo "  Approved  : ${{ github.event.inputs.approved_run_id || 'no' }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -136,6 +149,10 @@ jobs:
 
             if [ -n "${{ github.event.inputs.topic_id }}" ]; then
               ARGS="$ARGS --topic ${{ github.event.inputs.topic_id }}"
+            fi
+
+            if [ -n "${{ github.event.inputs.post_mode }}" ] && [ "${{ github.event.inputs.post_mode }}" != "auto" ]; then
+              ARGS="$ARGS --mode ${{ github.event.inputs.post_mode }}"
             fi
 
             if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then

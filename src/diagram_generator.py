@@ -29,6 +29,8 @@ try:
 except Exception:
     _DIAGRAM_AUTHOR = "Komal Batra"
 
+_COPYRIGHT_NAME = "Komal Batra"
+
 try:
     from logger import get_logger
     log = get_logger("diagrams")
@@ -180,9 +182,9 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
 {inner_svg}
 <rect x="0" y="{H-30}" width="{W}" height="30" fill="{foot_bg}"/>
 <rect x="0" y="{H-31}" width="{W}" height="1" fill="{foot_bdr}"/>
-<text x="18" y="{H-11}" fill="{foot_txt}" font-size="8.5">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>
+<text x="18" y="{H-11}" fill="{foot_txt}" font-size="8.5">{datetime.now().strftime("%B %Y")}</text>
 <rect x="{W-220}" y="{H-24}" width="208" height="18" rx="9" fill="{rgba(accent,0.12)}" stroke="{accent}" stroke-width="1"/>
-<text x="{W-116}" y="{H-12}" text-anchor="middle" fill="{accent}" font-size="9" font-weight="800" letter-spacing="0.8">AI (c) Komal Batra</text>
+<text x="{W-116}" y="{H-12}" text-anchor="middle" fill="{accent}" font-size="9" font-weight="800" letter-spacing="0.8">AI (c) {_COPYRIGHT_NAME}</text>
 </svg>'''
 
 
@@ -1752,7 +1754,7 @@ def _style_infographic_panels(topic_id, topic_name, C, structure=None):
             svg += f'<polygon points="{ax2+4},{ay} {ax2-4},{ay-4} {ax2-4},{ay+4}" fill="{lighten(pc,0.3)}"/>'
 
     svg += f'<rect x="0" y="{H-28}" width="{W}" height="28" fill="{lighten(accent,0.92)}"/>'
-    svg += f'<text x="18" y="{H-10}" fill="#6B7280" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="18" y="{H-10}" fill="#6B7280" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")}</text>'
     svg += f'<rect x="{W-200}" y="{H-22}" width="188" height="16" rx="8" fill="{rgba(accent,0.15)}" stroke="{accent}" stroke-width="1"/>'
     svg += f'<text x="{W-106}" y="{H-11}" text-anchor="middle" fill="{accent}" font-size="8.5" font-weight="800" font-family="Arial,sans-serif">AI (c) Komal Batra</text>'
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
@@ -1824,7 +1826,7 @@ def _style_chalkboard(topic_id, topic_name, C, structure=None):
             svg += f'<rect x="{bx}" y="{sy+20}" width="{comp_w-4}" height="32" rx="6" fill="{rgba(accent,0.15)}" stroke="{accent}" stroke-width="1"/>'
             svg += f'<text x="{bx+comp_w//2}" y="{sy+40}" text-anchor="middle" fill="{chalk_white}" font-size="9" font-weight="700" font-family="Arial,sans-serif">{xe(clamp(comp.strip(),12))}</text>'
 
-    svg += f'<text x="18" y="{H-10}" fill="{chalk_dim}" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="18" y="{H-10}" fill="{chalk_dim}" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")}</text>'
     svg += f'<text x="{W-18}" y="{H-10}" text-anchor="end" fill="{accent}" font-size="9" font-weight="800" font-family="Arial,sans-serif">AI (c) Komal Batra</text>'
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 
@@ -1892,7 +1894,7 @@ def _style_dark_column_flow(topic_id, topic_name, C, structure=None):
                 for li, ln in enumerate(label_lines[:2]):
                     svg += f'<text x="{cx}" y="{ny+node_r+14+li*13}" text-anchor="middle" fill="{lighten(col,0.5)}" font-size="9.5" font-family="Arial,sans-serif">{xe(ln)}</text>'
 
-    svg += f'<text x="18" y="{H-8}" fill="#555" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="18" y="{H-8}" fill="#555" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")}</text>'
     svg += f'<text x="{W-18}" y="{H-8}" text-anchor="end" fill="{C[0]}" font-size="9" font-weight="800" font-family="Arial,sans-serif">AI (c) Komal Batra</text>'
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 
@@ -1959,7 +1961,7 @@ def _style_three_panel(topic_id, topic_name, C, structure=None):
         svg += f'<text x="{sx+24}" y="{step_y+10}" fill="#374151" font-size="9" font-family="Arial,sans-serif">{xe(clamp(sec["desc"], col_w2//6))}</text>'
 
     svg += f'<rect x="0" y="{H-22}" width="{W}" height="22" fill="{C[0]}"/>'
-    svg += f'<text x="18" y="{H-7}" fill="white" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="18" y="{H-7}" fill="white" font-size="9" font-family="Arial,sans-serif">{datetime.now().strftime("%B %Y")}</text>'
     svg += f'<text x="{W-18}" y="{H-7}" text-anchor="end" fill="white" font-size="9" font-weight="800" font-family="Arial,sans-serif">AI (c) Komal Batra</text>'
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 
@@ -2281,12 +2283,12 @@ def _nb_title(W, title, subtitle):
 
 
 def _nb_footer(W, H, author):
-    """Bottom rule + author credit."""
+    """Bottom rule + copyright credit."""
     svg = f'<line x1="42" y1="{H-20}" x2="{W-42}" y2="{H-20}" stroke="#D3D1C7" stroke-width="0.6"/>'
     svg += (
         f'<text x="{W-42}" y="{H-7}" text-anchor="end" '
         f'font-family="Georgia,serif" font-size="11" fill="#888" '
-        f'font-style="italic">{_nb_xe(author)}</text>'
+        f'font-style="italic">{_nb_xe(f"AI (c) {_COPYRIGHT_NAME}")}</text>'
     )
     return svg
 
@@ -2645,7 +2647,7 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
             svg += f'<text x="{bx}" y="{by+4}" text-anchor="middle" fill="{darken(col,0.2)}" font-size="8.5" font-weight="700">{xe(clamp(bubble, 28))}</text>'
 
     svg += f'<rect x="0" y="{H-28}" width="{W}" height="28" fill="#E5E7EB"/>'
-    svg += f'<text x="18" y="{H-10}" fill="#64748B" font-size="9">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="18" y="{H-10}" fill="#64748B" font-size="9">{datetime.now().strftime("%B %Y")}</text>'
     svg += f'<text x="{W-18}" y="{H-10}" text-anchor="end" fill="{C[0]}" font-size="9" font-weight="800">AI (c) Komal Batra</text>'
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 

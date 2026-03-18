@@ -721,11 +721,18 @@ class TopicManager:
         raise ValueError("Topic not found: " + topic_id)
 
     def get_next_topic(self):
+        topic_by_id = {t["id"]: t for t in self.topics}
         recent_ids = [h["topic_id"] for h in self.history[-35:]]
         available = [t for t in self.topics if t["id"] not in recent_ids]
         if not available:
             available = self.topics  # all have been used recently — full reset
-        recent_categories = [h.get("category") for h in self.history[-5:]]
+        recent_categories = []
+        for h in self.history[-5:]:
+            category = h.get("category")
+            if not category:
+                category = topic_by_id.get(h.get("topic_id", ""), {}).get("category")
+            if category:
+                recent_categories.append(category)
         prioritized = [t for t in available if t["category"] not in recent_categories]
         pool = prioritized if prioritized else available
         chosen = random.choice(pool)

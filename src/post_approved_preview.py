@@ -113,6 +113,7 @@ def main():
                 "timestamp": datetime.now().isoformat(),
                 "topic_id": payload.get("topic_id", ""),
                 "topic_name": payload.get("topic_name", ""),
+                "category": payload.get("category", ""),
                 "mode": payload.get("mode", "topic"),
                 "status": "success",
             })
