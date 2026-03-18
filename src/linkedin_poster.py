@@ -133,7 +133,7 @@ class LinkedInPoster:
         """Post text + diagram image to LinkedIn."""
         try:
             # Step 1: Get image bytes
-            if image_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+            if image_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
                 log.info(f"Uploading native image: {image_path}")
                 with open(image_path, "rb") as f:
                     png_bytes = f.read()

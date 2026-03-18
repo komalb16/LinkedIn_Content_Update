@@ -19,6 +19,8 @@ import shutil
 import math
 import hashlib
 import random
+import re
+import io
 from datetime import datetime
 from pathlib import Path
 
@@ -38,6 +40,7 @@ except Exception:
     log = _L()
 
 OUTPUT_DIR = "diagrams"
+_MOTION_PHASE = None
 
 # ── Colour palettes ────────────────────────────────────────────────────────────
 PALETTES = {
@@ -90,6 +93,42 @@ def wrap_lines(text, max_chars):
     if cur: lines.append(cur)
     return lines or [""]
 
+
+def _animated_dot_path(path_d, dot_colors=("#2563EB", "#DC2626"), dot_radius=3.2, duration=3.2, begin=0.0):
+    path_id = "p" + hashlib.md5(f"{path_d}|{dot_colors}|{dot_radius}|{duration}".encode("utf-8")).hexdigest()[:12]
+    lead = dot_colors[0]
+    trail = dot_colors[1] if len(dot_colors) > 1 else dot_colors[0]
+    return (
+        f'<path id="{path_id}" d="{path_d}" fill="none" stroke="none"/>'
+        f'<circle r="{dot_radius}" fill="{lead}" opacity="0.95">'
+        f'<animateMotion dur="{duration:.2f}s" begin="{begin:.2f}s" repeatCount="indefinite" path="{path_d}"/>'
+        f'<animate attributeName="opacity" values="0.35;1;0.35" dur="{duration:.2f}s" begin="{begin:.2f}s" repeatCount="indefinite"/>'
+        f'</circle>'
+        f'<circle r="{max(2.4, dot_radius-0.6):.1f}" fill="{trail}" opacity="0.85">'
+        f'<animateMotion dur="{duration:.2f}s" begin="{begin + duration/2:.2f}s" repeatCount="indefinite" path="{path_d}"/>'
+        f'<animate attributeName="opacity" values="0.2;0.85;0.2" dur="{duration:.2f}s" begin="{begin + duration/2:.2f}s" repeatCount="indefinite"/>'
+        f'</circle>'
+    )
+
+
+def _dotted_flow_line(x1, y1, x2, y2, stroke, dot_colors=("#2563EB", "#DC2626"), dot_spacing=24, dot_radius=2.7, opacity=0.9):
+    dx = x2 - x1
+    dy = y2 - y1
+    dist = max(math.hypot(dx, dy), 1.0)
+    steps = max(1, int(dist // dot_spacing))
+    svg = f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{stroke}" stroke-width="1.8" opacity="{opacity}" />'
+    phase = _MOTION_PHASE if _MOTION_PHASE is not None else 0.0
+    for i in range(steps):
+        t = ((i / steps) + phase) % 1.0
+        if t <= 0.02 or t >= 0.98:
+            continue
+        cx = x1 + dx * t
+        cy = y1 + dy * t
+        col = dot_colors[i % len(dot_colors)]
+        rr = dot_radius + (0.35 if i % 3 == 0 else 0)
+        svg += f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{rr:.1f}" fill="{col}" opacity="0.95"/>'
+    return svg
+
 # ── Shared CSS animations ──────────────────────────────────────────────────────
 ANIM = """<style>
   @keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -113,7 +152,6 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
         dot_pat = (f'<pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">'
                    f'<circle cx="1" cy="1" r="0.65" fill="{rgba(accent,0.10)}"/></pattern>'
                    f'<rect width="{W}" height="{H}" fill="url(#dots)"/>')
-    else:
         dot_pat = (f'<pattern id="grid" width="26" height="26" patternUnits="userSpaceOnUse">'
                    f'<path d="M26 0 L0 0 0 26" fill="none" stroke="{rgba(accent,0.06)}" stroke-width="0.5"/></pattern>'
                    f'<rect width="{W}" height="{H}" fill="url(#grid)"/>')
@@ -229,6 +267,8 @@ def _style_vertical_flow(topic_id, topic_name, C):
         if i < len(steps) - 1:
             ax = cx; ay1 = y + BOX_H; ay2 = ay1 + ARROW_H - 8
             svg += f'<line x1="{ax}" y1="{ay1}" x2="{ax}" y2="{ay2}" stroke="{col}" stroke-width="2.5" class="flow" opacity="0.8"/>'
+            svg += _dotted_flow_line(ax, ay1 + 3, ax, ay2 - 2, rgba(col,0.32), dot_spacing=14, dot_radius=2.6)
+            svg += _animated_dot_path(f"M {ax} {ay1+3} L {ax} {ay2-2}", duration=2.4, begin=i * 0.12)
             svg += f'<polygon points="{ax},{ay2+8} {ax-7},{ay2} {ax+7},{ay2}" fill="{col}" class="pu"/>'
         y += BOX_H + ARROW_H
 
@@ -509,6 +549,8 @@ def _style_timeline(topic_id, topic_name, C):
     step = span_w // (n - 1)
 
     svg += f'<line x1="{pad}" y1="{spine_y}" x2="{W-pad}" y2="{spine_y}" stroke="{lighten(accent,0.3)}" stroke-width="3" class="flow"/>'
+    svg += _dotted_flow_line(pad, spine_y, W-pad, spine_y, rgba(accent,0.22), dot_spacing=34, dot_radius=3.0, opacity=0.7)
+    svg += _animated_dot_path(f"M {pad} {spine_y} L {W-pad} {spine_y}", duration=4.6)
 
     for i, (year, title, desc) in enumerate(milestones):
         col = C[i % len(C)]
@@ -523,6 +565,7 @@ def _style_timeline(topic_id, topic_name, C):
         stem_y1 = spine_y - 12 if above else spine_y + 12
         stem_y2 = cy_card + card_h if above else cy_card
         svg += f'<line x1="{mx}" y1="{stem_y1}" x2="{mx}" y2="{stem_y2}" stroke="{col}" stroke-width="2" stroke-dasharray="4 2"/>'
+        svg += _dotted_flow_line(mx, stem_y1, mx, stem_y2, rgba(col,0.28), dot_spacing=13, dot_radius=2.3, opacity=0.75)
 
         svg += f'<circle cx="{mx}" cy="{spine_y}" r="10" fill="{dark_bg2}" stroke="{col}" stroke-width="2.5" class="pu"/>'
         svg += f'<circle cx="{mx}" cy="{spine_y}" r="5" fill="{col}"/>'
@@ -854,6 +897,12 @@ def _style_orbit(topic_id, topic_name, C):
         svg += (f'<line x1="{cx+63*math.cos(a):.1f}" y1="{cy+63*math.sin(a):.1f}" '
                 f'x2="{sx-38*math.cos(a):.1f}" y2="{sy-38*math.sin(a):.1f}" '
                 f'stroke="{col}" stroke-width="1.8" stroke-dasharray="5 3" class="flow" style="animation-delay:{i*0.12:.2f}s"/>')
+        line_x1 = cx + 63 * math.cos(a)
+        line_y1 = cy + 63 * math.sin(a)
+        line_x2 = sx - 38 * math.cos(a)
+        line_y2 = sy - 38 * math.sin(a)
+        svg += _dotted_flow_line(line_x1, line_y1, line_x2, line_y2, rgba(col,0.24), dot_spacing=16, dot_radius=2.5, opacity=0.72)
+        svg += _animated_dot_path(f"M {line_x1:.1f} {line_y1:.1f} L {line_x2:.1f} {line_y2:.1f}", duration=2.8, begin=i * 0.18)
 
         r_sat = 38
         svg += f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="{r_sat}" fill="{darken(col,0.52)}" stroke="{col}" stroke-width="2" class="fi" style="animation-delay:{i*0.1:.2f}s"/>'
@@ -967,8 +1016,12 @@ def _style_data_evolution(topic_id, topic_name, C):
 
     # Draw the main flow arrows in background
     svg += f'<path d="M 230 {H//2} L 310 {H//2}" fill="none" stroke="{C[1]}" stroke-width="3" stroke-dasharray="8 4" class="flow"/>'
+    svg += _dotted_flow_line(230, H//2, 310, H//2, rgba(C[1],0.24), dot_spacing=15, dot_radius=2.7, opacity=0.78)
+    svg += _animated_dot_path(f"M 230 {H//2} L 310 {H//2}", duration=2.0)
     svg += f'<polygon points="310,{H//2} 300,{H//2-6} 300,{H//2+6}" fill="{C[1]}" class="pu"/>'
     svg += f'<path d="M 590 {H//2} L 670 {H//2}" fill="none" stroke="{C[0]}" stroke-width="3" stroke-dasharray="8 4" class="flow"/>'
+    svg += _dotted_flow_line(590, H//2, 670, H//2, rgba(C[0],0.24), dot_spacing=15, dot_radius=2.7, opacity=0.78)
+    svg += _animated_dot_path(f"M 590 {H//2} L 670 {H//2}", duration=2.0, begin=0.8)
     svg += f'<polygon points="670,{H//2} 660,{H//2-6} 660,{H//2+6}" fill="{C[0]}" class="pu"/>'
 
     x_offsets = [40, 320, 680]
@@ -2369,7 +2422,6 @@ def _style_notebook(topic_id, topic_name, C, structure=None):
     # ── Pick data ────────────────────────────────────────────────────────────
     if structure and "rows" in structure:
         data = structure
-    else:
         tid = topic_id.lower()
         name_lower = topic_name.lower()
         data = None
@@ -2521,6 +2573,82 @@ if __name__ == "__main__":
             f.write(svg2)
         print(f"Written: {p2}")
 
+def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
+    W, H = 900, 620
+    bg = "#FBFBFD"
+    ink = "#0F172A"
+    subtitle = structure["subtitle"] if structure else "Where retrieval, tools, agents, and protocols connect"
+    sections = structure["sections"] if structure else [
+        {"id": 1, "label": "RAG", "desc": "User question -> Retrieve -> Rerank -> Prompt -> Answer"},
+        {"id": 2, "label": "AI Agent", "desc": "Plan -> Tool use -> Observe -> Reflect -> Finish"},
+        {"id": 3, "label": "MCP", "desc": "Host -> Protocol -> Server -> Tool access"},
+        {"id": 4, "label": "A2A", "desc": "Registry -> Route -> Delegate -> Status"},
+    ]
+    sections = sections[:4]
+
+    def _clean_steps(desc):
+        return [s.strip() for s in re.split(r"\s*(?:â†’|->|\|)\s*", desc or "") if s.strip()]
+
+    svg = ""
+    svg += f'<rect width="{W}" height="{H}" fill="{bg}"/>'
+    svg += f'<line x1="44" y1="28" x2="{W-44}" y2="28" stroke="#111827" stroke-width="2"/>'
+    svg += f'<text x="{W//2}" y="74" text-anchor="middle" fill="{ink}" font-size="30" font-weight="900">{xe(clamp(topic_name, 44))}</text>'
+    svg += f'<text x="{W//2}" y="100" text-anchor="middle" fill="#475569" font-size="13" font-weight="600">{xe(clamp(subtitle, 84))}</text>'
+
+    lane_x = 28
+    lane_w = W - 56
+    lane_h = 108
+    lane_gap = 14
+    top_y = 124
+
+    for i, sec in enumerate(sections):
+        y = top_y + i * (lane_h + lane_gap)
+        col = C[i % len(C)]
+        left_fill = lighten(col, 0.93)
+        chip_fill = lighten(col, 0.97)
+        steps = _clean_steps(sec.get("desc", ""))
+        if not steps:
+            steps = ["Input", "Process", "Output"]
+
+        svg += f'<rect x="{lane_x}" y="{y}" width="{lane_w}" height="{lane_h}" rx="8" fill="#FFFFFF" stroke="{lighten(col,0.45)}" stroke-width="1.4"/>'
+        svg += f'<rect x="{lane_x}" y="{y}" width="{lane_w}" height="3" fill="{col}"/>'
+        svg += f'<rect x="{lane_x+12}" y="{y+14}" width="162" height="{lane_h-28}" rx="6" fill="{left_fill}" stroke="{col}" stroke-width="1.3"/>'
+        svg += f'<text x="{lane_x+28}" y="{y+42}" fill="{darken(col,0.18)}" font-size="14" font-weight="800">LANE {i+1}</text>'
+        svg += f'<text x="{lane_x+28}" y="{y+76}" fill="{darken(col,0.25)}" font-size="28" font-weight="900">{xe(clamp(sec["label"], 16))}</text>'
+
+        flow_x1 = lane_x + 208
+        flow_x2 = lane_x + lane_w - 30
+        flow_y = y + 42
+        svg += f'<line x1="{flow_x1}" y1="{flow_y}" x2="{flow_x2}" y2="{flow_y}" stroke="{rgba(col,0.28)}" stroke-width="2"/>'
+        svg += _dotted_flow_line(flow_x1, flow_y, flow_x2, flow_y, rgba(col,0.18), dot_spacing=20, dot_radius=2.4, opacity=0.78)
+        svg += _animated_dot_path(f"M {flow_x1} {flow_y} L {flow_x2} {flow_y}", duration=3.1 + i*0.3, begin=i*0.18)
+
+        step_gap = (flow_x2 - flow_x1) / max(len(steps), 1)
+        for si, step in enumerate(steps):
+            cx = flow_x1 + step_gap * si + step_gap * 0.45
+            box_w = min(118, max(78, int(step_gap - 12)))
+            box_x = cx - box_w / 2
+            svg += f'<circle cx="{cx:.1f}" cy="{flow_y:.1f}" r="9" fill="#FFFFFF" stroke="{col}" stroke-width="2"/>'
+            svg += f'<text x="{cx:.1f}" y="{flow_y+4:.1f}" text-anchor="middle" fill="{darken(col,0.20)}" font-size="10" font-weight="900">{si+1}</text>'
+            svg += f'<rect x="{box_x:.1f}" y="{y+58}" width="{box_w:.1f}" height="30" rx="5" fill="{chip_fill}" stroke="{lighten(col,0.55)}" stroke-width="1"/>'
+            lines = wrap_lines(step, 14)
+            ty = y + 76 - (len(lines)-1)*5
+            for li, ln in enumerate(lines[:2]):
+                svg += f'<text x="{cx:.1f}" y="{ty+li*11:.1f}" text-anchor="middle" fill="{ink}" font-size="8.5" font-weight="700">{xe(clamp(ln,16))}</text>'
+
+        if len(steps) >= 2:
+            bubble = f"{steps[-2]} -> {steps[-1]}"
+            bx = lane_x + lane_w - 155
+            by = y + lane_h - 18
+            svg += f'<ellipse cx="{bx}" cy="{by}" rx="78" ry="16" fill="#FFFFFF" stroke="{lighten(col,0.42)}" stroke-width="1.3"/>'
+            svg += f'<text x="{bx}" y="{by+4}" text-anchor="middle" fill="{darken(col,0.2)}" font-size="8.5" font-weight="700">{xe(clamp(bubble, 28))}</text>'
+
+    svg += f'<rect x="0" y="{H-28}" width="{W}" height="28" fill="#E5E7EB"/>'
+    svg += f'<text x="18" y="{H-10}" fill="#64748B" font-size="9">{datetime.now().strftime("%B %Y")} · {xe(_DIAGRAM_AUTHOR)}</text>'
+    svg += f'<text x="{W-18}" y="{H-10}" text-anchor="end" fill="{C[0]}" font-size="9" font-weight="800">AI (c) Komal Batra</text>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
+
+
 STYLES = [
     _style_vertical_flow,   # 0 — numbered pipeline steps
     _style_mind_map,        # 1 — radial hub + branches
@@ -2543,6 +2671,7 @@ STYLES = [
     _style_dark_column_flow,    # 18
     _style_three_panel,         # 19
     _style_notebook,            # 20 - notebook style
+    _style_lane_map_infographic, # 21 - editorial lane-map infographic
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -2563,6 +2692,7 @@ TOPIC_STYLE_OVERRIDES = {
     "kafka-streaming":   5,   # comparison — vs other brokers
     "data-evolution":    8,   # 3-tier data evolution
     "ml-algorithms":     9,   # horizontal tree
+    "agentic-ai":       21,   # editorial lane map
     "ai-disciplines":    10,  # layered horizontal flow
     "rag-stack":         11,  # ecosystem tree
     "ai-skills-map":     12,  # honeycomb map
@@ -2594,38 +2724,86 @@ TOPIC_STYLE_OVERRIDES = {
     "rag-systems":    20,
 }
 
+DIAGRAM_TYPE_STYLE_MAP = {
+    "architecture diagram": 7,
+    "architecture": 7,
+    "flow chart": 0,
+    "flow": 0,
+    "comparison table": 5,
+    "comparison": 5,
+    "cheat sheet": 4,
+    "cheatsheet": 4,
+    "taxonomy tree": 9,
+    "tree": 9,
+    "conceptual layers": 2,
+    "layers": 2,
+    "ecosystem tree": 11,
+    "ecosystem": 11,
+    "honeycomb map": 12,
+    "parallel pipelines": 13,
+    "roadmap": 14,
+    "timeline": 15,
+    "notebook": 20,
+    "lane map": 21,
+    "lane infographic": 21,
+    "decision tree": 9,
+    "7 layers": 10,
+    "signal vs noise": 17,
+}
+
+
+def _normalize_diagram_type(diagram_type: str) -> str:
+    return re.sub(r"\s+", " ", (diagram_type or "").strip().lower())
+
+
+def _pick_style_from_metadata(topic_id: str, topic_name: str, diagram_type: str = "", structure: dict = None):
+    if isinstance(structure, dict) and isinstance(structure.get("style"), int):
+        return structure["style"], "structure"
+
+    normalized_type = _normalize_diagram_type(diagram_type)
+    if normalized_type in DIAGRAM_TYPE_STYLE_MAP:
+        return DIAGRAM_TYPE_STYLE_MAP[normalized_type], "diagram_type"
+
+    tid = (topic_id or "").lower()
+    name_lower = (topic_name or "").lower()
+
+    for key, idx in TOPIC_STYLE_OVERRIDES.items():
+        if key in tid:
+            return idx, "topic_id"
+
+    for key, idx in TOPIC_STYLE_OVERRIDES.items():
+        if key in name_lower:
+            return idx, "topic_name"
+
+    if normalized_type:
+        return 7, "generic_type_fallback"
+
+    return 7, "default"
+
+
+def _maybe_variation_style(base_style_idx: int, topic_id: str, topic_name: str, source: str) -> int:
+    if source not in {"topic_id", "topic_name"}:
+        return base_style_idx
+
+    digest = hashlib.md5(f"{topic_id}|{topic_name}".encode("utf-8")).hexdigest()
+    if int(digest[:2], 16) % 10 >= 3:
+        return base_style_idx
+
+    candidate = int(digest[2:6], 16) % len(STYLES)
+    return candidate if candidate != base_style_idx else base_style_idx
+
 
 def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "", structure: dict = None) -> str:
     C = get_pal(topic_id, topic_name)
-    tid = topic_id.lower()
-    name_lower = topic_name.lower()
+    style_idx, source = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
+    style_idx = _maybe_variation_style(style_idx, topic_id, topic_name, source)
 
-    style_idx = None
-    is_known = False
 
-    # Pass 1: match on topic ID
-    for key, idx in TOPIC_STYLE_OVERRIDES.items():
-        if key in tid:
-            style_idx = idx
-            is_known = True
-            break
 
-    # Pass 2: match on topic NAME (catches custom topics with arbitrary IDs)
-    if not is_known:
-        for key, idx in TOPIC_STYLE_OVERRIDES.items():
-            if key in name_lower:
-                style_idx = idx
-                is_known = True
-                break
-
-    if is_known:
-        # Known topics: 30% chance of style variation
-        if random.random() < 0.30:
-            style_idx = random.randint(0, len(STYLES) - 1)
-    else:
-        # Completely unknown topic → always card grid, never a random wrong style
-        style_idx = 7
-        log.info(f"Unknown topic '{topic_name}' — using card grid fallback")
+    log.info(
+        f"Diagram style {style_idx} selected via {source}"
+        + (f" ({diagram_type})" if diagram_type else "")
+    )
 
     fn = STYLES[style_idx]
     try:
@@ -2636,6 +2814,45 @@ def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "", structu
     except Exception as e:
         log.warning(f"Style {style_idx} failed ({e}), falling back to card grid")
         return _style_card_grid(topic_id, topic_name, C)
+
+
+def _style_supports_motion(style_idx: int) -> bool:
+    return style_idx in {0, 3, 6, 8, 21}
+
+
+def _render_gif(topic_name: str, topic_id: str, diagram_type: str = "", structure: dict = None,
+                frame_count: int = 10, duration_ms: int = 120):
+    try:
+        import cairosvg
+        from PIL import Image
+    except Exception as e:
+        log.warning(f"GIF export unavailable: {e}")
+        return None
+
+    style_idx, _ = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
+    if not _style_supports_motion(style_idx):
+        return None
+
+    frames = []
+    global _MOTION_PHASE
+    previous_phase = _MOTION_PHASE
+    try:
+        for idx in range(frame_count):
+            _MOTION_PHASE = idx / frame_count
+            svg = make_diagram(topic_name, topic_id, diagram_type, structure=structure)
+            png_bytes = cairosvg.svg2png(bytestring=svg.encode("utf-8"), output_width=1200, output_height=840)
+            frame = Image.open(io.BytesIO(png_bytes)).convert("P", palette=Image.ADAPTIVE)
+            frames.append(frame)
+    finally:
+        _MOTION_PHASE = previous_phase
+
+    if not frames:
+        return None
+
+    return {
+        "frames": frames,
+        "duration_ms": duration_ms,
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2651,16 +2868,24 @@ class DiagramGenerator:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
         
-        # Check for existing diagram (SVG or PNG)
+        # Check for existing diagram (SVG, PNG, or GIF)
         existing_svg = f"{OUTPUT_DIR}/{topic_id}.svg"
         existing_png = f"{OUTPUT_DIR}/{topic_id}.png"
+        existing_gif = f"{OUTPUT_DIR}/{topic_id}.gif"
         
+        allow_reuse = not structure and not (diagram_type or "").strip()
+
         use_existing = False
-        if os.path.exists(existing_svg) and random.random() < 0.5:  # 50% chance to use existing SVG
+        if allow_reuse and os.path.exists(existing_gif) and random.random() < 0.5:
+            gif_name = filename.replace(".svg", ".gif")
+            shutil.copy(existing_gif, gif_name)
+            log.info(f"Using existing GIF diagram: {gif_name}")
+            return gif_name
+        if allow_reuse and os.path.exists(existing_svg) and random.random() < 0.5:  # 50% chance to use existing SVG
             shutil.copy(existing_svg, filename)
             log.info(f"Using existing SVG diagram: {filename}")
             use_existing = True
-        elif os.path.exists(existing_png) and random.random() < 0.5:  # 50% chance to use existing PNG
+        elif allow_reuse and os.path.exists(existing_png) and random.random() < 0.5:  # 50% chance to use existing PNG
             # For PNG, copy and treat as SVG (will be converted later)
             shutil.copy(existing_png, filename.replace('.svg', '.png'))
             log.info(f"Using existing PNG diagram: {filename.replace('.svg', '.png')}")
@@ -2668,6 +2893,23 @@ class DiagramGenerator:
             use_existing = True
         
         if not use_existing:
+            gif_bundle = _render_gif(topic_name or topic_id, topic_id, diagram_type, structure=structure)
+            if gif_bundle:
+                gif_name = filename.replace(".svg", ".gif")
+                frames = gif_bundle["frames"]
+                frames[0].save(
+                    gif_name,
+                    save_all=True,
+                    append_images=frames[1:],
+                    duration=gif_bundle["duration_ms"],
+                    loop=0,
+                    optimize=False,
+                    disposal=2,
+                )
+                size_kb = os.path.getsize(gif_name) / 1024
+                log.info(f"Generated animated GIF: {gif_name} ({round(size_kb, 1)} KB)")
+                return gif_name
+
             svg = make_diagram(topic_name or topic_id, topic_id, diagram_type, structure=structure)
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(svg)

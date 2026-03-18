@@ -357,16 +357,57 @@ Pick the most technically interesting story. Write a LinkedIn post that:
 - Includes a ``` fenced flow diagram using 🟦🟩🟨🟥 with │ and ▼ connectors
 - Takes a real position — not "time will tell"
 """
-    return call_ai(prompt, NEWS_SYSTEM)
+    return _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
 
 
-def generate_topic_post(topic, structure=None):
+def _build_post_template_instructions(diagram_type, structure=None):
+    section_count = len(structure.get("sections", [])) if structure else 0
+
+    templates = {
+        "Decision Tree": (
+            "Structure the post like a real decision memo. "
+            "Open with the hard decision people get wrong. "
+            "Walk through the branches in order using 'If ... then ...' logic. "
+            "Be explicit about when NOT to use the more complex option. "
+            "End with the single decision criterion that matters most."
+        ),
+        "7 Layers": (
+            f"Write this as a layered breakdown with exactly {max(section_count, 5)} layers. "
+            "Open with the hidden thesis or moat. "
+            "Each section should name one layer and explain why it matters strategically. "
+            "This should read like an argument, not a textbook explanation."
+        ),
+        "Signal vs Noise": (
+            "Write this as a judgment call. "
+            "Open with whether this is signal, noise, or a mix. "
+            "Call out what is overrated, what is real, and where teams get misled. "
+            "Use a decisive tone instead of neutral explanation."
+        ),
+        "Lane Map": (
+            "Write this as an editorial workflow breakdown. "
+            "Each section should describe one operating lane or system role. "
+            "Emphasize how the lanes connect, hand off work, and fail in production."
+        ),
+        "Comparison Table": (
+            "Write this as a practical comparison. "
+            "Do not just list differences; make a recommendation about when each option wins."
+        ),
+        "Winding Roadmap": (
+            "Write this as a staged journey. "
+            "Each section should feel like the next step in capability, not just a list item."
+        ),
+    }
+    return templates.get(diagram_type, "")
+
+
+def generate_topic_post(topic, structure=None, diagram_type=""):
     log.info("Generating post: " + topic["name"])
 
     hook   = random.choice(HOOK_STYLES)
     tone   = random.choice(TONE_VARIATIONS)
     fmt    = random.choice(FORMAT_VARIATIONS)
     length = random.choice(LENGTH_VARIATIONS)
+    template_instruction = _build_post_template_instructions(diagram_type, structure)
 
     if structure and structure.get("sections"):
         sections = structure["sections"]
@@ -383,8 +424,12 @@ Match each label word-for-word. End with a poll listing all {n} options."""
     else:
         structure_block = ""
 
+    if template_instruction:
+        structure_block += f"\n\nPost template guidance:\n{template_instruction}"
+
     prompt = f"""Write a LinkedIn post about: {topic["prompt"]}
 Angle: {topic.get("angle", "practical, production-level insights")}
+Planned diagram type: {diagram_type or topic.get("diagram_type", "Architecture Diagram")}
 
 Story archetype (hook): {hook}
 Voice: {tone}
@@ -399,7 +444,109 @@ Requirements:
 - The hook must be the very first line — no warming up, no preamble
 - Never mention the current month or year
 """
-    return call_ai(prompt, _build_post_system())
+    return _cleanup_generated_post(call_ai(prompt, _build_post_system()))
+
+
+def _cleanup_generated_post(text):
+    text = (text or "").replace("hashtag#", "#").strip()
+    if not text:
+        return text
+
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    normalized = text.strip()
+
+    first_line = normalized.splitlines()[0].strip() if normalized.splitlines() else ""
+    if first_line:
+        marker = "\n" + first_line + "\n"
+        second_pos = normalized.find(marker, len(first_line) + 1)
+        if second_pos > 20:
+            text = normalized[:second_pos].strip()
+            normalized = text
+
+    for copies in (3, 2):
+        if len(normalized) >= copies * 40:
+            chunk_len = len(normalized) // copies
+            if chunk_len * copies == len(normalized):
+                chunk = normalized[:chunk_len].strip()
+                if chunk and chunk * copies == normalized.replace("\r", ""):
+                    text = chunk
+                    normalized = text
+                    break
+
+    # Remove exact repeated full-post blocks that sometimes appear back-to-back.
+    lines = [ln.rstrip() for ln in text.splitlines()]
+    while lines and not lines[-1].strip():
+        lines.pop()
+    n = len(lines)
+    for chunk_len in range(n // 3, 3, -1):
+        if n >= chunk_len * 2:
+            first = lines[:chunk_len]
+            second = lines[chunk_len:chunk_len * 2]
+            if first == second:
+                lines = first + lines[chunk_len * 2:]
+                break
+        if n >= chunk_len * 3:
+            first = lines[:chunk_len]
+            second = lines[chunk_len:chunk_len * 2]
+            third = lines[chunk_len * 2:chunk_len * 3]
+            if first == second == third:
+                lines = first + lines[chunk_len * 3:]
+                break
+
+    text = "\n".join(lines).strip()
+
+    # Collapse accidental repeated title/header lines at the top.
+    split_lines = text.splitlines()
+    if len(split_lines) >= 2 and split_lines[0].strip() == split_lines[1].strip():
+        split_lines.pop(1)
+        text = "\n".join(split_lines).strip()
+
+    return text
+
+
+def _extract_visual_title(post_text, fallback_title):
+    for raw_line in (post_text or "").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("```") or line.startswith("#"):
+            continue
+        line = re.sub(r"^[\"'`•\-\s]+", "", line)
+        line = re.sub(r"\s+", " ", line)
+        if len(line) >= 12:
+            return line[:54]
+    return fallback_title
+
+
+def _infer_diagram_type_from_post(post_text, fallback_type):
+    text = (post_text or "").lower()
+    if "decision tree" in text or "when not to use" in text or "should i" in text:
+        return "Decision Tree"
+    if "7 layers" in text or "layer 1" in text:
+        return "7 Layers"
+    if "signal vs noise" in text or "signal or noise" in text:
+        return "Signal vs Noise"
+    if "mcp" in text or "a2a" in text:
+        return "Lane Map"
+    if "comparison" in text or ("|" in text and "---" in text) or " vs " in text:
+        return "Comparison Table"
+    if "timeline" in text or "roadmap" in text:
+        return "Timeline"
+    if "flow" in text or "→" in post_text or "▼" in post_text:
+        return "Flow Chart"
+    return fallback_type
+
+
+def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_structure):
+    if mode == "topic":
+        return topic["name"], fallback_type, fallback_structure
+
+    diagram_title = _extract_visual_title(post_text, topic["name"])
+    diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
+    diagram_structure = fallback_structure
+
+    if diagram_type != fallback_type:
+        diagram_structure = None
+
+    return diagram_title, diagram_type, diagram_structure
 
 
 # ─── POST MODE ────────────────────────────────────────────────────────────────
@@ -581,8 +728,10 @@ Write a LinkedIn post that:
         )
         log.info("Topic selected: " + topic["name"])
         structure = topic_mgr.get_diagram_structure(topic)
+        planned_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
         log.info(f"Structure: '{structure['subtitle']}' ({len(structure['sections'])} sections)")
-        post_text = generate_topic_post(topic, structure)
+        log.info(f"Planned topic diagram type: {planned_diagram_type}")
+        post_text = generate_topic_post(topic, structure, planned_diagram_type)
 
     # ── FALLBACK TOPIC for news posts ─────────────────────────────────────────
     if not topic:
@@ -596,9 +745,13 @@ Write a LinkedIn post that:
     log.info("POST:\n" + post_text)
 
     # ── GENERATE DIAGRAM ──────────────────────────────────────────────────────
-    diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
+    fallback_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
+    diagram_title, diagram_type, diagram_structure = _resolve_visual_metadata(
+        topic, post_text, mode, fallback_diagram_type, structure
+    )
+    log.info(f"Visual metadata: title='{diagram_title}', type='{diagram_type}'")
     diagram_path = diagram_gen.save_svg(
-        None, topic["id"], topic["name"], diagram_type, structure=structure
+        None, topic["id"], diagram_title, diagram_type, structure=diagram_structure
     )
     log.info("Diagram saved: " + diagram_path)
 

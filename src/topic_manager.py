@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import re
 from datetime import datetime
 from logger import get_logger
 
@@ -250,6 +251,76 @@ TOPICS = [
         "diagram_type": "Winding Roadmap",
         "emoji": "🛣️",
     },
+    {
+        "id": "agentic-ai-decision-tree",
+        "name": "Agentic AI Decision Tree",
+        "category": "AI Strategy",
+        "prompt": "When should you use agents, when is RAG enough, and when should you avoid both in favor of traditional software or ML?",
+        "angle": "The hard part is not building agents. It is deciding when you do not need them.",
+        "diagram_subject": "Decision tree for choosing code vs ML vs RAG vs single-agent vs multi-agent architecture",
+        "diagram_type": "Decision Tree",
+        "emoji": "🌳",
+    },
+    {
+        "id": "enterprise-agentic-strategy",
+        "name": "Enterprise Agentic AI Strategy",
+        "category": "AI Strategy",
+        "prompt": "What actually creates a moat in enterprise agentic AI: identity, distribution, developer capture, data graph, bundling, and infrastructure control.",
+        "angle": "Why the winners in enterprise AI may be decided by layers of distribution and control, not by raw model quality alone.",
+        "diagram_subject": "7-layer enterprise agentic AI strategy stack",
+        "diagram_type": "7 Layers",
+        "emoji": "🧱",
+    },
+    {
+        "id": "ai-evals-guardrails",
+        "name": "AI Evals and Guardrails",
+        "category": "AI Reliability",
+        "prompt": "Why most teams confuse prompt quality with system quality, and why evals, red-teaming, guardrails, and regression checks are the real foundation of production AI.",
+        "angle": "Signal vs noise in AI reliability: what actually reduces hallucinations and failures in production.",
+        "diagram_subject": "Signal vs noise in AI evals, guardrails, and production reliability",
+        "diagram_type": "Signal vs Noise",
+        "emoji": "🛡️",
+    },
+    {
+        "id": "ai-observability",
+        "name": "AI Observability",
+        "category": "AI Reliability",
+        "prompt": "AI observability in production: tracing prompts, retrieval paths, tool calls, latency, token spend, and failure modes across agent workflows.",
+        "angle": "If you cannot observe prompts, context, tool use, and user outcomes, you are flying blind in production AI.",
+        "diagram_subject": "AI observability stack: prompts, traces, retrieval, tools, latency, feedback, and alerts",
+        "diagram_type": "Architecture Diagram",
+        "emoji": "📡",
+    },
+    {
+        "id": "multimodal-ai-systems",
+        "name": "Multimodal AI Systems",
+        "category": "AI",
+        "prompt": "How production multimodal AI systems combine text, image, audio, and video understanding with retrieval, orchestration, and safety checks.",
+        "angle": "Multimodal is not just adding images to a prompt. It changes ingestion, storage, retrieval, latency, and evaluation.",
+        "diagram_subject": "Multimodal AI flow across text, image, audio, video, retrieval, reasoning, and safety",
+        "diagram_type": "Lane Map",
+        "emoji": "🎥",
+    },
+    {
+        "id": "vector-databases",
+        "name": "Vector Databases and Retrieval",
+        "category": "AI Data",
+        "prompt": "Vector databases in AI systems: embeddings, indexing, filtering, hybrid search, reranking, and when vector search is the wrong abstraction.",
+        "angle": "How to compare Pinecone, Weaviate, pgvector, OpenSearch, and hybrid retrieval choices without falling for hype.",
+        "diagram_subject": "Vector database comparison across indexing, filtering, hybrid search, scale, and fit",
+        "diagram_type": "Comparison Table",
+        "emoji": "🗂️",
+    },
+    {
+        "id": "model-context-protocol",
+        "name": "Model Context Protocol",
+        "category": "AI Protocols",
+        "prompt": "Model Context Protocol (MCP): why it matters, how hosts, clients, and servers connect, and what it changes for tool-using AI systems.",
+        "angle": "MCP is not another wrapper. It is the interface layer that could standardize how AI systems discover and use tools.",
+        "diagram_subject": "Lane map of MCP hosts, protocol flow, tool servers, auth, and responses",
+        "diagram_type": "Lane Map",
+        "emoji": "🔌",
+    },
 ]
 
 # ─── DIAGRAM STRUCTURES ───────────────────────────────────────────────────────
@@ -326,7 +397,7 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "cicd-pipelines": {
-        "style": 0, "subtitle": "From Commit to Production",
+        "style": 16, "subtitle": "From Commit to Production",
         "sections": [
             {"id":1,"label":"Code Commit",    "desc":"Pre-commit hooks, linting"},
             {"id":2,"label":"CI Build",       "desc":"Tests, SAST scan in parallel"},
@@ -428,21 +499,92 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "agentic-ai": {
-        "style": 18, "subtitle": "RAG vs Agentic RAG vs AI Memory",
+        "style": 21, "subtitle": "RAG vs Agentic RAG vs AI Memory vs A2A",
         "sections": [
             {"id":1,"label":"RAG",          "desc":"Query → Embed → Vector → Context → LLM"},
-            {"id":2,"label":"Agentic RAG",  "desc":"Agent routes: web search, DB, APIs"},
-            {"id":3,"label":"AI Memory",    "desc":"Search + store memory across sessions"},
+            {"id":2,"label":"Agentic RAG",  "desc":"Goal -> Route -> Tool use -> Observe -> Reflect"},
+            {"id":3,"label":"AI Memory",    "desc":"Capture -> Store -> Recall -> Personalise -> Reuse"},
+            {"id":4,"label":"A2A",          "desc":"Discover -> Delegate -> Status -> Handoff -> Outcome"},
         ]
     },
     "git-workflow": {
-        "style": 3, "subtitle": "Commands That Separate Juniors from Seniors",
+        "style": 16, "subtitle": "Commands That Separate Juniors from Seniors",
         "sections": [
             {"id":1,"label":"Branch",    "desc":"main + develop + feature/* strategy"},
             {"id":2,"label":"Commit",    "desc":"Conventional commits, GPG signed"},
             {"id":3,"label":"PR Flow",   "desc":"2-reviewer gate, squash merge"},
             {"id":4,"label":"Rebase",    "desc":"Clean history, no merge noise"},
             {"id":5,"label":"Recovery",  "desc":"reset, reflog, cherry-pick"},
+        ]
+    },
+    "agentic-ai-decision-tree": {
+        "style": 9, "subtitle": "When agents are the wrong answer",
+        "sections": [
+            {"id":1,"label":"Task Shape",     "desc":"Structured task or open-ended reasoning?"},
+            {"id":2,"label":"Need Retrieval", "desc":"If knowledge is enough, use RAG"},
+            {"id":3,"label":"Need Tools",     "desc":"If actions matter, consider an agent"},
+            {"id":4,"label":"Complexity",     "desc":"Start single-agent before multi-agent"},
+            {"id":5,"label":"Decision",       "desc":"Use the simplest architecture that works"},
+        ]
+    },
+    "enterprise-agentic-strategy": {
+        "style": 10, "subtitle": "The layers that create enterprise AI moats",
+        "sections": [
+            {"id":1,"label":"Identity",     "desc":"Credentials, auth, and enterprise trust"},
+            {"id":2,"label":"Distribution", "desc":"Where users already work every day"},
+            {"id":3,"label":"Developer",    "desc":"IDE, repos, and workflow capture"},
+            {"id":4,"label":"Open Stack",   "desc":"Frameworks, models, and ecosystem leverage"},
+            {"id":5,"label":"Data Graph",   "desc":"Context, documents, meetings, and signals"},
+            {"id":6,"label":"Bundling",     "desc":"Pricing power and default adoption"},
+            {"id":7,"label":"Infra",        "desc":"Cloud, chips, and platform control"},
+        ]
+    },
+    "ai-evals-guardrails": {
+        "style": 17, "subtitle": "What actually makes AI systems reliable",
+        "sections": [
+            {"id":1,"label":"Prompt Tweaks", "desc":"Feels productive but is not a reliability strategy"},
+            {"id":2,"label":"Evals",         "desc":"Regression checks and task-based scoring"},
+            {"id":3,"label":"Guardrails",    "desc":"Policy checks, safety filters, and routing"},
+            {"id":4,"label":"Red Teaming",   "desc":"Stress-testing before production incidents"},
+        ]
+    },
+    "ai-observability": {
+        "style": 7, "subtitle": "What to trace in production AI",
+        "sections": [
+            {"id":1,"label":"Prompts",      "desc":"Inputs, system prompts, and rewrites"},
+            {"id":2,"label":"Retrieval",    "desc":"Chunks, scores, and rerank decisions"},
+            {"id":3,"label":"Tool Calls",   "desc":"Latency, failures, and side effects"},
+            {"id":4,"label":"Cost",         "desc":"Token usage, throughput, and spend"},
+            {"id":5,"label":"Quality",      "desc":"User feedback, hallucinations, and regressions"},
+            {"id":6,"label":"Alerts",       "desc":"SLOs, anomalies, and escalation paths"},
+        ]
+    },
+    "multimodal-ai-systems": {
+        "style": 21, "subtitle": "How text, image, audio, and video systems connect",
+        "sections": [
+            {"id":1,"label":"Text",   "desc":"Input -> Embed -> Retrieve -> Reason -> Output"},
+            {"id":2,"label":"Image",  "desc":"Capture -> Encode -> Detect -> Ground -> Explain"},
+            {"id":3,"label":"Audio",  "desc":"Transcribe -> Segment -> Enrich -> Summarise -> Act"},
+            {"id":4,"label":"Video",  "desc":"Sample -> Detect -> Track -> Index -> Search"},
+        ]
+    },
+    "vector-databases": {
+        "style": 5, "subtitle": "Vector retrieval choices for real systems",
+        "sections": [
+            {"id":1,"label":"Pinecone",   "desc":"Managed scale and fast setup"},
+            {"id":2,"label":"Weaviate",   "desc":"Open ecosystem and rich filtering"},
+            {"id":3,"label":"pgvector",   "desc":"Postgres-first retrieval"},
+            {"id":4,"label":"OpenSearch", "desc":"Hybrid keyword and vector search"},
+            {"id":5,"label":"Milvus",     "desc":"High-scale open source vector infra"},
+        ]
+    },
+    "model-context-protocol": {
+        "style": 21, "subtitle": "How MCP connects hosts, tools, and servers",
+        "sections": [
+            {"id":1,"label":"Host",      "desc":"Client app -> Discover -> Authorise -> Invoke -> Render"},
+            {"id":2,"label":"Protocol",  "desc":"Request -> Tool schema -> Context -> Response -> Events"},
+            {"id":3,"label":"Servers",   "desc":"Connect -> Validate -> Execute -> Return -> Log"},
+            {"id":4,"label":"Outcomes",  "desc":"Audit -> Observe -> Secure -> Reuse -> Scale"},
         ]
     },
 }
@@ -459,6 +601,15 @@ DEFAULT_STRUCTURE = {
         {"id":6,"label":"Key Takeaway",   "desc":"The one thing to remember"},
     ]
 }
+
+INFERRED_DIAGRAM_TYPES = [
+    (("decision tree", "should i", "when to use", "when not to use", "choose", "adoption framework"), "Decision Tree"),
+    (("7 layers", "seven layers", "layers", "stack", "strategy"), "7 Layers"),
+    (("signal vs noise", "signal or noise", "hype", "worth it", "real or hype"), "Signal vs Noise"),
+    (("mcp", "a2a", "protocol", "agentic", "agent workflow", "orchestration"), "Lane Map"),
+    (("roadmap", "journey", "learning path"), "Winding Roadmap"),
+    (("compare", "vs", "versus", "comparison"), "Comparison Table"),
+]
 
 # topics_config.json lives in the root directory.
 TOPICS_CONFIG_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "topics_config.json")
@@ -549,32 +700,113 @@ class TopicManager:
         log.info(f"Selected topic: {chosen['name']} (category: {chosen['category']})")
         return chosen
 
-    def get_diagram_type_for_topic(self, topic):
+    def _topic_text_blob(self, topic):
+        return " ".join([
+            topic.get("id", ""),
+            topic.get("name", ""),
+            topic.get("prompt", ""),
+            topic.get("angle", ""),
+            topic.get("diagram_subject", ""),
+        ]).lower()
+
+    def _infer_diagram_type_from_topic(self, topic):
+        blob = self._topic_text_blob(topic)
+        for keywords, diagram_type in INFERRED_DIAGRAM_TYPES:
+            if any(k in blob for k in keywords):
+                return diagram_type
         return topic.get("diagram_type", "Architecture Diagram")
+
+    def _build_structure_from_diagram_type(self, topic, diagram_type):
+        name = topic.get("name", "This Topic")
+        base_name = re.sub(r"\s+", " ", name).strip()
+
+        if diagram_type == "Decision Tree":
+            return {
+                "style": 9,
+                "subtitle": f"How to decide when {base_name} is the right move",
+                "sections": [
+                    {"id": 1, "label": "Start", "desc": f"What problem does {base_name} solve?"},
+                    {"id": 2, "label": "Need", "desc": "Is the task open-ended or mostly deterministic?"},
+                    {"id": 3, "label": "Data", "desc": "Do you need retrieval, prediction, or orchestration?"},
+                    {"id": 4, "label": "Build", "desc": "Use the simplest architecture that works"},
+                    {"id": 5, "label": "Scale", "desc": "Add complexity only when reliability demands it"},
+                ],
+            }
+
+        if diagram_type == "7 Layers":
+            return {
+                "style": 10,
+                "subtitle": f"The 7 layers behind {base_name}",
+                "sections": [
+                    {"id": 1, "label": "Layer 1", "desc": "Foundation and identity"},
+                    {"id": 2, "label": "Layer 2", "desc": "Distribution and interface"},
+                    {"id": 3, "label": "Layer 3", "desc": "Developer workflow and tooling"},
+                    {"id": 4, "label": "Layer 4", "desc": "Open ecosystem and frameworks"},
+                    {"id": 5, "label": "Layer 5", "desc": "Context, data, and knowledge graph"},
+                    {"id": 6, "label": "Layer 6", "desc": "Bundling, pricing, or adoption moat"},
+                    {"id": 7, "label": "Layer 7", "desc": "Infrastructure and long-term control"},
+                ],
+            }
+
+        if diagram_type == "Signal vs Noise":
+            return {
+                "style": 17,
+                "subtitle": f"Separating signal from noise in {base_name}",
+                "sections": [
+                    {"id": 1, "label": "The Hype", "desc": "What people say this changes"},
+                    {"id": 2, "label": "The Reality", "desc": "What it actually improves in practice"},
+                    {"id": 3, "label": "The Fit", "desc": "Who should use it and who should not"},
+                    {"id": 4, "label": "The Risk", "desc": "What breaks when teams overapply it"},
+                ],
+            }
+
+        if diagram_type == "Lane Map":
+            return {
+                "style": 21,
+                "subtitle": f"The operating lanes behind {base_name}",
+                "sections": [
+                    {"id": 1, "label": "Inputs", "desc": "Trigger -> Route -> Context -> Action -> Output"},
+                    {"id": 2, "label": "Tools", "desc": "Discover -> Connect -> Authorise -> Call -> Return"},
+                    {"id": 3, "label": "Control", "desc": "Plan -> Observe -> Reflect -> Correct -> Finish"},
+                    {"id": 4, "label": "Scale", "desc": "Delegate -> Coordinate -> Track -> Handoff -> Outcome"},
+                ],
+            }
+
+        default = dict(DEFAULT_STRUCTURE)
+        default["sections"] = [
+            {"id":1,"label":"The Problem",    "desc":f"Why {base_name} matters now"},
+            {"id":2,"label":"Core Concept",   "desc":"The fundamental idea"},
+            {"id":3,"label":"How It Works",   "desc":"The mechanism underneath"},
+            {"id":4,"label":"Best Practices", "desc":"What production systems do"},
+            {"id":5,"label":"Common Mistakes","desc":"What most engineers get wrong"},
+            {"id":6,"label":"Key Takeaway",   "desc":"The one thing to remember"},
+        ]
+        return default
+
+    def get_diagram_type_for_topic(self, topic):
+        current = topic.get("diagram_type", "Architecture Diagram")
+        if not current or current == "Architecture Diagram":
+            return self._infer_diagram_type_from_topic(topic)
+        return current
 
     def get_diagram_structure(self, topic):
         """Return diagram structure for this topic — matched sections for post + diagram."""
         tid = topic["id"]
         name_lower = topic["name"].lower()
+        inferred_type = self.get_diagram_type_for_topic(topic)
         if tid in DIAGRAM_STRUCTURES:
             return DIAGRAM_STRUCTURES[tid]
         for key in DIAGRAM_STRUCTURES:
             if key in tid or tid in key:
                 return DIAGRAM_STRUCTURES[key]
+        if inferred_type != "Architecture Diagram":
+            return self._build_structure_from_diagram_type(topic, inferred_type)
         for key in DIAGRAM_STRUCTURES:
             if key.replace("-", " ") in name_lower:
                 return DIAGRAM_STRUCTURES[key]
-        # Dynamic default using the topic's own name
-        default = dict(DEFAULT_STRUCTURE)
-        default["sections"] = [
-            {"id":1,"label":"The Problem",    "desc":f"Why {topic['name']} matters now"},
-            {"id":2,"label":"Core Concept",   "desc":"The fundamental idea"},
-            {"id":3,"label":"How It Works",   "desc":"The mechanism underneath"},
-            {"id":4,"label":"Best Practices", "desc":"What production systems do"},
-            {"id":5,"label":"Common Mistakes","desc":"What most engineers get wrong"},
-            {"id":6,"label":"Key Takeaway",   "desc":f"The one thing to remember"},
-        ]
-        return default
+        return self._build_structure_from_diagram_type(
+            topic, inferred_type
+        )
 
     def save_run_history(self, entry):
         self.history.append(entry)
