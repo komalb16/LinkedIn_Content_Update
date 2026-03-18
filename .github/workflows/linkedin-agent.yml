@@ -1,5 +1,9 @@
 name: 🤖 LinkedIn Agent
 
+permissions:
+  contents: write
+  actions: read
+
 run-name: >-
   ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.dry_run == 'true' && 'dry-run' || 'live' }} · ${{ github.event.inputs.post_mode || 'auto' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
 

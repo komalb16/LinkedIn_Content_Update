@@ -3846,6 +3846,16 @@
       return new Blob([bytes], { type: mime || 'application/octet-stream' });
     }
 
+    function localTimeToUtc(hhmm, tz) {
+      const [h, m] = (hhmm || '09:30').split(':').map(Number);
+      const nowUtc = new Date();
+      const localNow = new Date(nowUtc.toLocaleString('en-US', { timeZone: tz }));
+      localNow.setHours(h, m, 0, 0);
+      const utcMs = localNow.getTime() - tzOffsetMins() * 60000;
+      const utcDate = new Date(utcMs);
+      return `${String(utcDate.getUTCHours()).padStart(2, '0')}:${String(utcDate.getUTCMinutes()).padStart(2, '0')}`;
+    }
+
     async function downloadArtifactZipBuffer(artifactId) {
       let lastStatus = 'unknown';
       for (let attempt = 0; attempt < 8; attempt++) {
@@ -4596,6 +4606,7 @@ async function runNow(options = {}) {
           if (schedConfig.weekly[day]) {
             schedConfig.weekly[day].time_local = schedConfig.weekly[day].time_ist;
             schedConfig.weekly[day].time_tz = userTZ;
+            schedConfig.weekly[day].time_utc = localTimeToUtc(schedConfig.weekly[day].time_ist, userTZ);
           }
         }
         schedConfig.updated_at = new Date().toISOString();

@@ -133,6 +133,27 @@ def utc_now() -> datetime:
     """Current UTC datetime (naive)."""
     return datetime.utcnow()
 
+
+def _schedule_reference_tz(cfg: dict) -> str:
+    weekly = cfg.get("weekly", {}) or {}
+    for day in DAYS:
+        tz_name = (weekly.get(day) or {}).get("time_tz")
+        if tz_name:
+            return tz_name
+    return ""
+
+
+def _schedule_now(cfg: dict):
+    now_utc = utc_now()
+    ref_tz = _schedule_reference_tz(cfg)
+    if ref_tz and HAS_ZONEINFO:
+        try:
+            localized = datetime.now(timezone.utc).astimezone(ZoneInfo(ref_tz))
+            return localized.replace(tzinfo=None), ref_tz
+        except Exception as e:
+            warn(f"Could not resolve schedule timezone '{ref_tz}' ({e}) — using UTC day resolution")
+    return now_utc, ""
+
 def ist_now() -> datetime:
     """Legacy alias — kept so old configs using time_ist still work."""
     return datetime.utcnow() + timedelta(hours=5, minutes=30)
@@ -152,14 +173,15 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         manual = True
         info("Manual trigger detected via GH_EVENT_NAME env var")
 
-    cfg     = load_config()
-    # Use UTC for day/date calculations — dashboard saves all times in UTC now
-    now     = utc_now()
-    today   = now.strftime("%Y-%m-%d")
-    day_key = DAYS[now.weekday()]   # 0=Mon … 6=Sun (UTC date)
+    cfg = load_config()
+    schedule_now, schedule_tz = _schedule_now(cfg)
+    now = utc_now()
+    today = schedule_now.strftime("%Y-%m-%d")
+    day_key = DAYS[schedule_now.weekday()]
 
     trigger = "MANUAL" if manual else ("DRY-RUN" if dry_run else "SCHEDULED")
-    info(f"Schedule check — {today} ({day_key.upper()}) — IST {now.strftime('%H:%M')} — trigger: {trigger}")
+    tz_label = schedule_tz or "UTC"
+    info(f"Schedule check — {today} ({day_key.upper()}) — {tz_label} {schedule_now.strftime('%H:%M')} — trigger: {trigger}")
 
     # ── 1. PAUSE CHECK ────────────────────────────────────────────────────────
     if cfg["paused"]:
