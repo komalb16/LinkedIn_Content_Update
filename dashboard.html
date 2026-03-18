@@ -4495,33 +4495,43 @@ async function runNow(options = {}) {
     // ── STATS ─────────────────────────────────────────────────────────────────────
     async function loadStats() {
       try {
-        const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100');
-        const d = await r.json();
-        const runs = d.workflow_runs || [];
+        let runs = allRuns;
+        if (!runs.length) {
+          const [rc, ri, rq] = await Promise.all([
+            gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100&status=completed'),
+            gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=10&status=in_progress'),
+            gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=10&status=queued'),
+          ]);
+          const dc = rc.ok ? await rc.json() : { workflow_runs: [] };
+          const di = ri.ok ? await ri.json() : { workflow_runs: [] };
+          const dq = rq.ok ? await rq.json() : { workflow_runs: [] };
+          const seen = new Set();
+          runs = [...(di.workflow_runs || []), ...(dq.workflow_runs || []), ...(dc.workflow_runs || [])]
+            .filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; })
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
 
-        // "LinkedIn posts" = non-cron, non-skipped runs only.
-        // isSkippedRun already excludes every schedule event + skipped/fast-cancel.
+        await enrichRunTopics(runs.slice(0, 30));
+
+        // Match the run-history definition of a real LinkedIn post.
         const postRuns = runs.filter(r => !isSkippedRun(r));
-
-        // Successful posts = run reached LinkedIn and the API accepted the post.
         const postedRuns = postRuns.filter(r => r.conclusion === 'success');
 
-        // This-week posts — current calendar week (Mon 00:00 to now), not rolling 7 days
-        const now = new Date();
-        const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon...
-        const daysSinceMon = (dayOfWeek + 6) % 7; // days since last Monday
+        // This-week posts: current calendar week in the selected dashboard timezone.
+        const now = tzNow();
+        const dayOfWeek = now.getDay();
+        const daysSinceMon = (dayOfWeek + 6) % 7;
         const weekStart = new Date(now);
         weekStart.setDate(now.getDate() - daysSinceMon);
         weekStart.setHours(0, 0, 0, 0);
-        const thisWeek = postedRuns.filter(r => new Date(r.created_at) >= weekStart);
+        const thisWeek = postedRuns.filter(r => {
+          const createdLocal = new Date(new Date(r.created_at).toLocaleString('en-US', { timeZone: userTZ }));
+          return createdLocal >= weekStart;
+        });
 
-        // Stat card 1 — total all-time successful posts
         document.getElementById('s1').textContent = postedRuns.length;
-
-        // Stat card 2 — same as s1
         document.getElementById('s2').textContent = postedRuns.length;
 
-        // Stat card 3 — posts this calendar week (Mon–Sun)
         const weekLabel = document.getElementById('s3week');
         if (weekLabel) {
           const opts = { month: 'short', day: 'numeric' };
@@ -4529,7 +4539,6 @@ async function runNow(options = {}) {
         }
         document.getElementById('s3').textContent = thisWeek.length;
 
-        // Stat card 4 — last post time
         if (postedRuns.length > 0) {
           const last = postedRuns[0];
           const diffMs = Date.now() - new Date(last.created_at);
@@ -4550,7 +4559,7 @@ async function runNow(options = {}) {
       } catch (e) { }
     }
 
-    // ── ADVANCED SCHEDULE ─────────────────────────────────────────────────────────
+    // ADVANCED SCHEDULE
     const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
     const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const DAY_ICONS = ['☀️', '🌙', '🌙', '🌙', '🌙', '🌙', '🎉'];
