@@ -159,6 +159,10 @@ jobs:
               ARGS="$ARGS --dry-run"
             fi
 
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              ARGS="$ARGS --manual"
+            fi
+
             python agent.py $ARGS
           fi
 
