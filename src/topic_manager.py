@@ -2,6 +2,7 @@ import json
 import os
 import random
 import re
+from collections import Counter
 from datetime import datetime
 from logger import get_logger
 
@@ -728,16 +729,51 @@ class TopicManager:
             available = self.topics  # all have been used recently — full reset
         recent_categories = []
         for h in self.history[-5:]:
-            category = h.get("category")
-            if not category:
-                category = topic_by_id.get(h.get("topic_id", ""), {}).get("category")
+            category = self._resolve_history_category(h, topic_by_id)
             if category:
                 recent_categories.append(category)
         prioritized = [t for t in available if t["category"] not in recent_categories]
         pool = prioritized if prioritized else available
+
+        category_supply = Counter(t["category"] for t in self.topics)
+        category_history = Counter()
+        recent_window = self.history[-24:]
+        for h in recent_window:
+            category = self._resolve_history_category(h, topic_by_id)
+            if category in category_supply:
+                category_history[category] += 1
+
+        total_supply = max(1, sum(category_supply.values()))
+        total_history = max(1, sum(category_history.values()))
+
+        def category_gap(cat):
+            target_share = category_supply[cat] / total_supply
+            actual_share = category_history[cat] / total_history
+            return actual_share - target_share
+
+        eligible_categories = {t["category"] for t in pool}
+        min_gap = min(category_gap(cat) for cat in eligible_categories)
+        balanced_categories = {
+            cat for cat in eligible_categories
+            if abs(category_gap(cat) - min_gap) < 1e-9
+        }
+        balanced_pool = [t for t in pool if t["category"] in balanced_categories]
+        if balanced_pool:
+            pool = balanced_pool
+
         chosen = random.choice(pool)
-        log.info(f"Selected topic: {chosen['name']} (category: {chosen['category']})")
+        log.info(
+            f"Selected topic: {chosen['name']} (category: {chosen['category']}, "
+            f"gap={category_gap(chosen['category']):.3f}, pool={len(pool)})"
+        )
         return chosen
+
+    def _resolve_history_category(self, history_entry, topic_by_id):
+        category = history_entry.get("category")
+        if category:
+            return category
+        topic_id = history_entry.get("topic_id", "")
+        return topic_by_id.get(topic_id, {}).get("category")
 
     def _topic_text_blob(self, topic):
         return " ".join([
