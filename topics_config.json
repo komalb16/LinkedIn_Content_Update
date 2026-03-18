@@ -58,7 +58,11 @@
     {
       "id": "langchain",
       "name": "LangChain"
+    },
+    {
+      "id": "ai-observability",
+      "name": "AI Observability"
     }
   ],
-  "updated_at": "2026-03-16T21:43:35.628Z"
+  "updated_at": "2026-03-18T00:25:22.094Z"
 }
