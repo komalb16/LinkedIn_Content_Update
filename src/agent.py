@@ -695,15 +695,113 @@ def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
 
 
 def _extract_visual_title(post_text, fallback_title):
+    return _extract_visual_title_for_type(post_text, fallback_title, "")
+
+
+def _clean_entity_name(name):
+    cleaned = re.sub(r"^[\"'`\-\s]+|[\"'`.,:;!?\)\]\s]+$", "", (name or "").strip())
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned[:28]
+
+
+def _extract_comparison_entities(post_text):
+    text = post_text or ""
+    patterns = [
+        r"\b([A-Z][A-Za-z0-9&.+/\- ]{1,30})\s+vs\.?\s+([A-Z][A-Za-z0-9&.+/\- ]{1,30})\b",
+        r"\bcomparison of\s+([A-Z][A-Za-z0-9&.+/\- ]{1,30})\s+(?:and|to|vs\.?)\s+([A-Z][A-Za-z0-9&.+/\- ]{1,30})\b",
+        r"\bcompare\s+([A-Z][A-Za-z0-9&.+/\- ]{1,30})\s+(?:and|to|vs\.?)\s+([A-Z][A-Za-z0-9&.+/\- ]{1,30})\b",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            left = _clean_entity_name(match.group(1))
+            right = _clean_entity_name(match.group(2))
+            if left and right and left.lower() != right.lower():
+                return [left, right]
+
+    preferred = [
+        "OpenAI", "Anthropic", "Google", "Microsoft", "AWS", "Azure", "Railway",
+        "Mistral", "GitHub", "Docker", "Kubernetes", "Databricks", "Snowflake",
+        "Pinecone", "Weaviate", "LangChain", "CrewAI", "n8n", "Vercel", "Cursor",
+    ]
+    lowered = text.lower()
+    found = []
+    for name in preferred:
+        pos = lowered.find(name.lower())
+        if pos != -1:
+            found.append((pos, name))
+    if found:
+        found.sort(key=lambda item: item[0])
+        ordered = []
+        for _, name in found:
+            if name not in ordered:
+                ordered.append(name)
+            if len(ordered) == 2:
+                return ordered
+        return ordered[:2]
+    return []
+
+
+def _extract_visual_title_for_type(post_text, fallback_title, diagram_type):
+    entities = _extract_comparison_entities(post_text) if diagram_type == "Comparison Table" else []
+    if len(entities) >= 2:
+        return f"{entities[0]} vs {entities[1]}"
+
+    weak_openers = (
+        "i'm", "i am", "here's", "the fact that", "this led me", "nobody talks",
+        "our ", "today", "in today's", "let's", "three years ago",
+    )
     for raw_line in (post_text or "").splitlines():
         line = raw_line.strip()
         if not line or line.startswith("```") or line.startswith("#"):
             continue
         line = re.sub(r"^[\"'`•\-\s]+", "", line)
         line = re.sub(r"\s+", " ", line)
+        if line.lower().startswith(weak_openers):
+            continue
         if len(line) >= 12:
             return line[:54]
     return fallback_title
+
+
+def _build_comparison_structure_from_post(post_text, title):
+    entities = _extract_comparison_entities(post_text)
+    if len(entities) < 2:
+        return None
+
+    rows = []
+    code_blocks = re.findall(r"```(.*?)```", post_text or "", flags=re.DOTALL)
+    for block in code_blocks:
+        for raw_line in block.splitlines():
+            line = raw_line.strip(" -*\t")
+            if not line or "|" in line or "---" in line:
+                continue
+            parts = re.split(r"\s*(?:->|→)\s*", line, maxsplit=1)
+            if len(parts) != 2:
+                continue
+            left, right = parts[0].strip(), parts[1].strip()
+            if not left or not right:
+                continue
+            label = "Positioning" if not rows else f"Point {len(rows) + 1}"
+            rows.append((label, [left[:22], right[:22]]))
+            if len(rows) >= 4:
+                break
+        if len(rows) >= 4:
+            break
+
+    if not rows:
+        rows = [
+            ("Positioning", ["Established platform", "Emerging alternative"]),
+            ("AI Approach", ["Add-on automation", "AI-native workflow"]),
+            ("Best Fit", ["Enterprise breadth", "Developer speed"]),
+            ("Trade-off", ["More control, more weight", "Simpler, less mature"]),
+        ]
+
+    return {
+        "title": title,
+        "cols": entities[:2],
+        "rows": rows,
+    }
 
 
 def _infer_diagram_type_from_post(post_text, fallback_type):
@@ -729,12 +827,14 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
     if mode == "topic":
         return topic["name"], fallback_type, fallback_structure
 
-    diagram_title = _extract_visual_title(post_text, topic["name"])
     diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
+    diagram_title = _extract_visual_title_for_type(post_text, topic["name"], diagram_type)
     diagram_structure = fallback_structure
 
     if diagram_type != fallback_type:
         diagram_structure = None
+    if diagram_type == "Comparison Table" and not diagram_structure:
+        diagram_structure = _build_comparison_structure_from_post(post_text, diagram_title)
 
     return diagram_title, diagram_type, diagram_structure
 

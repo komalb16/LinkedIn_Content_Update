@@ -675,7 +675,7 @@ def _style_hexagon(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 5 — COMPARISON TABLE  (side-by-side matrix)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_comparison(topic_id, topic_name, C):
+def _style_comparison(topic_id, topic_name, C, structure=None):
     W, H = 900, 580
     accent = C[0]
     bg_top = lighten(accent, 0.90)
@@ -738,22 +738,24 @@ def _style_comparison(topic_id, topic_name, C):
             ],
         },
     }
-    tid = topic_id.lower()
-    key = next((k for k in TABLES if k in tid), None)
-    if key:
-        data = TABLES[key]
-        cols = data["cols"]
-        rows = data["rows"]
+    if structure and structure.get("cols") and structure.get("rows"):
+        cols = structure["cols"]
+        rows = structure["rows"]
     else:
-        cols = ["Option A","Option B","Option C","Option D"]
-        rows = [
-            ("Performance",  ["High","Medium","Very High","Medium"]),
-            ("Complexity",   ["Low","Medium","High","Low"]),
-            ("Cost",         ["Free","Paid","Enterprise","OSS"]),
-            ("Scalability",  ["Linear","Limited","Excellent","Good"]),
-            ("Maturity",     ["Stable","Beta","Stable","Stable"]),
-            ("Best For",     ["Dev","Prototyping","Production","Edge"]),
-        ]
+        tid = topic_id.lower()
+        key = next((k for k in TABLES if k in tid), None)
+        if key:
+            data = TABLES[key]
+            cols = data["cols"]
+            rows = data["rows"]
+        else:
+            cols = ["Comparison A","Comparison B"]
+            rows = [
+                ("Positioning",  ["Established approach","Emerging approach"]),
+                ("Strength",     ["Operational maturity","Focused innovation"]),
+                ("Trade-off",    ["Broader coverage","Sharper specialization"]),
+                ("Best Fit",     ["Enterprise standardization","Fast-moving teams"]),
+            ]
 
     n_cols = len(cols)
     n_rows = len(rows)
