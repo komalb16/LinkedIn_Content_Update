@@ -1914,6 +1914,612 @@ def _style_three_panel(topic_id, topic_name, C, structure=None):
 #  DISPATCH — pick style per topic (override map + hash fallback)
 # ══════════════════════════════════════════════════════════════════════════════
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 20 — NOTEBOOK SKETCH
+#  Hand-drawn notebook aesthetic: spiral binding, ruled lines, serif titles,
+#  light-tint boxes with thin borders, inline glyphs, mixed font stack.
+#
+#  HOW TO USE:
+#  1. Paste this function into diagram_generator.py (before the STYLES list)
+#  2. Add  _style_notebook  to the STYLES list as entry [20]
+#  3. Add topic overrides to TOPIC_STYLE_OVERRIDES as needed, e.g.:
+#        "system-design": 20,
+#        "enterprise-ai": 20,
+#
+#  The function accepts the standard (topic_id, topic_name, C) signature
+#  plus an optional `structure` dict for custom layouts (see below).
+#
+#  Optional `structure` dict shape:
+#  {
+#    "subtitle": "optional subtitle text",
+#    "rows": [
+#       {
+#         "label": "Row Header",           # italic section label (top-left)
+#         "type": "banner",                 # "banner" | "columns" | "datastores" | "obs"
+#         "color": "#D0EAFE",              # fill colour for banner rows
+#         "border": "#185FA5",             # stroke colour for banner rows
+#         "text_color": "#0C447C",         # text colour for banner rows
+#         "columns": [                     # for type="columns"
+#           {
+#             "glyph": "≡",               # prefix glyph
+#             "title": "Col Title",
+#             "items": ["item 1", "item 2", "item 3"]
+#           },
+#           ...
+#         ],
+#         "items": ["item 1", "item 2"],   # for type="obs" (flat text lines)
+#       },
+#       ...
+#    ]
+#  }
+#
+#  Without a structure dict the function uses built-in topic data (see
+#  NOTEBOOK_DATA below) and falls back to a generic system-design layout.
+# ══════════════════════════════════════════════════════════════════════════════
+
+import math as _math
+
+# ── Topic data ─────────────────────────────────────────────────────────────────
+# Each entry drives the notebook layout for a matched topic_id keyword.
+# Keys must match substrings in topic_id.lower() or topic_name.lower().
+
+_NOTEBOOK_DATA = {
+    # ── Enterprise / System Design ──────────────────────────────────────────
+    "enterprise": {
+        "subtitle": "High-level reference architecture",
+        "rows": [
+            {
+                "label": "1. User Layer",
+                "type": "chips",
+                "chips": ["AI Developer", "Business User", "Employee", "AI Admin"],
+                "chip_color": "#EEF2FF", "chip_border": "#7F77DD", "chip_text": "#3C3489",
+            },
+            {
+                "label": "2. API Gateway & Identity",
+                "type": "banner",
+                "text": "GPT Gateway API — OAuth2 / OIDC · RBAC / Zero Trust",
+                "color": "#E0F2E9", "border": "#0F6E56", "text_color": "#085041",
+            },
+            {
+                "label": "3. Core Components",
+                "type": "columns",
+                "columns": [
+                    {"glyph": "≡", "title": "RAG Ingestion",
+                     "items": ["Doc Parsing", "Chunking", "Embedding + Index"]},
+                    {"glyph": "⇄", "title": "Model Routing",
+                     "items": ["Cost / Latency opt.", "Mistral · OpenAI", "Claude · Local"]},
+                    {"glyph": "□", "title": "AI Guardrails",
+                     "items": ["Prompt Injection", "PII Filtering", "Output Validation"]},
+                ],
+            },
+            {
+                "label": "4. Processing",
+                "type": "columns",
+                "columns": [
+                    {"glyph": "⚙", "title": "LLM Processing",
+                     "items": ["LLM API → Model", "Vector DB · Docs", "Knowledge Base"]},
+                    {"glyph": "🤖", "title": "Agentic AI Flow",
+                     "items": ["Task Planner Agent", "Tool Selection", "Execution Agent"]},
+                ],
+            },
+            {
+                "label": "5. Observability & Governance",
+                "type": "obs",
+                "items": [
+                    "Monitoring · Logging · Tracing · Model Governance",
+                    "Token Usage, Prompt Tracing, Evaluation Datasets, Hallucination Monitoring",
+                ],
+                "color": "#F3EBF9", "border": "#7F77DD", "text_color": "#3C3489",
+            },
+        ],
+    },
+    # ── System Design ───────────────────────────────────────────────────────
+    "system": {
+        "subtitle": "Scalable distributed system blueprint",
+        "rows": [
+            {
+                "label": "Clients",
+                "type": "chips",
+                "chips": ["Browser", "Mobile", "Desktop", "IoT"],
+                "chip_color": "#EEF2FF", "chip_border": "#7F77DD", "chip_text": "#3C3489",
+            },
+            {
+                "label": "Edge",
+                "type": "banner",
+                "text": "CDN · Load Balancer · API Gateway · WAF",
+                "color": "#E0F2E9", "border": "#0F6E56", "text_color": "#085041",
+            },
+            {
+                "label": "Services",
+                "type": "columns",
+                "columns": [
+                    {"glyph": "⚙", "title": "Core Services",
+                     "items": ["User Svc", "Order Svc", "Payment Svc"]},
+                    {"glyph": "✉", "title": "Messaging",
+                     "items": ["Kafka", "RabbitMQ", "Redis PubSub"]},
+                    {"glyph": "🗄", "title": "Data Layer",
+                     "items": ["PostgreSQL", "Redis Cache", "S3 Storage"]},
+                ],
+            },
+            {
+                "label": "Observability",
+                "type": "obs",
+                "items": [
+                    "Prometheus · Grafana · Jaeger · PagerDuty",
+                    "SLO tracking, distributed tracing, anomaly alerts",
+                ],
+                "color": "#F3EBF9", "border": "#7F77DD", "text_color": "#3C3489",
+            },
+        ],
+    },
+    # ── Kubernetes ──────────────────────────────────────────────────────────
+    "kube": {
+        "subtitle": "Kubernetes cluster architecture",
+        "rows": [
+            {
+                "label": "Control Plane",
+                "type": "chips",
+                "chips": ["API Server", "etcd", "Scheduler", "Controller Mgr"],
+                "chip_color": "#E0F2E9", "chip_border": "#0F6E56", "chip_text": "#085041",
+            },
+            {
+                "label": "Worker Nodes",
+                "type": "banner",
+                "text": "Kubelet · kube-proxy · containerd · CNI plugin",
+                "color": "#D0EAFE", "border": "#185FA5", "text_color": "#0C447C",
+            },
+            {
+                "label": "Workloads",
+                "type": "columns",
+                "columns": [
+                    {"glyph": "□", "title": "Compute",
+                     "items": ["Deployment", "StatefulSet", "DaemonSet", "CronJob"]},
+                    {"glyph": "⇄", "title": "Networking",
+                     "items": ["Service", "Ingress", "NetworkPolicy", "Istio"]},
+                    {"glyph": "🗄", "title": "Storage",
+                     "items": ["PersistentVol", "StorageClass", "ConfigMap", "Secret"]},
+                ],
+            },
+            {
+                "label": "Observability",
+                "type": "obs",
+                "items": [
+                    "Prometheus · Grafana · Loki · OpenTelemetry",
+                    "HPA autoscaling, RBAC policies, Helm chart releases",
+                ],
+                "color": "#F3EBF9", "border": "#7F77DD", "text_color": "#3C3489",
+            },
+        ],
+    },
+    # ── RAG ─────────────────────────────────────────────────────────────────
+    "rag": {
+        "subtitle": "Retrieval-Augmented Generation pipeline",
+        "rows": [
+            {
+                "label": "Ingestion",
+                "type": "chips",
+                "chips": ["PDF / HTML", "Databases", "APIs", "Streaming"],
+                "chip_color": "#EEF2FF", "chip_border": "#7F77DD", "chip_text": "#3C3489",
+            },
+            {
+                "label": "Processing",
+                "type": "banner",
+                "text": "Chunking · Overlap · Embedding (text-embed-3) · Schema Registry",
+                "color": "#D0EAFE", "border": "#185FA5", "text_color": "#0C447C",
+            },
+            {
+                "label": "Retrieval & Generation",
+                "type": "columns",
+                "columns": [
+                    {"glyph": "🔍", "title": "Vector Store",
+                     "items": ["Pinecone", "Weaviate", "pgvector", "FAISS"]},
+                    {"glyph": "⇄", "title": "Retrieval",
+                     "items": ["BM25 + Dense", "Cross-encoder rerank", "Hybrid search"]},
+                    {"glyph": "✦", "title": "LLM Generation",
+                     "items": ["Grounded answer", "Citation sources", "Hallucination check"]},
+                ],
+            },
+            {
+                "label": "Evaluation",
+                "type": "obs",
+                "items": [
+                    "RAGAS · LangSmith · Faithfulness · Answer Relevance",
+                    "Latency tracking, context precision, retrieval recall metrics",
+                ],
+                "color": "#E0F2E9", "border": "#0F6E56", "text_color": "#085041",
+            },
+        ],
+    },
+    # ── DevOps / CI-CD ──────────────────────────────────────────────────────
+    "devops": {
+        "subtitle": "Modern CI/CD + DevOps toolchain",
+        "rows": [
+            {
+                "label": "Source",
+                "type": "chips",
+                "chips": ["GitHub", "GitLab", "Bitbucket", "Azure DevOps"],
+                "chip_color": "#F1EFE8", "chip_border": "#888780", "chip_text": "#2C2C2A",
+            },
+            {
+                "label": "CI Pipeline",
+                "type": "banner",
+                "text": "Lint → Build → Unit Test → SAST → Docker Build → Push",
+                "color": "#E0F2E9", "border": "#0F6E56", "text_color": "#085041",
+            },
+            {
+                "label": "CD + Deploy",
+                "type": "columns",
+                "columns": [
+                    {"glyph": "⚙", "title": "Packaging",
+                     "items": ["Docker multi-stage", "Helm chart", "Kustomize overlay"]},
+                    {"glyph": "🛡", "title": "Security Gates",
+                     "items": ["Trivy CVE scan", "Snyk SCA", "OPA policy"]},
+                    {"glyph": "🚀", "title": "Release",
+                     "items": ["Blue/Green", "Canary 5%→100%", "Auto-rollback"]},
+                ],
+            },
+            {
+                "label": "Observability",
+                "type": "obs",
+                "items": [
+                    "Prometheus · Grafana · DORA metrics · PagerDuty",
+                    "Deployment frequency, change failure rate, MTTR tracking",
+                ],
+                "color": "#F3EBF9", "border": "#7F77DD", "text_color": "#3C3489",
+            },
+        ],
+    },
+}
+
+# ── Colour helpers (duplicated here for self-containment; already in scope) ──
+
+def _nb_lighten(hex_color, pct=0.88):
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    r = int(r + (255 - r) * pct)
+    g = int(g + (255 - g) * pct)
+    b = int(b + (255 - b) * pct)
+    return f"#{r:02X}{g:02X}{b:02X}"
+
+def _nb_darken(hex_color, pct=0.25):
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"#{int(r*(1-pct)):02X}{int(g*(1-pct)):02X}{int(b*(1-pct)):02X}"
+
+def _nb_xe(t):
+    return str(t).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+def _nb_clamp(text, n):
+    text = str(text)
+    return text if len(text) <= n else text[:n - 1] + "…"
+
+
+# ── Notebook background helpers ───────────────────────────────────────────────
+
+def _nb_background(W, H):
+    """Returns SVG string for notebook paper: off-white bg, ruled lines, binding."""
+    svg = f'<rect x="0" y="0" width="{W}" height="{H}" fill="#FAFAF5"/>'
+    # Ruled lines every 28px
+    for yi in range(60, H, 28):
+        svg += f'<line x1="36" y1="{yi}" x2="{W-12}" y2="{yi}" stroke="#EBEBDF" stroke-width="0.5"/>'
+    # Binding margin line
+    svg += f'<line x1="30" y1="0" x2="30" y2="{H}" stroke="#E2E2D8" stroke-width="1"/>'
+    # Spiral dots
+    for yi in range(28, H, 28):
+        svg += f'<circle cx="16" cy="{yi}" r="4.5" fill="none" stroke="#C4C4B8" stroke-width="1.2"/>'
+    return svg
+
+
+def _nb_title(W, title, subtitle):
+    """Returns SVG for serif title + underline + optional subtitle."""
+    svg = (
+        f'<text x="{W//2}" y="32" text-anchor="middle" '
+        f'font-family="Georgia,serif" font-size="17" font-weight="700" '
+        f'fill="#1A1A1A" letter-spacing="1.5">{_nb_xe(title.upper())}</text>'
+    )
+    svg += f'<line x1="60" y1="42" x2="{W-60}" y2="42" stroke="#1A1A1A" stroke-width="0.8"/>'
+    if subtitle:
+        svg += (
+            f'<text x="{W//2}" y="56" text-anchor="middle" '
+            f'font-family="Arial,sans-serif" font-size="10" fill="#888" '
+            f'font-style="italic">{_nb_xe(subtitle)}</text>'
+        )
+    return svg
+
+
+def _nb_footer(W, H, author):
+    """Bottom rule + author credit."""
+    svg = f'<line x1="42" y1="{H-20}" x2="{W-42}" y2="{H-20}" stroke="#D3D1C7" stroke-width="0.6"/>'
+    svg += (
+        f'<text x="{W-42}" y="{H-7}" text-anchor="end" '
+        f'font-family="Georgia,serif" font-size="11" fill="#888" '
+        f'font-style="italic">{_nb_xe(author)}</text>'
+    )
+    return svg
+
+
+# ── Row renderers ─────────────────────────────────────────────────────────────
+
+def _nb_row_label(x, y, text):
+    return (
+        f'<text x="{x}" y="{y}" font-family="Georgia,serif" font-size="10" '
+        f'fill="#999" font-style="italic">{_nb_xe(text)}</text>'
+    )
+
+
+def _nb_chips_row(x, y, W, chips, chip_color, chip_border, chip_text):
+    """Row of evenly-spaced rounded chips, arrow below centre."""
+    n = len(chips)
+    usable = W - x - 50
+    chip_w = min(130, (usable - (n - 1) * 12) // n)
+    chip_h = 28
+    gap = (usable - n * chip_w) // max(n - 1, 1)
+    svg = ""
+    for i, label in enumerate(chips):
+        cx = x + i * (chip_w + gap)
+        svg += (
+            f'<rect x="{cx}" y="{y}" width="{chip_w}" height="{chip_h}" rx="4" '
+            f'fill="{chip_color}" stroke="{chip_border}" stroke-width="0.8"/>'
+            f'<text x="{cx + chip_w//2}" y="{y + chip_h//2 + 4}" text-anchor="middle" '
+            f'font-family="Arial,sans-serif" font-size="10" font-weight="600" '
+            f'fill="{chip_text}">{_nb_xe(_nb_clamp(label, 16))}</text>'
+        )
+    centre_x = x + (usable) // 2
+    arrow_y1 = y + chip_h
+    arrow_y2 = arrow_y1 + 12
+    svg += (
+        f'<line x1="{centre_x}" y1="{arrow_y1}" x2="{centre_x}" y2="{arrow_y2}" '
+        f'stroke="#AAAAAA" stroke-width="1.2" marker-end="url(#nbarrow)"/>'
+    )
+    return svg, arrow_y2
+
+
+def _nb_banner_row(x, y, W, text, color, border, text_color):
+    """Full-width banner with text, arrow below centre."""
+    bw = W - x - 50
+    bh = 32
+    svg = (
+        f'<rect x="{x}" y="{y}" width="{bw}" height="{bh}" rx="4" '
+        f'fill="{color}" stroke="{border}" stroke-width="1.1"/>'
+        f'<text x="{x + bw//2}" y="{y + bh//2 + 4}" text-anchor="middle" '
+        f'font-family="Arial,sans-serif" font-size="11" font-weight="700" '
+        f'fill="{text_color}">{_nb_xe(_nb_clamp(text, 72))}</text>'
+    )
+    centre_x = x + bw // 2
+    arrow_y1 = y + bh
+    arrow_y2 = arrow_y1 + 12
+    svg += (
+        f'<line x1="{centre_x}" y1="{arrow_y1}" x2="{centre_x}" y2="{arrow_y2}" '
+        f'stroke="#AAAAAA" stroke-width="1.2" marker-end="url(#nbarrow)"/>'
+    )
+    return svg, arrow_y2
+
+
+def _nb_columns_row(x, y, W, columns):
+    """2–4 columns side by side, each with glyph + title + item list."""
+    n = len(columns)
+    usable = W - x - 50
+    col_w = (usable - (n - 1) * 14) // n
+    col_h = 20 + len(max(columns, key=lambda c: len(c["items"]))["items"]) * 16 + 8
+    col_h = max(col_h, 70)
+
+    svg = ""
+    for i, col_def in enumerate(columns):
+        cx = x + i * (col_w + 14)
+        svg += (
+            f'<rect x="{cx}" y="{y}" width="{col_w}" height="{col_h}" rx="4" '
+            f'fill="#FAFAF0" stroke="#C4C4B8" stroke-width="0.8"/>'
+        )
+        # Glyph + title header
+        glyph = col_def.get("glyph", "•")
+        title = col_def.get("title", "")
+        svg += (
+            f'<text x="{cx + 10}" y="{y + 16}" '
+            f'font-family="Arial,sans-serif" font-size="11" font-weight="700" '
+            f'fill="#2C2C2A">{_nb_xe(glyph)} {_nb_xe(_nb_clamp(title, 18))}</text>'
+        )
+        # Items
+        for j, item in enumerate(col_def.get("items", [])[:5]):
+            svg += (
+                f'<text x="{cx + 12}" y="{y + 32 + j*16}" '
+                f'font-family="Arial,sans-serif" font-size="9.5" fill="#5F5E5A">'
+                f'• {_nb_xe(_nb_clamp(item, 22))}</text>'
+            )
+    # Arrow from centre column down
+    centre_x = x + usable // 2
+    arrow_y1 = y + col_h
+    arrow_y2 = arrow_y1 + 12
+    svg += (
+        f'<line x1="{centre_x}" y1="{arrow_y1}" x2="{centre_x}" y2="{arrow_y2}" '
+        f'stroke="#AAAAAA" stroke-width="1.2" marker-end="url(#nbarrow)"/>'
+    )
+    return svg, arrow_y2, col_h
+
+
+def _nb_obs_row(x, y, W, items, color, border, text_color):
+    """Observability / notes banner with multiple text lines."""
+    line_h = 16
+    bh = 14 + len(items) * line_h + 8
+    bw = W - x - 50
+    svg = (
+        f'<rect x="{x}" y="{y}" width="{bw}" height="{bh}" rx="4" '
+        f'fill="{color}" stroke="{border}" stroke-width="1"/>'
+    )
+    for i, item in enumerate(items):
+        weight = "700" if i == 0 else "400"
+        size = "10" if i == 0 else "9.5"
+        fill = text_color if i == 0 else "#5F5E5A"
+        svg += (
+            f'<text x="{x + 12}" y="{y + 14 + i * line_h}" '
+            f'font-family="Arial,sans-serif" font-size="{size}" '
+            f'font-weight="{weight}" fill="{fill}">'
+            f'{_nb_xe(_nb_clamp(item, 90))}</text>'
+        )
+    return svg, y + bh
+
+
+# ── Main function ─────────────────────────────────────────────────────────────
+
+def _style_notebook(topic_id, topic_name, C, structure=None):
+    """
+    Style 20 — Notebook Sketch.
+    Renders a hand-drawn notebook diagram with spiral binding, ruled lines,
+    serif titles, and thin-border sketch boxes.
+    """
+    # ── Pick data ────────────────────────────────────────────────────────────
+    if structure and "rows" in structure:
+        data = structure
+    else:
+        tid = topic_id.lower()
+        name_lower = topic_name.lower()
+        data = None
+        for key, val in _NOTEBOOK_DATA.items():
+            if key in tid or key in name_lower:
+                data = val
+                break
+        if data is None:
+            data = _NOTEBOOK_DATA["system"]
+
+    subtitle = data.get("subtitle", "")
+    rows = data.get("rows", [])
+
+    # ── Layout pass: measure total height ────────────────────────────────────
+    W = 680
+    MARGIN_LEFT = 42
+    LABEL_H = 16   # height of the italic row label
+    ARROW_H = 14   # gap for the downward arrow between rows
+    GAP = 10       # gap between rows
+
+    # Estimate height
+    H_est = 80  # title block
+    for row in rows:
+        H_est += LABEL_H
+        rt = row.get("type", "banner")
+        if rt == "chips":
+            H_est += 28 + ARROW_H + GAP
+        elif rt == "banner":
+            H_est += 32 + ARROW_H + GAP
+        elif rt == "columns":
+            cols = row.get("columns", [])
+            max_items = max((len(c.get("items", [])) for c in cols), default=0)
+            col_h = 20 + max_items * 16 + 8
+            col_h = max(col_h, 70)
+            H_est += col_h + ARROW_H + GAP
+        elif rt == "obs":
+            items = row.get("items", [])
+            H_est += 14 + len(items) * 16 + 8 + GAP
+    H_est += 40  # footer
+
+    H = max(H_est, 400)
+
+    # ── Start building SVG ───────────────────────────────────────────────────
+    inner = ""
+
+    # Arrow marker (local id to avoid collision with parent page markers)
+    inner += (
+        '<defs>'
+        '<marker id="nbarrow" viewBox="0 0 10 10" refX="8" refY="5" '
+        'markerWidth="5" markerHeight="5" orient="auto-start-reverse">'
+        '<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" '
+        'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+        '</marker>'
+        '</defs>'
+    )
+
+    # Background
+    inner += _nb_background(W, H)
+
+    # Title
+    inner += _nb_title(W, topic_name, subtitle)
+
+    # ── Render rows ──────────────────────────────────────────────────────────
+    y = 68
+
+    for row in rows:
+        label = row.get("label", "")
+        rt = row.get("type", "banner")
+
+        if label:
+            inner += _nb_row_label(MARGIN_LEFT, y + LABEL_H - 2, label)
+            y += LABEL_H
+
+        if rt == "chips":
+            chunk, y_after = _nb_chips_row(
+                MARGIN_LEFT, y, W,
+                chips=row.get("chips", []),
+                chip_color=row.get("chip_color", "#EEF2FF"),
+                chip_border=row.get("chip_border", "#7F77DD"),
+                chip_text=row.get("chip_text", "#3C3489"),
+            )
+            inner += chunk
+            y = y_after + GAP
+
+        elif rt == "banner":
+            chunk, y_after = _nb_banner_row(
+                MARGIN_LEFT, y, W,
+                text=row.get("text", ""),
+                color=row.get("color", "#E0F2E9"),
+                border=row.get("border", "#0F6E56"),
+                text_color=row.get("text_color", "#085041"),
+            )
+            inner += chunk
+            y = y_after + GAP
+
+        elif rt == "columns":
+            chunk, y_after, col_h = _nb_columns_row(
+                MARGIN_LEFT, y, W,
+                columns=row.get("columns", []),
+            )
+            inner += chunk
+            y = y_after + GAP
+
+        elif rt == "obs":
+            chunk, y_after = _nb_obs_row(
+                MARGIN_LEFT, y, W,
+                items=row.get("items", []),
+                color=row.get("color", "#F3EBF9"),
+                border=row.get("border", "#7F77DD"),
+                text_color=row.get("text_color", "#3C3489"),
+            )
+            inner += chunk
+            y = y_after + GAP
+
+    # Footer
+    inner += _nb_footer(W, H, _DIAGRAM_AUTHOR)
+
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" '
+        f'viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
+        f'style="display:block;font-family:Arial,sans-serif;overflow:hidden">'
+        f'{inner}'
+        f'</svg>'
+    )
+
+
+# ── Quick smoke-test (run directly: python style_notebook.py) ─────────────────
+if __name__ == "__main__":
+    import os, sys
+
+    # Stub the module-level name that _nb_footer uses
+    _DIAGRAM_AUTHOR = "Komal Batra"  # noqa: F811
+
+    svg = _style_notebook("enterprise-ai", "Enterprise AI Architecture", [])
+    out_path = os.path.join(os.path.dirname(__file__), "notebook_test.svg")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(svg)
+    print(f"Written: {out_path} ({len(svg)} bytes)")
+
+    # Try a few other built-in topics
+    for tid, tname in [
+        ("kube", "Kubernetes Architecture"),
+        ("rag", "RAG Systems Pipeline"),
+        ("devops", "DevOps CI/CD Toolchain"),
+    ]:
+        svg2 = _style_notebook(tid, tname, [])
+        p2 = os.path.join(os.path.dirname(__file__), f"notebook_{tid}.svg")
+        with open(p2, "w", encoding="utf-8") as f:
+            f.write(svg2)
+        print(f"Written: {p2}")
 
 STYLES = [
     _style_vertical_flow,   # 0 — numbered pipeline steps
@@ -1936,6 +2542,7 @@ STYLES = [
     _style_chalkboard,          # 17
     _style_dark_column_flow,    # 18
     _style_three_panel,         # 19
+    _style_notebook,            # 20 - notebook style
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -1943,7 +2550,6 @@ TOPIC_STYLE_OVERRIDES = {
     "ai-agents":         6,   # orbit — agent ecosystem
     "mlops-pipeline":    0,   # vertical flow — pipeline steps
     "rag-systems":       0,   # vertical flow — pipeline steps
-    "kubernetes":        4,   # hexagon grid — many K8s concepts
     "docker":            4,   # hexagon grid — Dockerfile cheatsheet
     "aws-architecture":  6,   # orbit — AWS service ecosystem
     "cicd-pipelines":    3,   # timeline — CI/CD history
@@ -1980,9 +2586,12 @@ TOPIC_STYLE_OVERRIDES = {
     "bootcamp":      0,
     "course":        0,
     "certification": 3,
-    "rag-systems":      16,   # infographic panels — 7 RAG patterns
-    "agentic-ai":       18,   # dark column flow — RAG vs Agentic vs Memory
+    "agentic-ai":       20,   # dark column flow — RAG vs Agentic vs Memory
     "docker-cheatsheet": 19,  # three panel — Client/Host/Hub
+    "enterprise-ai":  20,
+    "system-design":  20,
+    "kubernetes":     20,   # override existing if you want notebook style
+    "rag-systems":    20,
 }
 
 
