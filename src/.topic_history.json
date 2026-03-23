@@ -275,5 +275,13 @@
     "category": "DevOps",
     "mode": "ai_news",
     "status": "success"
+  },
+  {
+    "timestamp": "2026-03-23T23:15:07.258648",
+    "topic_id": "ai-skills-map",
+    "topic_name": "AI Skills & Technologies Map",
+    "category": "AI Learning",
+    "mode": "ai_news",
+    "status": "success"
   }
 ]
