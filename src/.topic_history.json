@@ -291,5 +291,13 @@
     "category": "AI",
     "mode": "ai_news",
     "status": "success"
+  },
+  {
+    "timestamp": "2026-03-25T22:25:20.524105",
+    "topic_id": "system-design",
+    "topic_name": "System Design Fundamentals",
+    "category": "Engineering",
+    "mode": "topic",
+    "status": "success"
   }
 ]
