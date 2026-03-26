@@ -53,11 +53,20 @@ METRIC_PATTERN = re.compile(
     re.I,
 )
 EMOJI_PATTERN = re.compile(r"[\U0001F300-\U0001FAFF]")
+POLL_PREFIX_RE = re.compile(r"^\s*(?:\d+\s*[.):]|[1-9]\uFE0F\u20E3|-)\s*")
 SIM_STOPWORDS = {
     "the", "and", "for", "with", "this", "that", "from", "your", "have", "has",
     "just", "into", "what", "when", "where", "which", "their", "about", "most",
     "team", "teams", "works", "work", "used", "using", "build", "system", "ai",
 }
+GENERIC_PHRASES = (
+    "what actually works",
+    "most teams",
+    "when it comes to",
+    "the hard part is not",
+    "in production",
+    "taking a step back",
+)
 
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
 RSS_FEEDS = {
@@ -628,6 +637,7 @@ Requirements:
 - Include exactly one fenced visual block that matches the planned diagram type
 - Do not use Mermaid syntax or graph declarations like `graph LR`, `graph TD`, or `flowchart`
 - Keep this to exactly one topic only; do not append or preview a second post
+- Poll/CTA options must be concrete answer choices (not repeated section headers like "Task Shape", "Need Tools")
 - The hook must be the very first line — no warming up, no preamble
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
@@ -812,15 +822,27 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
     if emoji_count > 14:
         issues.append("Reduce emoji density; keep emojis relevant and readable.")
 
-    repetitive_phrases = (
-        "what actually works",
-        "most teams",
-        "when it comes to",
-    )
-    for phrase in repetitive_phrases:
+    for phrase in GENERIC_PHRASES:
         if lowered.count(phrase) > 1:
             issues.append(f"Avoid repeating the phrase '{phrase}' multiple times.")
             break
+    generic_hits = sum(1 for phrase in GENERIC_PHRASES if phrase in lowered)
+    if generic_hits >= 3:
+        issues.append("Reduce generic filler phrasing and add one concrete technical detail or trade-off.")
+
+    if structure and structure.get("sections"):
+        labels = [s.get("label", "").strip().lower() for s in structure.get("sections", []) if s.get("label")]
+        if labels:
+            poll_lines = [
+                ln.strip().lower()
+                for ln in cleaned.splitlines()
+                if POLL_PREFIX_RE.match(ln.strip())
+            ]
+            if poll_lines:
+                stripped = [POLL_PREFIX_RE.sub("", ln).strip() for ln in poll_lines]
+                label_echoes = sum(1 for ln in stripped if any(lb == ln for lb in labels))
+                if label_echoes >= max(2, len(stripped) // 2):
+                    issues.append("Replace poll options with concrete architecture choices, not section header names.")
 
     if diagram_type == "Observability Map" or "observability" in topic_blob:
         expected_terms = ("prompt", "retrieval", "tool", "latency", "cost", "quality", "alert")
@@ -843,11 +865,73 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
     return issues
 
 
-def _finalize_post_text(topic, post_text):
+def _upgrade_weak_poll_options(text, structure=None, diagram_type=""):
+    if not structure or not structure.get("sections"):
+        return text
+    lines = (text or "").splitlines()
+    if not lines:
+        return text
+
+    labels = [s.get("label", "").strip().lower() for s in structure.get("sections", []) if s.get("label")]
+    if not labels:
+        return text
+
+    poll_idx = None
+    for i, ln in enumerate(lines):
+        if "💬" in ln or "curious" in ln.lower() or "which approach" in ln.lower():
+            poll_idx = i
+    if poll_idx is None:
+        return text
+
+    option_idxs = []
+    for i in range(poll_idx + 1, min(len(lines), poll_idx + 8)):
+        ln = lines[i].strip()
+        if POLL_PREFIX_RE.match(ln):
+            option_idxs.append(i)
+        elif ln.startswith("#") or not ln:
+            break
+    if not option_idxs:
+        return text
+
+    stripped = [
+        POLL_PREFIX_RE.sub("", lines[i].strip()).strip().lower()
+        for i in option_idxs
+    ]
+    echoes = sum(1 for ln in stripped if ln in labels)
+    if echoes < max(2, len(stripped) // 2):
+        return text
+
+    if diagram_type == "Decision Tree" or "decision" in (diagram_type or "").lower():
+        replacements = [
+            "1️⃣ Traditional software + rules",
+            "2️⃣ RAG (knowledge-first)",
+            "3️⃣ Single-agent with tools",
+            "4️⃣ Multi-agent workflow",
+            "5️⃣ Hybrid (depends on step)",
+        ]
+    else:
+        replacements = [
+            "1️⃣ Fastest to ship",
+            "2️⃣ Best reliability",
+            "3️⃣ Lowest cost",
+            "4️⃣ Easiest to maintain",
+            "5️⃣ Best long-term fit",
+        ]
+
+    for j, idx in enumerate(option_idxs):
+        if j < len(replacements):
+            lines[idx] = replacements[j]
+        else:
+            lines[idx] = ""
+    return "\n".join([ln for ln in lines if ln is not None]).strip()
+
+
+def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _cleanup_generated_post(post_text or "")
     finalized = finalized.replace("hashtag#", "#").strip()
     if not finalized:
         return finalized
+    finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
     return finalized
 
 
@@ -1032,6 +1116,18 @@ def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
         covered = sum(1 for label in labels if _label_in_post(label, text.lower()))
         if labels:
             score += min(8, covered * 2)
+        poll_lines = [
+            ln.strip().lower()
+            for ln in text.splitlines()
+            if POLL_PREFIX_RE.match(ln.strip())
+        ]
+        if poll_lines:
+            normalized_labels = {lbl.strip().lower() for lbl in labels if lbl}
+            stripped = [POLL_PREFIX_RE.sub("", ln).strip() for ln in poll_lines]
+            echoes = sum(1 for ln in stripped if ln in normalized_labels)
+            if echoes >= max(2, len(stripped) // 2):
+                issues.append("Poll options are too generic; use concrete answer choices.")
+                score -= 8
 
     if structure and structure.get("rows") and diagram_type == "Observability Map":
         row_terms = ("input", "retrieval", "runtime", "quality")
@@ -1453,7 +1549,7 @@ Write a LinkedIn post that:
                     {"id": 5, "label": "Action 3", "desc": "Consistent content and positioning cadence"},
                 ],
             }
-            st_text = _finalize_post_text(st_topic, st_text)
+            st_text = _finalize_post_text(st_topic, st_text, structure=st_structure, diagram_type="Modern Cards")
             story_candidates.append(st_text)
             story_meta.append((st_topic, st_structure))
         pick = _pick_best_candidate(story_meta[0][0], story_candidates, story_meta[0][1], "Modern Cards", recent_posts)
@@ -1476,7 +1572,7 @@ Write a LinkedIn post that:
         topic_candidates = []
         for _ in range(candidate_count):
             draft = generate_topic_post(topic, structure, planned_diagram_type)
-            topic_candidates.append(_finalize_post_text(topic, draft))
+            topic_candidates.append(_finalize_post_text(topic, draft, structure=structure, diagram_type=planned_diagram_type))
         pick = _pick_best_candidate(topic, topic_candidates, structure, planned_diagram_type, recent_posts)
         post_text = topic_candidates[pick["index"]]
 
@@ -1486,7 +1582,7 @@ Write a LinkedIn post that:
         structure = topic_mgr.get_diagram_structure(topic)
         log.info("Fallback topic for diagram/history: " + topic["name"])
 
-    post_text = _finalize_post_text(topic, post_text)
+    post_text = _finalize_post_text(topic, post_text, structure=structure, diagram_type=topic_mgr.get_diagram_type_for_topic(topic))
     score_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
     score_structure = structure or topic_mgr.get_diagram_structure(topic)
     score_card = _score_post_candidate(topic, post_text, score_structure, score_diagram_type)
@@ -1502,7 +1598,7 @@ Write a LinkedIn post that:
                 _, regen_text = generate_story_post()
             else:
                 regen_text = generate_topic_post(topic, regen_structure, regen_diagram_type)
-            regen_candidates.append(_finalize_post_text(topic, regen_text))
+            regen_candidates.append(_finalize_post_text(topic, regen_text, structure=regen_structure, diagram_type=regen_diagram_type))
         regen_pick = _pick_best_candidate(topic, regen_candidates, regen_structure, regen_diagram_type, recent_posts)
         post_text = regen_candidates[regen_pick["index"]]
         score_card = _score_post_candidate(topic, post_text, regen_structure, regen_diagram_type)
@@ -1569,7 +1665,7 @@ Write a LinkedIn post that:
             if not post_text.strip().startswith("📌")
             else post_text
         )
-        full_post_text = _finalize_post_text(topic, full_post_text)
+        full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
         with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
             f.write(full_post_text)
         with open("preview_payload_" + topic["id"] + ".json", "w", encoding="utf-8") as f:
@@ -1605,7 +1701,7 @@ Write a LinkedIn post that:
         if not post_text.strip().startswith("📌")
         else post_text
     )
-    full_post_text = _finalize_post_text(topic, full_post_text)
+    full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
 
     result = poster.create_post_with_image(
         text=full_post_text,
