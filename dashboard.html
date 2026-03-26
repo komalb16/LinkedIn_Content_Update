@@ -4262,7 +4262,7 @@ async function runNow(options = {}) {
 
     function isSkippedRun(r) {
       const title = (r.display_title || r.name || '').toLowerCase();
-      if (title.includes('dry-run')) return true;
+      if (title.includes('dry-run') || title.includes('dry run')) return true;
 
       // Always hide skipped runs
       if (r.conclusion === 'skipped') return true;
@@ -4274,14 +4274,6 @@ async function runNow(options = {}) {
         // Cron heartbeat runs are typically very short and do not publish.
         if (r.conclusion === 'success' && durMs > 0 && durMs < 20000) return true;
 
-        // Hide scheduled runs that succeeded but never posted
-        // A real post has its topic enriched from the "✅ Posted ·" step
-        // A cron heartbeat exits(0) cleanly — success but no topic
-        if (r.conclusion === 'success') {
-          const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
-          // Hide only when enrichment explicitly confirms "no posted-topic step".
-          if (fetched && !_topicCache[r.id]) return true;
-        }
         return false;
       }
 
@@ -4289,10 +4281,6 @@ async function runNow(options = {}) {
       if (r.conclusion === 'cancelled') {
         const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
         return durMs < 15000;
-      }
-      if (r.conclusion === 'success' && _enrichmentDone) {
-        const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
-        if (fetched && !_topicCache[r.id]) return true;
       }
       return false;
     }
