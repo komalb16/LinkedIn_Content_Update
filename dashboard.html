@@ -4394,6 +4394,7 @@ async function runNow(options = {}) {
     }
 
     const _topicCache = {};
+    const _postedAtCache = {};
 
     async function enrichRunTopics(runs) {
       // Enrich ALL successful/failed runs (both manual and scheduled) to get actual topic names
@@ -4408,13 +4409,19 @@ async function runNow(options = {}) {
           const resp = await gh('/repos/' + REPO + '/actions/runs/' + r.id + '/jobs');
           if (resp.ok) {
             const data = await resp.json();
+            let foundPostedStep = false;
             for (const job of (data.jobs || [])) {
               for (const step of (job.steps || [])) {
                 const sn = step.name || '';
                 // Current workflow: "✅ Posted · TOPIC_NAME"
                 if (sn.startsWith('✅ Posted ·')) {
                   const topic = sn.replace('✅ Posted ·', '').trim();
-                  if (topic && topic !== 'auto-topic' && topic !== 'unknown') { _topicCache[r.id] = topic; break; }
+                  if (topic && topic !== 'auto-topic' && topic !== 'unknown') {
+                    _topicCache[r.id] = topic;
+                    _postedAtCache[r.id] = step.completed_at || step.started_at || job.completed_at || r.updated_at || r.created_at;
+                    foundPostedStep = true;
+                    break;
+                  }
                 }
                 // Legacy: "bookmark_pin TOPIC_NAME" or "TOPIC: NAME"
                 if (sn.includes('TOPIC:') || sn.match(/^bookmark_pin /)) {
@@ -4424,6 +4431,7 @@ async function runNow(options = {}) {
                   }
                 }
               }
+              if (foundPostedStep) break;
             }
           }
         } catch (e) { }
@@ -4433,9 +4441,16 @@ async function runNow(options = {}) {
         if (!Object.prototype.hasOwnProperty.call(_topicCache, r.id)) {
           _topicCache[r.id] = null;
         }
+        if (!Object.prototype.hasOwnProperty.call(_postedAtCache, r.id)) {
+          _postedAtCache[r.id] = null;
+        }
       }));
       _enrichmentDone = true;
       applyRunFilter();
+    }
+
+    function getRunPostedAt(r) {
+      return _postedAtCache[r.id] || r.created_at;
     }
 
     function getTopicFromRun(r) {
@@ -4511,6 +4526,9 @@ async function runNow(options = {}) {
         // Match the run-history definition of a real LinkedIn post.
         const postRuns = runs.filter(r => !isSkippedRun(r));
         const postedRuns = postRuns.filter(r => r.conclusion === 'success');
+        const postedRunsByPostTime = [...postedRuns].sort((a, b) =>
+          new Date(getRunPostedAt(b)) - new Date(getRunPostedAt(a))
+        );
 
         // This-week posts: current calendar week in the selected dashboard timezone.
         const now = tzNow();
@@ -4520,7 +4538,7 @@ async function runNow(options = {}) {
         weekStart.setDate(now.getDate() - daysSinceMon);
         weekStart.setHours(0, 0, 0, 0);
         const thisWeek = postedRuns.filter(r => {
-          const createdLocal = new Date(new Date(r.created_at).toLocaleString('en-US', { timeZone: userTZ }));
+          const createdLocal = new Date(new Date(getRunPostedAt(r)).toLocaleString('en-US', { timeZone: userTZ }));
           return createdLocal >= weekStart;
         });
 
@@ -4534,9 +4552,10 @@ async function runNow(options = {}) {
         }
         document.getElementById('s3').textContent = thisWeek.length;
 
-        if (postedRuns.length > 0) {
-          const last = postedRuns[0];
-          const diffMs = Date.now() - new Date(last.created_at);
+        if (postedRunsByPostTime.length > 0) {
+          const last = postedRunsByPostTime[0];
+          const lastPostedAt = getRunPostedAt(last);
+          const diffMs = Date.now() - new Date(lastPostedAt);
           const diffMin = Math.floor(diffMs / 60000);
           const diffHr = Math.floor(diffMs / 3600000);
           const diffDay = Math.floor(diffMs / 86400000);
@@ -4547,7 +4566,7 @@ async function runNow(options = {}) {
           else ago = diffDay + 'd ' + (diffHr % 24) + 'h ago';
           document.getElementById('s4').textContent = ago;
           document.getElementById('s4b').textContent = tzFmt(
-            last.created_at,
+            lastPostedAt,
             { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }
           );
         }
