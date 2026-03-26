@@ -4288,9 +4288,11 @@ async function runNow(options = {}) {
         const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
         return durMs < 15000;
       }
-      if (r.event === 'workflow_dispatch' && r.conclusion === 'success' && _enrichmentDone) {
+      if (r.conclusion === 'success' && _enrichmentDone) {
         const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
-        if (fetched && !_topicCache[r.id]) return true;
+        // Only show successful runs when enrichment confirms a real posted topic.
+        if (!fetched) return true;
+        if (!_topicCache[r.id]) return true;
       }
       return false;
     }
@@ -4406,7 +4408,7 @@ async function runNow(options = {}) {
       const toFetch = runs.filter(r =>
         !_topicCache[r.id] &&
         (r.conclusion === 'success' || r.conclusion === 'failure')
-      ).slice(0, 30);
+      ).slice(0, 120);
       if (!toFetch.length) { _enrichmentDone = true; applyRunFilter(); return; }
       await Promise.all(toFetch.map(async r => {
         try {
