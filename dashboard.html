@@ -4227,7 +4227,7 @@ async function runNow(options = {}) {
         allRuns = [...(di.workflow_runs || []), ...(dq.workflow_runs || []), ...(dc.workflow_runs || [])]
           .filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; })
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        enrichRunTopics(allRuns.slice(0, 30)).then(() => applyRunFilter());
+        enrichRunTopics(allRuns.slice(0, 120)).then(() => applyRunFilter());
         applyRunFilter();
       } catch (e) {
         document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">❌</div><span>Could not load runs: ' + e.message + '</span></div>';
@@ -4262,7 +4262,7 @@ async function runNow(options = {}) {
 
     function isSkippedRun(r) {
       const title = (r.display_title || r.name || '').toLowerCase();
-      if (title.includes('dry-run')) return true;
+      if (title.includes('dry-run') || title.includes('dry run')) return true;
 
       // Always hide skipped runs
       if (r.conclusion === 'skipped') return true;
@@ -4270,15 +4270,9 @@ async function runNow(options = {}) {
       if (r.event === 'schedule') {
         // Hide cancelled scheduled runs (timeout kills, heartbeat cancels)
         if (r.conclusion === 'cancelled') return true;
+        // Keep only scheduled runs that have a confirmed post marker.
+        if (r.conclusion === 'success' && _enrichmentDone && !_topicCache[r.id]) return true;
 
-        // Hide scheduled runs that succeeded but never posted
-        // A real post has its topic enriched from the "✅ Posted ·" step
-        // A cron heartbeat exits(0) cleanly — success but no topic
-        if (r.conclusion === 'success' && _enrichmentDone && !_topicCache[r.id]) {
-          // Give it benefit of the doubt if enrichment didn't fetch this run
-          const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
-          if (fetched) return true; // fetched but empty = no post step found = heartbeat
-        }
         return false;
       }
 
@@ -4287,7 +4281,7 @@ async function runNow(options = {}) {
         const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
         return durMs < 15000;
       }
-
+      // Manual success runs are kept unless enrichment explicitly says no post step.
       if (r.event === 'workflow_dispatch' && r.conclusion === 'success' && _enrichmentDone) {
         const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
         if (fetched && !_topicCache[r.id]) return true;
@@ -4512,7 +4506,7 @@ async function runNow(options = {}) {
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         }
 
-        await enrichRunTopics(runs.slice(0, 30));
+        await enrichRunTopics(runs.slice(0, 120));
 
         // Match the run-history definition of a real LinkedIn post.
         const postRuns = runs.filter(r => !isSkippedRun(r));
