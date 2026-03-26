@@ -629,7 +629,7 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "vector-databases": {
-        "style": 5, "subtitle": "Vector retrieval choices for real systems",
+        "style": 16, "subtitle": "Vector retrieval choices for real systems",
         "sections": [
             {"id":1,"label":"Pinecone",   "desc":"Managed scale and fast setup"},
             {"id":2,"label":"Weaviate",   "desc":"Open ecosystem and rich filtering"},

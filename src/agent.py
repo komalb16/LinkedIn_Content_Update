@@ -603,6 +603,13 @@ def _cleanup_generated_post(text):
         text = "".join(rebuilt).strip()
         text = re.sub(r"\n{3,}", "\n\n", text)
 
+    # Fix malformed opening quote in the first line.
+    first_line = text.splitlines()[0] if text.splitlines() else ""
+    if first_line.startswith('"') and first_line.count('"') == 1:
+        text = first_line[1:].lstrip() + ("\n" + "\n".join(text.splitlines()[1:]) if len(text.splitlines()) > 1 else "")
+    elif first_line.startswith("'") and first_line.count("'") == 1:
+        text = first_line[1:].lstrip() + ("\n" + "\n".join(text.splitlines()[1:]) if len(text.splitlines()) > 1 else "")
+
     return text
 
 
