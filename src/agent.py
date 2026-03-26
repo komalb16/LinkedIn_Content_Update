@@ -581,6 +581,7 @@ Requirements:
 - If the topic does not include named tools, keep examples generic instead of dropping in brand names
 - Use 4 to 10 relevant emojis naturally across hook, bullets, and CTA (not spammy)
 - Include exactly one fenced visual block that matches the planned diagram type
+- Do not use Mermaid syntax or graph declarations like `graph LR`, `graph TD`, or `flowchart`
 - Keep this to exactly one topic only; do not append or preview a second post
 - The hook must be the very first line — no warming up, no preamble
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
@@ -744,6 +745,8 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
 
     if re.search(r"\bnext post\b|\bthird post\b|\bpost 2\b|\banother post\b", cleaned, re.I):
         issues.append("Write exactly one post and remove any extra appended drafts.")
+    if re.search(r"```+\s*mermaid|^\s*graph\s+(?:lr|td)|^\s*flowchart", cleaned, re.I | re.M):
+        issues.append("Do not use Mermaid syntax; use plain-text visual blocks only.")
 
     if cleaned.count("📌") > 1:
         issues.append("Use a single title/topic marker only once.")

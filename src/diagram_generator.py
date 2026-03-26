@@ -208,7 +208,7 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 0 — VERTICAL FLOW  (numbered steps with animated arrows)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_vertical_flow(topic_id, topic_name, C):
+def _style_vertical_flow(topic_id, topic_name, C, structure=None):
     W, H = 900, 620
     accent = C[0]
     bg_top = lighten(accent, 0.93)
@@ -254,16 +254,26 @@ def _style_vertical_flow(topic_id, topic_name, C):
     }
     tid = topic_id.lower()
     key = next((k for k in STEP_DATA if k in tid), None)
-    steps = STEP_DATA[key] if key else [
+    if structure and structure.get("sections"):
+        steps = [
+            (str(s.get("label", f"Step {i+1}")), str(s.get("desc", "")))
+            for i, s in enumerate(structure.get("sections", [])[:8])
+        ]
+    else:
+        steps = STEP_DATA[key] if key else [
         ("Ingest","Collect raw inputs from all upstream sources"),
         ("Validate","Schema checks, deduplication, quality gates"),
         ("Transform","Business logic, enrichment, join operations"),
         ("Store","Persist to primary data store with indexing"),
         ("Serve","REST / GraphQL API layer with caching"),
         ("Monitor","Metrics, SLO alerts, and automated reporting"),
-    ]
+        ]
 
-    BOX_W, BOX_H, ARROW_H = 500, 56, 32
+    n_steps = max(1, len(steps))
+    BOX_W, ARROW_H = 500, 30
+    max_flow_h = H - 90
+    BOX_H = max(50, int((max_flow_h - ARROW_H * (n_steps - 1)) / n_steps))
+    BOX_H = min(64, BOX_H)
     cx = W // 2
     y = 70
     svg = ""
@@ -279,8 +289,12 @@ def _style_vertical_flow(topic_id, topic_name, C):
         svg += f'<rect x="{bx}" y="{y}" width="6" height="{BOX_H}" rx="3" fill="{col}"/>'
         svg += f'<circle cx="{bx+32}" cy="{y+BOX_H//2}" r="14" fill="{col}"/>'
         svg += f'<text x="{bx+32}" y="{y+BOX_H//2+5}" text-anchor="middle" fill="white" font-size="13" font-weight="900">{i+1}</text>'
-        svg += f'<text x="{bx+58}" y="{y+BOX_H//2-7}" fill="{darken(col,0.08)}" font-size="13" font-weight="800">{xe(label)}</text>'
-        svg += f'<text x="{bx+58}" y="{y+BOX_H//2+10}" fill="#64748B" font-size="9.5">{xe(sub)}</text>'
+        label_lines = fit_lines(label, 34, 1)
+        sub_lines = fit_lines(sub, 58, 2)
+        label_y = y + max(18, BOX_H // 2 - 8)
+        svg += f'<text x="{bx+58}" y="{label_y}" fill="{darken(col,0.08)}" font-size="13" font-weight="800">{xe(label_lines[0])}</text>'
+        for li, ln in enumerate(sub_lines):
+            svg += f'<text x="{bx+58}" y="{label_y+16+li*11}" fill="#64748B" font-size="9.5">{xe(ln)}</text>'
         svg += f'<text x="{bx+BOX_W-40}" y="{y+BOX_H//2+9}" fill="{rgba(col,0.18)}" font-size="28" font-weight="900">{i+1:02d}</text>'
 
         if i < len(steps) - 1:
