@@ -708,7 +708,7 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "ai-search-discovery": {
-        "style": 22, "subtitle": "How AI decides who to recommend",
+        "style": 0, "subtitle": "How AI decides who to recommend",
         "sections": [
             {"id":1,"label":"Intent",      "desc":"What the user asks and how specific it is"},
             {"id":2,"label":"Signals",     "desc":"Profile clarity, expertise cues, and consistency"},

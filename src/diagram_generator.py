@@ -195,6 +195,7 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
     foot_txt = "#94A3B8"
 
     bg_rect = f'<rect width="{W}" height="{H}" fill="url(#BG)"/>'
+    dot_pat = ""
     if not dark:
         dot_pat = (f'<pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">'
                    f'<circle cx="1" cy="1" r="0.65" fill="{rgba(accent,0.10)}"/></pattern>'
@@ -2911,26 +2912,26 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "notebook": 20,
     "lane map": 21,
     "lane infographic": 21,
-    "modern cards": 22,
-    "modern tech cards": 22,
+    "modern cards": 21,
+    "modern tech cards": 21,
     "decision tree": 9,
     "7 layers": 10,
     "signal vs noise": 17,
 }
 
 STYLE_FAMILIES_BY_TYPE = {
-    "comparison table": [22, 16, 5],
-    "comparison": [22, 16, 5],
+    "comparison table": [5, 22, 16, 0],
+    "comparison": [5, 22, 16, 0],
     "decision tree": [9, 0, 16],
-    "flow chart": [0, 21, 16],
+    "flow chart": [0, 21, 16, 15],
     "lane map": [21, 0, 16],
     "observability map": [20, 21, 16],
     "winding roadmap": [14, 15, 3],
     "timeline": [15, 3, 14],
     "7 layers": [10, 2, 16],
-    "architecture diagram": [7, 20, 16],
-    "architecture": [7, 20, 16],
-    "modern cards": [22, 16, 21],
+    "architecture diagram": [7, 20, 0, 11, 16],
+    "architecture": [7, 20, 0, 11, 16],
+    "modern cards": [21, 0, 16, 15],
 }
 
 _SCORE_STOPWORDS = {
@@ -3030,6 +3031,14 @@ def _score_svg_candidate(svg: str, topic_name: str, diagram_type: str = "", stru
 
     if len(svg or "") >= 7000:
         score += 6
+    text_chunks = re.findall(r"<text[^>]*>(.*?)</text>", svg or "", flags=re.I | re.S)
+    char_count = sum(len(re.sub(r"<[^>]+>", "", chunk).strip()) for chunk in text_chunks)
+    if text_nodes >= 8:
+        avg_chars = char_count / max(1, text_nodes)
+        if avg_chars < 8:
+            score -= 12
+        elif avg_chars > 16:
+            score += 6
 
     topic_lower = (topic_name or "").lower()
     if "aws cloud" in lowered and "aws" not in topic_lower:
@@ -3053,13 +3062,14 @@ def _pick_candidate_styles(topic_id: str, topic_name: str, diagram_type: str = "
     base_style_idx, source = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
     base_style_idx = _maybe_variation_style(base_style_idx, topic_id, topic_name, source)
 
-    if isinstance(structure, dict) and isinstance(structure.get("style"), int):
-        return [base_style_idx]
-
     normalized_type = _normalize_diagram_type(diagram_type)
     family = STYLE_FAMILIES_BY_TYPE.get(normalized_type, [])
     if not family:
         family = [base_style_idx, 16, 19, 0, 1, 3, 4, 7, 20, 21]
+    # Even when topic structure pins a preferred style, still sample nearby styles
+    # to avoid repetitive "same template every run" outputs.
+    if isinstance(structure, dict) and isinstance(structure.get("style"), int):
+        family = [base_style_idx] + [idx for idx in family if idx != base_style_idx]
 
     rng = random.Random(int(hashlib.md5(f"{topic_id}|{topic_name}|{diagram_type}".encode("utf-8")).hexdigest()[:8], 16))
     tail = [idx for idx in range(len(STYLES)) if idx not in family and idx != base_style_idx]
@@ -3200,6 +3210,8 @@ class DiagramGenerator:
             memory = _load_diagram_memory()
             topic_memory = [e for e in memory if e.get("topic_id") == topic_id][-40:]
             recent_topic_signatures = {e.get("signature", "") for e in topic_memory if e.get("signature")}
+            recent_styles = [e.get("style") for e in memory[-8:] if isinstance(e.get("style"), int)]
+            recent_style_set = set(recent_styles)
             scored_candidates = []
             for style_idx in candidate_styles:
                 svg_candidate = make_diagram(
@@ -3208,19 +3220,25 @@ class DiagramGenerator:
                 candidate_score = _score_svg_candidate(
                     svg_candidate, topic_name or topic_id, diagram_type=diagram_type, structure=structure
                 )
+                if _normalize_diagram_type(diagram_type) == "modern cards" and style_idx in {16, 22}:
+                    candidate_score -= 20
+                if style_idx in recent_style_set:
+                    candidate_score -= 18
                 signature = _diagram_signature(svg_candidate)
                 duplicate = signature in recent_topic_signatures if signature else False
-                scored_candidates.append((candidate_score, style_idx, svg_candidate, signature, duplicate))
+                scored_candidates.append((candidate_score, style_idx, svg_candidate, signature, duplicate, style_idx in recent_style_set))
             scored_candidates.sort(key=lambda x: x[0], reverse=True)
 
             non_duplicate = [c for c in scored_candidates if not c[4]]
             chosen = non_duplicate[0] if non_duplicate else scored_candidates[0]
-            best_score, best_style, best_svg, best_signature, _ = chosen
+            best_score, best_style, best_svg, best_signature, _, _ = chosen
             log.info(
                 "Diagram candidates ranked: "
                 + ", ".join(
-                    f"style {style}={score}" + ("(dup)" if dup else "")
-                    for score, style, _, _, dup in scored_candidates
+                    f"style {style}={score}"
+                    + ("(dup)" if dup else "")
+                    + ("(recent)" if recent else "")
+                    for score, style, _, _, dup, recent in scored_candidates
                 )
                 + f" -> selected style {best_style}"
             )
