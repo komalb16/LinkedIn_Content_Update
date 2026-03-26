@@ -45,6 +45,16 @@ except Exception:
 OUTPUT_DIR = "diagrams"
 _MOTION_PHASE = None
 DIAGRAM_MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".diagram_memory.json")
+DISABLED_STYLES = {16}
+
+
+def _fallback_for_disabled_style(style_idx: int, diagram_type: str = "") -> int:
+    normalized = _normalize_diagram_type(diagram_type)
+    if normalized in {"comparison table", "comparison"}:
+        return 5
+    if normalized in {"lane map", "modern cards", "flow chart"}:
+        return 21
+    return 0
 
 
 def _load_diagram_memory():
@@ -3061,11 +3071,13 @@ def _score_svg_candidate(svg: str, topic_name: str, diagram_type: str = "", stru
 def _pick_candidate_styles(topic_id: str, topic_name: str, diagram_type: str = "", structure: dict = None, candidate_count: int = 3):
     base_style_idx, source = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
     base_style_idx = _maybe_variation_style(base_style_idx, topic_id, topic_name, source)
+    if base_style_idx in DISABLED_STYLES:
+        base_style_idx = _fallback_for_disabled_style(base_style_idx, diagram_type)
 
     normalized_type = _normalize_diagram_type(diagram_type)
     if normalized_type in {"comparison table", "comparison"}:
         preferred = [5, 0, 15, 21]
-        return [idx for idx in preferred if 0 <= idx < len(STYLES)][:max(1, candidate_count)]
+        return [idx for idx in preferred if 0 <= idx < len(STYLES) and idx not in DISABLED_STYLES][:max(1, candidate_count)]
 
     family = STYLE_FAMILIES_BY_TYPE.get(normalized_type, [])
     if not family:
@@ -3076,7 +3088,7 @@ def _pick_candidate_styles(topic_id: str, topic_name: str, diagram_type: str = "
         family = [base_style_idx] + [idx for idx in family if idx != base_style_idx]
 
     rng = random.Random(int(hashlib.md5(f"{topic_id}|{topic_name}|{diagram_type}".encode("utf-8")).hexdigest()[:8], 16))
-    tail = [idx for idx in range(len(STYLES)) if idx not in family and idx != base_style_idx]
+    tail = [idx for idx in range(len(STYLES)) if idx not in family and idx != base_style_idx and idx not in DISABLED_STYLES]
     rng.shuffle(tail)
 
     ordered = [base_style_idx] + family + tail
@@ -3085,6 +3097,8 @@ def _pick_candidate_styles(topic_id: str, topic_name: str, diagram_type: str = "
         if not isinstance(idx, int):
             continue
         if idx < 0 or idx >= len(STYLES):
+            continue
+        if idx in DISABLED_STYLES:
             continue
         if idx in deduped:
             continue
@@ -3109,6 +3123,10 @@ def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "", structu
         f"Diagram style {style_idx} selected via {source}"
         + (f" ({diagram_type})" if diagram_type else "")
     )
+    if style_idx in DISABLED_STYLES:
+        replacement = _fallback_for_disabled_style(style_idx, diagram_type)
+        log.info(f"Diagram style {style_idx} is disabled; using style {replacement} instead")
+        style_idx = replacement
 
     fn = STYLES[style_idx]
     try:
