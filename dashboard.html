@@ -4282,6 +4282,12 @@ async function runNow(options = {}) {
         const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
         return durMs < 15000;
       }
+      // If enrichment explicitly found no posted-topic step for a successful run,
+      // treat it as non-post (applies to both schedule and manual).
+      if (r.conclusion === 'success' && _enrichmentDone) {
+        const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
+        if (fetched && !_topicCache[r.id]) return true;
+      }
       return false;
     }
 
@@ -4502,7 +4508,7 @@ async function runNow(options = {}) {
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         }
 
-        await enrichRunTopics(runs.slice(0, 30));
+        await enrichRunTopics(runs.slice(0, 120));
 
         // Match the run-history definition of a real LinkedIn post.
         const postRuns = runs.filter(r => !isSkippedRun(r));
