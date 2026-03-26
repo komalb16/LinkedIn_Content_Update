@@ -689,7 +689,7 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "vector-databases": {
-        "style": 22, "subtitle": "Vector retrieval choices for real systems",
+        "style": 5, "subtitle": "Vector retrieval choices for real systems",
         "sections": [
             {"id":1,"label":"Pinecone",   "desc":"Managed scale and fast setup"},
             {"id":2,"label":"Weaviate",   "desc":"Open ecosystem and rich filtering"},
@@ -708,7 +708,7 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "ai-search-discovery": {
-        "style": 0, "subtitle": "How AI decides who to recommend",
+        "style": 21, "subtitle": "How AI decides who to recommend",
         "sections": [
             {"id":1,"label":"Intent",      "desc":"What the user asks and how specific it is"},
             {"id":2,"label":"Signals",     "desc":"Profile clarity, expertise cues, and consistency"},

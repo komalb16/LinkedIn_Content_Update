@@ -3063,6 +3063,10 @@ def _pick_candidate_styles(topic_id: str, topic_name: str, diagram_type: str = "
     base_style_idx = _maybe_variation_style(base_style_idx, topic_id, topic_name, source)
 
     normalized_type = _normalize_diagram_type(diagram_type)
+    if normalized_type in {"comparison table", "comparison"}:
+        preferred = [5, 0, 15, 21]
+        return [idx for idx in preferred if 0 <= idx < len(STYLES)][:max(1, candidate_count)]
+
     family = STYLE_FAMILIES_BY_TYPE.get(normalized_type, [])
     if not family:
         family = [base_style_idx, 16, 19, 0, 1, 3, 4, 7, 20, 21]
@@ -3223,6 +3227,8 @@ class DiagramGenerator:
                 normalized_type = _normalize_diagram_type(diagram_type)
                 if normalized_type == "modern cards" and style_idx in {16, 22}:
                     candidate_score -= 20
+                if normalized_type == "comparison table" and style_idx in {22, 16}:
+                    candidate_score -= 26
                 if normalized_type == "flow chart" and style_idx in {16, 22, 5}:
                     candidate_score -= 24
                 if normalized_type in {"architecture", "architecture diagram"} and style_idx in {16, 22}:

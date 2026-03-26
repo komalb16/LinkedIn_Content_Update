@@ -648,6 +648,7 @@ Requirements:
 - If the topic does not include named tools, keep examples generic instead of dropping in brand names
 - Use 4 to 10 relevant emojis naturally across hook, bullets, and CTA (not spammy)
 - Include exactly one fenced visual block that matches the planned diagram type
+- Keep the fenced visual block concise (3 to 6 lines); avoid large ASCII box art
 - Do not use Mermaid syntax or graph declarations like `graph LR`, `graph TD`, or `flowchart`
 - Keep this to exactly one topic only; do not append or preview a second post
 - Poll/CTA options must be concrete answer choices (not repeated section headers like "Task Shape", "Need Tools")
@@ -822,6 +823,14 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
         issues.append("Write exactly one post and remove any extra appended drafts.")
     if re.search(r"```+\s*mermaid|^\s*graph\s+(?:lr|td)|^\s*flowchart", cleaned, re.I | re.M):
         issues.append("Do not use Mermaid syntax; use plain-text visual blocks only.")
+    for block in re.findall(r"```(.*?)```", cleaned, flags=re.S):
+        lines = [ln for ln in block.splitlines() if ln.strip()]
+        if len(lines) > 6:
+            issues.append("Keep the visual block short (3 to 6 lines) so the post stays readable.")
+            break
+        if any(ch in block for ch in ("+---", "|   |", "┌", "└", "│")):
+            issues.append("Avoid heavy ASCII box art inside the visual block; use compact line-based flow text.")
+            break
 
     if cleaned.count("📌") > 1:
         issues.append("Use a single title/topic marker only once.")
