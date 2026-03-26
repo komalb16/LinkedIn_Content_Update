@@ -946,6 +946,13 @@ class TopicManager:
         if balanced_pool:
             pool = balanced_pool
 
+        # Never repeat the immediately previous topic when alternatives exist.
+        if self.history:
+            last_topic_id = self.history[-1].get("topic_id")
+            non_repeat_pool = [t for t in pool if t.get("id") != last_topic_id]
+            if non_repeat_pool:
+                pool = non_repeat_pool
+
         chosen = random.choice(pool)
         log.info(
             f"Selected topic: {chosen['name']} (category: {chosen['category']}, "

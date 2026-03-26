@@ -2676,6 +2676,24 @@ def _style_modern_tech_cards(topic_id, topic_name, C, structure=None):
     card_w = (W - pad_x * 2 - gap * (cols - 1)) // cols
     card_h = (H - top_y - 56 - gap * (rows - 1)) // max(rows, 1)
 
+    icon_map = {
+        "pinecone": "P",
+        "weaviate": "W",
+        "pgvector": "PG",
+        "opensearch": "OS",
+        "milvus": "M",
+        "moment": "M",
+        "insight": "I",
+        "action": "A",
+    }
+
+    def _card_icon(label):
+        ll = (label or "").lower()
+        for key, icon in icon_map.items():
+            if key in ll:
+                return icon
+        return "AI"
+
     svg = ""
     svg += (
         f'<defs>'
@@ -2687,7 +2705,7 @@ def _style_modern_tech_cards(topic_id, topic_name, C, structure=None):
     )
     svg += f'<rect width="{W}" height="{H}" fill="url(#mtc-bg)"/>'
     svg += f'<line x1="0" y1="96" x2="{W}" y2="96" stroke="{rgba("#60A5FA",0.22)}" stroke-width="1.5"/>'
-    svg += f'<text x="26" y="40" fill="#93C5FD" font-size="14" font-weight="700" letter-spacing="1.2">DIAGRAM PREVIEW</text>'
+    svg += f'<text x="26" y="40" fill="#93C5FD" font-size="14" font-weight="700" letter-spacing="1.2">TECH MAP</text>'
     svg += f'<text x="{W//2}" y="68" text-anchor="middle" fill="#F8FAFC" font-size="38" font-weight="900">{xe(clamp(topic_name, 34))}</text>'
     svg += f'<text x="{W//2}" y="96" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600">{xe(clamp(subtitle, 86))}</text>'
 
@@ -2702,16 +2720,16 @@ def _style_modern_tech_cards(topic_id, topic_name, C, structure=None):
         svg += f'<rect x="{x}" y="{y}" width="{card_w}" height="{card_h}" rx="12" fill="{rgba("#0F172A",0.72)}" stroke="{lighten(col,0.30)}" stroke-width="1.5" class="fi" style="{delay}"/>'
         svg += f'<rect x="{x}" y="{y}" width="{card_w}" height="6" rx="3" fill="{col}"/>'
         svg += f'<circle cx="{x+18}" cy="{y+22}" r="11" fill="{lighten(col,0.82)}" stroke="{col}" stroke-width="1.5"/>'
-        svg += f'<text x="{x+18}" y="{y+26}" text-anchor="middle" fill="{darken(col,0.20)}" font-size="10" font-weight="900">{i+1}</text>'
+        svg += f'<text x="{x+18}" y="{y+26}" text-anchor="middle" fill="{darken(col,0.20)}" font-size="9" font-weight="900">{xe(_card_icon(sec.get("label","Option")))}</text>'
         svg += f'<text x="{x+36}" y="{y+26}" fill="{ink}" font-size="15" font-weight="900">{xe(clamp(sec.get("label","Option"), 22))}</text>'
 
         lines = wrap_lines(sec.get("desc", ""), 26)
         for li, ln in enumerate(lines[:4]):
             svg += f'<text x="{x+16}" y="{y+56+li*16}" fill="#CBD5E1" font-size="12" font-weight="600">{xe(clamp(ln, 42))}</text>'
 
-        # subtle badge
-        svg += f'<rect x="{x+card_w-96}" y="{y+14}" width="82" height="20" rx="10" fill="{rgba(col,0.20)}" stroke="{rgba(col,0.50)}" stroke-width="1"/>'
-        svg += f'<text x="{x+card_w-55}" y="{y+28}" text-anchor="middle" fill="{lighten(col,0.68)}" font-size="9" font-weight="800">PROFILE</text>'
+        # small index badge
+        svg += f'<rect x="{x+card_w-58}" y="{y+14}" width="44" height="20" rx="10" fill="{rgba(col,0.20)}" stroke="{rgba(col,0.50)}" stroke-width="1"/>'
+        svg += f'<text x="{x+card_w-36}" y="{y+28}" text-anchor="middle" fill="{lighten(col,0.68)}" font-size="9" font-weight="800">#{i+1}</text>'
 
     svg += f'<rect x="0" y="{H-28}" width="{W}" height="28" fill="{rgba("#0F172A",0.9)}"/>'
     svg += f'<text x="18" y="{H-10}" fill="#64748B" font-size="9">{datetime.now().strftime("%B %Y")}</text>'

@@ -50,6 +50,7 @@ METRIC_PATTERN = re.compile(
     r"|(\$\s*\d+(?:\.\d+)?\s*(?:k|m|b)?\+?)",
     re.I,
 )
+EMOJI_PATTERN = re.compile(r"[\U0001F300-\U0001FAFF]")
 
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
 RSS_FEEDS = {
@@ -571,9 +572,11 @@ Requirements:
 - Do not invent personal incidents, team stories, tool names, or metrics that were not explicitly provided in the topic
 - If the topic does not include a concrete metric, use qualitative language instead of numbers
 - If the topic does not include named tools, keep examples generic instead of dropping in brand names
+- Use 4 to 10 relevant emojis naturally across hook, bullets, and CTA (not spammy)
 - Include exactly one fenced visual block that matches the planned diagram type
 - Keep this to exactly one topic only; do not append or preview a second post
 - The hook must be the very first line — no warming up, no preamble
+- Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
 """
     post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
@@ -741,6 +744,21 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
     hashtag_count = len(re.findall(r"(?<!\w)#\w+", cleaned))
     if hashtag_count > 8:
         issues.append("Use fewer hashtags (ideal range: 4 to 7).")
+    emoji_count = len(EMOJI_PATTERN.findall(cleaned))
+    if emoji_count < 4:
+        issues.append("Add more relevant emojis to improve scanability and engagement (target: 4 to 10).")
+    if emoji_count > 14:
+        issues.append("Reduce emoji density; keep emojis relevant and readable.")
+
+    repetitive_phrases = (
+        "what actually works",
+        "most teams",
+        "when it comes to",
+    )
+    for phrase in repetitive_phrases:
+        if lowered.count(phrase) > 1:
+            issues.append(f"Avoid repeating the phrase '{phrase}' multiple times.")
+            break
 
     if diagram_type == "Observability Map" or "observability" in topic_blob:
         expected_terms = ("prompt", "retrieval", "tool", "latency", "cost", "quality", "alert")
