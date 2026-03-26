@@ -324,5 +324,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-03-26T22:11:23.172559",
+    "topic_id": "vector-databases",
+    "topic_name": "Vector Databases and Retrieval",
+    "category": "AI Data",
+    "mode": "topic",
+    "status": "dry_run",
+    "quality_score": 100,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 100,
+        "raw_score": 100,
+        "similarity": 0.0,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 84,
+        "raw_score": 84,
+        "similarity": 0.0,
+        "penalty": 0
+      }
+    ]
   }
 ]
