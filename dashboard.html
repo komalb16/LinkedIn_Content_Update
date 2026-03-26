@@ -4274,10 +4274,11 @@ async function runNow(options = {}) {
         // Hide scheduled runs that succeeded but never posted
         // A real post has its topic enriched from the "✅ Posted ·" step
         // A cron heartbeat exits(0) cleanly — success but no topic
-        if (r.conclusion === 'success' && _enrichmentDone && !_topicCache[r.id]) {
-          // Give it benefit of the doubt if enrichment didn't fetch this run
+        if (r.conclusion === 'success') {
           const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
-          if (fetched) return true; // fetched but empty = no post step found = heartbeat
+          // Until enrichment confirms a posted topic, keep scheduled-success runs hidden.
+          if (!fetched) return true;
+          if (!_topicCache[r.id]) return true; // fetched but empty = no post step found = heartbeat
         }
         return false;
       }
