@@ -264,8 +264,9 @@ ever-evolving, foster, tapestry, seamless, synergy, paradigm, unprecedented, \
 game-changer, leverage, revolutionize, supercharge, holistic, transformative
 - No corporate-speak. If you would not say it to a colleague, do not write it.
 - ALWAYS end with 💬 + a genuine question + blank line + 5 to 7 hashtags
-- ALWAYS include a ``` fenced flow diagram using 🟦🟩🟨🟥 with │ and ▼ connectors
-- ALWAYS include a ``` fenced comparison or table using → arrows
+- Include exactly ONE fenced visual block that matches the planned diagram type
+- If planned type is "Comparison Table", use a simple `left -> right` format
+- For non-comparison topics, avoid forcing vendor-vs-vendor comparisons
 - Do NOT add copyright, signature, or author name
 - Never mention the current month or year
 """
@@ -279,7 +280,7 @@ RULES:
 - Lead with your honest reaction, not a summary of the news
 - Use "I" freely — this is a personal take, not a press release
 - One strong opinion, defended with specifics — not a both-sides take
-- Include a ``` fenced comparison or flow diagram
+- Include one ``` fenced visual block that fits the post
 - End with 💬 + a sharp question + 5 to 7 hashtags
 - 200 to 300 words — reactions should be tight
 - No banned words: robust, crucial, delve, landscape, seamless, synergy,
@@ -378,8 +379,7 @@ Length: {length}
 Pick the most technically interesting story. Write a LinkedIn post that:
 - Starts with your personal reaction — not a neutral summary
 - Mentions the actual company, product, or number from the news
-- Includes a ``` fenced comparison table using → arrows
-- Includes a ``` fenced flow diagram using 🟦🟩🟨🟥 with │ and ▼ connectors
+- Includes one ``` fenced visual block that supports the argument
 - Takes a real position — not "time will tell"
 """
     return _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
@@ -420,7 +420,8 @@ def _build_post_template_instructions(diagram_type, structure=None):
         ),
         "Comparison Table": (
             "Write this as a practical comparison. "
-            "Do not just list differences; make a recommendation about when each option wins."
+            "Do not just list differences; make a recommendation about when each option wins. "
+            "Use a clear rule-of-thumb section near the end."
         ),
         "Winding Roadmap": (
             "Write this as a staged journey. "
@@ -428,6 +429,22 @@ def _build_post_template_instructions(diagram_type, structure=None):
         ),
     }
     return templates.get(diagram_type, "")
+
+
+def _build_visual_block_instruction(diagram_type):
+    if diagram_type == "Comparison Table":
+        return (
+            "Include one ``` fenced comparison block using concise `left -> right` lines. "
+            "Keep entities relevant to the topic only."
+        )
+    if diagram_type in {"Decision Tree", "Winding Roadmap", "Flow Chart", "Lane Map"}:
+        return (
+            "Include one ``` fenced flow block using plain ASCII connectors like `->` or `|`."
+        )
+    return (
+        "Include one ``` fenced visual block (outline, framework, or mini-map) "
+        "that mirrors the post structure."
+    )
 
 
 def generate_topic_post(topic, structure=None, diagram_type=""):
@@ -468,6 +485,7 @@ Match the row labels closely so the text and image stay coherent."""
 
     if template_instruction:
         structure_block += f"\n\nPost template guidance:\n{template_instruction}"
+    structure_block += f"\n\nVisual block guidance:\n{_build_visual_block_instruction(diagram_type)}"
 
     prompt = f"""Write a LinkedIn post about: {topic["prompt"]}
 Angle: {topic.get("angle", "practical, production-level insights")}
@@ -483,8 +501,8 @@ Requirements:
 - Do not invent personal incidents, team stories, tool names, or metrics that were not explicitly provided in the topic
 - If the topic does not include a concrete metric, use qualitative language instead of numbers
 - If the topic does not include named tools, keep examples generic instead of dropping in brand names
-- Include a ``` fenced flow diagram using 🟦🟩🟨🟥 squares with │ and ▼ connectors
-- Include a ``` fenced comparison or before/after table using → arrows
+- Include exactly one fenced visual block that matches the planned diagram type
+- Keep this to exactly one topic only; do not append or preview a second post
 - The hook must be the very first line — no warming up, no preamble
 - Never mention the current month or year
 """
@@ -555,6 +573,36 @@ def _cleanup_generated_post(text):
         split_lines.pop(1)
         text = "\n".join(split_lines).strip()
 
+    # Guard against accidental multi-post output from the model.
+    split_markers = [
+        r"\n\s*next post\s*:",
+        r"\n\s*third post\s*:",
+        r"\n\s*post\s*2\s*:",
+        r"\n\s*another post\s*:",
+        r"\n\s*here'?s another\s*:",
+    ]
+    lowered = text.lower()
+    cut_positions = []
+    for pattern in split_markers:
+        m = re.search(pattern, lowered, flags=re.IGNORECASE)
+        if m:
+            cut_positions.append(m.start())
+    if cut_positions:
+        text = text[:min(cut_positions)].strip()
+
+    # Keep only one fenced visual/code block to prevent duplicated diagram sections.
+    fence_matches = list(re.finditer(r"```[\s\S]*?```", text))
+    if len(fence_matches) > 1:
+        keep_start, keep_end = fence_matches[0].span()
+        rebuilt = [text[:keep_end]]
+        for idx in range(1, len(fence_matches)):
+            prev_end = fence_matches[idx - 1].end()
+            curr_start = fence_matches[idx].start()
+            rebuilt.append(text[prev_end:curr_start])
+        rebuilt.append(text[fence_matches[-1].end():])
+        text = "".join(rebuilt).strip()
+        text = re.sub(r"\n{3,}", "\n\n", text)
+
     return text
 
 
@@ -602,6 +650,16 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
 
     if re.search(r"\bour production\b|\bour team\b|\bwe cut\b|\bI quickly diagnosed\b|\bjust failed\b", cleaned, re.I):
         issues.append("Do not invent a first-person incident or case study unless the topic explicitly includes one.")
+
+    if re.search(r"\bnext post\b|\bthird post\b|\bpost 2\b|\banother post\b", cleaned, re.I):
+        issues.append("Write exactly one post and remove any extra appended drafts.")
+
+    if cleaned.count("📌") > 1:
+        issues.append("Use a single title/topic marker only once.")
+
+    hashtag_count = len(re.findall(r"(?<!\w)#\w+", cleaned))
+    if hashtag_count > 8:
+        issues.append("Use fewer hashtags (ideal range: 4 to 7).")
 
     if diagram_type == "Observability Map" or "observability" in topic_blob:
         expected_terms = ("prompt", "retrieval", "tool", "latency", "cost", "quality", "alert")
@@ -659,8 +717,12 @@ def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
         issues.append("Use 4 to 7 clean hashtags at the end.")
         score -= 8
 
-    if text.count("```") < 4:
-        issues.append("Include both the fenced flow diagram and the fenced comparison/table block.")
+    fence_count = text.count("```")
+    if fence_count < 2:
+        issues.append("Include one fenced visual block that matches the planned diagram type.")
+        score -= 10
+    if fence_count > 2:
+        issues.append("Include only one fenced visual block; remove duplicated diagram/code blocks.")
         score -= 10
 
     first_line = text.splitlines()[0].strip().lower() if text.splitlines() else ""
@@ -704,7 +766,7 @@ def _clean_entity_name(name):
     return cleaned[:28]
 
 
-def _extract_comparison_entities(post_text):
+def _extract_comparison_entities(post_text, fallback_entities=None):
     text = post_text or ""
     patterns = [
         r"\b([A-Z][A-Za-z0-9&.+/\- ]{1,30})\s+vs\.?\s+([A-Z][A-Za-z0-9&.+/\- ]{1,30})\b",
@@ -719,31 +781,19 @@ def _extract_comparison_entities(post_text):
             if left and right and left.lower() != right.lower():
                 return [left, right]
 
-    preferred = [
-        "OpenAI", "Anthropic", "Google", "Microsoft", "AWS", "Azure", "Railway",
-        "Mistral", "GitHub", "Docker", "Kubernetes", "Databricks", "Snowflake",
-        "Pinecone", "Weaviate", "LangChain", "CrewAI", "n8n", "Vercel", "Cursor",
-    ]
-    lowered = text.lower()
-    found = []
-    for name in preferred:
-        pos = lowered.find(name.lower())
-        if pos != -1:
-            found.append((pos, name))
-    if found:
-        found.sort(key=lambda item: item[0])
-        ordered = []
-        for _, name in found:
-            if name not in ordered:
-                ordered.append(name)
-            if len(ordered) == 2:
-                return ordered
-        return ordered[:2]
+    if fallback_entities and len(fallback_entities) >= 2:
+        cleaned = []
+        for entity in fallback_entities:
+            name = _clean_entity_name(entity)
+            if name and name not in cleaned:
+                cleaned.append(name)
+            if len(cleaned) >= 2:
+                return cleaned[:2]
     return []
 
 
-def _extract_visual_title_for_type(post_text, fallback_title, diagram_type):
-    entities = _extract_comparison_entities(post_text) if diagram_type == "Comparison Table" else []
+def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fallback_entities=None):
+    entities = _extract_comparison_entities(post_text, fallback_entities=fallback_entities) if diagram_type == "Comparison Table" else []
     if len(entities) >= 2:
         return f"{entities[0]} vs {entities[1]}"
 
@@ -770,8 +820,8 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type):
     return fallback_title
 
 
-def _build_comparison_structure_from_post(post_text, title):
-    entities = _extract_comparison_entities(post_text)
+def _build_comparison_structure_from_post(post_text, title, fallback_entities=None):
+    entities = _extract_comparison_entities(post_text, fallback_entities=fallback_entities)
     if len(entities) < 2:
         return None
 
@@ -837,13 +887,20 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
         return topic["name"], fallback_type, fallback_structure
 
     diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
-    diagram_title = _extract_visual_title_for_type(post_text, topic["name"], diagram_type)
+    fallback_entities = [topic.get("name", topic.get("id", ""))]
+    if topic.get("diagram_subject"):
+        fallback_entities.extend(re.findall(r"\b[A-Z][A-Za-z0-9+.\-]{2,}\b", topic["diagram_subject"]))
+    diagram_title = _extract_visual_title_for_type(
+        post_text, topic["name"], diagram_type, fallback_entities=fallback_entities
+    )
     diagram_structure = fallback_structure
 
     if diagram_type != fallback_type:
         diagram_structure = None
     if diagram_type == "Comparison Table" and not diagram_structure:
-        diagram_structure = _build_comparison_structure_from_post(post_text, diagram_title)
+        diagram_structure = _build_comparison_structure_from_post(
+            post_text, diagram_title, fallback_entities=fallback_entities
+        )
 
     return diagram_title, diagram_type, diagram_structure
 
@@ -852,13 +909,13 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
 
 def get_post_mode():
     rand = random.random()
-    if rand < 0.15:
+    if rand < 0.05:
         return "ai_news"
-    elif rand < 0.25:
+    elif rand < 0.08:
         return "layoff_news"
-    elif rand < 0.35:
+    elif rand < 0.12:
         return "tools_news"
-    elif rand < 0.40:
+    elif rand < 0.15:
         return "tech_news"
     else:
         return "topic"

@@ -2758,6 +2758,26 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "signal vs noise": 17,
 }
 
+STYLE_FAMILIES_BY_TYPE = {
+    "comparison table": [5, 16, 19],
+    "comparison": [5, 16, 19],
+    "decision tree": [9, 0, 16],
+    "flow chart": [0, 21, 16],
+    "lane map": [21, 0, 16],
+    "observability map": [20, 21, 16],
+    "winding roadmap": [14, 15, 3],
+    "timeline": [15, 3, 14],
+    "7 layers": [10, 2, 16],
+    "architecture diagram": [7, 20, 16],
+    "architecture": [7, 20, 16],
+}
+
+_SCORE_STOPWORDS = {
+    "the", "and", "for", "with", "from", "into", "over", "this", "that",
+    "about", "your", "what", "when", "where", "how", "map", "guide",
+    "architecture", "diagram", "flow", "chart", "table", "framework",
+}
+
 
 def _normalize_diagram_type(diagram_type: str) -> str:
     return re.sub(r"\s+", " ", (diagram_type or "").strip().lower())
@@ -2800,10 +2820,105 @@ def _maybe_variation_style(base_style_idx: int, topic_id: str, topic_name: str, 
     return candidate if candidate != base_style_idx else base_style_idx
 
 
-def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "", structure: dict = None) -> str:
+def _extract_scoring_keywords(topic_name: str, diagram_type: str = "", structure: dict = None):
+    raw = [topic_name or "", diagram_type or ""]
+    if isinstance(structure, dict):
+        raw.append(structure.get("subtitle", ""))
+        for section in structure.get("sections", [])[:8]:
+            raw.append(section.get("label", ""))
+            raw.append(section.get("desc", ""))
+        for row in structure.get("rows", [])[:8]:
+            raw.append(row.get("label", ""))
+            raw.append(row.get("text", ""))
+    tokens = []
+    for text in raw:
+        for tok in re.split(r"[^a-z0-9]+", (text or "").lower()):
+            if len(tok) < 3 or tok in _SCORE_STOPWORDS:
+                continue
+            tokens.append(tok)
+    seen = set()
+    deduped = []
+    for tok in tokens:
+        if tok in seen:
+            continue
+        seen.add(tok)
+        deduped.append(tok)
+    return deduped[:16]
+
+
+def _score_svg_candidate(svg: str, topic_name: str, diagram_type: str = "", structure: dict = None) -> int:
+    lowered = (svg or "").lower()
+    keywords = _extract_scoring_keywords(topic_name, diagram_type, structure)
+    score = 0
+
+    score += sum(8 for kw in keywords if kw in lowered)
+
+    text_nodes = lowered.count("<text")
+    if 10 <= text_nodes <= 90:
+        score += 14
+    else:
+        score -= min(12, abs(text_nodes - 40) // 3)
+
+    if len(svg or "") >= 7000:
+        score += 6
+
+    topic_lower = (topic_name or "").lower()
+    if "aws cloud" in lowered and "aws" not in topic_lower:
+        score -= 24
+    if "railway" in lowered and "railway" not in topic_lower:
+        score -= 18
+
+    if structure and structure.get("sections"):
+        labels = [s.get("label", "").lower() for s in structure.get("sections", [])]
+        covered = sum(1 for label in labels if label and label in lowered)
+        score += min(18, covered * 4)
+    if structure and structure.get("rows"):
+        labels = [r.get("label", "").lower() for r in structure.get("rows", [])]
+        covered = sum(1 for label in labels if label and label in lowered)
+        score += min(16, covered * 4)
+
+    return score
+
+
+def _pick_candidate_styles(topic_id: str, topic_name: str, diagram_type: str = "", structure: dict = None, candidate_count: int = 3):
+    base_style_idx, source = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
+    base_style_idx = _maybe_variation_style(base_style_idx, topic_id, topic_name, source)
+
+    if isinstance(structure, dict) and isinstance(structure.get("style"), int):
+        return [base_style_idx]
+
+    normalized_type = _normalize_diagram_type(diagram_type)
+    family = STYLE_FAMILIES_BY_TYPE.get(normalized_type, [])
+    if not family:
+        family = [base_style_idx, 16, 19, 0, 1, 3, 4, 7, 20, 21]
+
+    rng = random.Random(int(hashlib.md5(f"{topic_id}|{topic_name}|{diagram_type}".encode("utf-8")).hexdigest()[:8], 16))
+    tail = [idx for idx in range(len(STYLES)) if idx not in family and idx != base_style_idx]
+    rng.shuffle(tail)
+
+    ordered = [base_style_idx] + family + tail
+    deduped = []
+    for idx in ordered:
+        if not isinstance(idx, int):
+            continue
+        if idx < 0 or idx >= len(STYLES):
+            continue
+        if idx in deduped:
+            continue
+        deduped.append(idx)
+        if len(deduped) >= max(1, candidate_count):
+            break
+    return deduped
+
+
+def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "", structure: dict = None, style_override: int = None) -> str:
     C = get_pal(topic_id, topic_name)
-    style_idx, source = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
-    style_idx = _maybe_variation_style(style_idx, topic_id, topic_name, source)
+    if isinstance(style_override, int):
+        style_idx = style_override
+        source = "override"
+    else:
+        style_idx, source = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
+        style_idx = _maybe_variation_style(style_idx, topic_id, topic_name, source)
 
 
 
@@ -2828,6 +2943,7 @@ def _style_supports_motion(style_idx: int) -> bool:
 
 
 def _render_gif(topic_name: str, topic_id: str, diagram_type: str = "", structure: dict = None,
+                style_override: int = None,
                 frame_count: int = 10, duration_ms: int = 120):
     try:
         import cairosvg
@@ -2836,7 +2952,10 @@ def _render_gif(topic_name: str, topic_id: str, diagram_type: str = "", structur
         log.warning(f"GIF export unavailable: {e}")
         return None
 
-    style_idx, _ = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
+    if isinstance(style_override, int):
+        style_idx = style_override
+    else:
+        style_idx, _ = _pick_style_from_metadata(topic_id, topic_name, diagram_type, structure=structure)
     if not _style_supports_motion(style_idx):
         return None
 
@@ -2846,7 +2965,7 @@ def _render_gif(topic_name: str, topic_id: str, diagram_type: str = "", structur
     try:
         for idx in range(frame_count):
             _MOTION_PHASE = idx / frame_count
-            svg = make_diagram(topic_name, topic_id, diagram_type, structure=structure)
+            svg = make_diagram(topic_name, topic_id, diagram_type, structure=structure, style_override=style_idx)
             png_bytes = cairosvg.svg2png(bytestring=svg.encode("utf-8"), output_width=1200, output_height=840)
             frame = Image.open(io.BytesIO(png_bytes)).convert("P", palette=Image.ADAPTIVE)
             frames.append(frame)
@@ -2900,7 +3019,36 @@ class DiagramGenerator:
             use_existing = True
         
         if not use_existing:
-            gif_bundle = _render_gif(topic_name or topic_id, topic_id, diagram_type, structure=structure)
+            try:
+                candidate_count = int(os.environ.get("DIAGRAM_CANDIDATES", "3"))
+            except Exception:
+                candidate_count = 3
+            candidate_count = max(1, min(5, candidate_count))
+
+            candidate_styles = _pick_candidate_styles(
+                topic_id, topic_name or topic_id, diagram_type, structure=structure, candidate_count=candidate_count
+            )
+            scored_candidates = []
+            for style_idx in candidate_styles:
+                svg_candidate = make_diagram(
+                    topic_name or topic_id, topic_id, diagram_type, structure=structure, style_override=style_idx
+                )
+                candidate_score = _score_svg_candidate(
+                    svg_candidate, topic_name or topic_id, diagram_type=diagram_type, structure=structure
+                )
+                scored_candidates.append((candidate_score, style_idx, svg_candidate))
+            scored_candidates.sort(key=lambda x: x[0], reverse=True)
+
+            best_score, best_style, best_svg = scored_candidates[0]
+            log.info(
+                "Diagram candidates ranked: "
+                + ", ".join(f"style {style}={score}" for score, style, _ in scored_candidates)
+                + f" -> selected style {best_style}"
+            )
+
+            gif_bundle = _render_gif(
+                topic_name or topic_id, topic_id, diagram_type, structure=structure, style_override=best_style
+            )
             if gif_bundle:
                 gif_name = filename.replace(".svg", ".gif")
                 frames = gif_bundle["frames"]
@@ -2917,10 +3065,9 @@ class DiagramGenerator:
                 log.info(f"Generated animated GIF: {gif_name} ({round(size_kb, 1)} KB)")
                 return gif_name
 
-            svg = make_diagram(topic_name or topic_id, topic_id, diagram_type, structure=structure)
             with open(filename, "w", encoding="utf-8") as f:
-                f.write(svg)
+                f.write(best_svg)
             size_kb = os.path.getsize(filename) / 1024
-            log.info(f"Generated diagram: {filename} ({round(size_kb, 1)} KB)")
+            log.info(f"Generated diagram: {filename} ({round(size_kb, 1)} KB, score={best_score})")
         
         return filename

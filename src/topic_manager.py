@@ -409,15 +409,43 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "system-design": {
-        "style": 7, "subtitle": "Principles Every Senior Engineer Must Master",
-        "sections": [
-            {"id":1,"label":"Client Layer",   "desc":"Browser, mobile, desktop"},
-            {"id":2,"label":"Edge + CDN",     "desc":"Cache at the network edge"},
-            {"id":3,"label":"API Gateway",    "desc":"Rate limiting, auth, routing"},
-            {"id":4,"label":"Microservices",  "desc":"Bounded domain services"},
-            {"id":5,"label":"Data Layer",     "desc":"Primary DB and read replicas"},
-            {"id":6,"label":"Observability",  "desc":"Metrics, traces, SLO alerts"},
-        ]
+        "style": 20,
+        "subtitle": "A practical blueprint for scalable systems",
+        "rows": [
+            {
+                "label": "1. Entry Layer",
+                "type": "chips",
+                "chips": ["Client", "CDN", "WAF", "Rate Limit"],
+                "chip_color": "#EEF2FF",
+                "chip_border": "#2563EB",
+                "chip_text": "#1E3A8A",
+            },
+            {
+                "label": "2. Service Layer",
+                "type": "columns",
+                "columns": [
+                    {"glyph": "A", "title": "Gateway", "items": ["Auth", "Routing", "Quotas"]},
+                    {"glyph": "S", "title": "Services", "items": ["Stateless", "Retries", "Timeouts"]},
+                    {"glyph": "Q", "title": "Queues", "items": ["Buffer", "Backpressure", "Async Jobs"]},
+                ],
+            },
+            {
+                "label": "3. Data Layer",
+                "type": "banner",
+                "text": "Primary DB · Replicas · Cache · Partitioning · Consistency",
+                "color": "#E0F2E9",
+                "border": "#059669",
+                "text_color": "#065F46",
+            },
+            {
+                "label": "4. Reliability Layer",
+                "type": "obs",
+                "items": ["Metrics + Traces", "SLO Alerts", "Graceful Degradation", "Runbooks + Load Tests"],
+                "color": "#F3EBF9",
+                "border": "#7F77DD",
+                "text_color": "#3C3489",
+            },
+        ],
     },
     "api-design": {
         "style": 5, "subtitle": "REST vs GraphQL vs gRPC vs WebSocket",
@@ -644,6 +672,12 @@ INFERRED_DIAGRAM_TYPES = [
     (("compare", "vs", "versus", "comparison"), "Comparison Table"),
 ]
 
+TOPIC_ANCHOR_STOPWORDS = {
+    "ai", "ml", "llm", "genai", "data", "engineering", "system", "design",
+    "architecture", "modern", "advanced", "real", "world", "insights",
+    "skills", "trends", "applications", "platform", "stack", "guide",
+}
+
 # topics_config.json lives in the root directory.
 TOPICS_CONFIG_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "topics_config.json")
 
@@ -691,21 +725,30 @@ class TopicManager:
             t for t in TOPICS
             if not t.get("hidden", False) and t["id"] not in hidden_ids
         ]
+        active_by_id = {t["id"]: idx for idx, t in enumerate(active)}
 
         # Custom topics from dashboard — provide defaults for missing fields
         for ct in custom_topics:
             if not ct.get("id"):
                 continue
-            active.append({
+            raw_name = ct.get("name", ct["id"])
+            inferred_diagram_type = self._infer_diagram_type_from_name(raw_name)
+            inferred_category = self._infer_category_from_name(raw_name)
+            merged_topic = {
                 "id":             ct["id"],
-                "name":           ct.get("name", ct["id"]),
-                "category":       ct.get("category", "Custom"),
-                "prompt":         ct.get("prompt", f"Write an insightful post about {ct.get('name', ct['id'])} for senior engineers."),
-                "angle":          ct.get("angle", "Practical insights and real-world implications"),
-                "diagram_subject": ct.get("diagram_subject", ct.get("name", ct["id"]) + " architecture overview"),
-                "diagram_type":   ct.get("diagram_type", "Architecture Diagram"),
+                "name":           raw_name,
+                "category":       ct.get("category", inferred_category),
+                "prompt":         ct.get("prompt", self._build_default_custom_prompt(raw_name)),
+                "angle":          ct.get("angle", "Practical implementation guidance, trade-offs, and mistakes to avoid"),
+                "diagram_subject": ct.get("diagram_subject", f"{raw_name} practical framework"),
+                "diagram_type":   ct.get("diagram_type", inferred_diagram_type),
                 "emoji":          ct.get("emoji", "💡"),
-            })
+            }
+            if ct["id"] in active_by_id:
+                active[active_by_id[ct["id"]]] = merged_topic
+            else:
+                active_by_id[ct["id"]] = len(active)
+                active.append(merged_topic)
 
         log.info(f"Topic pool: {len(active)} active topic(s) (of {len(TOPICS)+len(custom_topics)} total)")
         return active
@@ -727,6 +770,19 @@ class TopicManager:
         available = [t for t in self.topics if t["id"] not in recent_ids]
         if not available:
             available = self.topics  # all have been used recently — full reset
+
+        recent_anchors = {
+            self._history_anchor(h, topic_by_id)
+            for h in self.history[-8:]
+        }
+        recent_anchors.discard("")
+        diversified = [
+            t for t in available
+            if self._topic_anchor(t) not in recent_anchors
+        ]
+        if diversified:
+            available = diversified
+
         recent_categories = []
         for h in self.history[-5:]:
             category = self._resolve_history_category(h, topic_by_id)
@@ -768,6 +824,44 @@ class TopicManager:
         )
         return chosen
 
+    def _infer_category_from_name(self, name):
+        blob = re.sub(r"[^a-z0-9]+", " ", (name or "").lower())
+        if any(k in blob for k in ("security", "zero trust", "devsecops")):
+            return "Security"
+        if any(k in blob for k in ("kafka", "data", "lakehouse", "warehouse", "etl")):
+            return "Data"
+        if any(k in blob for k in ("aws", "azure", "gcp", "kubernetes", "docker", "cloud")):
+            return "Cloud"
+        if any(k in blob for k in ("agent", "llm", "genai", "copilot", "rag", "ai")):
+            return "AI"
+        return "Engineering"
+
+    def _infer_diagram_type_from_name(self, name):
+        topic = {"id": "", "name": name, "prompt": name, "angle": "", "diagram_subject": ""}
+        inferred = self._infer_diagram_type_from_topic(topic)
+        return inferred if inferred else "Architecture Diagram"
+
+    def _build_default_custom_prompt(self, name):
+        return (
+            f"{name}: explain the practical architecture choices, common implementation mistakes, "
+            "and a clear decision framework for when to use it."
+        )
+
+    def _topic_anchor(self, topic):
+        raw = " ".join([topic.get("id", ""), topic.get("name", "")]).lower()
+        tokens = [t for t in re.split(r"[^a-z0-9]+", raw) if t and t not in TOPIC_ANCHOR_STOPWORDS]
+        return tokens[0] if tokens else ""
+
+    def _history_anchor(self, history_entry, topic_by_id):
+        topic_id = history_entry.get("topic_id", "")
+        if topic_id in topic_by_id:
+            return self._topic_anchor(topic_by_id[topic_id])
+        fallback = {
+            "id": topic_id,
+            "name": history_entry.get("topic_name", ""),
+        }
+        return self._topic_anchor(fallback)
+
     def _resolve_history_category(self, history_entry, topic_by_id):
         category = history_entry.get("category")
         if category:
@@ -786,8 +880,18 @@ class TopicManager:
 
     def _infer_diagram_type_from_topic(self, topic):
         blob = self._topic_text_blob(topic)
+
+        def keyword_matches(keyword):
+            k = (keyword or "").strip().lower()
+            if not k:
+                return False
+            # Avoid substring collisions like "vs" matching inside "services".
+            if re.fullmatch(r"[a-z0-9]+", k):
+                return re.search(rf"\b{re.escape(k)}\b", blob) is not None
+            return k in blob
+
         for keywords, diagram_type in INFERRED_DIAGRAM_TYPES:
-            if any(k in blob for k in keywords):
+            if any(keyword_matches(k) for k in keywords):
                 return diagram_type
         return topic.get("diagram_type", "Architecture Diagram")
 
@@ -893,6 +997,13 @@ class TopicManager:
 
     def get_diagram_type_for_topic(self, topic):
         current = topic.get("diagram_type", "Architecture Diagram")
+        topic_id = topic.get("id", "")
+
+        # For curated built-in structures, trust configured type to avoid accidental
+        # keyword-triggered switches (e.g. "vs" in prose forcing Comparison Table).
+        if topic_id in DIAGRAM_STRUCTURES and current:
+            return current
+
         if not current or current == "Architecture Diagram":
             return self._infer_diagram_type_from_topic(topic)
         return current
