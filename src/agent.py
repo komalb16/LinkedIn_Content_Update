@@ -1823,7 +1823,6 @@ Write a LinkedIn post that:
         log.warning("Quality notes: " + " | ".join(score_card["issues"][:5]))
 
     write_github_output("POST_TOPIC",   topic.get("name", ""))
-    write_github_output("POSTED_TOPIC", topic.get("name", ""))
     write_github_output("POST_TOPIC_ID", topic.get("id", ""))
     write_github_output("POST_QUALITY_SCORE", str(score_card["score"]))
     log.info(f"Final topic resolved: {topic['name']} (mode: {mode})")
@@ -1924,6 +1923,7 @@ Write a LinkedIn post that:
     )
     if result.get("success"):
         log.info("Posted! ID: " + str(result.get("post_id")))
+        write_github_output("POSTED_TOPIC", topic.get("name", ""))
         write_github_output("POSTED_TITLE", topic.get("name", ""))
         write_github_output("POSTED_DATE",  datetime.now().strftime("%Y-%m-%d"))
         write_github_output("POSTED_URL",   result.get("post_url", ""))
