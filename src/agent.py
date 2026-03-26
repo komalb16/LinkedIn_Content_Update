@@ -966,12 +966,85 @@ def _enforce_numbered_poll_options(text):
     return "\n".join(lines).strip()
 
 
+def _align_poll_with_structure(text, structure=None, diagram_type=""):
+    if not structure or not structure.get("sections"):
+        return text
+    if diagram_type == "Decision Tree":
+        return text
+
+    labels = [s.get("label", "").strip() for s in structure.get("sections", []) if s.get("label")]
+    if len(labels) < 3:
+        return text
+
+    lines = (text or "").splitlines()
+    if not lines:
+        return text
+
+    poll_idx = None
+    for i, ln in enumerate(lines):
+        low = ln.lower()
+        if "💬" in ln or "which" in low or "what's your" in low or "what drives" in low:
+            poll_idx = i
+    if poll_idx is None:
+        return text
+
+    options = []
+    option_line_idx = None
+    for i in range(poll_idx + 1, min(len(lines), poll_idx + 8)):
+        ln = lines[i].strip()
+        if not ln or ln.startswith("#"):
+            break
+        if POLL_PREFIX_RE.match(ln):
+            options.append(POLL_PREFIX_RE.sub("", ln).strip().lower())
+        elif "," in ln:
+            option_line_idx = i
+            options.extend([
+                re.sub(r"^(?:or|and)\s+", "", p.strip(" ."), flags=re.I).lower()
+                for p in ln.rstrip("?").split(",")
+                if p.strip(" .")
+            ])
+            break
+
+    if not options:
+        return text
+
+    normalized_labels = {l.lower() for l in labels}
+    overlap = sum(1 for op in options if op in normalized_labels)
+    if overlap >= max(2, len(options) // 2):
+        return text
+
+    numbered = [f"{i+1}\uFE0F\u20E3 {lbl}" for i, lbl in enumerate(labels[:5])]
+    replacement = "  ".join(numbered)
+    if option_line_idx is not None:
+        lines[option_line_idx] = replacement
+    else:
+        # Replace existing option lines under poll
+        replaced = False
+        for i in range(poll_idx + 1, min(len(lines), poll_idx + 8)):
+            ln = lines[i].strip()
+            if not ln or ln.startswith("#"):
+                if not replaced:
+                    lines.insert(i, replacement)
+                replaced = True
+                break
+            if POLL_PREFIX_RE.match(ln):
+                if not replaced:
+                    lines[i] = replacement
+                    replaced = True
+                else:
+                    lines[i] = ""
+        if not replaced:
+            lines.insert(poll_idx + 1, replacement)
+    return "\n".join([ln for ln in lines if ln is not None and ln != ""]).strip()
+
+
 def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _cleanup_generated_post(post_text or "")
     finalized = finalized.replace("hashtag#", "#").strip()
     if not finalized:
         return finalized
     finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
+    finalized = _align_poll_with_structure(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _enforce_numbered_poll_options(finalized)
     return finalized
 
