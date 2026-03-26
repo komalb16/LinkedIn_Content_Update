@@ -1308,6 +1308,20 @@ def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
 
 
 def _pick_best_candidate(topic, candidates, structure, diagram_type, recent_posts, recent_hashes=None):
+    ranked = _rank_candidates(topic, candidates, structure, diagram_type, recent_posts, recent_hashes=recent_hashes)
+    best = ranked[0]
+    log.info(
+        "Text candidates ranked: "
+        + ", ".join(
+            f"#{r['index']+1}={r['score']} (raw={r['raw_score']}, sim={r['sim']:.2f})"
+            for r in ranked
+        )
+        + f" -> selected #{best['index']+1}"
+    )
+    return best
+
+
+def _rank_candidates(topic, candidates, structure, diagram_type, recent_posts, recent_hashes=None):
     ranked = []
     recent_hashes = set(recent_hashes or [])
     for idx, text in enumerate(candidates):
@@ -1328,16 +1342,7 @@ def _pick_best_candidate(topic, candidates, structure, diagram_type, recent_post
             "hash": duplicate_hash,
         })
     ranked.sort(key=lambda r: (r["score"], r["raw_score"]), reverse=True)
-    best = ranked[0]
-    log.info(
-        "Text candidates ranked: "
-        + ", ".join(
-            f"#{r['index']+1}={r['score']} (raw={r['raw_score']}, sim={r['sim']:.2f})"
-            for r in ranked
-        )
-        + f" -> selected #{best['index']+1}"
-    )
-    return best
+    return ranked
 
 
 def _extract_visual_title(post_text, fallback_title):
@@ -1603,6 +1608,12 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
     except Exception:
         candidate_count = 3
     candidate_count = max(1, min(5, candidate_count))
+    try:
+        ab_variants = int(os.environ.get("AB_VARIANTS", "2"))
+    except Exception:
+        ab_variants = 2
+    ab_variants = max(1, min(3, ab_variants))
+    candidate_snapshot = []
 
     if not dry_run:
         from linkedin_poster import LinkedInPoster
@@ -1722,11 +1733,18 @@ Write a LinkedIn post that:
             st_text = _finalize_post_text(st_topic, st_text, structure=st_structure, diagram_type="Modern Cards")
             story_candidates.append(st_text)
             story_meta.append((st_topic, st_structure))
-        pick = _pick_best_candidate(
+        ranked_story = _rank_candidates(
             story_meta[0][0], story_candidates, story_meta[0][1], "Modern Cards", recent_posts, recent_hashes=recent_hashes
         )
+        pick = ranked_story[0]
+        candidate_snapshot = ranked_story[:ab_variants]
         topic, structure = story_meta[pick["index"]]
         post_text = story_candidates[pick["index"]]
+        if len(candidate_snapshot) >= 2:
+            log.info(
+                f"A/B winner: variant #{candidate_snapshot[0]['index']+1} ({candidate_snapshot[0]['score']}) "
+                f"over #{candidate_snapshot[1]['index']+1} ({candidate_snapshot[1]['score']})"
+            )
 
     # ── RESOLVE TOPIC ─────────────────────────────────────────────────────────
     if mode == "topic" or not post_text:
@@ -1745,10 +1763,17 @@ Write a LinkedIn post that:
         for _ in range(candidate_count):
             draft = generate_topic_post(topic, structure, planned_diagram_type)
             topic_candidates.append(_finalize_post_text(topic, draft, structure=structure, diagram_type=planned_diagram_type))
-        pick = _pick_best_candidate(
+        ranked_topic = _rank_candidates(
             topic, topic_candidates, structure, planned_diagram_type, recent_posts, recent_hashes=recent_hashes
         )
+        pick = ranked_topic[0]
+        candidate_snapshot = ranked_topic[:ab_variants]
         post_text = topic_candidates[pick["index"]]
+        if len(candidate_snapshot) >= 2:
+            log.info(
+                f"A/B winner: variant #{candidate_snapshot[0]['index']+1} ({candidate_snapshot[0]['score']}) "
+                f"over #{candidate_snapshot[1]['index']+1} ({candidate_snapshot[1]['score']})"
+            )
 
     # ── FALLBACK TOPIC for news posts ─────────────────────────────────────────
     if not topic:
@@ -1773,9 +1798,11 @@ Write a LinkedIn post that:
             else:
                 regen_text = generate_topic_post(topic, regen_structure, regen_diagram_type)
             regen_candidates.append(_finalize_post_text(topic, regen_text, structure=regen_structure, diagram_type=regen_diagram_type))
-        regen_pick = _pick_best_candidate(
+        ranked_regen = _rank_candidates(
             topic, regen_candidates, regen_structure, regen_diagram_type, recent_posts, recent_hashes=recent_hashes
         )
+        regen_pick = ranked_regen[0]
+        candidate_snapshot = ranked_regen[:ab_variants]
         post_text = regen_candidates[regen_pick["index"]]
         score_card = _score_post_candidate(topic, post_text, regen_structure, regen_diagram_type)
 
@@ -1856,6 +1883,16 @@ Write a LinkedIn post that:
                 "post_file": "output_post_" + topic["id"] + ".txt",
                 "quality_score": score_card["score"],
                 "quality_notes": score_card["issues"],
+                "ab_variants": [
+                    {
+                        "variant_index": c.get("index", 0) + 1,
+                        "score": c.get("score"),
+                        "raw_score": c.get("raw_score"),
+                        "similarity": round(c.get("sim", 0.0), 4),
+                        "penalty": c.get("penalty", 0),
+                    }
+                    for c in candidate_snapshot
+                ],
             }, f, indent=2)
         write_github_summary(topic["name"], mode, full_post_text, dry_run=True, score_card=score_card)
         _remember_post(topic, full_post_text)
@@ -1866,6 +1903,17 @@ Write a LinkedIn post that:
             "category":   topic.get("category", ""),
             "mode":       mode,
             "status":     "dry_run",
+            "quality_score": score_card["score"],
+            "ab_variants": [
+                {
+                    "variant_index": c.get("index", 0) + 1,
+                    "score": c.get("score"),
+                    "raw_score": c.get("raw_score"),
+                    "similarity": round(c.get("sim", 0.0), 4),
+                    "penalty": c.get("penalty", 0),
+                }
+                for c in candidate_snapshot
+            ],
         })
         log.info("DRY RUN complete. Post saved.")
         return
@@ -1898,6 +1946,17 @@ Write a LinkedIn post that:
             "category":   topic.get("category", ""),
             "mode":       mode,
             "status":     "success",
+            "quality_score": score_card["score"],
+            "ab_variants": [
+                {
+                    "variant_index": c.get("index", 0) + 1,
+                    "score": c.get("score"),
+                    "raw_score": c.get("raw_score"),
+                    "similarity": round(c.get("sim", 0.0), 4),
+                    "penalty": c.get("penalty", 0),
+                }
+                for c in candidate_snapshot
+            ],
         })
         try:
             from notifier import notify_all
