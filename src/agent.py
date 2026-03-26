@@ -67,6 +67,17 @@ GENERIC_PHRASES = (
     "in production",
     "taking a step back",
 )
+INCIDENT_PATTERNS = [
+    r"\bour production\b",
+    r"\bour team\b",
+    r"\bin my team\b",
+    r"\bwe had an incident\b",
+    r"\bproduction issue\b",
+    r"\bproduction outage\b",
+    r"\bdebugging\b.*\bproduction\b",
+    r"\bi\s+just\s+spent\s+\d+\s*(?:hours?|hrs?)\b",
+    r"\blast night\b.*\b(prod|incident|outage|issue)\b",
+]
 
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
 RSS_FEEDS = {
@@ -803,19 +814,7 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
             + ", ".join(unsupported_tools[:4])
         )
 
-    incident_patterns = [
-        r"\bour production\b",
-        r"\bour team\b",
-        r"\bin my team\b",
-        r"\bwe cut\b",
-        r"\bwe had an incident\b",
-        r"\bproduction issue\b",
-        r"\bproduction outage\b",
-        r"\bdebugging\b.*\bproduction\b",
-        r"\bi\s+just\s+spent\s+\d+\s*(?:hours?|hrs?)\b",
-        r"\blast night\b.*\b(prod|incident|outage|issue)\b",
-    ]
-    if any(re.search(pat, cleaned, re.I) for pat in incident_patterns):
+    if any(re.search(pat, cleaned, re.I) for pat in INCIDENT_PATTERNS):
         issues.append("Avoid personal/work incident references; keep examples generic unless the topic explicitly includes a real case study.")
 
     if re.search(r"\bnext post\b|\bthird post\b|\bpost 2\b|\banother post\b", cleaned, re.I):
@@ -962,6 +961,18 @@ def _enforce_numbered_poll_options(text):
     if poll_idx + 1 >= len(lines):
         return text
     option_line = lines[poll_idx + 1].strip().rstrip("?")
+    symbol_options = []
+    for i in range(poll_idx + 1, min(len(lines), poll_idx + 9)):
+        ln = lines[i].strip()
+        if not ln or ln.startswith("#"):
+            break
+        m = re.match(r"^[❇️✳️•\-]\s*(.+)$", ln)
+        if m:
+            symbol_options.append((i, m.group(1).strip(" .")))
+    if len(symbol_options) >= 3:
+        for j, (idx, label) in enumerate(symbol_options[:5]):
+            lines[idx] = f"{j+1}\uFE0F\u20E3 {label}"
+        return "\n".join(lines).strip()
     if not option_line or option_line.startswith("#"):
         return text
 
@@ -976,6 +987,22 @@ def _enforce_numbered_poll_options(text):
     parts = parts[:5]
     numbered = [f"{i+1}\uFE0F\u20E3 {part}" for i, part in enumerate(parts)]
     lines[poll_idx + 1] = "  ".join(numbered)
+    return "\n".join(lines).strip()
+
+
+def _strip_work_incident_hook(text, topic_name=""):
+    if not text:
+        return text
+    if not any(re.search(pat, text, re.I) for pat in INCIDENT_PATTERNS):
+        return text
+    lines = text.splitlines()
+    if not lines:
+        return text
+    safe_hook = (
+        f"Most teams blame the model first, but in {topic_name or 'LLM systems'} "
+        "the bigger failures usually come from architecture decisions. 🧠"
+    )
+    lines[0] = safe_hook
     return "\n".join(lines).strip()
 
 
@@ -1056,6 +1083,7 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = finalized.replace("hashtag#", "#").strip()
     if not finalized:
         return finalized
+    finalized = _strip_work_incident_hook(finalized, topic.get("name", ""))
     finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _align_poll_with_structure(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _enforce_numbered_poll_options(finalized)
