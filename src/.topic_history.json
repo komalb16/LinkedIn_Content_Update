@@ -299,5 +299,30 @@
     "category": "Engineering",
     "mode": "topic",
     "status": "success"
+  },
+  {
+    "timestamp": "2026-03-26T22:09:59.019309",
+    "topic_id": "ai-search-discovery",
+    "topic_name": "AI Search and Discovery",
+    "category": "AI Strategy",
+    "mode": "topic",
+    "status": "dry_run",
+    "quality_score": 100,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 100,
+        "raw_score": 100,
+        "similarity": 0.0,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 96,
+        "raw_score": 96,
+        "similarity": 0.0,
+        "penalty": 0
+      }
+    ]
   }
 ]
