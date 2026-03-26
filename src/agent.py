@@ -1188,6 +1188,14 @@ Write a LinkedIn post that:
                 "quality_notes": score_card["issues"],
             }, f, indent=2)
         write_github_summary(topic["name"], mode, full_post_text, dry_run=True, score_card=score_card)
+        topic_mgr.save_run_history({
+            "timestamp":  datetime.now().isoformat(),
+            "topic_id":   topic["id"],
+            "topic_name": topic["name"],
+            "category":   topic.get("category", ""),
+            "mode":       mode,
+            "status":     "dry_run",
+        })
         log.info("DRY RUN complete. Post saved.")
         return
 

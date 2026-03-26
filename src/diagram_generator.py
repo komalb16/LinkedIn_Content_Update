@@ -2653,6 +2653,71 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
     svg += f'<text x="{W-18}" y="{H-10}" text-anchor="end" fill="{C[0]}" font-size="9" font-weight="800">AI (c) Komal Batra</text>'
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 
+def _style_modern_tech_cards(topic_id, topic_name, C, structure=None):
+    W, H = 920, 640
+    ink = "#E2E8F0"
+    bg_top = "#0B1220"
+    bg_bot = "#111827"
+    subtitle = structure["subtitle"] if structure else "Practical comparison map"
+    sections = structure["sections"] if structure else [
+        {"id": 1, "label": "Option A", "desc": "Strong defaults and broad ecosystem"},
+        {"id": 2, "label": "Option B", "desc": "Flexible architecture and rich filtering"},
+        {"id": 3, "label": "Option C", "desc": "Low-friction fit for existing stack"},
+        {"id": 4, "label": "Option D", "desc": "Hybrid retrieval and enterprise features"},
+    ]
+    sections = sections[:6]
+
+    n = max(1, len(sections))
+    cols = 3 if n > 4 else 2
+    rows = math.ceil(n / cols)
+    pad_x = 28
+    top_y = 132
+    gap = 14
+    card_w = (W - pad_x * 2 - gap * (cols - 1)) // cols
+    card_h = (H - top_y - 56 - gap * (rows - 1)) // max(rows, 1)
+
+    svg = ""
+    svg += (
+        f'<defs>'
+        f'<linearGradient id="mtc-bg" x1="0" y1="0" x2="0" y2="1">'
+        f'<stop offset="0%" stop-color="{bg_top}"/>'
+        f'<stop offset="100%" stop-color="{bg_bot}"/>'
+        f'</linearGradient>'
+        f'</defs>'
+    )
+    svg += f'<rect width="{W}" height="{H}" fill="url(#mtc-bg)"/>'
+    svg += f'<line x1="0" y1="96" x2="{W}" y2="96" stroke="{rgba("#60A5FA",0.22)}" stroke-width="1.5"/>'
+    svg += f'<text x="26" y="40" fill="#93C5FD" font-size="14" font-weight="700" letter-spacing="1.2">DIAGRAM PREVIEW</text>'
+    svg += f'<text x="{W//2}" y="68" text-anchor="middle" fill="#F8FAFC" font-size="38" font-weight="900">{xe(clamp(topic_name, 34))}</text>'
+    svg += f'<text x="{W//2}" y="96" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600">{xe(clamp(subtitle, 86))}</text>'
+
+    for i, sec in enumerate(sections):
+        r = i // cols
+        c = i % cols
+        x = pad_x + c * (card_w + gap)
+        y = top_y + r * (card_h + gap)
+        col = C[i % len(C)]
+        delay = f"animation-delay:{i*0.07:.2f}s"
+
+        svg += f'<rect x="{x}" y="{y}" width="{card_w}" height="{card_h}" rx="12" fill="{rgba("#0F172A",0.72)}" stroke="{lighten(col,0.30)}" stroke-width="1.5" class="fi" style="{delay}"/>'
+        svg += f'<rect x="{x}" y="{y}" width="{card_w}" height="6" rx="3" fill="{col}"/>'
+        svg += f'<circle cx="{x+18}" cy="{y+22}" r="11" fill="{lighten(col,0.82)}" stroke="{col}" stroke-width="1.5"/>'
+        svg += f'<text x="{x+18}" y="{y+26}" text-anchor="middle" fill="{darken(col,0.20)}" font-size="10" font-weight="900">{i+1}</text>'
+        svg += f'<text x="{x+36}" y="{y+26}" fill="{ink}" font-size="15" font-weight="900">{xe(clamp(sec.get("label","Option"), 22))}</text>'
+
+        lines = wrap_lines(sec.get("desc", ""), 26)
+        for li, ln in enumerate(lines[:4]):
+            svg += f'<text x="{x+16}" y="{y+56+li*16}" fill="#CBD5E1" font-size="12" font-weight="600">{xe(clamp(ln, 42))}</text>'
+
+        # subtle badge
+        svg += f'<rect x="{x+card_w-96}" y="{y+14}" width="82" height="20" rx="10" fill="{rgba(col,0.20)}" stroke="{rgba(col,0.50)}" stroke-width="1"/>'
+        svg += f'<text x="{x+card_w-55}" y="{y+28}" text-anchor="middle" fill="{lighten(col,0.68)}" font-size="9" font-weight="800">PROFILE</text>'
+
+    svg += f'<rect x="0" y="{H-28}" width="{W}" height="28" fill="{rgba("#0F172A",0.9)}"/>'
+    svg += f'<text x="18" y="{H-10}" fill="#64748B" font-size="9">{datetime.now().strftime("%B %Y")}</text>'
+    svg += f'<text x="{W-18}" y="{H-10}" text-anchor="end" fill="#93C5FD" font-size="9" font-weight="800">AI (c) Komal Batra</text>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
+
 
 STYLES = [
     _style_vertical_flow,   # 0 — numbered pipeline steps
@@ -2677,6 +2742,7 @@ STYLES = [
     _style_three_panel,         # 19
     _style_notebook,            # 20 - notebook style
     _style_lane_map_infographic, # 21 - editorial lane-map infographic
+    _style_modern_tech_cards,   # 22 - modern comparison/stack cards
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -2759,8 +2825,8 @@ DIAGRAM_TYPE_STYLE_MAP = {
 }
 
 STYLE_FAMILIES_BY_TYPE = {
-    "comparison table": [5, 16, 19],
-    "comparison": [5, 16, 19],
+    "comparison table": [22, 16, 5],
+    "comparison": [22, 16, 5],
     "decision tree": [9, 0, 16],
     "flow chart": [0, 21, 16],
     "lane map": [21, 0, 16],
