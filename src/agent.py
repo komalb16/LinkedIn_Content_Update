@@ -363,6 +363,33 @@ def call_ai(prompt, system):
     return resp.json()["choices"][0]["message"]["content"].strip()
 
 
+def _fallback_visual_block(structure=None):
+    if structure and structure.get("sections"):
+        labels = [s.get("label", f"Step {idx+1}") for idx, s in enumerate(structure.get("sections", [])[:5])]
+        return "\n".join(labels)
+    if structure and structure.get("rows"):
+        labels = [r.get("label", f"Row {idx+1}") for idx, r in enumerate(structure.get("rows", [])[:5])]
+        return "\n".join(labels)
+    return "Problem -> Constraints -> Choice -> Trade-off -> Decision"
+
+
+def _fallback_topic_post(topic, structure=None):
+    title = topic.get("name", "Engineering Topic")
+    angle = topic.get("angle", "practical production insights")
+    visual = _fallback_visual_block(structure)
+    return (
+        f"{title} is less about theory and more about trade-offs in production. ⚙️\n\n"
+        f"My current lens: {angle}. I optimize for clarity first, then scale, then cost. 🚀\n\n"
+        "The fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. "
+        "That keeps systems easier to debug, cheaper to run, and safer to evolve. 🧠\n\n"
+        "```text\n"
+        f"{visual}\n"
+        "```\n\n"
+        "💬 If you had to simplify one part of your current architecture this week, what would you change first?\n\n"
+        "#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
+    )
+
+
 # ─── RSS FETCH ────────────────────────────────────────────────────────────────
 
 def fetch_rss_news(category="tech", max_items=5):
@@ -429,7 +456,11 @@ Pick the most technically interesting story. Write a LinkedIn post that:
 - Includes one ``` fenced visual block that supports the argument
 - Takes a real position — not "time will tell"
 """
-    return _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
+    try:
+        return _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
+    except Exception as e:
+        log.warning(f"News generation failed ({news_type}), falling back to topic mode: {e}")
+        return None
 
 def generate_story_post(theme=None):
     theme = theme or random.choice(STORY_THEMES)
@@ -450,7 +481,21 @@ Requirements:
 - Do not invent unsupported metrics, salary ranges, or percentages.
 - Include one ``` fenced visual block that reflects the 3 actions.
 """
-    post_text = _cleanup_generated_post(call_ai(prompt, STORY_SYSTEM))
+    try:
+        post_text = _cleanup_generated_post(call_ai(prompt, STORY_SYSTEM))
+    except Exception as e:
+        log.warning(f"Story generation failed, using fallback story copy: {e}")
+        post_text = (
+            "AI is changing discoverability faster than most people realize. 🔎\n\n"
+            "One moment made this obvious to me: assistants now surface people and companies from clear public signals, not just ads. "
+            "That shifts the game toward proof, clarity, and consistency. 📈\n\n"
+            "```text\n"
+            "Moment -> Insight -> Action 1 -> Action 2 -> Action 3\n"
+            "```\n\n"
+            "Three actions that work right away: tighten your headline, publish concrete outcomes, and keep a steady posting rhythm. 🛠️\n\n"
+            "💬 What signal do you want AI tools to associate with your profile?\n\n"
+            "#AIAgents #FutureOfWork #PersonalBranding #CareerGrowth #ArtificialIntelligence"
+        )
     story_topic = {
         "id": f"story-{theme['id']}",
         "name": theme["name"],
@@ -587,7 +632,11 @@ Requirements:
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
 """
-    post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
+    try:
+        post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
+    except Exception as e:
+        log.warning(f"Topic generation failed for {topic.get('id', 'unknown')}, using fallback copy: {e}")
+        return _fallback_topic_post(topic, structure=structure)
     issues = _post_quality_issues(topic, post_text, structure, diagram_type)
     if issues:
         revision_prompt = (
@@ -596,7 +645,10 @@ Requirements:
             + "\n- ".join(issues[:5])
             + "\nRewrite the post from scratch and fix every issue above."
         )
-        post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
+        try:
+            post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
+        except Exception as e:
+            log.warning(f"Topic revision failed for {topic.get('id', 'unknown')}, keeping first draft: {e}")
     return _cleanup_generated_post(post_text)
 
 
@@ -1072,15 +1124,23 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         "i'm", "i am", "here's", "the fact that", "this led me", "nobody talks",
         "our ", "today", "in today's", "let's", "three years ago",
     )
+    in_fence = False
     for raw_line in (post_text or "").splitlines():
         line = raw_line.strip()
-        if not line or line.startswith("```") or line.startswith("#"):
+        if line.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if not line or line.startswith("#"):
             continue
         line = re.sub(r"^[\"'`•\-\s]+", "", line)
         line = re.sub(r"\s+", " ", line)
         if line.lower().startswith(weak_openers):
             continue
         if '"' in raw_line or "'" in raw_line:
+            continue
+        if any(tok in line for tok in ("->", "-->", "|>", "[", "]", "{", "}")):
             continue
         if len(line) >= 12:
             return line[:54]
