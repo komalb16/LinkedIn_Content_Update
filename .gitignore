@@ -9,6 +9,10 @@ diagrams/
 src/*.log
 
 output_post_*.txt
+src/output_post_*.txt
+src/preview_payload_*.json
 
 .topic_history.json
 src/.topic_history.json
+src/.post_memory.json
+src/.diagram_memory.json

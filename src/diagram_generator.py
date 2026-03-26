@@ -21,6 +21,7 @@ import hashlib
 import random
 import re
 import io
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -43,6 +44,33 @@ except Exception:
 
 OUTPUT_DIR = "diagrams"
 _MOTION_PHASE = None
+DIAGRAM_MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".diagram_memory.json")
+
+
+def _load_diagram_memory():
+    if not os.path.exists(DIAGRAM_MEMORY_FILE):
+        return []
+    try:
+        with open(DIAGRAM_MEMORY_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, list):
+            return data[-400:]
+    except Exception:
+        pass
+    return []
+
+
+def _save_diagram_memory(entries):
+    try:
+        with open(DIAGRAM_MEMORY_FILE, "w", encoding="utf-8") as f:
+            json.dump((entries or [])[-400:], f, indent=2)
+    except Exception as e:
+        log.warning(f"Could not save diagram memory: {e}")
+
+
+def _diagram_signature(svg):
+    body = re.sub(r"\s+", " ", (svg or "").strip())
+    return hashlib.md5(body.encode("utf-8")).hexdigest() if body else ""
 
 # ── Colour palettes ────────────────────────────────────────────────────────────
 PALETTES = {
@@ -3169,6 +3197,9 @@ class DiagramGenerator:
             candidate_styles = _pick_candidate_styles(
                 topic_id, topic_name or topic_id, diagram_type, structure=structure, candidate_count=candidate_count
             )
+            memory = _load_diagram_memory()
+            topic_memory = [e for e in memory if e.get("topic_id") == topic_id][-40:]
+            recent_topic_signatures = {e.get("signature", "") for e in topic_memory if e.get("signature")}
             scored_candidates = []
             for style_idx in candidate_styles:
                 svg_candidate = make_diagram(
@@ -3177,13 +3208,20 @@ class DiagramGenerator:
                 candidate_score = _score_svg_candidate(
                     svg_candidate, topic_name or topic_id, diagram_type=diagram_type, structure=structure
                 )
-                scored_candidates.append((candidate_score, style_idx, svg_candidate))
+                signature = _diagram_signature(svg_candidate)
+                duplicate = signature in recent_topic_signatures if signature else False
+                scored_candidates.append((candidate_score, style_idx, svg_candidate, signature, duplicate))
             scored_candidates.sort(key=lambda x: x[0], reverse=True)
 
-            best_score, best_style, best_svg = scored_candidates[0]
+            non_duplicate = [c for c in scored_candidates if not c[4]]
+            chosen = non_duplicate[0] if non_duplicate else scored_candidates[0]
+            best_score, best_style, best_svg, best_signature, _ = chosen
             log.info(
                 "Diagram candidates ranked: "
-                + ", ".join(f"style {style}={score}" for score, style, _ in scored_candidates)
+                + ", ".join(
+                    f"style {style}={score}" + ("(dup)" if dup else "")
+                    for score, style, _, _, dup in scored_candidates
+                )
                 + f" -> selected style {best_style}"
             )
 
@@ -3204,11 +3242,27 @@ class DiagramGenerator:
                 )
                 size_kb = os.path.getsize(gif_name) / 1024
                 log.info(f"Generated animated GIF: {gif_name} ({round(size_kb, 1)} KB)")
+                memory.append({
+                    "timestamp": datetime.now().isoformat(),
+                    "topic_id": topic_id,
+                    "style": best_style,
+                    "signature": best_signature or _diagram_signature(best_svg),
+                    "duplicate_avoided": bool(non_duplicate),
+                })
+                _save_diagram_memory(memory)
                 return gif_name
 
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(best_svg)
             size_kb = os.path.getsize(filename) / 1024
             log.info(f"Generated diagram: {filename} ({round(size_kb, 1)} KB, score={best_score})")
+            memory.append({
+                "timestamp": datetime.now().isoformat(),
+                "topic_id": topic_id,
+                "style": best_style,
+                "signature": best_signature or _diagram_signature(best_svg),
+                "duplicate_avoided": bool(non_duplicate),
+            })
+            _save_diagram_memory(memory)
         
         return filename

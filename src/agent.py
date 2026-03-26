@@ -5,6 +5,7 @@ import json
 import random
 import argparse
 import copy
+import hashlib
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -1129,6 +1130,14 @@ def _normalize_similarity_text(text):
     return tokens
 
 
+def _content_hash(text):
+    tokens = _normalize_similarity_text(text)
+    if not tokens:
+        return ""
+    blob = " ".join(tokens[:500])
+    return hashlib.md5(blob.encode("utf-8")).hexdigest()
+
+
 def _similarity_score(a, b):
     a_tokens = _normalize_similarity_text(a)
     b_tokens = _normalize_similarity_text(b)
@@ -1298,11 +1307,15 @@ def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
     }
 
 
-def _pick_best_candidate(topic, candidates, structure, diagram_type, recent_posts):
+def _pick_best_candidate(topic, candidates, structure, diagram_type, recent_posts, recent_hashes=None):
     ranked = []
+    recent_hashes = set(recent_hashes or [])
     for idx, text in enumerate(candidates):
         card = _score_post_candidate(topic, text, structure, diagram_type)
         penalty, sim = _recent_similarity_penalty(text, recent_posts)
+        duplicate_hash = _content_hash(text)
+        if duplicate_hash and duplicate_hash in recent_hashes:
+            penalty = max(penalty, 40)
         adjusted = max(0, card["score"] - penalty)
         ranked.append({
             "index": idx,
@@ -1312,6 +1325,7 @@ def _pick_best_candidate(topic, candidates, structure, diagram_type, recent_post
             "sim": sim,
             "penalty": penalty,
             "issues": card["issues"],
+            "hash": duplicate_hash,
         })
     ranked.sort(key=lambda r: (r["score"], r["raw_score"]), reverse=True)
     best = ranked[0]
@@ -1583,6 +1597,7 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
     diagram_gen = DiagramGenerator()
     recent_post_entries = _load_post_memory()
     recent_posts = [e.get("text", "") for e in recent_post_entries if e.get("text")]
+    recent_hashes = {_content_hash(t) for t in recent_posts if t}
     try:
         candidate_count = int(os.environ.get("TEXT_CANDIDATES", "3"))
     except Exception:
@@ -1707,7 +1722,9 @@ Write a LinkedIn post that:
             st_text = _finalize_post_text(st_topic, st_text, structure=st_structure, diagram_type="Modern Cards")
             story_candidates.append(st_text)
             story_meta.append((st_topic, st_structure))
-        pick = _pick_best_candidate(story_meta[0][0], story_candidates, story_meta[0][1], "Modern Cards", recent_posts)
+        pick = _pick_best_candidate(
+            story_meta[0][0], story_candidates, story_meta[0][1], "Modern Cards", recent_posts, recent_hashes=recent_hashes
+        )
         topic, structure = story_meta[pick["index"]]
         post_text = story_candidates[pick["index"]]
 
@@ -1728,7 +1745,9 @@ Write a LinkedIn post that:
         for _ in range(candidate_count):
             draft = generate_topic_post(topic, structure, planned_diagram_type)
             topic_candidates.append(_finalize_post_text(topic, draft, structure=structure, diagram_type=planned_diagram_type))
-        pick = _pick_best_candidate(topic, topic_candidates, structure, planned_diagram_type, recent_posts)
+        pick = _pick_best_candidate(
+            topic, topic_candidates, structure, planned_diagram_type, recent_posts, recent_hashes=recent_hashes
+        )
         post_text = topic_candidates[pick["index"]]
 
     # ── FALLBACK TOPIC for news posts ─────────────────────────────────────────
@@ -1754,7 +1773,9 @@ Write a LinkedIn post that:
             else:
                 regen_text = generate_topic_post(topic, regen_structure, regen_diagram_type)
             regen_candidates.append(_finalize_post_text(topic, regen_text, structure=regen_structure, diagram_type=regen_diagram_type))
-        regen_pick = _pick_best_candidate(topic, regen_candidates, regen_structure, regen_diagram_type, recent_posts)
+        regen_pick = _pick_best_candidate(
+            topic, regen_candidates, regen_structure, regen_diagram_type, recent_posts, recent_hashes=recent_hashes
+        )
         post_text = regen_candidates[regen_pick["index"]]
         score_card = _score_post_candidate(topic, post_text, regen_structure, regen_diagram_type)
 
