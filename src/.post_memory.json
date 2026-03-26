@@ -22,5 +22,11 @@
     "topic_id": "ai-search-discovery",
     "topic_name": "AI Search and Discovery",
     "text": "\ud83d\udccc AI Search and Discovery\n\nAI search is not about gaming the system with keyword stuffing, it's about clarity, structure, and consistent evidence \ud83d\udcca. This is a fundamentally different approach from classic SEO, and it's what AI assistants use to discover businesses and professionals from public web signals.\n\nAs an engineer, I've tried various approaches to optimize for AI search, and I've found that it rewards those who prioritize transparency and authenticity \ud83c\udf1f.\n\n```\nIntent -> Signals -> Evidence -> Fit -> Recommendation\n```\n\nSignals such as profile clarity, expertise cues, and consistency are crucial in helping AI assistants understand what you do and what you're good at \ud83d\udcc8. Evidence, including posts and relevant examples, also plays a significant role in establishing credibility and trust \ud83d\udcca.\n\nSo what does this mean for personal branding and B2B discovery? It means that professionals need to focus on showcasing their expertise and showcasing consistent evidence of their work, rather than trying to manipulate the system with keywords \ud83d\udeab.\n\n\ud83d\udcac Which of the following is most important for AI search:\nIntent \ud83e\udd14\nSignals \ud83d\udcfb\nEvidence \ud83d\udcca\nFit \ud83d\udcc8\nRecommendation \ud83d\udce2"
+  },
+  {
+    "timestamp": "2026-03-26T22:38:17.244646",
+    "topic_id": "agentic-ai-decision-tree",
+    "topic_name": "Agentic AI Decision Tree",
+    "text": "\ud83d\udccc Agentic AI Decision Tree\n\nAgentic AI Decision Tree is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: The hard part is not building agents. It is deciding when you do not need them.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n```text\nTask Shape\nNeed Retrieval\nNeed Tools\nComplexity\nDecision\n```\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
   }
 ]
