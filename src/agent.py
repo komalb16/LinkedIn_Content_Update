@@ -4,6 +4,7 @@ import re
 import json
 import random
 import argparse
+import copy
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -874,6 +875,66 @@ def _visual_coherence_issues(topic, diagram_type, structure=None):
         issues.append("Structured notebook-style diagrams need a matching non-generic diagram type.")
     return issues
 
+def _diagram_labels_from_structure(structure):
+    labels = []
+    if not isinstance(structure, dict):
+        return labels
+    for sec in structure.get("sections", []) or []:
+        labels.append(str(sec.get("label", "")))
+        labels.append(str(sec.get("desc", "")))
+    for row in structure.get("rows", []) or []:
+        labels.append(str(row.get("label", "")))
+        labels.append(str(row.get("text", "")))
+    return [x for x in labels if x.strip()]
+
+
+def _diagram_alignment_score(diagram_path, structure):
+    if not diagram_path.lower().endswith(".svg"):
+        return 1.0
+    if not structure:
+        return 1.0
+    try:
+        with open(diagram_path, encoding="utf-8") as f:
+            svg_text = f.read().lower()
+    except Exception:
+        return 0.0
+
+    labels = _diagram_labels_from_structure(structure)
+    if not labels:
+        return 1.0
+
+    covered = 0
+    total = 0
+    for label in labels:
+        words = [w for w in re.split(r"[^a-z0-9]+", label.lower()) if len(w) > 2]
+        if not words:
+            continue
+        total += 1
+        if any(w in svg_text for w in words):
+            covered += 1
+    if total == 0:
+        return 1.0
+    return covered / total
+
+
+def _fallback_style_for_diagram(diagram_type, structure=None):
+    if structure and structure.get("rows"):
+        return 20
+    mapping = {
+        "Decision Tree": 21,
+        "Comparison Table": 22,
+        "Flow Chart": 21,
+        "Lane Map": 21,
+        "Signal vs Noise": 17,
+        "7 Layers": 16,
+        "Observability Map": 20,
+        "Winding Roadmap": 16,
+        "Architecture Diagram": 16,
+        "Architecture": 16,
+        "Modern Cards": 22,
+    }
+    return mapping.get(diagram_type, 16)
+
 
 def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
     text = _cleanup_generated_post(post_text or "")
@@ -1401,6 +1462,31 @@ Write a LinkedIn post that:
     diagram_path = diagram_gen.save_svg(
         None, topic["id"], diagram_title, diagram_type, structure=diagram_structure
     )
+    alignment = _diagram_alignment_score(diagram_path, diagram_structure)
+    log.info(f"Diagram/Text alignment score: {alignment:.2f}")
+
+    if alignment < 0.45 and diagram_structure:
+        fallback_style = _fallback_style_for_diagram(diagram_type, diagram_structure)
+        forced_structure = copy.deepcopy(diagram_structure)
+        forced_structure["style"] = fallback_style
+        log.warning(
+            f"Low diagram/text alignment ({alignment:.2f}). Regenerating diagram with style {fallback_style}."
+        )
+        diagram_path = diagram_gen.save_svg(
+            None, topic["id"], diagram_title, diagram_type, structure=forced_structure
+        )
+        alignment = _diagram_alignment_score(diagram_path, forced_structure)
+        diagram_structure = forced_structure
+        log.info(f"Diagram/Text alignment score after retry: {alignment:.2f}")
+
+    strict_match = os.environ.get("DIAGRAM_STRICT_MATCH", "1").strip().lower() not in {"0", "false", "no"}
+    if alignment < 0.35:
+        msg = f"Diagram/Post semantic mismatch remains high (alignment={alignment:.2f})."
+        if strict_match and not dry_run:
+            log.error(msg + " Blocking publish.")
+            sys.exit(1)
+        log.warning(msg + " Continuing due to dry-run or non-strict mode.")
+
     log.info("Diagram saved: " + diagram_path)
 
     if dry_run:
