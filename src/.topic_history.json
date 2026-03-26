@@ -299,5 +299,30 @@
     "category": "Engineering",
     "mode": "topic",
     "status": "success"
+  },
+  {
+    "timestamp": "2026-03-26T23:33:31.120912",
+    "topic_id": "docker-cheatsheet",
+    "topic_name": "Docker Mastery",
+    "category": "Cloud",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 88,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 76,
+        "raw_score": 88,
+        "similarity": 0.6567,
+        "penalty": 12
+      },
+      {
+        "variant_index": 2,
+        "score": 76,
+        "raw_score": 88,
+        "similarity": 0.6567,
+        "penalty": 12
+      }
+    ]
   }
 ]

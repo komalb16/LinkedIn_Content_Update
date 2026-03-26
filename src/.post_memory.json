@@ -40,5 +40,11 @@
     "topic_id": "finops-for-ai",
     "topic_name": "FinOps for AI Systems",
     "text": "\ud83d\udccc FinOps for AI Systems\n\n80% of AI projects exceed their budget \ud83d\ude80.\nThis happens because AI cost optimization is often treated as a finance problem, not a product architecture issue \ud83e\udd14.\n\nMyth: AI cost optimization is just about monitoring expenses \ud83d\udcca.\nReality: it's about designing the right architecture from the start \ud83c\udfd7\ufe0f.\n\n```\nRoute -> Cache -> Batch -> Fallback -> Govern\n```\nTo control AI costs without killing product quality, consider routing requests to fit-for-purpose models, caching responses, batching offline workloads, falling back to cheaper options, and governing budgets \ud83d\udcc8.\n\n\ud83d\udcac What's the most important factor in controlling AI costs for you: routing to efficient models, caching and reuse, batching for cheaper throughput, falling back to simpler options, or governing with strict budgets?\n#AICostOptimization #ProductArchitecture #AIEngineering #CostControl #MachineLearning"
+  },
+  {
+    "timestamp": "2026-03-26T23:33:31.120614",
+    "topic_id": "docker-cheatsheet",
+    "topic_name": "Docker Mastery",
+    "text": "\ud83d\udccc Docker Mastery\n\nDocker Mastery is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: The 20% of Docker knowledge that covers 80% of daily use. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n```text\nDocker Client\nDocker Host\nDocker Hub\n```\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
   }
 ]
