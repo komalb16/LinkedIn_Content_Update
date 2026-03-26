@@ -2654,9 +2654,8 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
         svg += f'<rect x="{lane_x}" y="{y}" width="{lane_w}" height="3" fill="{col}"/>'
         left_box_h = max(50, lane_h - 20)
         svg += f'<rect x="{lane_x+12}" y="{y+10}" width="162" height="{left_box_h}" rx="6" fill="{left_fill}" stroke="{col}" stroke-width="1.3"/>'
-        svg += f'<text x="{lane_x+28}" y="{y+42}" fill="{darken(col,0.18)}" font-size="14" font-weight="800">LANE {i+1}</text>'
         label_lines = fit_lines(sec.get("label", ""), 12, 2)
-        label_y = y + 62
+        label_y = y + 48
         label_fs = 23 if len(label_lines) == 1 else 18
         for li, ln in enumerate(label_lines):
             svg += f'<text x="{lane_x+28}" y="{label_y+li*20}" fill="{darken(col,0.25)}" font-size="{label_fs}" font-weight="900">{xe(ln)}</text>'
@@ -2959,11 +2958,19 @@ def _extract_scoring_keywords(topic_name: str, diagram_type: str = "", structure
     if isinstance(structure, dict):
         raw.append(structure.get("subtitle", ""))
         for section in structure.get("sections", [])[:8]:
-            raw.append(section.get("label", ""))
-            raw.append(section.get("desc", ""))
+            if isinstance(section, dict):
+                raw.append(section.get("label", ""))
+                raw.append(section.get("desc", ""))
+            else:
+                raw.append(str(section))
         for row in structure.get("rows", [])[:8]:
-            raw.append(row.get("label", ""))
-            raw.append(row.get("text", ""))
+            if isinstance(row, dict):
+                raw.append(row.get("label", ""))
+                raw.append(row.get("text", ""))
+            elif isinstance(row, (tuple, list)):
+                raw.extend(str(x) for x in row[:2])
+            else:
+                raw.append(str(row))
     tokens = []
     for text in raw:
         for tok in re.split(r"[^a-z0-9]+", (text or "").lower()):

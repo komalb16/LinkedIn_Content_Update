@@ -1166,7 +1166,10 @@ def _build_comparison_structure_from_post(post_text, title, fallback_entities=No
             if not left or not right:
                 continue
             label = "Positioning" if not rows else f"Point {len(rows) + 1}"
-            rows.append((label, [left[:22], right[:22]]))
+            rows.append({
+                "label": label,
+                "text": f"{left[:22]} -> {right[:22]}",
+            })
             if len(rows) >= 4:
                 break
         if len(rows) >= 4:
@@ -1174,10 +1177,10 @@ def _build_comparison_structure_from_post(post_text, title, fallback_entities=No
 
     if not rows:
         rows = [
-            ("Positioning", ["Established platform", "Emerging alternative"]),
-            ("AI Approach", ["Add-on automation", "AI-native workflow"]),
-            ("Best Fit", ["Enterprise breadth", "Developer speed"]),
-            ("Trade-off", ["More control, more weight", "Simpler, less mature"]),
+            {"label": "Positioning", "text": "Established platform -> Emerging alternative"},
+            {"label": "AI Approach", "text": "Add-on automation -> AI-native workflow"},
+            {"label": "Best Fit", "text": "Enterprise breadth -> Developer speed"},
+            {"label": "Trade-off", "text": "More control, more weight -> Simpler, less mature"},
         ]
 
     return {
@@ -1235,17 +1238,24 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
 # ─── POST MODE ────────────────────────────────────────────────────────────────
 
 def get_post_mode():
+    if os.environ.get("ENABLE_NEWS_MODES", "0").strip().lower() in {"1", "true", "yes"}:
+        rand = random.random()
+        if rand < 0.10:
+            return "story"
+        elif rand < 0.15:
+            return "ai_news"
+        elif rand < 0.18:
+            return "layoff_news"
+        elif rand < 0.22:
+            return "tools_news"
+        elif rand < 0.25:
+            return "tech_news"
+        else:
+            return "topic"
+
     rand = random.random()
-    if rand < 0.10:
+    if rand < 0.12:
         return "story"
-    elif rand < 0.15:
-        return "ai_news"
-    elif rand < 0.18:
-        return "layoff_news"
-    elif rand < 0.22:
-        return "tools_news"
-    elif rand < 0.25:
-        return "tech_news"
     else:
         return "topic"
 

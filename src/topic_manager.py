@@ -607,7 +607,7 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "agentic-ai-decision-tree": {
-        "style": 21, "subtitle": "When agents are the wrong answer",
+        "style": 0, "subtitle": "When agents are the wrong answer",
         "sections": [
             {"id":1,"label":"Task Shape",     "desc":"Structured task or open-ended reasoning?"},
             {"id":2,"label":"Need Retrieval", "desc":"If knowledge is enough, use RAG"},
