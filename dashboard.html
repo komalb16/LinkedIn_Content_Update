@@ -4270,6 +4270,9 @@ async function runNow(options = {}) {
       if (r.event === 'schedule') {
         // Hide cancelled scheduled runs (timeout kills, heartbeat cancels)
         if (r.conclusion === 'cancelled') return true;
+        const durMs = r.updated_at ? (new Date(r.updated_at) - new Date(r.created_at)) : 0;
+        // Cron heartbeat runs are typically very short and do not publish.
+        if (r.conclusion === 'success' && durMs > 0 && durMs < 20000) return true;
 
         // Hide scheduled runs that succeeded but never posted
         // A real post has its topic enriched from the "✅ Posted ·" step
