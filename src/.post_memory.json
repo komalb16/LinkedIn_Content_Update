@@ -28,5 +28,11 @@
     "topic_id": "agentic-ai-decision-tree",
     "topic_name": "Agentic AI Decision Tree",
     "text": "\ud83d\udccc Agentic AI Decision Tree\n\nAgentic AI Decision Tree is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: The hard part is not building agents. It is deciding when you do not need them.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n```text\nTask Shape\nNeed Retrieval\nNeed Tools\nComplexity\nDecision\n```\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
+  },
+  {
+    "timestamp": "2026-03-26T22:39:06.619395",
+    "topic_id": "ai-search-discovery",
+    "topic_name": "AI Search and Discovery",
+    "text": "\ud83d\udccc AI Search and Discovery\n\nAI Search and Discovery is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: AI search is not classic SEO. It rewards clarity, structure, and consistent evidence over keyword stuffing.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n```text\nIntent\nSignals\nEvidence\nFit\nRecommendation\n```\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
   }
 ]
