@@ -3220,8 +3220,13 @@ class DiagramGenerator:
                 candidate_score = _score_svg_candidate(
                     svg_candidate, topic_name or topic_id, diagram_type=diagram_type, structure=structure
                 )
-                if _normalize_diagram_type(diagram_type) == "modern cards" and style_idx in {16, 22}:
+                normalized_type = _normalize_diagram_type(diagram_type)
+                if normalized_type == "modern cards" and style_idx in {16, 22}:
                     candidate_score -= 20
+                if normalized_type == "flow chart" and style_idx in {16, 22, 5}:
+                    candidate_score -= 24
+                if normalized_type in {"architecture", "architecture diagram"} and style_idx in {16, 22}:
+                    candidate_score -= 12
                 if style_idx in recent_style_set:
                     candidate_score -= 18
                 signature = _diagram_signature(svg_candidate)
