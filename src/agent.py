@@ -13,6 +13,7 @@ from logger import get_logger
 import notifier
 
 log = get_logger("agent")
+POST_MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".post_memory.json")
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "llama-3.3-70b-versatile"
@@ -51,6 +52,11 @@ METRIC_PATTERN = re.compile(
     re.I,
 )
 EMOJI_PATTERN = re.compile(r"[\U0001F300-\U0001FAFF]")
+SIM_STOPWORDS = {
+    "the", "and", "for", "with", "this", "that", "from", "your", "have", "has",
+    "just", "into", "what", "when", "where", "which", "their", "about", "most",
+    "team", "teams", "works", "work", "used", "using", "build", "system", "ai",
+}
 
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
 RSS_FEEDS = {
@@ -424,8 +430,8 @@ Pick the most technically interesting story. Write a LinkedIn post that:
 """
     return _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
 
-def generate_story_post():
-    theme = random.choice(STORY_THEMES)
+def generate_story_post(theme=None):
+    theme = theme or random.choice(STORY_THEMES)
     hook = random.choice(HOOK_STYLES)
     tone = random.choice(TONE_VARIATIONS)
     length = random.choice(LENGTH_VARIATIONS)
@@ -789,6 +795,76 @@ def _finalize_post_text(topic, post_text):
     return finalized
 
 
+def _load_post_memory():
+    if os.path.exists(POST_MEMORY_FILE):
+        try:
+            with open(POST_MEMORY_FILE, encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                return data[-120:]
+        except Exception:
+            pass
+    return []
+
+
+def _save_post_memory(entries):
+    try:
+        with open(POST_MEMORY_FILE, "w", encoding="utf-8") as f:
+            json.dump((entries or [])[-120:], f, indent=2)
+    except Exception as e:
+        log.warning(f"Could not save post memory: {e}")
+
+
+def _remember_post(topic, text):
+    entries = _load_post_memory()
+    entries.append({
+        "timestamp": datetime.now().isoformat(),
+        "topic_id": topic.get("id", ""),
+        "topic_name": topic.get("name", ""),
+        "text": _cleanup_generated_post(text or "")[:2500],
+    })
+    _save_post_memory(entries)
+
+
+def _normalize_similarity_text(text):
+    lowered = re.sub(r"```[\s\S]*?```", " ", (text or "").lower())
+    lowered = re.sub(r"(?<!\w)#\w+", " ", lowered)
+    lowered = re.sub(r"[^a-z0-9\s]", " ", lowered)
+    tokens = [t for t in lowered.split() if len(t) > 2 and t not in SIM_STOPWORDS]
+    return tokens
+
+
+def _similarity_score(a, b):
+    a_tokens = _normalize_similarity_text(a)
+    b_tokens = _normalize_similarity_text(b)
+    if len(a_tokens) < 4 or len(b_tokens) < 4:
+        return 0.0
+    a_grams = {" ".join(a_tokens[i:i + 2]) for i in range(len(a_tokens) - 1)}
+    b_grams = {" ".join(b_tokens[i:i + 2]) for i in range(len(b_tokens) - 1)}
+    if not a_grams or not b_grams:
+        return 0.0
+    inter = len(a_grams & b_grams)
+    union = max(1, len(a_grams | b_grams))
+    return inter / union
+
+
+def _recent_similarity_penalty(text, recent_posts):
+    if not recent_posts:
+        return 0, 0.0
+    best = 0.0
+    for prev in recent_posts[-30:]:
+        score = _similarity_score(text, prev)
+        if score > best:
+            best = score
+    if best >= 0.78:
+        return 35, best
+    if best >= 0.70:
+        return 22, best
+    if best >= 0.62:
+        return 12, best
+    return 0, best
+
+
 def _visual_coherence_issues(topic, diagram_type, structure=None):
     topic_blob = _topic_text_blob(topic).lower()
     issues = []
@@ -853,6 +929,34 @@ def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
         "word_count": word_count,
         "hashtag_count": len(hashtags),
     }
+
+
+def _pick_best_candidate(topic, candidates, structure, diagram_type, recent_posts):
+    ranked = []
+    for idx, text in enumerate(candidates):
+        card = _score_post_candidate(topic, text, structure, diagram_type)
+        penalty, sim = _recent_similarity_penalty(text, recent_posts)
+        adjusted = max(0, card["score"] - penalty)
+        ranked.append({
+            "index": idx,
+            "text": text,
+            "score": adjusted,
+            "raw_score": card["score"],
+            "sim": sim,
+            "penalty": penalty,
+            "issues": card["issues"],
+        })
+    ranked.sort(key=lambda r: (r["score"], r["raw_score"]), reverse=True)
+    best = ranked[0]
+    log.info(
+        "Text candidates ranked: "
+        + ", ".join(
+            f"#{r['index']+1}={r['score']} (raw={r['raw_score']}, sim={r['sim']:.2f})"
+            for r in ranked
+        )
+        + f" -> selected #{best['index']+1}"
+    )
+    return best
 
 
 def _extract_visual_title(post_text, fallback_title):
@@ -1092,6 +1196,13 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
 
     topic_mgr   = TopicManager()
     diagram_gen = DiagramGenerator()
+    recent_post_entries = _load_post_memory()
+    recent_posts = [e.get("text", "") for e in recent_post_entries if e.get("text")]
+    try:
+        candidate_count = int(os.environ.get("TEXT_CANDIDATES", "3"))
+    except Exception:
+        candidate_count = 3
+    candidate_count = max(1, min(5, candidate_count))
 
     if not dry_run:
         from linkedin_poster import LinkedInPoster
@@ -1192,19 +1303,28 @@ Write a LinkedIn post that:
         if not post_text:
             mode = "topic"
     elif mode == "story":
-        topic, post_text = generate_story_post()
-        structure = {
-            "style": 22,
-            "subtitle": "Moment -> Insight -> Action",
-            "sections": [
-                {"id": 1, "label": "Moment", "desc": "The trigger event that changed perspective"},
-                {"id": 2, "label": "Insight", "desc": "What the moment reveals about AI discovery"},
-                {"id": 3, "label": "Action 1", "desc": "Immediate profile or workflow update"},
-                {"id": 4, "label": "Action 2", "desc": "Signal quality and clarity improvements"},
-                {"id": 5, "label": "Action 3", "desc": "Consistent content and positioning cadence"},
-            ],
-        }
-        post_text = _finalize_post_text(topic, post_text)
+        chosen_theme = random.choice(STORY_THEMES)
+        story_candidates = []
+        story_meta = []
+        for _ in range(candidate_count):
+            st_topic, st_text = generate_story_post(theme=chosen_theme)
+            st_structure = {
+                "style": 22,
+                "subtitle": "Moment -> Insight -> Action",
+                "sections": [
+                    {"id": 1, "label": "Moment", "desc": "The trigger event that changed perspective"},
+                    {"id": 2, "label": "Insight", "desc": "What the moment reveals about AI discovery"},
+                    {"id": 3, "label": "Action 1", "desc": "Immediate profile or workflow update"},
+                    {"id": 4, "label": "Action 2", "desc": "Signal quality and clarity improvements"},
+                    {"id": 5, "label": "Action 3", "desc": "Consistent content and positioning cadence"},
+                ],
+            }
+            st_text = _finalize_post_text(st_topic, st_text)
+            story_candidates.append(st_text)
+            story_meta.append((st_topic, st_structure))
+        pick = _pick_best_candidate(story_meta[0][0], story_candidates, story_meta[0][1], "Modern Cards", recent_posts)
+        topic, structure = story_meta[pick["index"]]
+        post_text = story_candidates[pick["index"]]
 
     # ── RESOLVE TOPIC ─────────────────────────────────────────────────────────
     if mode == "topic" or not post_text:
@@ -1219,8 +1339,12 @@ Write a LinkedIn post that:
         structure_items = structure.get("sections") or structure.get("rows") or []
         log.info(f"Structure: '{structure['subtitle']}' ({len(structure_items)} items)")
         log.info(f"Planned topic diagram type: {planned_diagram_type}")
-        post_text = generate_topic_post(topic, structure, planned_diagram_type)
-        post_text = _finalize_post_text(topic, post_text)
+        topic_candidates = []
+        for _ in range(candidate_count):
+            draft = generate_topic_post(topic, structure, planned_diagram_type)
+            topic_candidates.append(_finalize_post_text(topic, draft))
+        pick = _pick_best_candidate(topic, topic_candidates, structure, planned_diagram_type, recent_posts)
+        post_text = topic_candidates[pick["index"]]
 
     # ── FALLBACK TOPIC for news posts ─────────────────────────────────────────
     if not topic:
@@ -1232,14 +1356,21 @@ Write a LinkedIn post that:
     score_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
     score_structure = structure or topic_mgr.get_diagram_structure(topic)
     score_card = _score_post_candidate(topic, post_text, score_structure, score_diagram_type)
-    if mode == "topic" and score_card["score"] < 75:
+    if mode in {"topic", "story"} and score_card["score"] < 75:
         log.warning(
             f"Low post quality score ({score_card['score']}/100). Regenerating once with the same topic."
         )
         regen_structure = score_structure
         regen_diagram_type = score_diagram_type
-        post_text = generate_topic_post(topic, regen_structure, regen_diagram_type)
-        post_text = _finalize_post_text(topic, post_text)
+        regen_candidates = []
+        for _ in range(max(2, candidate_count)):
+            if mode == "story":
+                _, regen_text = generate_story_post()
+            else:
+                regen_text = generate_topic_post(topic, regen_structure, regen_diagram_type)
+            regen_candidates.append(_finalize_post_text(topic, regen_text))
+        regen_pick = _pick_best_candidate(topic, regen_candidates, regen_structure, regen_diagram_type, recent_posts)
+        post_text = regen_candidates[regen_pick["index"]]
         score_card = _score_post_candidate(topic, post_text, regen_structure, regen_diagram_type)
 
     log.info(
@@ -1296,6 +1427,7 @@ Write a LinkedIn post that:
                 "quality_notes": score_card["issues"],
             }, f, indent=2)
         write_github_summary(topic["name"], mode, full_post_text, dry_run=True, score_card=score_card)
+        _remember_post(topic, full_post_text)
         topic_mgr.save_run_history({
             "timestamp":  datetime.now().isoformat(),
             "topic_id":   topic["id"],
@@ -1327,6 +1459,7 @@ Write a LinkedIn post that:
         write_github_output("POSTED_DATE",  datetime.now().strftime("%Y-%m-%d"))
         write_github_output("POSTED_URL",   result.get("post_url", ""))
         write_github_summary(topic["name"], mode, full_post_text, dry_run=False, score_card=score_card)
+        _remember_post(topic, full_post_text)
         topic_mgr.save_run_history({
             "timestamp":  datetime.now().isoformat(),
             "topic_id":   topic["id"],
