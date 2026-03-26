@@ -926,12 +926,53 @@ def _upgrade_weak_poll_options(text, structure=None, diagram_type=""):
     return "\n".join([ln for ln in lines if ln is not None]).strip()
 
 
+def _enforce_numbered_poll_options(text):
+    lines = (text or "").splitlines()
+    if not lines:
+        return text
+
+    poll_idx = None
+    for i, ln in enumerate(lines):
+        low = ln.lower()
+        if "💬" in ln or "which approach" in low or "what's your top priority" in low or "what do you use" in low:
+            poll_idx = i
+    if poll_idx is None:
+        return text
+
+    # If we already have numbered/bulleted options, keep as-is.
+    for i in range(poll_idx + 1, min(len(lines), poll_idx + 8)):
+        if POLL_PREFIX_RE.match(lines[i].strip()):
+            return text
+        if lines[i].strip().startswith("#"):
+            break
+
+    if poll_idx + 1 >= len(lines):
+        return text
+    option_line = lines[poll_idx + 1].strip().rstrip("?")
+    if not option_line or option_line.startswith("#"):
+        return text
+
+    parts = []
+    for raw in option_line.split(","):
+        part = raw.strip(" .")
+        part = re.sub(r"^(?:or|and)\s+", "", part, flags=re.I)
+        if part:
+            parts.append(part)
+    if len(parts) < 3:
+        return text
+    parts = parts[:5]
+    numbered = [f"{i+1}\uFE0F\u20E3 {part}" for i, part in enumerate(parts)]
+    lines[poll_idx + 1] = "  ".join(numbered)
+    return "\n".join(lines).strip()
+
+
 def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _cleanup_generated_post(post_text or "")
     finalized = finalized.replace("hashtag#", "#").strip()
     if not finalized:
         return finalized
     finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
+    finalized = _enforce_numbered_poll_options(finalized)
     return finalized
 
 
