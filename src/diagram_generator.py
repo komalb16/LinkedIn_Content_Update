@@ -2819,6 +2819,8 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "notebook": 20,
     "lane map": 21,
     "lane infographic": 21,
+    "modern cards": 22,
+    "modern tech cards": 22,
     "decision tree": 9,
     "7 layers": 10,
     "signal vs noise": 17,
@@ -2836,6 +2838,7 @@ STYLE_FAMILIES_BY_TYPE = {
     "7 layers": [10, 2, 16],
     "architecture diagram": [7, 20, 16],
     "architecture": [7, 20, 16],
+    "modern cards": [22, 16, 21],
 }
 
 _SCORE_STOPWORDS = {

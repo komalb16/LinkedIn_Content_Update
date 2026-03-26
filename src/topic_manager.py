@@ -313,6 +313,66 @@ TOPICS = [
         "emoji": "🗂️",
     },
     {
+        "id": "ai-search-discovery",
+        "name": "AI Search and Discovery",
+        "category": "AI Strategy",
+        "prompt": "How AI assistants discover businesses and professionals from public web signals, and what this changes for personal branding and B2B discovery.",
+        "angle": "AI search is not classic SEO. It rewards clarity, structure, and consistent evidence over keyword stuffing.",
+        "diagram_subject": "Signal map: profile clarity, proof of work, consistency, and discoverability outcomes",
+        "diagram_type": "Modern Cards",
+        "emoji": "🔎",
+    },
+    {
+        "id": "agentic-workflows-enterprise",
+        "name": "Enterprise Agentic Workflows",
+        "category": "AI",
+        "prompt": "How enterprise teams design agentic workflows with approvals, audit logs, tool policies, and rollback paths.",
+        "angle": "The winning pattern is not autonomous magic. It is controlled delegation with safety rails.",
+        "diagram_subject": "Lane map of trigger, plan, tool execution, human approval, and audit trail",
+        "diagram_type": "Lane Map",
+        "emoji": "🏢",
+    },
+    {
+        "id": "ai-governance-playbook",
+        "name": "AI Governance Playbook",
+        "category": "AI Reliability",
+        "prompt": "A practical governance playbook for production AI: risk tiers, approvals, model inventory, and policy enforcement.",
+        "angle": "Governance should accelerate adoption by reducing ambiguity, not slow teams with vague compliance theater.",
+        "diagram_subject": "Governance layers: policy, controls, oversight, incident response, and reporting",
+        "diagram_type": "7 Layers",
+        "emoji": "📜",
+    },
+    {
+        "id": "rag-evaluation-framework",
+        "name": "RAG Evaluation Framework",
+        "category": "AI Reliability",
+        "prompt": "How to evaluate RAG systems beyond latency: groundedness, context precision, citation quality, and failure patterns.",
+        "angle": "If you only track speed, you will ship fast hallucinations.",
+        "diagram_subject": "Evaluation map from query quality to retrieval quality to answer quality",
+        "diagram_type": "Observability Map",
+        "emoji": "🧪",
+    },
+    {
+        "id": "platform-engineering-ai",
+        "name": "Platform Engineering for AI Teams",
+        "category": "Engineering",
+        "prompt": "What an internal AI platform should provide: templates, guardrails, eval pipelines, cost controls, and deployment paths.",
+        "angle": "Platform teams should make the safe path the easiest path for product teams.",
+        "diagram_subject": "Platform layers for AI product delivery: templates, runtime, governance, and observability",
+        "diagram_type": "Architecture Diagram",
+        "emoji": "🧱",
+    },
+    {
+        "id": "finops-for-ai",
+        "name": "FinOps for AI Systems",
+        "category": "AI Strategy",
+        "prompt": "How teams control AI cost without killing product quality: routing, caching, batching, and model tiering.",
+        "angle": "AI cost optimization is a product architecture problem, not just a finance dashboard problem.",
+        "diagram_subject": "Cost-control flow: request routing, caching, fallback models, and budget alerts",
+        "diagram_type": "Flow Chart",
+        "emoji": "💸",
+    },
+    {
         "id": "model-context-protocol",
         "name": "Model Context Protocol",
         "category": "AI Protocols",
@@ -646,6 +706,75 @@ DIAGRAM_STRUCTURES = {
             {"id":3,"label":"Servers",   "desc":"Connect -> Validate -> Execute -> Return -> Log"},
             {"id":4,"label":"Outcomes",  "desc":"Audit -> Observe -> Secure -> Reuse -> Scale"},
         ]
+    },
+    "ai-search-discovery": {
+        "style": 22, "subtitle": "How AI decides who to recommend",
+        "sections": [
+            {"id":1,"label":"Intent",      "desc":"What the user asks and how specific it is"},
+            {"id":2,"label":"Signals",     "desc":"Profile clarity, expertise cues, and consistency"},
+            {"id":3,"label":"Evidence",    "desc":"Posts, outcomes, and relevant examples"},
+            {"id":4,"label":"Fit",         "desc":"Domain match and trust indicators"},
+            {"id":5,"label":"Recommendation","desc":"Shown, ranked, or skipped"},
+        ]
+    },
+    "agentic-workflows-enterprise": {
+        "style": 21, "subtitle": "Controlled delegation in enterprise agent flows",
+        "sections": [
+            {"id":1,"label":"Trigger",     "desc":"Event -> Goal -> Constraints -> Priority"},
+            {"id":2,"label":"Plan",        "desc":"Decompose -> Route -> Select tools -> Simulate"},
+            {"id":3,"label":"Execute",     "desc":"Call tools -> Validate -> Retry -> Log"},
+            {"id":4,"label":"Approve",     "desc":"Human gate -> Policy check -> Release"},
+        ]
+    },
+    "ai-governance-playbook": {
+        "style": 10, "subtitle": "Governance layers that scale AI safely",
+        "sections": [
+            {"id":1,"label":"Risk Tiering", "desc":"Classify use cases by impact and exposure"},
+            {"id":2,"label":"Model Registry","desc":"Track versions, owners, and approvals"},
+            {"id":3,"label":"Policy Controls","desc":"Prompt, data, and tool-use constraints"},
+            {"id":4,"label":"Monitoring",    "desc":"Latency, quality, and incident telemetry"},
+            {"id":5,"label":"Auditability",  "desc":"Decision trace and evidence retention"},
+            {"id":6,"label":"Response",      "desc":"Escalation, rollback, and remediation"},
+            {"id":7,"label":"Reporting",     "desc":"Risk posture and executive visibility"},
+        ]
+    },
+    "rag-evaluation-framework": {
+        "style": 20, "subtitle": "How to measure RAG quality in production",
+        "rows": [
+            {"label":"1. Query Quality", "type":"chips", "chips":["Intent", "Ambiguity", "Coverage", "Difficulty"],
+             "chip_color":"#EEF2FF","chip_border":"#2563EB","chip_text":"#1E3A8A"},
+            {"label":"2. Retrieval Quality", "type":"columns", "columns":[
+                {"glyph":"P","title":"Precision","items":["Top-k relevance","Noise ratio","Citations"]},
+                {"glyph":"R","title":"Recall","items":["Miss rate","Coverage","Long-tail"]},
+                {"glyph":"C","title":"Context","items":["Token fit","Dupes","Freshness"]},
+            ]},
+            {"label":"3. Answer Quality", "type":"banner", "text":"Groundedness · Faithfulness · Completeness · Actionability",
+             "color":"#E0F2E9","border":"#059669","text_color":"#065F46"},
+        ],
+    },
+    "platform-engineering-ai": {
+        "style": 20, "subtitle": "What internal AI platforms should standardize",
+        "rows": [
+            {"label":"1. Developer Experience", "type":"chips", "chips":["Templates", "SDKs", "Playbooks", "Sandboxes"],
+             "chip_color":"#EEF2FF","chip_border":"#2563EB","chip_text":"#1E3A8A"},
+            {"label":"2. Delivery Path", "type":"columns", "columns":[
+                {"glyph":"B","title":"Build", "items":["Prompt assets","Eval cases","Policies"]},
+                {"glyph":"D","title":"Deploy", "items":["Canary", "Rollback", "Guardrails"]},
+                {"glyph":"O","title":"Operate", "items":["Costs", "Incidents", "SLOs"]},
+            ]},
+            {"label":"3. Controls", "type":"banner", "text":"Identity · Access · Data policy · Audit trails",
+             "color":"#E0F2E9","border":"#059669","text_color":"#065F46"},
+        ],
+    },
+    "finops-for-ai": {
+        "style": 0, "subtitle": "Cost control patterns for AI systems",
+        "sections": [
+            {"id":1,"label":"Route",      "desc":"Send each request to fit-for-purpose model tier"},
+            {"id":2,"label":"Cache",      "desc":"Reuse responses and embeddings where safe"},
+            {"id":3,"label":"Batch",      "desc":"Aggregate offline workloads for cheaper throughput"},
+            {"id":4,"label":"Fallback",   "desc":"Degrade gracefully before expensive retries"},
+            {"id":5,"label":"Govern",     "desc":"Budget alerts, quotas, and ownership"},
+        ],
     },
 }
 

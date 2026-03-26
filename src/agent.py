@@ -42,7 +42,14 @@ KNOWN_TOOL_NAMES = {
     "GitHub Copilot",
 }
 
-METRIC_PATTERN = re.compile(r"(<\s*\d+\s*(?:ms|s|sec|%))|(\b\d+\s*%)|(\b\d+\s*(?:ms|s|sec|tokens?)\b)", re.I)
+METRIC_PATTERN = re.compile(
+    r"(<\s*\d+\s*(?:ms|s|sec|%))"
+    r"|(\b\d+\s*%)"
+    r"|(\b\d+\s*(?:ms|s|sec|tokens?|minutes?|hours?|days?|weeks?|months?|years?)\b)"
+    r"|(\b\d+(?:\.\d+)?\s*(?:k|m|b)\+?\b)"
+    r"|(\$\s*\d+(?:\.\d+)?\s*(?:k|m|b)?\+?)",
+    re.I,
+)
 
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
 RSS_FEEDS = {
@@ -289,6 +296,38 @@ RULES:
 - Do NOT add copyright or signature
 """
 
+STORY_THEMES = [
+    {
+        "id": "ai-discovery-moment",
+        "name": "AI Discovery Moment",
+        "prompt": "A personal but practical realization about how AI tools discover businesses, professionals, and expertise from public signals.",
+        "angle": "Use one concrete moment, then extract 3 practical actions readers can apply to their own profile or workflow.",
+        "diagram_type": "Modern Cards",
+        "diagram_subject": "Moment -> Realization -> Actions -> Outcome",
+    },
+    {
+        "id": "career-leverage-shift",
+        "name": "Career Leverage Shift",
+        "prompt": "How AI changes leverage at work: small teams shipping more by automating repetitive workflows.",
+        "angle": "Ground it in practical examples and avoid fear language.",
+        "diagram_type": "Modern Cards",
+        "diagram_subject": "Old workflow vs AI workflow vs role shift",
+    },
+]
+
+STORY_SYSTEM = """\
+You are Komal Batra writing a personal story post for LinkedIn.
+
+RULES:
+- Start with a concrete moment (not a generic intro).
+- Keep it honest, practical, and specific.
+- Include exactly 3 actionable takeaways.
+- No fabricated metrics, salaries, or sweeping claims unless explicitly provided.
+- Include one ``` fenced visual block with 3 to 5 lines.
+- End with 💬 and one genuine question plus 4 to 7 hashtags.
+- Do NOT mention the current month or year.
+"""
+
 
 # ─── AI CALL ──────────────────────────────────────────────────────────────────
 
@@ -383,6 +422,37 @@ Pick the most technically interesting story. Write a LinkedIn post that:
 - Takes a real position — not "time will tell"
 """
     return _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
+
+def generate_story_post():
+    theme = random.choice(STORY_THEMES)
+    hook = random.choice(HOOK_STYLES)
+    tone = random.choice(TONE_VARIATIONS)
+    length = random.choice(LENGTH_VARIATIONS)
+
+    prompt = f"""Write a LinkedIn post in story format.
+Theme: {theme["prompt"]}
+Angle: {theme["angle"]}
+Hook style: {hook}
+Voice: {tone}
+Length target: {length}
+
+Requirements:
+- One clear moment -> one insight -> three practical actions.
+- Keep it to one topic only.
+- Do not invent unsupported metrics, salary ranges, or percentages.
+- Include one ``` fenced visual block that reflects the 3 actions.
+"""
+    post_text = _cleanup_generated_post(call_ai(prompt, STORY_SYSTEM))
+    story_topic = {
+        "id": f"story-{theme['id']}",
+        "name": theme["name"],
+        "category": "Story",
+        "prompt": theme["prompt"],
+        "angle": theme["angle"],
+        "diagram_subject": theme.get("diagram_subject", theme["name"]),
+        "diagram_type": theme.get("diagram_type", "Modern Cards"),
+    }
+    return story_topic, post_text
 
 
 def _build_post_template_instructions(diagram_type, structure=None):
@@ -646,6 +716,10 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
 
     if METRIC_PATTERN.search(cleaned) and not METRIC_PATTERN.search(topic_blob):
         issues.append("Remove unsupported numeric claims and metrics unless the topic explicitly provided them.")
+    if re.search(r"\bonly\s+\d+%|\b\d+(?:\.\d+)?\s*(?:million|billion)\b|\$\s*\d", cleaned, re.I) and not re.search(
+        r"\bonly\s+\d+%|\b\d+(?:\.\d+)?\s*(?:million|billion)\b|\$\s*\d", topic_blob, re.I
+    ):
+        issues.append("Remove unsupported hard stats (percentages, millions, salary figures) unless provided in the topic.")
 
     allowed_tools = _detect_named_tools(topic_blob)
     unsupported_tools = sorted(_detect_named_tools(cleaned) - allowed_tools)
@@ -890,7 +964,7 @@ def _infer_diagram_type_from_post(post_text, fallback_type):
 
 
 def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_structure):
-    if mode == "topic":
+    if mode in {"topic", "story"}:
         return topic["name"], fallback_type, fallback_structure
 
     diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
@@ -916,13 +990,15 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
 
 def get_post_mode():
     rand = random.random()
-    if rand < 0.05:
-        return "ai_news"
-    elif rand < 0.08:
-        return "layoff_news"
-    elif rand < 0.12:
-        return "tools_news"
+    if rand < 0.10:
+        return "story"
     elif rand < 0.15:
+        return "ai_news"
+    elif rand < 0.18:
+        return "layoff_news"
+    elif rand < 0.22:
+        return "tools_news"
+    elif rand < 0.25:
         return "tech_news"
     else:
         return "topic"
@@ -1097,6 +1173,20 @@ Write a LinkedIn post that:
         post_text = generate_news_post("tech")
         if not post_text:
             mode = "topic"
+    elif mode == "story":
+        topic, post_text = generate_story_post()
+        structure = {
+            "style": 22,
+            "subtitle": "Moment -> Insight -> Action",
+            "sections": [
+                {"id": 1, "label": "Moment", "desc": "The trigger event that changed perspective"},
+                {"id": 2, "label": "Insight", "desc": "What the moment reveals about AI discovery"},
+                {"id": 3, "label": "Action 1", "desc": "Immediate profile or workflow update"},
+                {"id": 4, "label": "Action 2", "desc": "Signal quality and clarity improvements"},
+                {"id": 5, "label": "Action 3", "desc": "Consistent content and positioning cadence"},
+            ],
+        }
+        post_text = _finalize_post_text(topic, post_text)
 
     # ── RESOLVE TOPIC ─────────────────────────────────────────────────────────
     if mode == "topic" or not post_text:
@@ -1254,7 +1344,7 @@ if __name__ == "__main__":
     parser.add_argument("--news", type=str, default=None,
                         help="Force news mode: ai_news, layoff_news, tools_news, tech_news")
     parser.add_argument("--mode", type=str, default=None,
-                        help="Force post mode: auto, topic, ai_news, layoff_news, tools_news, tech_news")
+                        help="Force post mode: auto, topic, story, ai_news, layoff_news, tools_news, tech_news")
     parser.add_argument("--list-topics", action="store_true")
     args = parser.parse_args()
     if args.list_topics:
