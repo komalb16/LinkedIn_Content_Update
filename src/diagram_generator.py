@@ -96,6 +96,23 @@ def wrap_lines(text, max_chars):
     return lines or [""]
 
 
+def fit_lines(text, max_chars, max_lines):
+    lines = [clamp(ln, max_chars) for ln in wrap_lines(str(text or ""), max_chars)]
+    if len(lines) <= max_lines:
+        return lines
+    lines = lines[:max_lines]
+    last = lines[-1]
+    if not last.endswith("..."):
+        if len(last) >= max_chars:
+            last = clamp(last, max_chars)
+        if len(last) >= 3:
+            last = clamp(last, max(3, max_chars - 1))
+        if not last.endswith("..."):
+            last = (last[: max(0, max_chars - 3)] + "...") if max_chars > 3 else "..."
+    lines[-1] = last
+    return lines
+
+
 def _animated_dot_path(path_d, dot_colors=("#2563EB", "#DC2626"), dot_radius=3.2, duration=3.2, begin=0.0):
     path_id = "p" + hashlib.md5(f"{path_d}|{dot_colors}|{dot_radius}|{duration}".encode("utf-8")).hexdigest()[:12]
     lead = dot_colors[0]
@@ -2589,7 +2606,7 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
         {"id": 3, "label": "MCP", "desc": "Host -> Protocol -> Server -> Tool access"},
         {"id": 4, "label": "A2A", "desc": "Registry -> Route -> Delegate -> Status"},
     ]
-    sections = sections[:4]
+    sections = sections[:6]
 
     def _clean_steps(desc):
         return [s.strip() for s in re.split(r"\s*(?:â†’|->|\|)\s*", desc or "") if s.strip()]
@@ -2602,9 +2619,13 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
 
     lane_x = 28
     lane_w = W - 56
-    lane_h = 108
-    lane_gap = 14
+    lane_gap = 12
     top_y = 124
+    n_lanes = max(1, len(sections))
+    avail_h = H - top_y - 40 - lane_gap * (n_lanes - 1)
+    lane_h = max(78, int(avail_h / n_lanes))
+    if lane_h * n_lanes + lane_gap * (n_lanes - 1) > (H - top_y - 24):
+        lane_h = max(72, lane_h - 6)
 
     for i, sec in enumerate(sections):
         y = top_y + i * (lane_h + lane_gap)
@@ -2617,9 +2638,14 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
 
         svg += f'<rect x="{lane_x}" y="{y}" width="{lane_w}" height="{lane_h}" rx="8" fill="#FFFFFF" stroke="{lighten(col,0.45)}" stroke-width="1.4"/>'
         svg += f'<rect x="{lane_x}" y="{y}" width="{lane_w}" height="3" fill="{col}"/>'
-        svg += f'<rect x="{lane_x+12}" y="{y+14}" width="162" height="{lane_h-28}" rx="6" fill="{left_fill}" stroke="{col}" stroke-width="1.3"/>'
+        left_box_h = max(50, lane_h - 20)
+        svg += f'<rect x="{lane_x+12}" y="{y+10}" width="162" height="{left_box_h}" rx="6" fill="{left_fill}" stroke="{col}" stroke-width="1.3"/>'
         svg += f'<text x="{lane_x+28}" y="{y+42}" fill="{darken(col,0.18)}" font-size="14" font-weight="800">LANE {i+1}</text>'
-        svg += f'<text x="{lane_x+28}" y="{y+76}" fill="{darken(col,0.25)}" font-size="28" font-weight="900">{xe(clamp(sec["label"], 16))}</text>'
+        label_lines = fit_lines(sec.get("label", ""), 12, 2)
+        label_y = y + 62
+        label_fs = 23 if len(label_lines) == 1 else 18
+        for li, ln in enumerate(label_lines):
+            svg += f'<text x="{lane_x+28}" y="{label_y+li*20}" fill="{darken(col,0.25)}" font-size="{label_fs}" font-weight="900">{xe(ln)}</text>'
 
         flow_x1 = lane_x + 208
         flow_x2 = lane_x + lane_w - 30
@@ -2636,7 +2662,7 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
             svg += f'<circle cx="{cx:.1f}" cy="{flow_y:.1f}" r="9" fill="#FFFFFF" stroke="{col}" stroke-width="2"/>'
             svg += f'<text x="{cx:.1f}" y="{flow_y+4:.1f}" text-anchor="middle" fill="{darken(col,0.20)}" font-size="10" font-weight="900">{si+1}</text>'
             svg += f'<rect x="{box_x:.1f}" y="{y+58}" width="{box_w:.1f}" height="30" rx="5" fill="{chip_fill}" stroke="{lighten(col,0.55)}" stroke-width="1"/>'
-            lines = wrap_lines(step, 14)
+            lines = fit_lines(step, 14, 2)
             ty = y + 76 - (len(lines)-1)*5
             for li, ln in enumerate(lines[:2]):
                 svg += f'<text x="{cx:.1f}" y="{ty+li*11:.1f}" text-anchor="middle" fill="{ink}" font-size="8.5" font-weight="700">{xe(clamp(ln,16))}</text>'
@@ -2646,7 +2672,8 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
             bx = lane_x + lane_w - 155
             by = y + lane_h - 18
             svg += f'<ellipse cx="{bx}" cy="{by}" rx="78" ry="16" fill="#FFFFFF" stroke="{lighten(col,0.42)}" stroke-width="1.3"/>'
-            svg += f'<text x="{bx}" y="{by+4}" text-anchor="middle" fill="{darken(col,0.2)}" font-size="8.5" font-weight="700">{xe(clamp(bubble, 28))}</text>'
+            bubble_line = fit_lines(bubble, 28, 1)[0]
+            svg += f'<text x="{bx}" y="{by+4}" text-anchor="middle" fill="{darken(col,0.2)}" font-size="8.5" font-weight="700">{xe(bubble_line)}</text>'
 
     svg += f'<rect x="0" y="{H-28}" width="{W}" height="28" fill="#E5E7EB"/>'
     svg += f'<text x="18" y="{H-10}" fill="#64748B" font-size="9">{datetime.now().strftime("%B %Y")}</text>'
@@ -2706,7 +2733,12 @@ def _style_modern_tech_cards(topic_id, topic_name, C, structure=None):
     svg += f'<rect width="{W}" height="{H}" fill="url(#mtc-bg)"/>'
     svg += f'<line x1="0" y1="96" x2="{W}" y2="96" stroke="{rgba("#60A5FA",0.22)}" stroke-width="1.5"/>'
     svg += f'<text x="26" y="40" fill="#93C5FD" font-size="14" font-weight="700" letter-spacing="1.2">TECH MAP</text>'
-    svg += f'<text x="{W//2}" y="68" text-anchor="middle" fill="#F8FAFC" font-size="38" font-weight="900">{xe(clamp(topic_name, 34))}</text>'
+    title_lines = fit_lines(topic_name, 28, 2)
+    if len(title_lines) == 1:
+        svg += f'<text x="{W//2}" y="68" text-anchor="middle" fill="#F8FAFC" font-size="38" font-weight="900">{xe(title_lines[0])}</text>'
+    else:
+        svg += f'<text x="{W//2}" y="58" text-anchor="middle" fill="#F8FAFC" font-size="30" font-weight="900">{xe(title_lines[0])}</text>'
+        svg += f'<text x="{W//2}" y="88" text-anchor="middle" fill="#F8FAFC" font-size="30" font-weight="900">{xe(title_lines[1])}</text>'
     svg += f'<text x="{W//2}" y="96" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600">{xe(clamp(subtitle, 86))}</text>'
 
     for i, sec in enumerate(sections):
@@ -2723,8 +2755,9 @@ def _style_modern_tech_cards(topic_id, topic_name, C, structure=None):
         svg += f'<text x="{x+18}" y="{y+26}" text-anchor="middle" fill="{darken(col,0.20)}" font-size="9" font-weight="900">{xe(_card_icon(sec.get("label","Option")))}</text>'
         svg += f'<text x="{x+36}" y="{y+26}" fill="{ink}" font-size="15" font-weight="900">{xe(clamp(sec.get("label","Option"), 22))}</text>'
 
-        lines = wrap_lines(sec.get("desc", ""), 26)
-        for li, ln in enumerate(lines[:4]):
+        max_desc_lines = max(2, min(5, int((card_h - 64) / 16)))
+        lines = fit_lines(sec.get("desc", ""), 26, max_desc_lines)
+        for li, ln in enumerate(lines):
             svg += f'<text x="{x+16}" y="{y+56+li*16}" fill="#CBD5E1" font-size="12" font-weight="600">{xe(clamp(ln, 42))}</text>'
 
         # small index badge
