@@ -631,6 +631,7 @@ Length target: {length}
 
 Requirements:
 - Do not invent personal incidents, team stories, tool names, or metrics that were not explicitly provided in the topic
+- Do not mention your own workplace incidents (debugging sessions, outages, production fires, internal team events)
 - If the topic does not include a concrete metric, use qualitative language instead of numbers
 - If the topic does not include named tools, keep examples generic instead of dropping in brand names
 - Use 4 to 10 relevant emojis naturally across hook, bullets, and CTA (not spammy)
@@ -802,8 +803,20 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
             + ", ".join(unsupported_tools[:4])
         )
 
-    if re.search(r"\bour production\b|\bour team\b|\bwe cut\b|\bI quickly diagnosed\b|\bjust failed\b", cleaned, re.I):
-        issues.append("Do not invent a first-person incident or case study unless the topic explicitly includes one.")
+    incident_patterns = [
+        r"\bour production\b",
+        r"\bour team\b",
+        r"\bin my team\b",
+        r"\bwe cut\b",
+        r"\bwe had an incident\b",
+        r"\bproduction issue\b",
+        r"\bproduction outage\b",
+        r"\bdebugging\b.*\bproduction\b",
+        r"\bi\s+just\s+spent\s+\d+\s*(?:hours?|hrs?)\b",
+        r"\blast night\b.*\b(prod|incident|outage|issue)\b",
+    ]
+    if any(re.search(pat, cleaned, re.I) for pat in incident_patterns):
+        issues.append("Avoid personal/work incident references; keep examples generic unless the topic explicitly includes a real case study.")
 
     if re.search(r"\bnext post\b|\bthird post\b|\bpost 2\b|\banother post\b", cleaned, re.I):
         issues.append("Write exactly one post and remove any extra appended drafts.")
