@@ -12,5 +12,12 @@
     "style": 22,
     "signature": "2375d04ce2574ce2b8937b03aa8c0d7e",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-03-26T22:19:23.866120",
+    "topic_id": "ai-governance-playbook",
+    "style": 16,
+    "signature": "2bd79e40c38c75e8ac4b89a8c364fe85",
+    "duplicate_avoided": true
   }
 ]

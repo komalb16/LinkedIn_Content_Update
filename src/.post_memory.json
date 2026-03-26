@@ -10,5 +10,11 @@
     "topic_id": "vector-databases",
     "topic_name": "Vector Databases and Retrieval",
     "text": "\ud83d\udccc Vector Databases and Retrieval\nVector search is not the silver bullet for AI systems \ud83d\ude80.\nMany engineers overestimate its benefits, underestimating the complexity of indexing, filtering, and reranking.\nMyth \u2192 Reality:\nPinecone and Weaviate are not interchangeable \ud83e\udd14.\nHere's a comparison:\n```\nPinecone -> Managed scale and fast setup\nWeaviate -> Open ecosystem and rich filtering\npgvector -> Postgres-first retrieval\nOpenSearch -> Hybrid keyword and vector search\nMilvus -> High-scale open source vector infra\n```\nRule-of-thumb: Choose Pinecone for rapid prototyping, Weaviate for complex filtering, pgvector for existing Postgres workflows, OpenSearch for hybrid search, and Milvus for large-scale open source deployments \ud83d\udcc8.\n\ud83d\udcac Which vector database do you prefer?\n1\ufe0f\u20e3 Pinecone  2\ufe0f\u20e3 Weaviate  3\ufe0f\u20e3 pgvector  4\ufe0f\u20e3 OpenSearch  5\ufe0f\u20e3 Milvus\n#VectorDatabases #AISystems #SearchInfra #EngineeringChoices #DatabaseDesign"
+  },
+  {
+    "timestamp": "2026-03-26T22:19:23.867286",
+    "topic_id": "ai-governance-playbook",
+    "topic_name": "AI Governance Playbook",
+    "text": "\ud83d\udccc AI Governance Playbook\n\nAI Governance Playbook is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: Governance should accelerate adoption by reducing ambiguity, not slow teams with vague compliance theater.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n```text\nRisk Tiering\nModel Registry\nPolicy Controls\nMonitoring\nAuditability\n```\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
   }
 ]
