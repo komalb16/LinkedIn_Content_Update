@@ -4276,9 +4276,8 @@ async function runNow(options = {}) {
         // A cron heartbeat exits(0) cleanly — success but no topic
         if (r.conclusion === 'success') {
           const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
-          // Until enrichment confirms a posted topic, keep scheduled-success runs hidden.
-          if (!fetched) return true;
-          if (!_topicCache[r.id]) return true; // fetched but empty = no post step found = heartbeat
+          // Hide only when enrichment explicitly confirms "no posted-topic step".
+          if (fetched && !_topicCache[r.id]) return true;
         }
         return false;
       }
@@ -4290,9 +4289,7 @@ async function runNow(options = {}) {
       }
       if (r.conclusion === 'success' && _enrichmentDone) {
         const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
-        // Only show successful runs when enrichment confirms a real posted topic.
-        if (!fetched) return true;
-        if (!_topicCache[r.id]) return true;
+        if (fetched && !_topicCache[r.id]) return true;
       }
       return false;
     }
