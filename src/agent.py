@@ -1905,25 +1905,6 @@ Write a LinkedIn post that:
             }, f, indent=2)
         write_github_summary(topic["name"], mode, full_post_text, dry_run=True, score_card=score_card)
         _remember_post(topic, full_post_text)
-        topic_mgr.save_run_history({
-            "timestamp":  datetime.now().isoformat(),
-            "topic_id":   topic["id"],
-            "topic_name": topic["name"],
-            "category":   topic.get("category", ""),
-            "mode":       mode,
-            "status":     "dry_run",
-            "quality_score": score_card["score"],
-            "ab_variants": [
-                {
-                    "variant_index": c.get("index", 0) + 1,
-                    "score": c.get("score"),
-                    "raw_score": c.get("raw_score"),
-                    "similarity": round(c.get("sim", 0.0), 4),
-                    "penalty": c.get("penalty", 0),
-                }
-                for c in candidate_snapshot
-            ],
-        })
         log.info("DRY RUN complete. Post saved.")
         return
 
