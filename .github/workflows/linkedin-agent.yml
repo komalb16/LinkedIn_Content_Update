@@ -102,6 +102,7 @@ jobs:
 
       # 3. Install system dependencies (for SVG → PNG conversion)
       - name: 🔧 Install system deps
+        if: github.event.inputs.dry_run != 'true'
         run: |
           sudo apt-get update -q
           sudo apt-get install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
@@ -241,7 +242,7 @@ jobs:
       # 10. Check LinkedIn token expiry  (#15)
 
       - name: 🔐 Check Token Expiry
-        if: always()
+        if: always() && github.event.inputs.dry_run != 'true'
         env:
           LINKEDIN_TOKEN_DATE: ${{ secrets.LINKEDIN_TOKEN_DATE }}
           # Notification channels
