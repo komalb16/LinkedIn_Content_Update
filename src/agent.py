@@ -1100,6 +1100,19 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     return finalized
 
 
+def _render_linkedin_text(post_text):
+    text = (post_text or "").strip()
+    if not text:
+        return text
+    # LinkedIn renders fenced blocks poorly; keep content but remove fence markers.
+    text = re.sub(r"```[a-zA-Z0-9_-]*\r?\n?", "", text)
+    text = text.replace("```", "")
+    # Remove inline code ticks so raw markdown does not leak into the final post.
+    text = re.sub(r"`([^`\n]+)`", r"\1", text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    return text
+
+
 def _load_post_memory():
     if os.path.exists(POST_MEMORY_FILE):
         try:
@@ -1877,8 +1890,9 @@ Write a LinkedIn post that:
             else post_text
         )
         full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
+        publish_text = _render_linkedin_text(full_post_text)
         with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
-            f.write(full_post_text)
+            f.write(publish_text)
         with open("preview_payload_" + topic["id"] + ".json", "w", encoding="utf-8") as f:
             json.dump({
                 "topic_id": topic["id"],
@@ -1902,8 +1916,8 @@ Write a LinkedIn post that:
                     for c in candidate_snapshot
                 ],
             }, f, indent=2)
-        write_github_summary(topic["name"], mode, full_post_text, dry_run=True, score_card=score_card)
-        _remember_post(topic, full_post_text)
+        write_github_summary(topic["name"], mode, publish_text, dry_run=True, score_card=score_card)
+        _remember_post(topic, publish_text)
         log.info("DRY RUN complete. Post saved.")
         return
 
@@ -1915,9 +1929,10 @@ Write a LinkedIn post that:
         else post_text
     )
     full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
+    publish_text = _render_linkedin_text(full_post_text)
 
     result = poster.create_post_with_image(
-        text=full_post_text,
+        text=publish_text,
         image_path=diagram_path,
         title=topic["name"],
     )
@@ -1927,8 +1942,8 @@ Write a LinkedIn post that:
         write_github_output("POSTED_TITLE", topic.get("name", ""))
         write_github_output("POSTED_DATE",  datetime.now().strftime("%Y-%m-%d"))
         write_github_output("POSTED_URL",   result.get("post_url", ""))
-        write_github_summary(topic["name"], mode, full_post_text, dry_run=False, score_card=score_card)
-        _remember_post(topic, full_post_text)
+        write_github_summary(topic["name"], mode, publish_text, dry_run=False, score_card=score_card)
+        _remember_post(topic, publish_text)
         topic_mgr.save_run_history({
             "timestamp":  datetime.now().isoformat(),
             "topic_id":   topic["id"],

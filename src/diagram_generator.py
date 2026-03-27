@@ -2008,14 +2008,14 @@ def _style_three_panel(topic_id, topic_name, C, structure=None):
         svg += f'<rect x="{px}" y="74" width="{pw}" height="18" fill="{pc}"/>'
         svg += f'<text x="{px+pw//2}" y="79" text-anchor="middle" fill="white" font-size="12" font-weight="900" letter-spacing="1" font-family="Arial,sans-serif">{xe(sec["label"].upper())}</text>'
 
-        content_lines = sec["desc"].split(",") if "," in sec["desc"] else [sec["desc"]]
-        for ci2, line in enumerate(content_lines[:4]):
-            ly = 110 + ci2*52
-            svg += f'<rect x="{px+12}" y="{ly}" width="{pw-24}" height="40" rx="6" fill="{lighten(pc,0.90)}" stroke="{lighten(pc,0.6)}" stroke-width="1"/>'
-            svg += f'<rect x="{px+12}" y="{ly}" width="4" height="40" rx="2" fill="{pc}"/>'
-            lns = wrap_lines(line.strip(), (pw-30)//7)
-            for li2, ln in enumerate(lns[:2]):
-                svg += f'<text x="{px+22}" y="{ly+16+li2*14}" fill="#1F2937" font-size="10" font-weight="600" font-family="Arial,sans-serif">{xe(ln)}</text>'
+        # Keep one aligned content card per panel to avoid uneven vertical layouts.
+        ly = 110
+        card_h = 86
+        svg += f'<rect x="{px+12}" y="{ly}" width="{pw-24}" height="{card_h}" rx="6" fill="{lighten(pc,0.90)}" stroke="{lighten(pc,0.6)}" stroke-width="1"/>'
+        svg += f'<rect x="{px+12}" y="{ly}" width="4" height="{card_h}" rx="2" fill="{pc}"/>'
+        lns = wrap_lines((sec["desc"] or "").strip(), max(20, (pw - 44) // 7))
+        for li2, ln in enumerate(lns[:4]):
+            svg += f'<text x="{px+22}" y="{ly+18+li2*16}" fill="#1F2937" font-size="10" font-weight="600" font-family="Arial,sans-serif">{xe(ln)}</text>'
 
         if i < n_panels-1:
             ax = px+pw+2; ay = 56+panel_h//2
