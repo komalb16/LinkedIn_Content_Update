@@ -770,6 +770,72 @@ def _cleanup_generated_post(text):
     return text
 
 
+def _normalize_hashtags(text):
+    cleaned = text or ""
+    cleaned = cleaned.replace("hashtag#", "#")
+    # Fix broken tags like "# Agents" -> "#Agents"
+    cleaned = re.sub(r"(?<!\w)#\s+([A-Za-z][A-Za-z0-9_]*)", r"#\1", cleaned)
+    return cleaned
+
+
+def _shorten_poll_label(label, max_words=6, max_chars=42):
+    raw = re.sub(r"\s+", " ", (label or "")).strip(" .")
+    raw = re.sub(r"^(?:with|using|for)\s+", "", raw, flags=re.I)
+    # Keep strong noun phrase before long qualifiers.
+    raw = re.split(r"\s+(?:with|using|for|that|which)\s+", raw, maxsplit=1, flags=re.I)[0]
+    words = raw.split()
+    if len(words) > max_words:
+        raw = " ".join(words[:max_words]).strip()
+    if len(raw) > max_chars:
+        raw = raw[:max_chars].rsplit(" ", 1)[0].strip()
+    return raw.strip(" ,.-")
+
+
+def _tighten_poll_options(text):
+    lines = (text or "").splitlines()
+    if not lines:
+        return text
+    for i, line in enumerate(lines):
+        m = POLL_PREFIX_RE.match(line.strip())
+        if not m:
+            continue
+        label = POLL_PREFIX_RE.sub("", line.strip()).strip()
+        short = _shorten_poll_label(label)
+        if short:
+            lines[i] = m.group(0).strip() + " " + short
+    return "\n".join(lines).strip()
+
+
+def _reduce_repetitive_copy(text):
+    lines = (text or "").splitlines()
+    if not lines:
+        return text
+
+    out = []
+    seen_norm = set()
+    prev_non_empty = ""
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            out.append(line)
+            continue
+
+        norm = re.sub(r"[^a-z0-9]+", " ", stripped.lower()).strip()
+        # Skip duplicate non-hashtag lines.
+        if norm in seen_norm and not stripped.startswith("#"):
+            continue
+        seen_norm.add(norm)
+
+        # Avoid repeated "If ... then ..." cadence.
+        if stripped.startswith("If ") and prev_non_empty.startswith("If "):
+            stripped = "When " + stripped[3:]
+
+        out.append(stripped)
+        prev_non_empty = stripped
+
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip()
+
+
 def _topic_text_blob(topic):
     return " ".join(
         str(topic.get(k, ""))
@@ -1090,13 +1156,16 @@ def _align_poll_with_structure(text, structure=None, diagram_type=""):
 
 def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _cleanup_generated_post(post_text or "")
-    finalized = finalized.replace("hashtag#", "#").strip()
+    finalized = _normalize_hashtags(finalized).strip()
     if not finalized:
         return finalized
     finalized = _strip_work_incident_hook(finalized, topic.get("name", ""))
+    finalized = _reduce_repetitive_copy(finalized)
     finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _align_poll_with_structure(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _enforce_numbered_poll_options(finalized)
+    finalized = _tighten_poll_options(finalized)
+    finalized = _normalize_hashtags(finalized)
     return finalized
 
 
