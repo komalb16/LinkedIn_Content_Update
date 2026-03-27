@@ -3,7 +3,7 @@ import os
 import random
 import re
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 from logger import get_logger
 
 log = get_logger("topics")
@@ -928,6 +928,25 @@ class TopicManager:
         if selection_filtered:
             available = selection_filtered
 
+        # Hard cooldown: do not repeat a topic within N days (default 14),
+        # considering both live posts and dry-run/manual selections.
+        try:
+            cooldown_days = int(os.environ.get("TOPIC_COOLDOWN_DAYS", "14"))
+        except Exception:
+            cooldown_days = 14
+        cooldown_days = max(0, min(90, cooldown_days))
+        if cooldown_days > 0:
+            cutoff = datetime.now() - timedelta(days=cooldown_days)
+            cooldown_ids = set()
+            for entry in list(self.history)[-200:] + list(self.selection_history)[-300:]:
+                topic_id = entry.get("topic_id")
+                ts = self._parse_history_timestamp(entry.get("timestamp"))
+                if topic_id and ts and ts >= cutoff:
+                    cooldown_ids.add(topic_id)
+            cooldown_filtered = [t for t in available if t["id"] not in cooldown_ids]
+            if cooldown_filtered:
+                available = cooldown_filtered
+
         recent_anchors = {
             self._history_anchor(h, topic_by_id)
             for h in self.history[-8:]
@@ -1032,6 +1051,14 @@ class TopicManager:
             return category
         topic_id = history_entry.get("topic_id", "")
         return topic_by_id.get(topic_id, {}).get("category")
+
+    def _parse_history_timestamp(self, value):
+        if not value:
+            return None
+        try:
+            return datetime.fromisoformat(str(value).replace("Z", "+00:00")).replace(tzinfo=None)
+        except Exception:
+            return None
 
     def _topic_text_blob(self, topic):
         return " ".join([
