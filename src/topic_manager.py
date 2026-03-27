@@ -9,6 +9,7 @@ from logger import get_logger
 log = get_logger("topics")
 
 HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".topic_history.json")
+SELECTION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".topic_selection_history.json")
 
 TOPICS = [
     {
@@ -814,6 +815,7 @@ TOPICS_CONFIG_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspat
 class TopicManager:
     def __init__(self):
         self.history = self._load_history()
+        self.selection_history = self._load_selection_history()
         self.topics = self._load_topics()
 
     def _load_history(self):
@@ -830,6 +832,20 @@ class TopicManager:
             # Save last 50 entries
             history_list = list(self.history)
             json.dump(history_list[-100:], f, indent=2)
+
+    def _load_selection_history(self):
+        if os.path.exists(SELECTION_FILE):
+            try:
+                with open(SELECTION_FILE) as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return []
+
+    def _save_selection_history(self):
+        with open(SELECTION_FILE, "w") as f:
+            history_list = list(self.selection_history)
+            json.dump(history_list[-300:], f, indent=2)
 
     def _load_topics(self):
         """Merge hardcoded TOPICS with topics_config.json overrides from the dashboard."""
@@ -899,6 +915,18 @@ class TopicManager:
         available = [t for t in self.topics if t["id"] not in recent_ids]
         if not available:
             available = self.topics  # all have been used recently — full reset
+
+        # Also avoid very recent dry-run/manual selections so previews don't
+        # keep showing the same topic repeatedly.
+        recent_selected_ids = [
+            h.get("topic_id")
+            for h in self.selection_history[-18:]
+            if h.get("topic_id")
+        ]
+        recent_selected_set = set(recent_selected_ids)
+        selection_filtered = [t for t in available if t["id"] not in recent_selected_set]
+        if selection_filtered:
+            available = selection_filtered
 
         recent_anchors = {
             self._history_anchor(h, topic_by_id)
@@ -1167,6 +1195,10 @@ class TopicManager:
         self.history.append(entry)
         self._save_history()
         log.info("Run history saved (" + str(len(self.history)) + " total runs)")
+
+    def save_selection_history(self, entry):
+        self.selection_history.append(entry)
+        self._save_selection_history()
 
     def list_topics(self):
         print("\n" + "-"*60)

@@ -1613,23 +1613,35 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
 # ─── POST MODE ────────────────────────────────────────────────────────────────
 
 def get_post_mode():
+    def _env_float(name, default):
+        try:
+            return float(os.environ.get(name, str(default)))
+        except Exception:
+            return float(default)
+
     if os.environ.get("ENABLE_NEWS_MODES", "0").strip().lower() in {"1", "true", "yes"}:
+        story_prob = _env_float("STORY_MODE_PROB", 0.25)
+        ai_news_prob = _env_float("AI_NEWS_MODE_PROB", 0.05)
+        layoff_prob = _env_float("LAYOFF_MODE_PROB", 0.03)
+        tools_prob = _env_float("TOOLS_NEWS_MODE_PROB", 0.04)
+        tech_prob = _env_float("TECH_NEWS_MODE_PROB", 0.03)
         rand = random.random()
-        if rand < 0.10:
+        if rand < story_prob:
             return "story"
-        elif rand < 0.15:
+        elif rand < story_prob + ai_news_prob:
             return "ai_news"
-        elif rand < 0.18:
+        elif rand < story_prob + ai_news_prob + layoff_prob:
             return "layoff_news"
-        elif rand < 0.22:
+        elif rand < story_prob + ai_news_prob + layoff_prob + tools_prob:
             return "tools_news"
-        elif rand < 0.25:
+        elif rand < story_prob + ai_news_prob + layoff_prob + tools_prob + tech_prob:
             return "tech_news"
         else:
             return "topic"
 
+    story_prob = _env_float("STORY_MODE_PROB", 0.30)
     rand = random.random()
-    if rand < 0.12:
+    if rand < story_prob:
         return "story"
     else:
         return "topic"
@@ -1879,6 +1891,20 @@ Write a LinkedIn post that:
                 f"A/B winner: variant #{candidate_snapshot[0]['index']+1} ({candidate_snapshot[0]['score']}) "
                 f"over #{candidate_snapshot[1]['index']+1} ({candidate_snapshot[1]['score']})"
             )
+
+    # Save selection history for both dry and live runs to reduce repeated topics in previews.
+    if topic and topic.get("id"):
+        try:
+            topic_mgr.save_selection_history({
+                "timestamp": datetime.now().isoformat(),
+                "topic_id": topic["id"],
+                "topic_name": topic.get("name", ""),
+                "category": topic.get("category", ""),
+                "mode": mode,
+                "dry_run": bool(dry_run),
+            })
+        except Exception as e:
+            log.warning(f"Could not save selection history: {e}")
 
     # ── FALLBACK TOPIC for news posts ─────────────────────────────────────────
     if not topic:
