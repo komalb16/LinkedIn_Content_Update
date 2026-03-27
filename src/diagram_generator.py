@@ -2676,9 +2676,9 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
     top_y = 124
     n_lanes = max(1, len(sections))
     avail_h = H - top_y - 40 - lane_gap * (n_lanes - 1)
-    lane_h = max(78, int(avail_h / n_lanes))
+    lane_h = max(86, int(avail_h / n_lanes))
     if lane_h * n_lanes + lane_gap * (n_lanes - 1) > (H - top_y - 24):
-        lane_h = max(72, lane_h - 6)
+        lane_h = max(80, lane_h - 6)
 
     for i, sec in enumerate(sections):
         y = top_y + i * (lane_h + lane_gap)
@@ -2691,7 +2691,7 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
 
         svg += f'<rect x="{lane_x}" y="{y}" width="{lane_w}" height="{lane_h}" rx="8" fill="#FFFFFF" stroke="{lighten(col,0.45)}" stroke-width="1.4"/>'
         svg += f'<rect x="{lane_x}" y="{y}" width="{lane_w}" height="3" fill="{col}"/>'
-        left_box_h = max(50, lane_h - 20)
+        left_box_h = max(58, lane_h - 20)
         left_box_w = 210
         svg += f'<rect x="{lane_x+12}" y="{y+10}" width="{left_box_w}" height="{left_box_h}" rx="6" fill="{left_fill}" stroke="{col}" stroke-width="1.3"/>'
         label_lines = fit_lines(sec.get("label", ""), 18, 3)
@@ -2702,7 +2702,7 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
 
         flow_x1 = lane_x + left_box_w + 34
         flow_x2 = lane_x + lane_w - 30
-        flow_y = y + 42
+        flow_y = y + 44
         svg += f'<line x1="{flow_x1}" y1="{flow_y}" x2="{flow_x2}" y2="{flow_y}" stroke="{rgba(col,0.28)}" stroke-width="2"/>'
         svg += _dotted_flow_line(flow_x1, flow_y, flow_x2, flow_y, rgba(col,0.18), dot_spacing=20, dot_radius=2.4, opacity=0.78)
         svg += _animated_dot_path(f"M {flow_x1} {flow_y} L {flow_x2} {flow_y}", duration=3.1 + i*0.3, begin=i*0.18)
@@ -2710,15 +2710,15 @@ def _style_lane_map_infographic(topic_id, topic_name, C, structure=None):
         step_gap = (flow_x2 - flow_x1) / max(len(steps), 1)
         for si, step in enumerate(steps):
             cx = flow_x1 + step_gap * si + step_gap * 0.45
-            box_w = min(132, max(88, int(step_gap - 12)))
+            box_w = min(156, max(98, int(step_gap - 8)))
             box_x = cx - box_w / 2
             svg += f'<circle cx="{cx:.1f}" cy="{flow_y:.1f}" r="9" fill="#FFFFFF" stroke="{col}" stroke-width="2"/>'
             svg += f'<text x="{cx:.1f}" y="{flow_y+4:.1f}" text-anchor="middle" fill="{darken(col,0.20)}" font-size="10" font-weight="900">{si+1}</text>'
-            svg += f'<rect x="{box_x:.1f}" y="{y+56}" width="{box_w:.1f}" height="34" rx="5" fill="{chip_fill}" stroke="{lighten(col,0.55)}" stroke-width="1"/>'
-            lines = fit_lines(step, 18, 2)
-            ty = y + 76 - (len(lines)-1)*5
+            svg += f'<rect x="{box_x:.1f}" y="{y+58}" width="{box_w:.1f}" height="38" rx="5" fill="{chip_fill}" stroke="{lighten(col,0.55)}" stroke-width="1"/>'
+            lines = fit_lines(step, 22, 2)
+            ty = y + 79 - (len(lines)-1)*5
             for li, ln in enumerate(lines[:2]):
-                svg += f'<text x="{cx:.1f}" y="{ty+li*12:.1f}" text-anchor="middle" fill="{ink}" font-size="10" font-weight="700">{xe(clamp(ln,22))}</text>'
+                svg += f'<text x="{cx:.1f}" y="{ty+li*12:.1f}" text-anchor="middle" fill="{ink}" font-size="10.5" font-weight="700">{xe(clamp(ln,26))}</text>'
 
         if len(steps) >= 2:
             bubble = f"{steps[-2]} -> {steps[-1]}"

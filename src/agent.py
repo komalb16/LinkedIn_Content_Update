@@ -836,6 +836,20 @@ def _reduce_repetitive_copy(text):
     return re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip()
 
 
+def _remove_raw_flow_only_lines(text):
+    lines = (text or "").splitlines()
+    if not lines:
+        return text
+    cleaned = []
+    for line in lines:
+        stripped = line.strip()
+        # Remove bare flow-only lines like "A -> B -> C" that look like leaked draft notes.
+        if re.match(r"^[A-Za-z0-9][A-Za-z0-9\s/\-&()]{1,30}(?:\s*->\s*[A-Za-z0-9][A-Za-z0-9\s/\-&()]{1,30}){2,}\s*$", stripped):
+            continue
+        cleaned.append(line)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned)).strip()
+
+
 def _topic_text_blob(topic):
     return " ".join(
         str(topic.get(k, ""))
@@ -1161,6 +1175,7 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
         return finalized
     finalized = _strip_work_incident_hook(finalized, topic.get("name", ""))
     finalized = _reduce_repetitive_copy(finalized)
+    finalized = _remove_raw_flow_only_lines(finalized)
     finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _align_poll_with_structure(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _enforce_numbered_poll_options(finalized)
