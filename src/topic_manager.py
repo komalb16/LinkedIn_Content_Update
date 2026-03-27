@@ -390,7 +390,7 @@ TOPICS = [
         "prompt": "A practical map of Microsoft's AI ecosystem: foundation models, agent frameworks, developer tools, security/governance controls, and cloud runtime.",
         "angle": "Most teams use one tool and miss the stack-level leverage. The real win is understanding how the layers connect.",
         "diagram_subject": "Layered Microsoft AI stack from models to apps, governance, and infrastructure",
-        "diagram_type": "7 Layers",
+        "diagram_type": "Ecosystem Breakdown",
         "emoji": "🧩",
     },
     {
@@ -886,6 +886,7 @@ DEFAULT_STRUCTURE = {
 
 INFERRED_DIAGRAM_TYPES = [
     (("decision tree", "should i", "when to use", "when not to use", "choose", "adoption framework"), "Decision Tree"),
+    (("ecosystem", "full stack", "tool stack", "stack map", "from models to", "landscape"), "Ecosystem Breakdown"),
     (("7 layers", "seven layers", "layers", "stack", "strategy"), "7 Layers"),
     (("signal vs noise", "signal or noise", "hype", "worth it", "real or hype"), "Signal vs Noise"),
     (("observability", "tracing", "telemetry", "monitoring", "alerts"), "Observability Map"),
@@ -1207,6 +1208,39 @@ class TopicManager:
                     {"id": 5, "label": "Layer 5", "desc": "Context, data, and knowledge graph"},
                     {"id": 6, "label": "Layer 6", "desc": "Bundling, pricing, or adoption moat"},
                     {"id": 7, "label": "Layer 7", "desc": "Infrastructure and long-term control"},
+                ],
+            }
+
+        if diagram_type == "Ecosystem Breakdown":
+            return {
+                "style": 20,
+                "subtitle": f"How the {base_name} ecosystem fits together",
+                "rows": [
+                    {
+                        "label": "1. Foundation Layer",
+                        "type": "chips",
+                        "chips": ["Models", "Data", "Compute", "APIs"],
+                        "chip_color": "#EEF2FF",
+                        "chip_border": "#2563EB",
+                        "chip_text": "#1E3A8A",
+                    },
+                    {
+                        "label": "2. Build + Orchestrate",
+                        "type": "columns",
+                        "columns": [
+                            {"glyph": "D", "title": "Developer", "items": ["SDK/IDE", "Tooling", "Testing"]},
+                            {"glyph": "A", "title": "Agent", "items": ["Planning", "Tool calls", "Memory"]},
+                            {"glyph": "R", "title": "Runtime", "items": ["Deploy", "Scale", "Observe"]},
+                        ],
+                    },
+                    {
+                        "label": "3. Govern + Operate",
+                        "type": "banner",
+                        "text": "Identity · Security · Compliance · Cost · Reliability",
+                        "color": "#E0F2E9",
+                        "border": "#059669",
+                        "text_color": "#065F46",
+                    },
                 ],
             }
 

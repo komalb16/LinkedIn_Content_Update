@@ -2927,6 +2927,7 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "modern tech cards": 0,
     "decision tree": 9,
     "7 layers": 10,
+    "ecosystem breakdown": 20,
     "signal vs noise": 17,
 }
 
@@ -2943,6 +2944,7 @@ STYLE_FAMILIES_BY_TYPE = {
     "architecture diagram": [7, 20, 0, 11, 16],
     "architecture": [7, 20, 0, 11, 16],
     "modern cards": [0, 15, 9],
+    "ecosystem breakdown": [20, 10, 7],
 }
 
 _SCORE_STOPWORDS = {

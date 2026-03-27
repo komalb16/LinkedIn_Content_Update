@@ -554,6 +554,12 @@ def _build_post_template_instructions(diagram_type, structure=None):
             "Each section should name one layer and explain why it matters strategically. "
             "This should read like an argument, not a textbook explanation."
         ),
+        "Ecosystem Breakdown": (
+            "Write this like a practical ecosystem map. "
+            "Group tools/components into clear layers (foundation, build/orchestrate, govern/operate). "
+            "Show how the layers connect and where teams usually break integration. "
+            "Finish with a clear adoption rule: start narrow, then expand stack coverage."
+        ),
         "Signal vs Noise": (
             "Write this as a judgment call. "
             "Open with whether this is signal, noise, or a mix. "
@@ -588,6 +594,11 @@ def _build_visual_block_instruction(diagram_type):
         return (
             "Include one ``` fenced comparison block using concise `left -> right` lines. "
             "Keep entities relevant to the topic only."
+        )
+    if diagram_type == "Ecosystem Breakdown":
+        return (
+            "Include one ``` fenced grouped-layer block with 3 headings: "
+            "Foundation | Build/Orchestrate | Govern/Operate. Keep each layer concise."
         )
     if diagram_type in {"Decision Tree", "Winding Roadmap", "Flow Chart", "Lane Map"}:
         return (
@@ -1337,19 +1348,20 @@ def _fallback_style_for_diagram(diagram_type, structure=None):
     if structure and structure.get("rows"):
         return 20
     mapping = {
-        "Decision Tree": 21,
+        "Decision Tree": 9,
         "Comparison Table": 22,
-        "Flow Chart": 21,
-        "Lane Map": 21,
+        "Flow Chart": 0,
+        "Lane Map": 0,
         "Signal vs Noise": 17,
-        "7 Layers": 16,
+        "7 Layers": 10,
+        "Ecosystem Breakdown": 20,
         "Observability Map": 20,
-        "Winding Roadmap": 16,
-        "Architecture Diagram": 16,
-        "Architecture": 16,
+        "Winding Roadmap": 15,
+        "Architecture Diagram": 7,
+        "Architecture": 7,
         "Modern Cards": 22,
     }
-    return mapping.get(diagram_type, 16)
+    return mapping.get(diagram_type, 7)
 
 
 def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
@@ -1575,9 +1587,11 @@ def _build_comparison_structure_from_post(post_text, title, fallback_entities=No
 
 def _infer_diagram_type_from_post(post_text, fallback_type):
     text = (post_text or "").lower()
-    strong_editorial = {"Decision Tree", "7 Layers", "Signal vs Noise", "Lane Map", "Observability Map"}
+    strong_editorial = {"Decision Tree", "7 Layers", "Signal vs Noise", "Lane Map", "Observability Map", "Ecosystem Breakdown"}
     if "decision tree" in text or "when not to use" in text or "should i" in text:
         return "Decision Tree"
+    if "ecosystem" in text or "full stack" in text or "from models to" in text:
+        return "Ecosystem Breakdown"
     if "7 layers" in text or "layer 1" in text:
         return "7 Layers"
     if "signal vs noise" in text or "signal or noise" in text:
