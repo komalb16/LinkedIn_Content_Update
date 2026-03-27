@@ -383,6 +383,46 @@ TOPICS = [
         "diagram_type": "Lane Map",
         "emoji": "🔌",
     },
+    {
+        "id": "microsoft-ai-ecosystem",
+        "name": "Microsoft AI Ecosystem Map",
+        "category": "AI Strategy",
+        "prompt": "A practical map of Microsoft's AI ecosystem: foundation models, agent frameworks, developer tools, security/governance controls, and cloud runtime.",
+        "angle": "Most teams use one tool and miss the stack-level leverage. The real win is understanding how the layers connect.",
+        "diagram_subject": "Layered Microsoft AI stack from models to apps, governance, and infrastructure",
+        "diagram_type": "7 Layers",
+        "emoji": "🧩",
+    },
+    {
+        "id": "microsoft-agent-stack",
+        "name": "Microsoft Agent Stack",
+        "category": "AI Agents",
+        "prompt": "How Microsoft agent building blocks fit together: Agent Framework, Semantic Kernel, AutoGen, Copilot Studio, Entra Agent ID, and runtime/integration services.",
+        "angle": "Stop treating agents as a single tool choice. Design the full stack: identity, orchestration, tools, memory, and governance.",
+        "diagram_subject": "Agent platform layers: orchestration, tools, identity, runtime, and governance",
+        "diagram_type": "Architecture Diagram",
+        "emoji": "🤖",
+    },
+    {
+        "id": "responsible-ai-security-stack",
+        "name": "Responsible AI Security Stack",
+        "category": "Security",
+        "prompt": "How to combine Azure AI Content Safety, Defender for Cloud, Purview, and Confidential Computing into a practical secure-by-default AI delivery stack.",
+        "angle": "Responsible AI is not a checklist slide; it is an operating stack with controls at each layer.",
+        "diagram_subject": "Responsible AI controls from policy to runtime monitoring and incident response",
+        "diagram_type": "Observability Map",
+        "emoji": "🛡️",
+    },
+    {
+        "id": "microservices-components-map",
+        "name": "Microservices Architecture Components",
+        "category": "Engineering",
+        "prompt": "A clear map of core microservices components: API gateway, service registry, async messaging, cache, database replication, and observability pipeline.",
+        "angle": "Most failures come from integration boundaries between components, not from any one component in isolation.",
+        "diagram_subject": "Microservice component map with API gateway, services, messaging, cache, DB, and observability",
+        "diagram_type": "Architecture Diagram",
+        "emoji": "🧱",
+    },
 ]
 
 # ─── DIAGRAM STRUCTURES ───────────────────────────────────────────────────────
@@ -700,7 +740,7 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "model-context-protocol": {
-        "style": 21, "subtitle": "How MCP connects hosts, tools, and servers",
+        "style": 0, "subtitle": "How MCP connects hosts, tools, and servers",
         "sections": [
             {"id":1,"label":"Host",      "desc":"Client app -> Discover -> Authorise -> Invoke -> Render"},
             {"id":2,"label":"Protocol",  "desc":"Request -> Tool schema -> Context -> Response -> Events"},
@@ -709,7 +749,7 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "ai-search-discovery": {
-        "style": 21, "subtitle": "How AI decides who to recommend",
+        "style": 0, "subtitle": "How AI decides who to recommend",
         "sections": [
             {"id":1,"label":"Intent",      "desc":"What the user asks and how specific it is"},
             {"id":2,"label":"Signals",     "desc":"Profile clarity, expertise cues, and consistency"},
@@ -719,13 +759,65 @@ DIAGRAM_STRUCTURES = {
         ]
     },
     "agentic-workflows-enterprise": {
-        "style": 21, "subtitle": "Controlled delegation in enterprise agent flows",
+        "style": 0, "subtitle": "Controlled delegation in enterprise agent flows",
         "sections": [
             {"id":1,"label":"Trigger",     "desc":"Event -> Goal -> Constraints -> Priority"},
             {"id":2,"label":"Plan",        "desc":"Decompose -> Route -> Select tools -> Simulate"},
             {"id":3,"label":"Execute",     "desc":"Call tools -> Validate -> Retry -> Log"},
             {"id":4,"label":"Approve",     "desc":"Human gate -> Policy check -> Release"},
         ]
+    },
+    "microsoft-ai-ecosystem": {
+        "style": 20, "subtitle": "From models to agents, apps, and governance",
+        "rows": [
+            {"label":"1. Models", "type":"chips", "chips":["Phi family", "Kosmos", "Florence", "Voice/Image models"],
+             "chip_color":"#EEF2FF","chip_border":"#2563EB","chip_text":"#1E3A8A"},
+            {"label":"2. Agent + Dev Layer", "type":"columns", "columns":[
+                {"glyph":"A","title":"Agent Build", "items":["Agent Framework","Semantic Kernel","AutoGen"]},
+                {"glyph":"D","title":"Developer UX", "items":["GitHub Copilot","VS Code toolkit","Copilot Studio"]},
+                {"glyph":"R","title":"Runtime", "items":["AKS","Functions","Container Apps"]},
+            ]},
+            {"label":"3. Security + Governance", "type":"banner", "text":"Entra Agent ID · Defender · Purview · Content Safety · Confidential Compute",
+             "color":"#E0F2E9","border":"#059669","text_color":"#065F46"},
+        ],
+    },
+    "microsoft-agent-stack": {
+        "style": 10, "subtitle": "Building blocks for production-grade agents",
+        "sections": [
+            {"id":1,"label":"Goal + Policy", "desc":"Define objective, constraints, and risk tier"},
+            {"id":2,"label":"Orchestration", "desc":"Agent Framework, Semantic Kernel, or AutoGen flow"},
+            {"id":3,"label":"Identity", "desc":"Entra Agent ID, auth scopes, and audit controls"},
+            {"id":4,"label":"Tools + Data", "desc":"Tool connectors, memory, and enterprise knowledge"},
+            {"id":5,"label":"Runtime", "desc":"AKS/functions/container runtime with telemetry"},
+            {"id":6,"label":"Safety", "desc":"Content safety, guardrails, and policy checks"},
+            {"id":7,"label":"Operate", "desc":"Monitoring, rollback, and continuous evaluation"},
+        ],
+    },
+    "responsible-ai-security-stack": {
+        "style": 20, "subtitle": "Secure-by-default controls for AI systems",
+        "rows": [
+            {"label":"1. Prevent", "type":"chips", "chips":["Identity", "Data policy", "Prompt controls", "Access boundaries"],
+             "chip_color":"#FEE2E2","chip_border":"#DC2626","chip_text":"#7F1D1D"},
+            {"label":"2. Detect + Respond", "type":"columns", "columns":[
+                {"glyph":"D","title":"Detect", "items":["Defender alerts","Abuse patterns","Policy drift"]},
+                {"glyph":"I","title":"Investigate", "items":["Audit trails","Trace context","Evidence links"]},
+                {"glyph":"R","title":"Respond", "items":["Contain", "Rollback", "Remediate"]},
+            ]},
+            {"label":"3. Govern", "type":"banner", "text":"Purview classification · Confidential Computing · Compliance reporting",
+             "color":"#E0F2E9","border":"#059669","text_color":"#065F46"},
+        ],
+    },
+    "microservices-components-map": {
+        "style": 10, "subtitle": "How core service components work together",
+        "sections": [
+            {"id":1,"label":"Ingress", "desc":"Client traffic enters through API gateway and auth"},
+            {"id":2,"label":"Discovery", "desc":"Service registry and routing resolve service endpoints"},
+            {"id":3,"label":"Service Layer", "desc":"Business services communicate via sync and async paths"},
+            {"id":4,"label":"Data Layer", "desc":"Primary DB, replicas, caching, and consistency strategy"},
+            {"id":5,"label":"Messaging", "desc":"Queues/events decouple workloads and smooth traffic spikes"},
+            {"id":6,"label":"Observability", "desc":"Metrics, traces, logs, and alerting feedback loops"},
+            {"id":7,"label":"Ops Controls", "desc":"Rate limits, retries, circuit breakers, and incident response"},
+        ],
     },
     "ai-governance-playbook": {
         "style": 10, "subtitle": "Governance layers that scale AI safely",

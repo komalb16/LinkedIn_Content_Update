@@ -342,6 +342,14 @@ STORY_THEMES = [
         "diagram_type": "Modern Cards",
         "diagram_subject": "Old workflow vs AI workflow vs role shift",
     },
+    {
+        "id": "name-search-reputation-check",
+        "name": "AI Name Search Reality Check",
+        "prompt": "A personal moment: using an AI assistant for a simple recommendation, then searching your own name and realizing how public signals shape professional discovery.",
+        "angle": "Tell it as a real story: one relatable trigger moment, one uncomfortable realization, then 3 specific profile/content actions.",
+        "diagram_type": "Modern Cards",
+        "diagram_subject": "Trigger moment -> self-search -> signal gaps -> profile fixes -> outcome",
+    },
 ]
 
 STORY_SYSTEM = """\
