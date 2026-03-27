@@ -68,5 +68,12 @@
     "style": 0,
     "signature": "a071c52b0dee0b132b81916686439b46",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-03-27T04:42:09.983009",
+    "topic_id": "finops-for-ai",
+    "style": 0,
+    "signature": "ea62f86bc8aaf2ccaae2dcf4892305f8",
+    "duplicate_avoided": true
   }
 ]
