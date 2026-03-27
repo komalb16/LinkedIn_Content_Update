@@ -76,5 +76,11 @@
     "topic_id": "story-career-leverage-shift",
     "topic_name": "Career Leverage Shift",
     "text": "\ud83d\udccc Career Leverage Shift\n\nAI is changing discoverability faster than most people realize. \ud83d\udd0e\n\nOne moment made this obvious to me: assistants now surface people and companies from clear public signals, not just ads. That shifts the game toward proof, clarity, and consistency. \ud83d\udcc8\n\nMoment -> Insight -> Action 1 -> Action 2 -> Action 3\n\nThree actions that work right away: tighten your headline, publish concrete outcomes, and keep a steady posting rhythm. \ud83d\udee0\ufe0f\n\n\ud83d\udcac What signal do you want AI tools to associate with your profile?\n\n#AIAgents #FutureOfWork #PersonalBranding #CareerGrowth #ArtificialIntelligence"
+  },
+  {
+    "timestamp": "2026-03-27T04:54:31.761532",
+    "topic_id": "finops-for-ai",
+    "topic_name": "FinOps for AI Systems",
+    "text": "\ud83d\udccc FinOps for AI Systems\n\nFinOps for AI Systems is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: AI cost optimization is a product architecture problem, not just a finance dashboard problem.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nRoute\nCache\nBatch\nFallback\nGovern\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
   }
 ]
