@@ -1188,9 +1188,8 @@ def _render_linkedin_text(post_text):
     text = (post_text or "").strip()
     if not text:
         return text
-    # LinkedIn renders fenced blocks poorly; keep content but remove fence markers.
-    text = re.sub(r"```[a-zA-Z0-9_-]*\r?\n?", "", text)
-    text = text.replace("```", "")
+    # LinkedIn renders fenced blocks poorly; remove the entire fenced block from final publish text.
+    text = re.sub(r"```[\s\S]*?```", "", text)
     # Remove inline code ticks so raw markdown does not leak into the final post.
     text = re.sub(r"`([^`\n]+)`", r"\1", text)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()

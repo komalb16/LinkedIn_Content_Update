@@ -45,7 +45,7 @@ except Exception:
 OUTPUT_DIR = "diagrams"
 _MOTION_PHASE = None
 DIAGRAM_MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".diagram_memory.json")
-DISABLED_STYLES = {16}
+DISABLED_STYLES = {16, 21}
 
 
 def _fallback_for_disabled_style(style_idx: int, diagram_type: str = "") -> int:
@@ -53,7 +53,7 @@ def _fallback_for_disabled_style(style_idx: int, diagram_type: str = "") -> int:
     if normalized in {"comparison table", "comparison"}:
         return 5
     if normalized in {"lane map", "modern cards", "flow chart"}:
-        return 21
+        return 0
     return 0
 
 
@@ -2921,10 +2921,10 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "roadmap": 14,
     "timeline": 15,
     "notebook": 20,
-    "lane map": 21,
-    "lane infographic": 21,
-    "modern cards": 21,
-    "modern tech cards": 21,
+    "lane map": 0,
+    "lane infographic": 0,
+    "modern cards": 0,
+    "modern tech cards": 0,
     "decision tree": 9,
     "7 layers": 10,
     "signal vs noise": 17,
@@ -2934,15 +2934,15 @@ STYLE_FAMILIES_BY_TYPE = {
     "comparison table": [5, 22, 16, 0],
     "comparison": [5, 22, 16, 0],
     "decision tree": [9, 0, 16],
-    "flow chart": [0, 21, 16, 15],
-    "lane map": [21, 0, 16],
-    "observability map": [20, 21, 16],
+    "flow chart": [0, 15, 9],
+    "lane map": [0, 15, 9],
+    "observability map": [20, 0, 9],
     "winding roadmap": [14, 15, 3],
     "timeline": [15, 3, 14],
     "7 layers": [10, 2, 16],
     "architecture diagram": [7, 20, 0, 11, 16],
     "architecture": [7, 20, 0, 11, 16],
-    "modern cards": [21, 0, 16, 15],
+    "modern cards": [0, 15, 9],
 }
 
 _SCORE_STOPWORDS = {
