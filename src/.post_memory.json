@@ -82,5 +82,11 @@
     "topic_id": "finops-for-ai",
     "topic_name": "FinOps for AI Systems",
     "text": "\ud83d\udccc FinOps for AI Systems\n\nFinOps for AI Systems is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: AI cost optimization is a product architecture problem, not just a finance dashboard problem.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nRoute\nCache\nBatch\nFallback\nGovern\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
+  },
+  {
+    "timestamp": "2026-03-28T03:33:44.499061",
+    "topic_id": "ai-search-discovery",
+    "topic_name": "AI Search and Discovery",
+    "text": "\ud83d\udccc AI Search and Discovery\nAI assistants are not fooled by keyword-stuffed profiles and websites - they reward clarity, structure, and consistent evidence instead \ud83d\ude80.\nThis changes the game for personal branding and B2B discovery, as traditional SEO tactics no longer apply \ud83d\udcca.\n1\ufe0f\u20e3 Intent \u2014 What the user asks\n2\ufe0f\u20e3 Signals \u2014 Profile clarity, expertise cues\n```\nModern Cards:\nIntent | Signals | Evidence | Fit | Recommendation\nQuery  | Profile  | Posts    | Domain | Ranked\n3\ufe0f\u20e3 Evidence \u2014 Posts, outcomes, and relevant\n4\ufe0f\u20e3 Fit \u2014 Domain match and trust\n5\ufe0f\u20e3 Recommendation \u2014 Shown, ranked, or\nI believe that understanding these modern cards is key to succeeding in AI-driven discovery \ud83e\udd14.\n\ud83d\udcac What do you think is most important for AI assistants to discover you or your business?\n1\ufe0f\u20e3 Intent 2\ufe0f\u20e3 Signals 3\ufe0f\u20e3 Evidence 4\ufe0f\u20e3\n#AIBranding #Discovery #PersonalBranding #B2BMarketing #AIassistant"
   }
 ]

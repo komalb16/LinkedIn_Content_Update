@@ -324,5 +324,30 @@
         "penalty": 12
       }
     ]
+  },
+  {
+    "timestamp": "2026-03-28T03:33:44.499474",
+    "topic_id": "ai-search-discovery",
+    "topic_name": "AI Search and Discovery",
+    "category": "AI Strategy",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 92,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 92,
+        "raw_score": 92,
+        "similarity": 0.1049,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0744,
+        "penalty": 0
+      }
+    ]
   }
 ]
