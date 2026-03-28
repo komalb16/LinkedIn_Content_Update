@@ -349,5 +349,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-03-28T18:05:16.701171",
+    "topic_id": "microsoft-agent-stack",
+    "topic_name": "Microsoft Agent Stack",
+    "category": "AI Agents",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 90,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 90,
+        "raw_score": 90,
+        "similarity": 0.0145,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0046,
+        "penalty": 0
+      }
+    ]
   }
 ]
