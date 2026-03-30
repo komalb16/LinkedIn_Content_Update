@@ -374,5 +374,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-03-30T23:15:10.754846",
+    "topic_id": "story-ai-discovery-moment",
+    "topic_name": "AI Discovery Moment",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0093,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 80,
+        "raw_score": 80,
+        "similarity": 0.0086,
+        "penalty": 0
+      }
+    ]
   }
 ]
