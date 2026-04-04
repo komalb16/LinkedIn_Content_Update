@@ -499,5 +499,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-04T18:05:13.576171",
+    "topic_id": "data-evolution",
+    "topic_name": "Data Architecture Evolution",
+    "category": "Data",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 96,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 96,
+        "raw_score": 96,
+        "similarity": 0.0096,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 88,
+        "raw_score": 88,
+        "similarity": 0.0044,
+        "penalty": 0
+      }
+    ]
   }
 ]
