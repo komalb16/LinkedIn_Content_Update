@@ -38,10 +38,10 @@
       "time_tz": "America/New_York"
     },
     "sat": {
-      "enabled": false,
-      "time_ist": "11:20",
-      "time_utc": "19:20",
-      "time_local": "11:20",
+      "enabled": true,
+      "time_ist": "14:05",
+      "time_utc": "22:05",
+      "time_local": "14:05",
       "time_tz": "America/New_York"
     },
     "sun": {
@@ -54,5 +54,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-03-26T23:30:49.952Z"
+  "updated_at": "2026-03-28T02:34:11.551Z"
 }

@@ -96,5 +96,75 @@
     "style": 21,
     "signature": "3c369c7499c943656eec7b0c849f9b97",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-03-28T03:33:39.295013",
+    "topic_id": "ai-search-discovery",
+    "style": 0,
+    "signature": "27b943191ed635144773dd840d749d2a",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-03-28T18:05:09.933483",
+    "topic_id": "microsoft-agent-stack",
+    "style": 10,
+    "signature": "815505b094f8a96329a09a6a6efe12fa",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-03-28T18:05:11.323703",
+    "topic_id": "microsoft-agent-stack",
+    "style": 0,
+    "signature": "6300aff194ea084b620fef3976c91b37",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-03-30T23:15:05.253324",
+    "topic_id": "story-ai-discovery-moment",
+    "style": 0,
+    "signature": "8ff25bd1b1591f7146f0ec55f60f5550",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-03-31T17:00:12.288909",
+    "topic_id": "ai-innovation-experiments",
+    "style": 0,
+    "signature": "e60a1f94dfe878454811fbd5af644182",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-01T22:26:49.136638",
+    "topic_id": "platform-engineering-ai",
+    "style": 20,
+    "signature": "849f686e0700844d24527018da720417",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-02T23:00:09.865840",
+    "topic_id": "vector-databases",
+    "style": 0,
+    "signature": "570fed9745991785b1d92dfc0e93cfc2",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-04T03:31:02.062885",
+    "topic_id": "ml-algorithms",
+    "style": 19,
+    "signature": "014ad1008ba3624e912231c9610cf3d9",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-04T18:05:08.168824",
+    "topic_id": "data-evolution",
+    "style": 8,
+    "signature": "2af7a66ff7042553f3c22605988dc153",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-06T23:15:08.076168",
+    "topic_id": "llm-vs-agentic",
+    "style": 0,
+    "signature": "1c343a860f79080d361051e5212e5127",
+    "duplicate_avoided": true
   }
 ]
