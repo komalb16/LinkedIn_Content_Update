@@ -599,5 +599,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-07T17:00:17.280861",
+    "topic_id": "responsible-ai-security-stack",
+    "topic_name": "Responsible AI Security Stack",
+    "category": "Security",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 82,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 82,
+        "raw_score": 82,
+        "similarity": 0.0486,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 70,
+        "raw_score": 70,
+        "similarity": 0.0113,
+        "penalty": 0
+      }
+    ]
   }
 ]
