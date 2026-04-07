@@ -574,5 +574,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-07T01:15:08.001590",
+    "topic_id": "agentic-ai",
+    "topic_name": "Agentic AI",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 92,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 92,
+        "raw_score": 92,
+        "similarity": 0.0941,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0311,
+        "penalty": 0
+      }
+    ]
   }
 ]
