@@ -1,6 +1,9 @@
 {
   "paused": false,
   "pause_until": null,
+  "enable_trending_topics": true,
+  "trending_topic_frequency": 0.3,
+  "trending_cache_ttl_hours": 24,
   "weekly": {
     "mon": {
       "enabled": true,
