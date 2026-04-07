@@ -78,6 +78,15 @@
       display: flex
     }
 
+    /* ── DASHBOARD ── */
+    #db {
+      display: none
+    }
+
+    #db.show {
+      display: block
+    }
+
     .cc {
       max-width: 640px;
       padding: 60px 40px;
@@ -1518,6 +1527,13 @@
       _themeColor = localStorage.getItem('themeColor') || 'blue';
       _themeMode = localStorage.getItem('themeMode') || 'dark';
       applyTheme();
+      
+      // Show connect screen if no token
+      if (!token) {
+        document.getElementById('cs').style.display = 'flex';
+        document.getElementById('db').style.display = 'none';
+      }
+      
       initTzSelector();
       const postModeSel = document.getElementById('postModeSel');
       if (postModeSel) postModeSel.value = postMode;
