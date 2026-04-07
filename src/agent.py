@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from topic_manager import TopicManager
 from diagram_generator import DiagramGenerator
+from diagram_rotation import DiagramRotation
 from logger import get_logger
 import notifier
 
@@ -1739,6 +1740,7 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
 
     topic_mgr   = TopicManager()
     diagram_gen = DiagramGenerator()
+    diagram_rotator = DiagramRotation()  # Initialize rotation system for diagram variety
     recent_post_entries = _load_post_memory()
     recent_posts = [e.get("text", "") for e in recent_post_entries if e.get("text")]
     recent_hashes = {_content_hash(t) for t in recent_posts if t}
@@ -1983,16 +1985,36 @@ Write a LinkedIn post that:
         diagram_type = fallback_diagram_type
         diagram_structure = topic_mgr.get_diagram_structure(topic)
     log.info(f"Visual metadata: title='{diagram_title}', type='{diagram_type}'")
-    diagram_path = diagram_gen.save_svg(
-        None, topic["id"], diagram_title, diagram_type, structure=diagram_structure
+    
+    # ── SELECT DIAGRAM STYLE USING ROTATION SYSTEM ──────────────────────────────
+    # Use intelligent rotation instead of deterministic selection for visual variety
+    available_styles = list(range(8))  # 8 diagram styles available (0-7)
+    selected_style = diagram_rotator.select_next_style(
+        preferred_style=7,  # Default fallback style
+        available_styles=available_styles,
+        avoid_repetition=True  # Avoid recently used styles
     )
-    alignment = _diagram_alignment_score(diagram_path, diagram_structure)
+    
+    # Ensure diagram_structure is a dict and set the selected style
+    if not isinstance(diagram_structure, dict):
+        diagram_structure = {}
+    diagram_structure_with_style = copy.deepcopy(diagram_structure)
+    diagram_structure_with_style["style"] = selected_style
+    log.info(f"Diagram style selected via rotation: {selected_style} (diversity_score: {diagram_rotator.get_diversity_score():.2f})")
+    
+    diagram_path = diagram_gen.save_svg(
+        None, topic["id"], diagram_title, diagram_type, structure=diagram_structure_with_style
+    )
+    # Record the style used for future rotation decisions
+    diagram_rotator.record_style_used(selected_style, topic["id"], diagram_title)
+    
+    alignment = _diagram_alignment_score(diagram_path, diagram_structure_with_style)
     log.info(f"Diagram/Text alignment score: {alignment:.2f}")
 
-    if alignment < 0.45 and diagram_structure:
+    if alignment < 0.45 and diagram_structure_with_style:
         fallback_style = _fallback_style_for_diagram(diagram_type, diagram_structure)
-        forced_structure = copy.deepcopy(diagram_structure)
-        forced_structure["style"] = fallback_style
+        forced_structure = copy.deepcopy(diagram_structure_with_style)
+        forced_structure["style"] = fallback_style  # Use fallback style but keep rotation record
         log.warning(
             f"Low diagram/text alignment ({alignment:.2f}). Regenerating diagram with style {fallback_style}."
         )
