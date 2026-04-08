@@ -66,7 +66,11 @@
     {
       "id": "enterprise-ai",
       "name": "Enterprise AI"
+    },
+    {
+      "id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
+      "name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity"
     }
   ],
-  "updated_at": "2026-03-18T00:37:56.504Z"
+  "updated_at": "2026-04-08T20:35:04.141Z"
 }
