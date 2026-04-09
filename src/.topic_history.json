@@ -574,5 +574,80 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-07T01:15:08.001590",
+    "topic_id": "agentic-ai",
+    "topic_name": "Agentic AI",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 92,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 92,
+        "raw_score": 92,
+        "similarity": 0.0941,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0311,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-04-07T17:00:17.280861",
+    "topic_id": "responsible-ai-security-stack",
+    "topic_name": "Responsible AI Security Stack",
+    "category": "Security",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 82,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 82,
+        "raw_score": 82,
+        "similarity": 0.0486,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 70,
+        "raw_score": 70,
+        "similarity": 0.0113,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-04-08T22:29:27.808286",
+    "topic_id": "git-workflow",
+    "topic_name": "Git Workflow and Commands",
+    "category": "Engineering",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 98,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 98,
+        "raw_score": 98,
+        "similarity": 0.0053,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 92,
+        "raw_score": 92,
+        "similarity": 0.0122,
+        "penalty": 0
+      }
+    ]
   }
 ]
