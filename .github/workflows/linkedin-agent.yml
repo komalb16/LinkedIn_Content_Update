@@ -98,6 +98,8 @@ jobs:
     name: Generate & Post Content
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    # Skip merge commits (only run on direct pushes)
+    if: ${{ github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'Merge') }}
 
     steps:
       # 1. Checkout repository
