@@ -1357,8 +1357,9 @@
     .day-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      margin-bottom: 16px
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 10px
     }
 
     .day-col {
@@ -1369,7 +1370,7 @@
     }
 
     .day-name {
-      font-size: 10px;
+      font-size: 13px;
       font-family: monospace;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -1378,13 +1379,13 @@
     }
 
     .day-toggle {
-      width: 36px;
-      height: 36px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       border: 2px solid var(--bd);
       background: var(--bg2);
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1407,17 +1408,17 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
       width: 100%
     }
 
     .time-btn {
-      width: 28px;
-      height: 20px;
+      width: 32px;
+      height: 24px;
       background: var(--sur3);
       border: 1.5px solid var(--bd);
       border-radius: 6px;
-      font-size: 10px;
+      font-size: 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -1425,7 +1426,8 @@
       color: var(--txm);
       transition: all var(--tr);
       padding: 0;
-      line-height: 1
+      line-height: 1;
+      font-weight: 600
     }
 
     .time-btn:hover {
@@ -1435,18 +1437,18 @@
     }
 
     .time-val {
-      font-size: 12px;
+      font-size: 16px;
       font-family: var(--fm);
-      font-weight: 500;
+      font-weight: 600;
       color: var(--tx);
       background: var(--sur3);
       border: 1.5px solid var(--bd);
       border-radius: 7px;
-      padding: 4px 3px;
+      padding: 6px 5px;
       width: 100%;
       text-align: center;
       letter-spacing: .3px;
-      line-height: 1.2;
+      line-height: 1.3;
       transition: border-color var(--tr);
       outline: none;
       cursor: text;
@@ -2776,6 +2778,40 @@
       .rfp {
         font-size: 10px;
         padding: 4px 10px
+      }
+    }
+
+    /* ── LARGE SCREEN OPTIMIZATION (1200px+) ── */
+    @media(min-width:1200px) {
+      .day-grid {
+        gap: 16px;
+        padding: 16px
+      }
+
+      .day-col {
+        gap: 8px
+      }
+
+      .day-name {
+        font-size: 14px;
+        margin-bottom: 4px
+      }
+
+      .day-toggle {
+        width: 48px;
+        height: 48px;
+        font-size: 20px
+      }
+
+      .time-val {
+        font-size: 18px;
+        padding: 8px 6px
+      }
+
+      .time-btn {
+        width: 36px;
+        height: 28px;
+        font-size: 13px
       }
     }
 
