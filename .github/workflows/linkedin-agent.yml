@@ -5,7 +5,7 @@ permissions:
   actions: read
 
 run-name: >-
-  ${{ github.event_name == 'push' && '📤 Push' || github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.dry_run == 'true' && 'dry-run' || 'live' }} · ${{ github.event.inputs.post_mode || 'auto' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
+  ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.dry_run == 'true' && 'dry-run' || 'live' }} · ${{ github.event.inputs.post_mode || 'auto' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
 
 # ─── Triggers ───────────────────────────────────────────────────────────────
 on:
@@ -22,17 +22,6 @@ on:
     - cron: "0 14 * * *"  #  2 PM UTC = 10 AM EDT  ← morning posts
     - cron: "0 22 * * *"  # 10 PM UTC =  6 PM EDT  ← evening posts
     - cron: "0 1  * * *"   # ← new, covers late-night Friday
-  
-  # On push: run tests and validate changes to core files
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - 'dashboard.html'
-      - 'schedule_config.json'
-      - 'requirements.txt'
-      - '.github/workflows/linkedin-agent.yml'
   
   # Manual trigger from GitHub UI — with optional inputs
   workflow_dispatch:
@@ -98,8 +87,6 @@ jobs:
     name: Generate & Post Content
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    # Skip merge commits (only run on direct pushes)
-    if: ${{ github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'Merge') }}
 
     steps:
       # 1. Checkout repository
