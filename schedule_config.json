@@ -38,14 +38,14 @@
       "time_utc": "08:15"
     },
     "sat": {
-      "enabled": false,
+      "enabled": true,
       "time_ist": "10:00",
       "time_local": "10:00",
       "time_tz": "America/New_York",
       "time_utc": "18:00"
     },
     "sun": {
-      "enabled": false,
+      "enabled": true,
       "time_ist": "10:00",
       "time_local": "10:00",
       "time_tz": "America/New_York",

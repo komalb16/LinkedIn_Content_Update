@@ -1500,7 +1500,7 @@
     .time-val {
       font-size: 14px;
       font-family: var(--fm);
-      font-weight: 700;
+      font-weight: 600;
       color: var(--tx);
       background: var(--sur3);
       border: 1.5px solid var(--bd);
@@ -1612,6 +1612,7 @@
         font-size: 13px;
         letter-spacing: .02em;
         padding: 7px 6px;
+        font-weight: 500;
       }
 
       .time-btn {
@@ -4796,8 +4797,8 @@ async function runNow(options = {}) {
         wed: { enabled: true, time_ist: '09:30' },
         thu: { enabled: true, time_ist: '09:30' },
         fri: { enabled: true, time_ist: '09:30' },
-        sat: { enabled: false, time_ist: '10:00' },
-        sun: { enabled: false, time_ist: '10:00' },
+        sat: { enabled: true, time_ist: '10:00' },
+        sun: { enabled: true, time_ist: '10:00' },
       },
       skip_dates: [],
       force_dates: [],
