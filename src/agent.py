@@ -8,7 +8,11 @@ import copy
 import hashlib
 import requests
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timedelta
+
+# Add src directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from topic_manager import TopicManager
 from diagram_generator import DiagramGenerator
 from diagram_rotation import DiagramRotation
@@ -17,6 +21,8 @@ import notifier
 
 log = get_logger("agent")
 POST_MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".post_memory.json")
+ENGAGEMENT_TRACKER_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".engagement_tracker.json")
+DIAGRAM_ROTATION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".diagram_rotation.json")
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "llama-3.3-70b-versatile"
@@ -80,6 +86,50 @@ INCIDENT_PATTERNS = [
     r"\bi\s+just\s+spent\s+\d+\s*(?:hours?|hrs?)\b",
     r"\blast night\b.*\b(prod|incident|outage|issue)\b",
 ]
+
+# ─── ENGAGEMENT IMPROVEMENTS ──────────────────────────────────────────────────
+
+# Strong CTAs that drive engagement (vs weak "what do you think?")
+STRONG_CTAS = [
+    "How many of these mistakes have you made?",
+    "Which one cost your team the most time?",
+    "When was your turning point moment?",
+    "What's the uncomfortable truth you experienced?",
+    "Which wrong assumption did you finally fix?",
+    "What would you do differently knowing this?",
+    "Which trade-off bothers you most in production?",
+    "How long did it take you to really learn this?",
+    "What part of this does your team still get wrong?",
+    "Which mistake taught you the most?",
+]
+
+VULNERABILITY_PATTERNS = [
+    r"i was wrong",
+    r"i didn't realize",
+    r"biggest mistake",
+    r"biggest failure",
+    r"took me.*years?.*to learn",
+    r"setup fails",
+    r"architecture failed",
+    r"finally understood",
+    r"turns out",
+    r"completely changed my mind",
+    r"three times before",
+    r"wasted weeks?",
+    r"painful lesson",
+    r"embarrassing discovery",
+    r"got this wrong",
+    r"production fire",
+]
+
+# High-engagement hashtags (reach multiplier)
+TRENDING_HASHTAGS = {
+    "ai": ["#AIengineering", "#LLM", "#RAG", "#Agentic", "#VectorDB"],
+    "story": ["#CareerGrowth", "#LessonsLearned", "#EngineeringLife", "#HonestConversation"],
+    "system": ["#SystemDesign", "#SoftwareArchitecture", "#DistributedSystems", "#ScaleEngineering"],
+    "devops": ["#DevOps", "#Kubernetes", "#CloudNative", "#CICD"],
+    "interview": ["#InterviewQuestions", "#EngineeringMindset", "#SkillDevelopment", "#TechInterviews"],
+}
 
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
 RSS_FEEDS = {
@@ -367,6 +417,40 @@ RULES:
 """
 
 
+# ─── HASHTAG OPTIMIZATION ─────────────────────────────────────────────────────
+
+def optimize_hashtags_for_reach(post_text, post_type="topic"):
+    """Replace generic hashtags with trending ones for better reach."""
+    existing_tags = re.findall(r"(?<!\w)#\w+", post_text)
+    
+    # Get relevant trend tag list
+    type_key = "interview" if "interview" in post_type.lower() else post_type
+    trending = TRENDING_HASHTAGS.get(type_key, TRENDING_HASHTAGS.get("system", []))
+    
+    if not trending:
+        return post_text
+    
+    # Replace generic tags with trending ones (priority)
+    generic_tags = {"#AI", "#Tech", "#DevOps", "#Engineering", "#Learning"}
+    tags_to_replace = [t for t in existing_tags if t in generic_tags]
+    
+    updatedText = post_text
+    for old_tag in tags_to_replace[:2]:  # Replace max 2 generic tags
+        if trending:
+            new_tag = random.choice(trending)
+            updatedText = updatedText.replace(old_tag, new_tag, 1)
+    
+    # Ensure 5-7 total hashtags (sweet spot for LinkedIn)
+    final_tags = re.findall(r"(?<!\w)#\w+", updatedText)
+    if len(final_tags) < 5 and trending:
+        # Add missing tags
+        for _ in range(5 - len(final_tags)):
+            if trending:
+                updatedText += f" {random.choice(trending)}"
+    
+    return updatedText
+
+
 # ─── AI CALL ──────────────────────────────────────────────────────────────────
 
 def call_ai(prompt, system):
@@ -536,6 +620,62 @@ Requirements:
         "diagram_type": theme.get("diagram_type", "Modern Cards"),
     }
     return story_topic, post_text
+
+
+def generate_interview_post():
+    """Generate interview-style post with rotating topics - NEW feature."""
+    log.info("Generating interview post...")
+    
+    try:
+        from interview_post_generator import InterviewPostGenerator
+        
+        gen = InterviewPostGenerator()
+        
+        # Get random question (will rotate naturally)
+        question = gen.get_random_question()
+        
+        if not question:
+            log.warning("No interview questions available, falling back to topic mode")
+            return None, None
+        
+        # Generate post from question
+        post_text = gen.generate_post_from_question(question)
+        
+        if not post_text:
+            log.warning("Interview post generation failed")
+            return None, None
+        
+        # Find parent topic
+        parent_topic = None
+        for topic_key, topic_data in gen.topics.items():
+            for q in topic_data.get("questions", []):
+                if q.get("id") == question.get("id"):
+                    parent_topic = topic_key
+                    break
+        
+        # Get recommended diagram styles
+        diagram_styles = gen.get_best_diagram_styles(parent_topic) if parent_topic else [7]
+        
+        # Create metadata for integration
+        topic = {
+            "id": f"interview-{question.get('id', str(random.randint(1000, 9999)))}",
+            "name": f"Interview: {parent_topic.title() if parent_topic else 'Developer Question'}",
+            "category": "Interview",
+            "prompt": question.get("question", ""),
+            "angle": question.get("type", "opinion_poll"),
+            "diagram_type": "Modern Cards",
+            "diagram_styles": diagram_styles,
+        }
+        
+        log.info(f"Interview post generated from topic: {parent_topic}")
+        return topic, post_text
+    
+    except ImportError:
+        log.warning("interview_post_generator not available, falling back")
+        return None, None
+    except Exception as e:
+        log.error(f"Interview post generation error: {e}")
+        return None, None
 
 
 def _build_post_template_instructions(diagram_type, structure=None):
@@ -898,6 +1038,21 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
     lowered = cleaned.lower()
     topic_blob = _topic_text_blob(topic).lower()
 
+    # ─── ENGAGEMENT QUALITY CHECKS (NEW) ───────────────────────────────────────
+    # Check for vulnerability (drives engagement +500%)
+    has_vulnerability = any(re.search(pattern, lowered) for pattern in VULNERABILITY_PATTERNS)
+    if not has_vulnerability:
+        issues.append("Add vulnerability: mention a mistake, failure, or lesson learned. Try 'I was wrong', 'took me years to learn', or 'finally understood'.")
+
+    # Check for strong CTA (drives engagement +200%)
+    has_strong_cta = any(cta.lower() in lowered for cta in STRONG_CTAS)
+    weak_cta_patterns = [r"what do you think\?", r"thoughts\?", r"curious", r"let me know"]
+    has_weak_cta = any(re.search(pattern, lowered) for pattern in weak_cta_patterns)
+    
+    if has_weak_cta and not has_strong_cta:
+        random_cta = random.choice(STRONG_CTAS)
+        issues.append(f"Strengthen CTA: replace generic 'what do you think?' with concrete question like '{random_cta.lower()}'")
+
     if "hashtag#" in (post_text or ""):
         issues.append("Convert every 'hashtag#' token into a normal hashtag like '#AI'.")
 
@@ -1188,6 +1343,137 @@ def _align_poll_with_structure(text, structure=None, diagram_type=""):
     return "\n".join([ln for ln in lines if ln is not None and ln != ""]).strip()
 
 
+def _format_post_structure(text):
+    """Add proper spacing and visual hierarchy to posts for better LinkedIn readability."""
+    if not text:
+        return text
+    
+    lines = text.splitlines()
+    if not lines:
+        return text
+    
+    # Detect structural elements
+    visual_block_ranges = []  # Store (start, end) tuples for visual blocks
+    cta_line_idx = None
+    hashtag_start = None
+    
+    # Find visual blocks
+    in_visual = False
+    visual_start = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("```"):
+            if not in_visual:
+                visual_start = i
+                in_visual = True
+            else:
+                visual_block_ranges.append((visual_start, i))
+                in_visual = False
+    
+    # Find CTA section (look for poll marker or strong CTA)
+    for i in range(len(lines) - 1, -1, -1):
+        if "💬" in lines[i] or POLL_PREFIX_RE.search(lines[i]):
+            cta_line_idx = i
+            break
+    
+    # Find start of hashtags
+    for i in range(len(lines) - 1, -1, -1):
+        if lines[i].strip().startswith("#"):
+            hashtag_start = i
+        else:
+            break
+    
+    # Build formatted post with intelligent spacing
+    result = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        
+        # Check if we're in a visual block
+        in_visual_block = any(start <= i <= end for start, end in visual_block_ranges)
+        
+        if not stripped:
+            # Empty line - preserve but avoid duplicates
+            if result and result[-1] != "":
+                result.append("")
+            i += 1
+            continue
+        
+        # Handle visual blocks - add space before/after
+        if i > 0 and line.strip().startswith("```"):
+            if result and result[-1].strip():
+                result.append("")  # Space before visual block
+            result.append(line)
+            i += 1
+            continue
+        
+        if line.strip().startswith("```"):
+            if result and result[-1].strip():
+                result.append("")
+            while i < len(lines) and i <= (max([e for s, e in visual_block_ranges if s <= i], default=i) or i):
+                result.append(lines[i])
+                if lines[i].strip().endswith("```") and i > 0:
+                    i += 1
+                    if i < len(lines) and lines[i].strip():
+                        result.append("")  # Space after visual block
+                    break
+                i += 1
+            continue
+        
+        # Handle CTA/poll section - add clear visual breaks
+        if cta_line_idx and i >= cta_line_idx:
+            if i == cta_line_idx and result and result[-1].strip():
+                result.append("")  # Space before CTA section
+            
+            if "💬" in line and i > cta_line_idx:
+                # This is a poll question
+                result.append(line)
+                result.append("")  # Space after question
+            elif POLL_PREFIX_RE.search(line):
+                # Poll options - keep on separate lines
+                result.append(line)
+            else:
+                result.append(line)
+            i += 1
+            continue
+        
+        # Handle bullet points and numbered lists - add spacing
+        is_list_item = stripped.startswith(("•", "-", "→", "*", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"))
+        is_new_paragraph = (stripped[0].isupper() and 
+                           not (stripped.startswith(("📌", "💬")) or result and result[-1].endswith(":")))
+        
+        if result and result[-1].strip():
+            # Add space before:
+            # 1. New list items after regular text
+            if is_list_item and not result[-1].strip().startswith(("•", "-", "→", "*")):
+                result.append("")
+            # 2. New paragraphs after dense content
+            elif is_new_paragraph and len(result[-1]) > 60 and not result[-1] in ("", " "):
+                result.append("")
+        
+        result.append(line)
+        i += 1
+    
+    # Final cleanup: remove trailing spaces and limit empty lines
+    final_lines = []
+    prev_empty = False
+    
+    for line in result:
+        if not line.strip():
+            if not prev_empty and final_lines:
+                final_lines.append("")
+                prev_empty = True
+        else:
+            final_lines.append(line)
+            prev_empty = False
+    
+    # Remove trailing empty lines
+    while final_lines and not final_lines[-1].strip():
+        final_lines.pop()
+    
+    return "\n".join(final_lines).strip()
+
+
 def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _cleanup_generated_post(post_text or "")
     finalized = _normalize_hashtags(finalized).strip()
@@ -1201,6 +1487,10 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _enforce_numbered_poll_options(finalized)
     finalized = _tighten_poll_options(finalized)
     finalized = _normalize_hashtags(finalized)
+    # Format post structure for better readability (NEW)
+    finalized = _format_post_structure(finalized)
+    # NEW: Optimize hashtags for better reach
+    finalized = optimize_hashtags_for_reach(finalized, post_type=topic.get("category", "topic"))
     return finalized
 
 
@@ -1208,11 +1498,31 @@ def _render_linkedin_text(post_text):
     text = (post_text or "").strip()
     if not text:
         return text
-    # LinkedIn renders fenced blocks poorly; remove the entire fenced block from final publish text.
-    text = re.sub(r"```[\s\S]*?```", "", text)
-    # Remove inline code ticks so raw markdown does not leak into the final post.
+    
+    # LinkedIn renders fenced blocks poorly; extract content but preserve it with separators
+    visual_blocks = []
+    def extract_visual(match):
+        content = match.group(1).strip()
+        if content:
+            visual_blocks.append(content)
+            # Return markers to preserve visual block position, will be replaced later
+            return f"\n[VISUAL_BLOCK_{len(visual_blocks)-1}]\n"
+        return ""
+    
+    text = re.sub(r"```[\s\S]*?```", extract_visual, text)
+    
+    # Remove inline code ticks so raw markdown does not leak into the final post
     text = re.sub(r"`([^`\n]+)`", r"\1", text)
+    
+    # Add back visual blocks with proper formatting
+    for i, visual_content in enumerate(visual_blocks):
+        placeholder = f"[VISUAL_BLOCK_{i}]"
+        visual_formatted = "\n".join(visual_content.splitlines())
+        text = text.replace(placeholder, visual_formatted)
+    
+    # Clean up spacing - remove more than 2 consecutive newlines
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    
     return text
 
 
@@ -1237,14 +1547,67 @@ def _save_post_memory(entries):
 
 
 def _remember_post(topic, text):
+    """Remember post with enhanced tracking for engagement and diversity."""
     entries = _load_post_memory()
-    entries.append({
+    
+    # Determine category
+    category = topic.get("category", "")
+    if "interview" in topic.get("id", "").lower():
+        category = "interview"
+    elif topic.get("id", "").startswith("story-"):
+        category = "story"
+    elif "news" in topic.get("id", "").lower():
+        category = "news"
+    else:
+        category = "topic"
+    
+    entry = {
         "timestamp": datetime.now().isoformat(),
         "topic_id": topic.get("id", ""),
         "topic_name": topic.get("name", ""),
+        "category": category,
         "text": _cleanup_generated_post(text or "")[:2500],
-    })
+    }
+    
+    entries.append(entry)
     _save_post_memory(entries)
+    log.info(f"Post memory updated: {category} | {topic.get('name', 'unknown')}")
+
+
+def _get_recent_topics(days=7):
+    """Get topics posted in last N days to avoid repeats (interview feature)."""
+    entries = _load_post_memory()
+    cutoff = datetime.now() - timedelta(days=days)
+    recent = []
+    
+    try:
+        for entry in entries:
+            ts = datetime.fromisoformat(entry.get("timestamp", ""))
+            if ts > cutoff:
+                if entry.get("topic_id"):
+                    recent.append(entry.get("topic_id"))
+    except Exception as e:
+        log.warning(f"Could not check recent topics: {e}")
+    
+    return set(recent)
+
+
+def _get_category_mix(days=30):
+    """Get post category distribution for diversity tracking."""
+    entries = _load_post_memory()
+    cutoff = datetime.now() - timedelta(days=days)
+    categories = {}
+    
+    try:
+        for entry in entries:
+            ts = datetime.fromisoformat(entry.get("timestamp", ""))
+            if ts > cutoff:
+                cat = entry.get("category", "topic")
+                categories[cat] = categories.get(cat, 0) + 1
+    except Exception as e:
+        log.warning(f"Could not get category mix: {e}")
+    
+    return categories
 
 
 def _normalize_similarity_text(text):
@@ -1430,6 +1793,232 @@ def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
         "issues": issues[:8],
         "word_count": word_count,
         "hashtag_count": len(hashtags),
+    }
+
+
+# ─── TOPIC DIVERSITY CHECK ────────────────────────────────────────────────────
+
+def _get_topic_concepts(topic):
+    """Extract key concepts from topic for similarity comparison."""
+    blob = _topic_text_blob(topic).lower()
+    # Extract meaningful tokens
+    tokens = [t for t in re.split(r"[^a-z0-9]+", blob) if len(t) > 3]
+    # Also include topic ID for exact matches
+    concepts = {topic.get("id", "").lower()}
+    concepts.update(tokens[:20])  # Top 20 tokens
+    return concepts
+
+
+def _check_topic_diversity(topic, days=7):
+    """
+    Check if topic is too similar to recently posted topics.
+    Returns (is_diverse, similarity_score, conflicting_topic_ids)
+    """
+    entries = _load_post_memory()
+    cutoff = datetime.now() - timedelta(days=days)
+    recent_topics = []
+    
+    try:
+        for entry in entries:
+            ts = datetime.fromisoformat(entry.get("timestamp", ""))
+            if ts > cutoff:
+                recent_topics.append({
+                    "id": entry.get("topic_id", ""),
+                    "name": entry.get("topic_name", ""),
+                    "category": entry.get("category", "")
+                })
+    except Exception as e:
+        log.warning(f"Could not check topic diversity: {e}")
+        return True, 0.0, []
+    
+    # Get current topic concepts
+    current_concepts = _get_topic_concepts(topic)
+    conflicting = []
+    max_similarity = 0.0
+    
+    # Compare against recent topics
+    for recent in recent_topics:
+        # Exact ID match = very similar
+        if current_concepts & {recent["id"].lower()}:
+            conflicting.append(recent["id"])
+            continue
+        
+        # Similar category = likely related
+        if recent["category"] == topic.get("category", "topic"):
+            conflicting.append(recent["id"])
+            continue
+    
+    # If too many similar topics recently, flag it
+    if len(conflicting) >= 2:
+        max_similarity = min(0.95, 0.5 + len(conflicting) * 0.15)
+        return False, max_similarity, conflicting
+    
+    return True, max_similarity, conflicting
+
+
+# ─── SMART DIAGRAM ROTATION ───────────────────────────────────────────────────
+
+ALL_DIAGRAM_STYLES = list(range(8)) + list(range(8, 16)) + [17, 18, 19, 20, 22]  # Styles: 0-7, 8-15, 17-20, 22 (16, 21 disabled)
+
+def _load_diagram_rotation_state():
+    """Load diagram rotation state to track style usage."""
+    if os.path.exists(DIAGRAM_ROTATION_FILE):
+        try:
+            with open(DIAGRAM_ROTATION_FILE, encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                return data
+        except Exception:
+            pass
+    return {"rotation_index": 0, "style_history": []}
+
+
+def _save_diagram_rotation_state(state):
+    """Save diagram rotation state."""
+    try:
+        with open(DIAGRAM_ROTATION_FILE, "w", encoding="utf-8") as f:
+            json.dump(state, f, indent=2)
+    except Exception as e:
+        log.warning(f"Could not save diagram rotation state: {e}")
+
+
+def _select_smart_diagram_style(topic_id=""):
+    """
+    Select diagram style intelligently:
+    1. Rotate through all 23 available styles
+    2. Avoid styles used in last 15 posts
+    3. Prefer variety for each topic
+    """
+    state = _load_diagram_rotation_state()
+    style_history = state.get("style_history", [])[-15:]  # Last 15 used styles
+    
+    # Find first style not in recent history
+    for offset in range(len(ALL_DIAGRAM_STYLES)):
+        next_index = (state.get("rotation_index", 0) + offset) % len(ALL_DIAGRAM_STYLES)
+        candidate_style = ALL_DIAGRAM_STYLES[next_index]
+        
+        if candidate_style not in style_history:
+            # Found a fresh style
+            state["rotation_index"] = (next_index + 1) % len(ALL_DIAGRAM_STYLES)
+            state["style_history"] = style_history + [candidate_style]
+            _save_diagram_rotation_state(state)
+            log.info(f"Selected diagram style {candidate_style} (rotated from {len(style_history)} previous)")
+            return candidate_style
+    
+    # Fallback: use next in rotation even if recently used (but better than always using 7)
+    next_index = state.get("rotation_index", 0)
+    selected_style = ALL_DIAGRAM_STYLES[next_index]
+    state["rotation_index"] = (next_index + 1) % len(ALL_DIAGRAM_STYLES)
+    state["style_history"] = style_history + [selected_style]
+    _save_diagram_rotation_state(state)
+    
+    return selected_style
+
+
+# ─── ENGAGEMENT TRACKER ────────────────────────────────────────────────────────
+
+def _load_engagement_tracker():
+    """Load engagement tracking data."""
+    if os.path.exists(ENGAGEMENT_TRACKER_FILE):
+        try:
+            with open(ENGAGEMENT_TRACKER_FILE, encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict) and "posts" in data:
+                return data
+        except Exception:
+            pass
+    return {"posts": [], "stats_by_type": {}, "stats_by_topic": {}}
+
+
+def _save_engagement_tracker(tracker):
+    """Save engagement tracking data."""
+    try:
+        with open(ENGAGEMENT_TRACKER_FILE, "w", encoding="utf-8") as f:
+            json.dump(tracker, f, indent=2)
+    except Exception as e:
+        log.warning(f"Could not save engagement tracker: {e}")
+
+
+def _log_post_generated(topic, post_text, diagram_style, post_mode):
+    """
+    Log a generated post to engagement tracker.
+    This captures metadata for later engagement analysis.
+    """
+    tracker = _load_engagement_tracker()
+    
+    post_id = hashlib.md5(f"{datetime.now().isoformat()}|{topic.get('id', '')}".encode()).hexdigest()[:12]
+    
+    post_entry = {
+        "post_id": post_id,
+        "timestamp": datetime.now().isoformat(),
+        "topic_id": topic.get("id", ""),
+        "topic_name": topic.get("name", ""),
+        "post_type": post_mode,  # "topic", "story", "news", "interview"
+        "category": topic.get("category", ""),
+        "diagram_style": diagram_style,
+        "text_length": len(post_text or ""),
+        "emoji_count": len(re.findall(r"[^\w\s]", post_text or "")),
+        "hashtag_count": len(re.findall(r"(?<!\w)#\w+", post_text or "")),
+        "has_poll": "💬" in (post_text or ""),
+        "has_vulnerability": any(re.search(pat, (post_text or "").lower()) for pat in VULNERABILITY_PATTERNS),
+        "has_strong_cta": any(cta.lower() in (post_text or "").lower() for cta in STRONG_CTAS),
+        "engagement": {
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "impressions": 0,
+            "tracked": False
+        }
+    }
+    
+    tracker["posts"].append(post_entry)
+    
+    # Keep only last 500 posts
+    if len(tracker["posts"]) > 500:
+        tracker["posts"] = tracker["posts"][-500:]
+    
+    _save_engagement_tracker(tracker)
+    log.info(f"Post logged for engagement tracking: {post_id} | {post_mode} | {topic.get('name', 'unknown')}")
+    
+    return post_id
+
+
+def _get_engagement_stats(days=30, post_type=None):
+    """
+    Get engagement statistics by post type.
+    Returns average engagement metrics for comparison.
+    """
+    tracker = _load_engagement_tracker()
+    cutoff = datetime.now() - timedelta(days=days)
+    
+    posts = []
+    try:
+        for post in tracker.get("posts", []):
+            ts = datetime.fromisoformat(post.get("timestamp", ""))
+            if ts > cutoff:
+                if post_type is None or post.get("post_type") == post_type:
+                    posts.append(post)
+    except Exception:
+        pass
+    
+    if not posts:
+        return {
+            "count": 0,
+            "avg_engagement": 0,
+            "avg_comments": 0,
+            "avg_impressions": 0
+        }
+    
+    total_engagement = sum(p.get("engagement", {}).get("likes", 0) + 
+                          p.get("engagement", {}).get("comments", 0) for p in posts)
+    total_impressions = sum(p.get("engagement", {}).get("impressions", 0) for p in posts)
+    
+    return {
+        "count": len(posts),
+        "avg_engagement": total_engagement / max(1, len(posts)),
+        "avg_comments": sum(p.get("engagement", {}).get("comments", 0) for p in posts) / max(1, len(posts)),
+        "avg_impressions": total_impressions / max(1, len(posts)),
+        "tracked_count": len([p for p in posts if p.get("engagement", {}).get("tracked", False)])
     }
 
 
@@ -1636,36 +2225,45 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
 # ─── POST MODE ────────────────────────────────────────────────────────────────
 
 def get_post_mode():
+    """Decide which post type to generate - now with news ENABLED by default."""
     def _env_float(name, default):
         try:
             return float(os.environ.get(name, str(default)))
         except Exception:
             return float(default)
 
-    if os.environ.get("ENABLE_NEWS_MODES", "0").strip().lower() in {"1", "true", "yes"}:
-        story_prob = _env_float("STORY_MODE_PROB", 0.25)
-        ai_news_prob = _env_float("AI_NEWS_MODE_PROB", 0.05)
-        layoff_prob = _env_float("LAYOFF_MODE_PROB", 0.03)
-        tools_prob = _env_float("TOOLS_NEWS_MODE_PROB", 0.04)
-        tech_prob = _env_float("TECH_NEWS_MODE_PROB", 0.03)
-        rand = random.random()
-        if rand < story_prob:
-            return "story"
-        elif rand < story_prob + ai_news_prob:
-            return "ai_news"
-        elif rand < story_prob + ai_news_prob + layoff_prob:
-            return "layoff_news"
-        elif rand < story_prob + ai_news_prob + layoff_prob + tools_prob:
-            return "tools_news"
-        elif rand < story_prob + ai_news_prob + layoff_prob + tools_prob + tech_prob:
-            return "tech_news"
-        else:
-            return "topic"
-
-    story_prob = _env_float("STORY_MODE_PROB", 0.30)
+    # Load interview frequency from schedule_config if available
+    interview_freq = 0.15  # 15% interviews
+    try:
+        config_path = os.path.join(os.path.dirname(__file__), "..", "schedule_config.json")
+        if os.path.exists(config_path):
+            with open(config_path) as f:
+                cfg = json.load(f)
+                interview_freq = cfg.get("interview_posts", {}).get("frequency", 0.15)
+    except:
+        pass
+    
+    # NEWS MODES ENABLED BY DEFAULT (fix for 2-month gap)
+    interview_prob = interview_freq
+    story_prob = _env_float("STORY_MODE_PROB", 0.20)
+    ai_news_prob = _env_float("AI_NEWS_MODE_PROB", 0.12)
+    layoff_prob = _env_float("LAYOFF_MODE_PROB", 0.05)
+    tools_prob = _env_float("TOOLS_NEWS_MODE_PROB", 0.08)
+    tech_prob = _env_float("TECH_NEWS_MODE_PROB", 0.05)
+    
     rand = random.random()
-    if rand < story_prob:
+    if rand < interview_prob:
+        return "interview"
+    elif rand < interview_prob + story_prob:
         return "story"
+    elif rand < interview_prob + story_prob + ai_news_prob:
+        return "ai_news"
+    elif rand < interview_prob + story_prob + ai_news_prob + layoff_prob:
+        return "layoff_news"
+    elif rand < interview_prob + story_prob + ai_news_prob + layoff_prob + tools_prob:
+        return "tools_news"
+    elif rand < interview_prob + story_prob + ai_news_prob + layoff_prob + tools_prob + tech_prob:
+        return "tech_news"
     else:
         return "topic"
 
@@ -1780,7 +2378,20 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
     write_github_output("POST_MODE", mode)
 
     # ── GENERATE POST ─────────────────────────────────────────────────────────
-    if mode == "ai_news":
+    if mode == "interview":
+        # NEW: Interview posts with rotating topics
+        interview_topic, interview_text = generate_interview_post()
+        
+        if interview_topic and interview_text:
+            post_text = interview_text
+            topic = interview_topic
+            structure = None  # Interview posts don't use structured diagrams
+            log.info(f"Interview post selected: {topic['name']}")
+        else:
+            mode = "topic"  # Fallback
+            log.warning("Interview generation failed, falling back to topic mode")
+
+    elif mode == "ai_news":
         post_text = generate_news_post("ai")
         if not post_text:
             mode = "topic"
@@ -1895,6 +2506,13 @@ Write a LinkedIn post that:
             else topic_mgr.get_next_topic()
         )
         log.info("Topic selected: " + topic["name"])
+        
+        # NEW: Check topic diversity to prevent repetition
+        is_diverse, similarity_score, conflicts = _check_topic_diversity(topic, days=7)
+        if not is_diverse:
+            log.warning(f"Topic similarity warning: {topic['name']} is {similarity_score:.1%} similar to recent posts. Conflicting topics: {conflicts}")
+        else:
+            log.info(f"Topic diversity check passed: {topic['name']} is unique")
         structure = topic_mgr.get_diagram_structure(topic)
         planned_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
         structure_items = structure.get("sections") or structure.get("rows") or []
@@ -1986,27 +2604,20 @@ Write a LinkedIn post that:
         diagram_structure = topic_mgr.get_diagram_structure(topic)
     log.info(f"Visual metadata: title='{diagram_title}', type='{diagram_type}'")
     
-    # ── SELECT DIAGRAM STYLE USING ROTATION SYSTEM ──────────────────────────────
-    # Use intelligent rotation instead of deterministic selection for visual variety
-    available_styles = list(range(8))  # 8 diagram styles available (0-7)
-    selected_style = diagram_rotator.select_next_style(
-        preferred_style=7,  # Default fallback style
-        available_styles=available_styles,
-        avoid_repetition=True  # Avoid recently used styles
-    )
+    # ── SELECT DIAGRAM STYLE USING SMART ROTATION ──────────────────────────────
+    # NEW: Use smart rotation to cycle through all 23 available diagram styles
+    selected_style = _select_smart_diagram_style(topic.get("id", ""))
+    log.info(f"Selected diagram style {selected_style} from 23 available styles for visual variety")
     
     # Ensure diagram_structure is a dict and set the selected style
     if not isinstance(diagram_structure, dict):
         diagram_structure = {}
     diagram_structure_with_style = copy.deepcopy(diagram_structure)
     diagram_structure_with_style["style"] = selected_style
-    log.info(f"Diagram style selected via rotation: {selected_style} (diversity_score: {diagram_rotator.get_diversity_score():.2f})")
     
     diagram_path = diagram_gen.save_svg(
         None, topic["id"], diagram_title, diagram_type, structure=diagram_structure_with_style
     )
-    # Record the style used for future rotation decisions
-    diagram_rotator.record_style_used(selected_style, topic["id"], diagram_title)
     
     alignment = _diagram_alignment_score(diagram_path, diagram_structure_with_style)
     log.info(f"Diagram/Text alignment score: {alignment:.2f}")
@@ -2046,6 +2657,10 @@ Write a LinkedIn post that:
         publish_text = _render_linkedin_text(full_post_text)
         with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
             f.write(publish_text)
+        
+        # NEW: Log post to engagement tracker even in dry run
+        post_id = _log_post_generated(topic, publish_text, selected_style, mode)
+        
         with open("preview_payload_" + topic["id"] + ".json", "w", encoding="utf-8") as f:
             json.dump({
                 "topic_id": topic["id"],
@@ -2056,7 +2671,8 @@ Write a LinkedIn post that:
                 "diagram_title": diagram_title,
                 "diagram_file": os.path.basename(diagram_path),
                 "post_file": "output_post_" + topic["id"] + ".txt",
-                "quality_score": score_card["score"],
+                "post_id_for_tracking": post_id,
+                "diagram_style_used": selected_style,
                 "quality_notes": score_card["issues"],
                 "ab_variants": [
                     {
@@ -2083,6 +2699,10 @@ Write a LinkedIn post that:
     )
     full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
     publish_text = _render_linkedin_text(full_post_text)
+
+    # NEW: Log post to engagement tracker before publishing
+    post_id = _log_post_generated(topic, publish_text, selected_style, mode)
+    log.info(f"Engagement tracking ID assigned: {post_id}")
 
     result = poster.create_post_with_image(
         text=publish_text,

@@ -2,8 +2,13 @@ import json
 import os
 import random
 import re
+import sys
 from collections import Counter
 from datetime import datetime, timedelta
+
+# Add src directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from logger import get_logger
 
 log = get_logger("topics")

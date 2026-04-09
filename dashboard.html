@@ -4627,9 +4627,22 @@ async function runNow(options = {}) {
         // Set time_local and time_tz for DST-aware scheduling
         for (const day of DAYS) {
           if (schedConfig.weekly[day]) {
-            schedConfig.weekly[day].time_local = schedConfig.weekly[day].time_ist;
-            schedConfig.weekly[day].time_tz = userTZ;
-            schedConfig.weekly[day].time_utc = localTimeToUtc(schedConfig.weekly[day].time_ist, userTZ);
+            const dayCfg = schedConfig.weekly[day];
+            
+            // Support BOTH: new format (times array) and legacy format (single time_ist)
+            if (dayCfg.times && Array.isArray(dayCfg.times) && dayCfg.times.length > 0) {
+              // New format: process each time in the times array
+              dayCfg.times.forEach(timeEntry => {
+                timeEntry.time_local = timeEntry.time_ist;
+                timeEntry.time_tz = userTZ;
+                timeEntry.time_utc = localTimeToUtc(timeEntry.time_ist, userTZ);
+              });
+            } else {
+              // Legacy format: process single time
+              dayCfg.time_local = dayCfg.time_ist;
+              dayCfg.time_tz = userTZ;
+              dayCfg.time_utc = localTimeToUtc(dayCfg.time_ist, userTZ);
+            }
           }
         }
         schedConfig.updated_at = new Date().toISOString();
@@ -4749,22 +4762,82 @@ async function runNow(options = {}) {
       DAYS.forEach((day, i) => {
         const cfg = schedConfig.weekly[day] || { enabled: true, time_ist: '09:30' };
         const on = cfg.enabled && !schedConfig.paused;
-        const [h, m] = (cfg.time_ist || '09:30').split(':').map(Number);
+        
+        // Support BOTH: new format (times array) and legacy format (single time_ist)
+        const times = cfg.times && Array.isArray(cfg.times) && cfg.times.length > 0 
+          ? cfg.times 
+          : [{ time_ist: cfg.time_ist || '09:30' }];
+        
         const col = document.createElement('div');
         col.className = 'day-col' + (cfg.enabled ? '' : ' disabled');
         col.id = 'daycol-' + day;
+        
+        // Build time inputs for each slot
+        let timeInputsHtml = '';
+        times.forEach((timeEntry, timeIdx) => {
+          const timeVal = timeEntry.time_ist || '09:30';
+          const [h, m] = timeVal.split(':').map(Number);
+          const timeId = `tmval-${day}-${timeIdx}`;
+          
+          timeInputsHtml += `
+            <div style="display:flex;gap:4px;margin-bottom:6px;align-items:center">
+              <button class="time-btn" onclick="adjDayTime('${day}',15,${timeIdx})" style="padding:4px 6px">▲</button>
+              <input type="text" class="time-val" id="${timeId}" data-day="${day}" data-idx="${timeIdx}" value="${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}" maxlength="5" placeholder="HH:MM" oninput="onTimeInput('${day}',this,${timeIdx})" onblur="onTimeBlur('${day}',this,${timeIdx})" onkeydown="onTimeKey(event,'${day}',this,${timeIdx})" />
+              <button class="time-btn" onclick="adjDayTime('${day}',-15,${timeIdx})" style="padding:4px 6px">▼</button>
+              ${times.length > 1 ? `<button class="time-btn" onclick="removeTimeSlot('${day}',${timeIdx})" style="padding:4px 6px;background:var(--red);color:white">✕</button>` : ''}
+            </div>`;
+        });
+        
+        // Add button for adding another time slot
+        const addButtonHtml = `<button style="font-size:11px;padding:4px 8px;background:var(--acc);color:white;border:none;border-radius:3px;cursor:pointer;margin-top:4px" onclick="addTimeSlot('${day}')">+ Add time</button>`;
+        
         col.innerHTML = `
       <div class="day-name">${DAY_LABELS[i]}</div>
       <button class="day-toggle ${cfg.enabled ? 'on' : ''}" id="daytog-${day}" onclick="toggleDay('${day}')" title="${cfg.enabled ? 'Click to disable' : 'Click to enable'}">
         ${cfg.enabled ? '✓' : '✕'}
       </button>
-      <div class="time-ctrl">
-        <button class="time-btn" onclick="adjDayTime('${day}',15)">▲</button>
-        <input type="text" class="time-val" id="tmval-${day}" value="${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}" maxlength="5" placeholder="HH:MM" oninput="onTimeInput('${day}',this)" onblur="onTimeBlur('${day}',this)" onkeydown="onTimeKey(event,'${day}',this)" />
-        <button class="time-btn" onclick="adjDayTime('${day}',-15)">▼</button>
+      <div class="time-ctrl" style="display:flex;flex-direction:column">
+        ${timeInputsHtml}
+        ${addButtonHtml}
       </div>`;
         grid.appendChild(col);
       });
+    }
+    
+    // Add a new time slot to a day (multiple times support)
+    function addTimeSlot(day) {
+      const cfg = schedConfig.weekly[day];
+      if (!cfg) return;
+      
+      // Initialize times array if it doesn't exist
+      if (!cfg.times) {
+        cfg.times = [{ time_ist: cfg.time_ist || '09:30' }];
+      }
+      
+      // Add new time slot (default to one hour after last time)
+      const lastTime = cfg.times[cfg.times.length - 1].time_ist || '09:30';
+      const [h, m] = lastTime.split(':').map(Number);
+      const newH = (h + 1) % 24;
+      const newTime = String(newH).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      
+      cfg.times.push({ time_ist: newTime });
+      buildDayGrid();
+      updNext();
+    }
+    
+    // Remove a time slot from a day
+    function removeTimeSlot(day, idx) {
+      const cfg = schedConfig.weekly[day];
+      if (!cfg || !cfg.times) return;
+      
+      if (cfg.times.length <= 1) {
+        alert('You must have at least one time slot per day');
+        return;
+      }
+      
+      cfg.times.splice(idx, 1);
+      buildDayGrid();
+      updNext();
     }
 
     function parseTimeInput(val) {
@@ -4785,7 +4858,7 @@ async function runNow(options = {}) {
       return { h, m };
     }
 
-    function onTimeInput(day, el) {
+    function onTimeInput(day, el, timeIdx = 0) {
       // Live format hint: highlight border red if invalid while typing (>3 chars)
       const val = el.value;
       if (val.length >= 4) {
@@ -4796,27 +4869,54 @@ async function runNow(options = {}) {
       }
     }
 
-    function onTimeBlur(day, el) {
+    function onTimeBlur(day, el, timeIdx = 0) {
       const parsed = parseTimeInput(el.value);
+      const cfg = schedConfig.weekly[day];
+      if (!cfg) return;
+      
       if (parsed) {
         const time = String(parsed.h).padStart(2, '0') + ':' + String(parsed.m).padStart(2, '0');
-        schedConfig.weekly[day].time_ist = time;
+        
+        // Update either times array or legacy time_ist
+        if (cfg.times && Array.isArray(cfg.times) && cfg.times[timeIdx]) {
+          cfg.times[timeIdx].time_ist = time;
+        } else {
+          cfg.time_ist = time;
+        }
+        
         el.value = time;
         el.style.borderColor = '';
         updNext();
       } else {
         // Restore last valid value
-        el.value = schedConfig.weekly[day].time_ist || '09:30';
+        let lastValid = '09:30';
+        if (cfg.times && Array.isArray(cfg.times) && cfg.times[timeIdx]) {
+          lastValid = cfg.times[timeIdx].time_ist || '09:30';
+        } else {
+          lastValid = cfg.time_ist || '09:30';
+        }
+        el.value = lastValid;
         el.style.borderColor = '';
       }
     }
 
-    function onTimeKey(e, day, el) {
+    function onTimeKey(e, day, el, timeIdx = 0) {
       if (e.key === 'Enter') { el.blur(); return; }
-      if (e.key === 'Escape') { el.value = schedConfig.weekly[day].time_ist || '09:30'; el.blur(); return; }
+      const cfg = schedConfig.weekly[day];
+      if (e.key === 'Escape') {
+        let lastVal = '09:30';
+        if (cfg.times && Array.isArray(cfg.times) && cfg.times[timeIdx]) {
+          lastVal = cfg.times[timeIdx].time_ist || '09:30';
+        } else {
+          lastVal = cfg.time_ist || '09:30';
+        }
+        el.value = lastVal;
+        el.blur();
+        return;
+      }
       // Arrow up/down still adjusts by 15 min like the buttons
-      if (e.key === 'ArrowUp') { e.preventDefault(); adjDayTime(day, 15); return; }
-      if (e.key === 'ArrowDown') { e.preventDefault(); adjDayTime(day, -15); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); adjDayTime(day, 15, timeIdx); return; }
+      if (e.key === 'ArrowDown') { e.preventDefault(); adjDayTime(day, -15, timeIdx); return; }
     }
 
     function toggleDay(day) {
@@ -4825,12 +4925,30 @@ async function runNow(options = {}) {
       updNext();
     }
 
-    function adjDayTime(day, deltaMin) {
-      const [h, m] = (schedConfig.weekly[day].time_ist || '09:30').split(':').map(Number);
+    function adjDayTime(day, deltaMin, timeIdx = 0) {
+      const cfg = schedConfig.weekly[day];
+      if (!cfg) return;
+      
+      let currentTime = '09:30';
+      if (cfg.times && Array.isArray(cfg.times) && cfg.times[timeIdx]) {
+        currentTime = cfg.times[timeIdx].time_ist || '09:30';
+      } else {
+        currentTime = cfg.time_ist || '09:30';
+      }
+      
+      const [h, m] = currentTime.split(':').map(Number);
       const total = ((h * 60 + m + deltaMin) + 1440) % 1440;
       const nh = Math.floor(total / 60), nm = total % 60;
-      schedConfig.weekly[day].time_ist = String(nh).padStart(2, '0') + ':' + String(nm).padStart(2, '0');
-      const el = document.getElementById('tmval-' + day); if (el) el.value = schedConfig.weekly[day].time_ist;
+      const newTime = String(nh).padStart(2, '0') + ':' + String(nm).padStart(2, '0');
+      
+      // Update either times array or legacy time_ist
+      if (cfg.times && Array.isArray(cfg.times) && cfg.times[timeIdx]) {
+        cfg.times[timeIdx].time_ist = newTime;
+      } else {
+        cfg.time_ist = newTime;
+      }
+      
+      buildDayGrid();
       updNext();
     }
 
@@ -4915,7 +5033,14 @@ async function runNow(options = {}) {
       // Update cron display (earliest active time → UTC)
       const activeTimes = DAYS.map(d => schedConfig.weekly[d])
         .filter(d => d.enabled)
-        .map(d => d.time_ist || '09:30');
+        .map(d => {
+          // Support both: new format (times array) and legacy format (single time_ist)
+          if (d.times && Array.isArray(d.times) && d.times.length > 0) {
+            return d.times.map(t => t.time_ist || '09:30')[0]; // Get first time
+          } else {
+            return d.time_ist || '09:30';
+          }
+        });
       const earliest = activeTimes.sort()[0] || '09:30';
       const [eh, em] = earliest.split(':').map(Number);
       const offMins = tzOffsetMins();
@@ -4935,6 +5060,7 @@ async function runNow(options = {}) {
       }
 
       // Walk forward up to 14 days to find next active slot
+      let nextCandidate = null;
       for (let offset = 0; offset < 14; offset++) {
         const d = new Date(ist);
         d.setDate(d.getDate() + offset);
@@ -4945,19 +5071,37 @@ async function runNow(options = {}) {
         const isSkip = schedConfig.skip_dates.includes(ds);
         if (isSkip && !isForce) continue;
         if (!cfg.enabled && !isForce) continue;
-        const [ph, pm] = (cfg.time_ist || '09:30').split(':').map(Number);
-        const candidate = new Date(d);
-        candidate.setHours(ph, pm, 0, 0);
-        if (candidate <= ist) continue;
+        
+        // Support BOTH: new format (times array) and legacy format (single time_ist)
+        const timesArray = (cfg.times && Array.isArray(cfg.times) && cfg.times.length > 0)
+          ? cfg.times.map(t => t.time_ist || '09:30')
+          : [cfg.time_ist || '09:30'];
+        
+        // Check each time for this day
+        for (const timeStr of timesArray) {
+          const [ph, pm] = timeStr.split(':').map(Number);
+          const candidate = new Date(d);
+          candidate.setHours(ph, pm, 0, 0);
+          if (candidate <= ist) continue;
+          
+          // Found a future candidate — save it if it's the nearest
+          if (!nextCandidate || candidate < nextCandidate.time) {
+            nextCandidate = { time: candidate, isForce };
+          }
+        }
+      }
+      
+      if (nextCandidate) {
+        const { time: candidate, isForce } = nextCandidate;
         const df = candidate - ist;
         const dh = Math.floor(df / (1000 * 60 * 60)), dm = Math.floor((df % (1000 * 60 * 60)) / (1000 * 60));
         document.getElementById('npLabel').textContent = 'Next scheduled post';
         document.getElementById('nxt').textContent = tzFmt(candidate, { weekday: 'long', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) + (isForce ? ' 📌 forced' : '');
         document.getElementById('cdt').textContent = dh + 'h ' + dm + 'm';
-        return;
+      } else {
+        document.getElementById('nxt').textContent = 'No active days in next 14 days';
+        document.getElementById('cdt').textContent = '—';
       }
-      document.getElementById('nxt').textContent = 'No active days in next 14 days';
-      document.getElementById('cdt').textContent = '—';
     }
 
     function copyCron() {

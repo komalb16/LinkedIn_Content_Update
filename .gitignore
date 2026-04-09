@@ -1,16 +1,81 @@
+# Environment variables (never commit secrets!)
+.env
+.env.local
+.env.*.local
+
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
+# Testing
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+
+# Node / Frontend
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+logs/
+*.log
+src/__pycache__/
+src/*.log
+
+# Data files
+.engagement_tracker.json
+.diagram_rotation.json
+.post_memory.json
+.topic_history.json
+output_post_*.txt
+output_post_*.png
+output_post_*.svg
+src/output_post_*.txt
+src/preview_payload_*.json
 src/__pycache__/
 src/diagrams/
 diagrams/
 
-*.log
-src/*.log
-
-output_post_*.txt
-src/output_post_*.txt
-src/preview_payload_*.json
-
-.topic_history.json
-src/.topic_history.json
+# OS
+Thumbs.db

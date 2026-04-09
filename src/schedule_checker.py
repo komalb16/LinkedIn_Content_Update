@@ -154,9 +154,85 @@ def _schedule_now(cfg: dict):
             warn(f"Could not resolve schedule timezone '{ref_tz}' ({e}) — using UTC day resolution")
     return now_utc, ""
 
-def ist_now() -> datetime:
-    """Legacy alias — kept so old configs using time_ist still work."""
-    return datetime.utcnow() + timedelta(hours=5, minutes=30)
+def check_times_in_window(day_cfg: dict, now_utc: datetime, window_secs: int = 4*60*60) -> bool:
+    """
+    Enhancement for multiple times per day support.
+    Returns True if ANY of the configured times fall within the current window.
+    Handles both new format (times array) and legacy format (single time).
+    
+    Args:
+        day_cfg: The per-day config dict (e.g., cfg["weekly"]["mon"])
+        now_utc: Current UTC datetime
+        window_secs: Time window to consider (default 4 hours)
+    
+    Returns:
+        True if we should run now, False otherwise
+    """
+    times_to_check = []
+    
+    # NEW FORMAT: times array with multiple times per day
+    if "times" in day_cfg and day_cfg["times"] and isinstance(day_cfg["times"], list):
+        info(f"Multiple times detected for this day: {len(day_cfg['times'])} time slot(s)")
+        times_to_check = day_cfg["times"]
+    # LEGACY FORMAT: single time fields
+    else:
+        # Create a single-item list from the legacy time fields for unified processing
+        times_to_check = [day_cfg]
+
+    # Check each time slot to see if we're within the posting window
+    for time_entry in times_to_check:
+        time_local = time_entry.get("time_local")
+        time_tz = time_entry.get("time_tz", "")
+        time_utc = time_entry.get("time_utc")
+        
+        if time_local and time_tz and HAS_ZONEINFO:
+            try:
+                time_str = _local_to_utc_hhmm(time_local, time_tz)
+                info(f"  → Checking time_local={time_local} {time_tz} → {time_str} UTC")
+            except Exception as e:
+                warn(f"    DST conversion failed ({e}) — skipping this slot")
+                continue
+        elif time_utc:
+            time_str = time_utc
+            info(f"  → Checking time_utc={time_utc}")
+        else:
+            raw = time_entry.get("time_ist", "")
+            if raw:
+                warn(f"    LEGACY: time_ist='{raw}' (re-save for DST support)")
+                time_str = "09:00"
+            else:
+                warn(f"    Skipping slot with no valid time field")
+                continue
+
+        try:
+            sched_h, sched_m = map(int, time_str.split(":"))
+        except Exception:
+            warn(f"    Invalid time format '{time_str}' — skipping")
+            continue
+
+        target = now_utc.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
+        diff_secs = (target - now_utc).total_seconds()
+
+        # Check if this time slot is within the window
+        if diff_secs < -window_secs:
+            # Too far in the past — this window already closed
+            continue
+        elif diff_secs > window_secs:
+            # Too far in the future — not yet time for this slot
+            continue
+        else:
+            # This slot is within the window!
+            if diff_secs > 0:
+                wait_mins = int(diff_secs // 60)
+                wait_secs = int(diff_secs % 60)
+                info(f"✓ Found active time slot {time_str} UTC — will sleep {wait_mins}m {wait_secs}s")
+            else:
+                mins_past = int(-diff_secs // 60)
+                info(f"✓ Found active time slot {time_str} UTC — already {mins_past}m into window")
+            return True
+
+    # No time slots in window
+    return False
 
 
 def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
@@ -214,75 +290,86 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         info(f"Skipping time-of-day sleep ({trigger}) — running immediately")
         return
 
-    # Prefer time_utc (set by modern dashboard). Fall back to time_ist for
-    # legacy configs — convert IST → UTC by subtracting 5h30m.
     now = utc_now()   # re-fetch as UTC for time comparison
-
-    # ── DST-AWARE time resolution ─────────────────────────────────────────────
-    # Priority 1: time_local + time_tz (set by modern dashboard, DST-safe)
-    #   → convert wall-clock time in the saved timezone to UTC using TODAY's offset
-    #   → 6 PM America/New_York is always 6 PM, whether DST is on or off
-    # Priority 2: time_utc (fixed UTC, no DST awareness — legacy)
-    # Priority 3: time_ist (oldest legacy, warn and default)
-    time_local = day_cfg.get("time_local")
-    time_tz    = day_cfg.get("time_tz", "")
-    time_utc   = day_cfg.get("time_utc")
-
-    if time_local and time_tz and HAS_ZONEINFO:
-        try:
-            time_str = _local_to_utc_hhmm(time_local, time_tz)
-            info(f"Using time_local={time_local} {time_tz} → {time_str} UTC "
-                 f"(DST-aware, offset today: {_dst_offset_str(time_tz)})")
-        except Exception as e:
-            warn(f"DST conversion failed ({e}) — falling back to time_utc")
-            time_str = time_utc or "09:00"
-    elif time_utc:
-        time_str = time_utc
-        info(f"Using time_utc={time_utc} (fixed UTC — re-save schedule for DST support)")
-    else:
-        raw = day_cfg.get("time_ist", "")
-        warn(f"LEGACY CONFIG: time_ist='{raw}' found but no time_utc or time_local. "
-             f"Open dashboard → Save Schedule to fix. Defaulting to 09:00 UTC.")
-        time_str = "09:00"
-
-    try:
-        sched_h, sched_m = map(int, time_str.split(":"))
-    except Exception:
-        warn(f"Invalid scheduled time '{time_str}' — defaulting to 09:00 UTC")
-        sched_h, sched_m = 9, 0
-
-    target = now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
-    diff_secs = (target - now).total_seconds()
-
-    # Cron fires twice daily. We only proceed if within a 6-hour window
-    # of the configured time. Otherwise exit cleanly (costs ~2 sec of Actions time).
     WINDOW = 4 * 60 * 60  # 4-hour window — cron fires every 8h, each covers a 4h posting slot
 
-    if diff_secs > WINDOW:
-        # Too early — a future cron will catch the right window
-        mins_away = int(diff_secs // 60)
-        info(f"⏭️  Not yet time — {time_str} UTC is {mins_away}m away. Exiting (next cron will check again).")
+    # NEW: Check if any time slot (multiple or single) is within the posting window
+    if not check_times_in_window(day_cfg, now, WINDOW):
+        # No time slots matched the current window
+        info(f"⏭️  No active time slots for {day_key.upper()} in current window. Exiting.")
         _mark_skip()
         sys.exit(0)
-    elif diff_secs > 0:
+    
+    # If we reach here, at least one time slot matched. Now find the exact time to wait for.
+    times_to_check = []
+    if "times" in day_cfg and day_cfg["times"] and isinstance(day_cfg["times"], list):
+        times_to_check = day_cfg["times"]
+    else:
+        times_to_check = [day_cfg]
+
+    # Find the nearest future time or the most recent past time within window
+    best_time_str = None
+    best_diff_secs = None
+    target_time = None
+
+    for time_entry in times_to_check:
+        time_local = time_entry.get("time_local")
+        time_tz = time_entry.get("time_tz", "")
+        time_utc = time_entry.get("time_utc")
+        
+        if time_local and time_tz and HAS_ZONEINFO:
+            try:
+                time_str = _local_to_utc_hhmm(time_local, time_tz)
+            except Exception:
+                continue
+        elif time_utc:
+            time_str = time_utc
+        else:
+            raw = time_entry.get("time_ist", "")
+            if not raw:
+                continue
+            time_str = "09:00"
+
+        try:
+            sched_h, sched_m = map(int, time_str.split(":"))
+            target = now.replace(hour=sched_h, minute=sched_m, second=0, microsecond=0)
+            diff_secs = (target - now).total_seconds()
+
+            # Check if within window
+            if -WINDOW <= diff_secs <= WINDOW:
+                # Valid slot — prefer the nearest future time, or most recent past if all are past
+                if best_diff_secs is None or (diff_secs >= 0 and (best_diff_secs < 0 or diff_secs < best_diff_secs)):
+                    best_time_str = time_str
+                    best_diff_secs = diff_secs
+                    target_time = target
+        except Exception:
+            continue
+
+    if best_time_str is None:
+        info(f"⏭️  Could not find valid time slot — exiting")
+        _mark_skip()
+        sys.exit(0)
+
+    # Now handle the sleep based on the best time found
+    diff_secs = best_diff_secs
+    if diff_secs > 0:
         # Within the window — sleep the remaining gap then post
         wait_mins = int(diff_secs // 60)
         wait_secs = int(diff_secs % 60)
-        info(f"⏱️  Sleeping {wait_mins}m {wait_secs}s until {time_str} UTC...")
+        info(f"⏱️  Sleeping {wait_mins}m {wait_secs}s until {best_time_str} UTC...")
         remaining = diff_secs
         while remaining > 0:
             time.sleep(min(60, remaining))
             remaining -= 60
             if remaining > 60:
-                info(f"   ... {int(remaining // 60)}m remaining until {time_str} UTC")
-        info(f"✅ Reached {time_str} UTC — starting agent")
+                info(f"   ... {int(remaining // 60)}m remaining until {best_time_str} UTC")
+        info(f"✅ Reached {best_time_str} UTC — starting agent")
     elif diff_secs >= -WINDOW:
         # Slightly past the target (cron fired just after) — run immediately
-        info(f"✅ Within window of {time_str} UTC — proceeding immediately")
+        info(f"✅ Within window of {best_time_str} UTC — proceeding immediately")
     else:
-        # More than 90 min past — already ran this window, skip
-        mins_past = int(-diff_secs // 60)
-        info(f"⏭️  {time_str} UTC was {mins_past}m ago — already handled. Exiting.")
+        # This shouldn't happen given the check above, but handle it
+        info(f"⏭️  {best_time_str} UTC was too far in the past — skipping")
         _mark_skip()
         sys.exit(0)
 

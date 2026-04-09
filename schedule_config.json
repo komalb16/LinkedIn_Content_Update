@@ -4,49 +4,157 @@
   "enable_trending_topics": true,
   "trending_topic_frequency": 0.3,
   "trending_cache_ttl_hours": 24,
+  "interview_posts": {
+    "enabled": true,
+    "frequency": 0.25,
+    "topics": ["rag", "agentic_ai", "llm_models", "vector_databases", "mlops_infrastructure", "ai_agents"],
+    "post_types": ["poll", "comparison", "data_driven"],
+    "post_type_distribution": {
+      "poll": 0.4,
+      "comparison": 0.35,
+      "data_driven": 0.25
+    },
+    "include_diagrams": true,
+    "description": "Interview-style posts with question-answer format. 25% of all posts. Rotate through 6 AI topics. No repeat topics within 7 days."
+  },
+  "content_categories": {
+    "enabled": true,
+    "mix": {
+      "ai_tech": 0.7,
+      "news": 0.15,
+      "personal_story": 0.1,
+      "tips_lessons": 0.05
+    },
+    "description": "Content mix for diversified reach. AI/Tech (70%), Industry News (15%), Personal Stories (10%), Tips & Lessons (5%)"
+  },
+  "style_diversity": {
+    "enabled": true,
+    "force_all_styles": true,
+    "force_style_rotation": true,
+    "min_style_interval": 3,
+    "variation_probability": 0.7,
+    "description": "Force variety in diagram styles. Min 3 posts before repeating. 70% chance of style variation per topic."
+  },
   "weekly": {
     "mon": {
       "enabled": true,
-      "time_ist": "19:15",
-      "time_utc": "03:15",
-      "time_local": "19:15",
-      "time_tz": "America/New_York"
+      "times": [
+        {
+          "time_ist": "09:00",
+          "time_utc": "03:30",
+          "time_local": "09:00",
+          "time_tz": "America/New_York"
+        },
+        {
+          "time_ist": "21:00",
+          "time_utc": "15:30",
+          "time_local": "21:00",
+          "time_tz": "America/New_York"
+        }
+      ]
     },
     "tue": {
       "enabled": true,
-      "time_ist": "13:00",
-      "time_utc": "21:00",
-      "time_local": "13:00",
-      "time_tz": "America/New_York"
+      "times": [
+        {
+          "time_ist": "13:00",
+          "time_utc": "07:30",
+          "time_local": "13:00",
+          "time_tz": "America/New_York"
+        },
+        {
+          "time_ist": "19:00",
+          "time_utc": "13:30",
+          "time_local": "19:00",
+          "time_tz": "America/New_York"
+        }
+      ]
     },
     "wed": {
       "enabled": true,
-      "time_ist": "18:15",
-      "time_utc": "02:15",
-      "time_local": "18:15",
-      "time_tz": "America/New_York"
+      "times": [
+        {
+          "time_ist": "09:00",
+          "time_utc": "03:30",
+          "time_local": "09:00",
+          "time_tz": "America/New_York"
+        },
+        {
+          "time_ist": "21:00",
+          "time_utc": "15:30",
+          "time_local": "21:00",
+          "time_tz": "America/New_York"
+        }
+      ]
     },
     "thu": {
       "enabled": true,
-      "time_ist": "19:00",
-      "time_utc": "03:00",
-      "time_local": "19:00",
-      "time_tz": "America/New_York"
+      "times": [
+        {
+          "time_ist": "09:00",
+          "time_utc": "03:30",
+          "time_local": "09:00",
+          "time_tz": "America/New_York"
+        },
+        {
+          "time_ist": "21:00",
+          "time_utc": "15:30",
+          "time_local": "21:00",
+          "time_tz": "America/New_York"
+        }
+      ]
     },
     "fri": {
       "enabled": true,
-      "time_utc": "04:30",
-      "time_ist": "20:30",
-      "time_local": "20:30",
-      "time_tz": "America/New_York"
+      "times": [
+        {
+          "time_ist": "09:00",
+          "time_utc": "03:30",
+          "time_local": "09:00",
+          "time_tz": "America/New_York"
+        },
+        {
+          "time_ist": "21:00",
+          "time_utc": "15:30",
+          "time_local": "21:00",
+          "time_tz": "America/New_York"
+        }
+      ]
     },
     "sat": {
       "enabled": true,
-      "time_ist": "14:05",
-      "time_utc": "22:05",
-      "time_local": "14:05",
-      "time_tz": "America/New_York"
+      "times": [
+        {
+          "time_ist": "14:00",
+          "time_utc": "08:30",
+          "time_local": "14:00",
+          "time_tz": "America/New_York"
+        },
+        {
+          "time_ist": "20:00",
+          "time_utc": "14:30",
+          "time_local": "20:00",
+          "time_tz": "America/New_York"
+        }
+      ]
     },
+    "sun": {
+      "enabled": true,
+      "times": [
+        {
+          "time_ist": "11:00",
+          "time_utc": "05:30",
+          "time_local": "11:00",
+          "time_tz": "America/New_York"
+        },
+        {
+          "time_ist": "18:00",
+          "time_utc": "12:30",
+          "time_local": "18:00",
+          "time_tz": "America/New_York"
+        }
+      ]
+    }
     "sun": {
       "enabled": false,
       "time_ist": "10:00",
