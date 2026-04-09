@@ -1356,10 +1356,10 @@
     /* Weekly grid */
     .day-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(7, minmax(110px, 1fr));
+      gap: 12px;
       margin-bottom: 20px;
-      padding: 8px
+      padding: 12px
     }
 
     .day-col {
@@ -2785,13 +2785,22 @@
 
     /* ── LARGE SCREEN OPTIMIZATION (1200px+) ── */
     @media(min-width:1200px) {
+      .g2 {
+        grid-template-columns: 1fr
+      }
+
+      .sched-card {
+        width: 100%
+      }
+
       .day-grid {
-        gap: 10px;
-        padding: 12px
+        grid-template-columns: repeat(7, minmax(140px, 1fr));
+        gap: 14px;
+        padding: 16px
       }
 
       .day-col {
-        gap: 4px
+        gap: 6px
       }
 
       .day-name {
