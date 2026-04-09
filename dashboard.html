@@ -1374,8 +1374,8 @@
     }
 
     .day-col {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
       gap: 12px;
       padding: 14px 12px 12px;
       border-radius: 14px;
@@ -1399,7 +1399,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px
+      gap: 8px;
+      min-height: 42px
     }
 
     .day-name-wrap {
@@ -1454,7 +1455,8 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      width: 100%
+      width: 100%;
+      justify-content: flex-start
     }
 
     .time-slots {
@@ -1466,23 +1468,39 @@
 
     .time-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 4px;
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr) 26px;
+      gap: 6px;
+      align-items: stretch;
       width: 100%
     }
 
     .time-actions {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: 1fr 1fr;
       gap: 4px;
       width: 100%
     }
 
+    .time-slot {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .time-remove {
+      align-self: flex-end;
+      min-width: 26px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      line-height: 1;
+    }
+
     .time-btn {
-      width: 24px;
-      min-width: 24px;
-      height: 28px;
+      width: 26px;
+      min-width: 26px;
+      height: 100%;
       background: var(--sur3);
       border: 1.5px solid var(--bd);
       border-radius: 7px;
@@ -1561,6 +1579,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      min-height: 16px;
       font-size: 10px;
       letter-spacing: .08em;
       text-transform: uppercase;
@@ -1624,9 +1643,9 @@
       }
 
       .time-btn {
-        width: 22px;
-        min-width: 22px;
-        height: 26px;
+        width: 24px;
+        min-width: 24px;
+        height: 100%;
         font-size: 8px;
       }
 
@@ -5086,13 +5105,15 @@ async function runNow(options = {}) {
           const timeId = `tmval-${day}-${timeIdx}`;
 
           timeInputsHtml += `
-            <div class="time-row">
-              <input type="text" class="time-val" id="${timeId}" data-day="${day}" data-idx="${timeIdx}" value="${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}" maxlength="5" placeholder="HH:MM" aria-label="${fullDayName} time slot ${timeIdx + 1}" oninput="onTimeInput('${day}',this,${timeIdx})" onblur="onTimeBlur('${day}',this,${timeIdx})" onkeydown="onTimeKey(event,'${day}',this,${timeIdx})" />
-              <div class="time-actions">
-                <button class="time-btn" onclick="adjDayTime('${day}',15,${timeIdx})" title="Move ${fullDayName} slot ${timeIdx + 1} later">▲</button>
-                <button class="time-btn" onclick="adjDayTime('${day}',-15,${timeIdx})" title="Move ${fullDayName} slot ${timeIdx + 1} earlier">▼</button>
-                ${times.length > 1 ? `<button class="time-btn" onclick="removeTimeSlot('${day}',${timeIdx})" title="Remove ${fullDayName} slot ${timeIdx + 1}" style="background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.32);color:var(--red)">✕</button>` : '<span></span>'}
+            <div class="time-slot">
+              <div class="time-row">
+                <input type="text" class="time-val" id="${timeId}" data-day="${day}" data-idx="${timeIdx}" value="${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}" maxlength="5" placeholder="HH:MM" aria-label="${fullDayName} time slot ${timeIdx + 1}" oninput="onTimeInput('${day}',this,${timeIdx})" onblur="onTimeBlur('${day}',this,${timeIdx})" onkeydown="onTimeKey(event,'${day}',this,${timeIdx})" />
+                <div class="time-actions">
+                  <button class="time-btn" onclick="adjDayTime('${day}',15,${timeIdx})" title="Move ${fullDayName} slot ${timeIdx + 1} later">▲</button>
+                  <button class="time-btn" onclick="adjDayTime('${day}',-15,${timeIdx})" title="Move ${fullDayName} slot ${timeIdx + 1} earlier">▼</button>
+                </div>
               </div>
+              ${times.length > 1 ? `<button class="time-btn time-remove" onclick="removeTimeSlot('${day}',${timeIdx})" title="Remove ${fullDayName} slot ${timeIdx + 1}" style="background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.32);color:var(--red)">✕</button>` : ''}
             </div>`;
         });
 
