@@ -1466,9 +1466,16 @@
 
     .time-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      grid-template-columns: minmax(0, 1fr);
       gap: 4px;
       align-items: center;
+      width: 100%
+    }
+
+    .time-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
       width: 100%
     }
 
@@ -1621,6 +1628,10 @@
         min-width: 22px;
         height: 26px;
         font-size: 8px;
+      }
+
+      .time-actions {
+        gap: 3px;
       }
     }
 
@@ -5077,9 +5088,11 @@ async function runNow(options = {}) {
           timeInputsHtml += `
             <div class="time-row">
               <input type="text" class="time-val" id="${timeId}" data-day="${day}" data-idx="${timeIdx}" value="${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}" maxlength="5" placeholder="HH:MM" aria-label="${fullDayName} time slot ${timeIdx + 1}" oninput="onTimeInput('${day}',this,${timeIdx})" onblur="onTimeBlur('${day}',this,${timeIdx})" onkeydown="onTimeKey(event,'${day}',this,${timeIdx})" />
-              <button class="time-btn" onclick="adjDayTime('${day}',15,${timeIdx})" title="Move ${fullDayName} slot ${timeIdx + 1} later">▲</button>
-              <button class="time-btn" onclick="adjDayTime('${day}',-15,${timeIdx})" title="Move ${fullDayName} slot ${timeIdx + 1} earlier">▼</button>
-              ${times.length > 1 ? `<button class="time-btn" onclick="removeTimeSlot('${day}',${timeIdx})" title="Remove ${fullDayName} slot ${timeIdx + 1}" style="background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.32);color:var(--red)">✕</button>` : ''}
+              <div class="time-actions">
+                <button class="time-btn" onclick="adjDayTime('${day}',15,${timeIdx})" title="Move ${fullDayName} slot ${timeIdx + 1} later">▲</button>
+                <button class="time-btn" onclick="adjDayTime('${day}',-15,${timeIdx})" title="Move ${fullDayName} slot ${timeIdx + 1} earlier">▼</button>
+                ${times.length > 1 ? `<button class="time-btn" onclick="removeTimeSlot('${day}',${timeIdx})" title="Remove ${fullDayName} slot ${timeIdx + 1}" style="background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.32);color:var(--red)">✕</button>` : '<span></span>'}
+              </div>
             </div>`;
         });
 
