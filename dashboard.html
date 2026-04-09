@@ -1498,14 +1498,14 @@
     }
 
     .time-val {
-      font-size: 15px;
+      font-size: 14px;
       font-family: var(--fm);
       font-weight: 700;
       color: var(--tx);
       background: var(--sur3);
       border: 1.5px solid var(--bd);
       border-radius: 10px;
-      padding: 7px 10px;
+      padding: 7px 8px;
       width: 100%;
       min-width: 0;
       text-align: center;
@@ -1597,6 +1597,28 @@
     .add-time-btn:hover {
       border-color: var(--acc);
       background: rgba(79, 156, 249, 0.2)
+    }
+
+    @media (min-width: 1500px) {
+      .day-grid {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+      }
+
+      .day-col {
+        min-height: 228px;
+      }
+
+      .time-val {
+        font-size: 13px;
+        letter-spacing: .02em;
+        padding: 7px 6px;
+      }
+
+      .time-btn {
+        min-width: 0;
+        height: 30px;
+        font-size: 10px;
+      }
     }
 
     /* Override dates */
@@ -5030,12 +5052,11 @@ async function runNow(options = {}) {
     function buildDayGrid() {
       const grid = document.getElementById('dayGrid');
       grid.innerHTML = '';
-      const fullDayFormatter = new Intl.DateTimeFormat('en-US', { weekday: 'long' });
-      const baseSunday = new Date(Date.UTC(2024, 0, 7));
+      const FULL_DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
       DAYS.forEach((day, i) => {
         const cfg = schedConfig.weekly[day] || { enabled: true, time_ist: '09:30' };
-        const fullDayName = fullDayFormatter.format(new Date(baseSunday.getTime() + i * 86400000));
+        const fullDayName = FULL_DAY_NAMES[i];
         const times = cfg.times && Array.isArray(cfg.times) && cfg.times.length > 0
           ? cfg.times
           : [{ time_ist: cfg.time_ist || '09:30' }];
