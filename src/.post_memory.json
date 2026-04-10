@@ -166,5 +166,12 @@
     "topic_id": "git-workflow",
     "topic_name": "Git Workflow and Commands",
     "text": "\ud83d\udccc Git Workflow and Commands\nMost engineers believe Git mastery is about memorizing a bunch of obscure commands \ud83e\udd2f.\nIt's not \u2014 it's about understanding the right patterns and workflows to save your skin in a crisis.\n```\nBranch: main + develop + feature/*\nCommit: Conventional commits, GPG signed\nPR Flow: 2-reviewer gate, squash merge\nRebase: Clean history, no merge noise\nRecovery: reset, reflog, cherry-pick\nMyth: Gitflow is the only way to manage branches \ud83c\udf1f.\nReality: Trunk-based development can be just as effective, if not more, with the right commit and PR flow strategies in place \ud83d\ude80.\nSenior engineers use Git differently \u2014 they focus on simplicity, clean history, and a solid understanding of recovery commands \ud83d\udcbb.\nThey know that a well-crafted commit message and a 2-reviewer gate can save hours of debugging time \ud83d\udd52.\n\ud83d\udcac What's your go-to Git strategy:\n1\ufe0f\u20e3 Branch 2\ufe0f\u20e3 Commit 3\ufe0f\u20e3 PR Flow\n1\ufe0f\u20e3 Branch 2\ufe0f\u20e3 Commit 3\ufe0f\u20e3 PR Flow\nRebase mastery, or\nRecovery techniques?\n#GitMastery #DevTools #CodeQuality #VersionControl #SoftwareEngineering"
+  },
+  {
+    "timestamp": "2026-04-10T03:57:54.614079",
+    "topic_id": "aws-architecture",
+    "topic_name": "AWS Architecture Patterns",
+    "category": "topic",
+    "text": "\ud83d\udccc AWS Architecture Patterns\n\nNobody talks about the cost implications of choosing the wrong AWS architecture pattern.\n\nI was wrong about this for years, thinking that serverless was always the answer \ud83e\udd26\u200d\u2640\ufe0f.\n\n```\nCompute: EC2, Lambda, ECS, Fargate\nStorage: S3, EBS, EFS, Glacier\nDatabase: RDS, DynamoDB, ElastiCache\nNetwork: VPC, ALB, CloudFront, Route53\nSecurity: IAM, KMS, GuardDuty, Secrets Manager\n\n1\ufe0f\u20e3 Compute is where most of the\n\n2\ufe0f\u20e3 Storage and Database choices also impact\n\n3\ufe0f\u20e3 Network and Security configurations can\n\ud83d\udcac Which of the following is your top priority when designing an AWS architecture:\n\n1\ufe0f\u20e3 Compute 2\ufe0f\u20e3 Storage 3\ufe0f\u20e3 Database 4\ufe0f\u20e3\n#AWSServices #CloudArchitecture #Serverless #Microservices #EventDrivenArchitecture"
   }
 ]
