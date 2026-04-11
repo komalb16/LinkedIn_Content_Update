@@ -649,5 +649,55 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-10T03:57:54.614639",
+    "topic_id": "aws-architecture",
+    "topic_name": "AWS Architecture Patterns",
+    "category": "Cloud",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 80,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 80,
+        "raw_score": 80,
+        "similarity": 0.0065,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 68,
+        "raw_score": 68,
+        "similarity": 0.014,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-04-11T23:12:05.431464",
+    "topic_id": "rag-stack",
+    "topic_name": "Open Source RAG Stack",
+    "category": "AI Tools",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 98,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 98,
+        "raw_score": 98,
+        "similarity": 0.0327,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 98,
+        "raw_score": 98,
+        "similarity": 0.0282,
+        "penalty": 0
+      }
+    ]
   }
 ]
