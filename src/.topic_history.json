@@ -699,5 +699,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-11T23:39:47.915131",
+    "topic_id": "data-engineering",
+    "topic_name": "Data Engineering",
+    "category": "Data",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 98,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 98,
+        "raw_score": 98,
+        "similarity": 0.0769,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.1543,
+        "penalty": 0
+      }
+    ]
   }
 ]
