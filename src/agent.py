@@ -1498,32 +1498,45 @@ def _render_linkedin_text(post_text):
     text = (post_text or "").strip()
     if not text:
         return text
-    
-    # LinkedIn renders fenced blocks poorly; extract content but preserve it with separators
-    visual_blocks = []
-    def extract_visual(match):
-        content = match.group(1).strip()
-        if content:
-            visual_blocks.append(content)
-            # Return markers to preserve visual block position, will be replaced later
-            return f"\n[VISUAL_BLOCK_{len(visual_blocks)-1}]\n"
-        return ""
-    
-    text = re.sub(r"```[\s\S]*?```", extract_visual, text)
-    
-    # Remove inline code ticks so raw markdown does not leak into the final post
-    text = re.sub(r"`([^`\n]+)`", r"\1", text)
-    
-    # Add back visual blocks with proper formatting
-    for i, visual_content in enumerate(visual_blocks):
-        placeholder = f"[VISUAL_BLOCK_{i}]"
-        visual_formatted = "\n".join(visual_content.splitlines())
-        text = text.replace(placeholder, visual_formatted)
-    
-    # Clean up spacing - remove more than 2 consecutive newlines
-    text = re.sub(r"\n{3,}", "\n\n", text).strip()
-    
-    return text
+
+    try:
+        # LinkedIn renders fenced blocks poorly; extract content but preserve position
+        visual_blocks = []
+
+        def extract_visual(match):
+            # group(1) is safe — regex below has capture group ([\s\S]*?)
+            content = match.group(1).strip()
+            if content:
+                visual_blocks.append(content)
+                return f"\n[VISUAL_BLOCK_{len(visual_blocks)-1}]\n"
+            return ""
+
+        # FIX: added capture group so match.group(1) works correctly
+        text = re.sub(r"```([\s\S]*?)```", extract_visual, text)
+
+        # Remove inline code ticks so raw markdown does not leak into final post
+        text = re.sub(r"`([^`\n]+)`", r"\1", text)
+
+        # Restore visual blocks with proper formatting
+        for i, visual_content in enumerate(visual_blocks):
+            placeholder = f"[VISUAL_BLOCK_{i}]"
+            visual_formatted = "\n".join(visual_content.splitlines())
+            text = text.replace(placeholder, visual_formatted)
+
+        # Clean up spacing
+        text = re.sub(r"\n{3,}", "\n\n", text).strip()
+        return text
+
+    except Exception as e:
+        log.warning(f"_render_linkedin_text failed ({e}), falling back to manual fence strip")
+        try:
+            fallback = re.sub(r"```[a-z]*\n?", "", post_text or "")
+            fallback = re.sub(r"```", "", fallback)
+            fallback = re.sub(r"`([^`\n]+)`", r"\1", fallback)
+            return re.sub(r"\n{3,}", "\n\n", fallback).strip()
+        except Exception as e2:
+            log.warning(f"Fallback render also failed ({e2}), returning raw text")
+            return (post_text or "").strip()
 
 
 def _load_post_memory():
@@ -2225,7 +2238,7 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
 # ─── POST MODE ────────────────────────────────────────────────────────────────
 
 def get_post_mode():
-    """Decide which post type to generate - now with news ENABLED by default."""
+    """Decide which post type to generate."""
     def _env_float(name, default):
         try:
             return float(os.environ.get(name, str(default)))
@@ -2233,39 +2246,56 @@ def get_post_mode():
             return float(default)
 
     # Load interview frequency from schedule_config if available
-    interview_freq = 0.15  # 15% interviews
+    interview_freq = 0.15
     try:
         config_path = os.path.join(os.path.dirname(__file__), "..", "schedule_config.json")
         if os.path.exists(config_path):
             with open(config_path) as f:
                 cfg = json.load(f)
                 interview_freq = cfg.get("interview_posts", {}).get("frequency", 0.15)
-    except:
+    except Exception:
         pass
-    
-    # NEWS MODES ENABLED BY DEFAULT (fix for 2-month gap)
+
     interview_prob = interview_freq
-    story_prob = _env_float("STORY_MODE_PROB", 0.20)
-    ai_news_prob = _env_float("AI_NEWS_MODE_PROB", 0.12)
-    layoff_prob = _env_float("LAYOFF_MODE_PROB", 0.05)
-    tools_prob = _env_float("TOOLS_NEWS_MODE_PROB", 0.08)
-    tech_prob = _env_float("TECH_NEWS_MODE_PROB", 0.05)
-    
+    story_prob     = _env_float("STORY_MODE_PROB",      0.18)
+    trending_prob  = _env_float("TREND_MODE_PROB",      0.20)  # NEW: trending topics
+    ai_news_prob   = _env_float("AI_NEWS_MODE_PROB",    0.10)
+    layoff_prob    = _env_float("LAYOFF_MODE_PROB",     0.04)
+    tools_prob     = _env_float("TOOLS_NEWS_MODE_PROB", 0.06)
+    tech_prob      = _env_float("TECH_NEWS_MODE_PROB",  0.04)
+
     rand = random.random()
-    if rand < interview_prob:
+    cumulative = 0.0
+
+    cumulative += interview_prob
+    if rand < cumulative:
         return "interview"
-    elif rand < interview_prob + story_prob:
+
+    cumulative += story_prob
+    if rand < cumulative:
         return "story"
-    elif rand < interview_prob + story_prob + ai_news_prob:
+
+    cumulative += trending_prob
+    if rand < cumulative:
+        return "trending"
+
+    cumulative += ai_news_prob
+    if rand < cumulative:
         return "ai_news"
-    elif rand < interview_prob + story_prob + ai_news_prob + layoff_prob:
+
+    cumulative += layoff_prob
+    if rand < cumulative:
         return "layoff_news"
-    elif rand < interview_prob + story_prob + ai_news_prob + layoff_prob + tools_prob:
+
+    cumulative += tools_prob
+    if rand < cumulative:
         return "tools_news"
-    elif rand < interview_prob + story_prob + ai_news_prob + layoff_prob + tools_prob + tech_prob:
+
+    cumulative += tech_prob
+    if rand < cumulative:
         return "tech_news"
-    else:
-        return "topic"
+
+    return "topic"
 
 
 # ─── GITHUB HELPERS ───────────────────────────────────────────────────────────
@@ -2465,6 +2495,56 @@ Write a LinkedIn post that:
         post_text = generate_news_post("tech")
         if not post_text:
             mode = "topic"
+
+    elif mode == "trending":
+        # ── TRENDING TOPIC MODE ───────────────────────────────────────────
+        try:
+            from trend_discovery import discover_trending_topics
+            from trend_to_topic import pick_best_trend
+
+            log.info("Fetching trending topics from HN + Reddit + Dev.to...")
+            trends = discover_trending_topics(max_topics=12)
+
+            if trends:
+                recent_ids = _get_recent_topics(days=7)
+                trend_topic, chosen_trend = pick_best_trend(
+                    trends, recent_ids, call_ai
+                )
+                if trend_topic:
+                    topic = trend_topic
+                    structure = topic_mgr.get_diagram_structure(topic)
+                    planned_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
+                    log.info(f"Trending topic selected: {topic['name']} (from {chosen_trend.get('source','?')} — score {chosen_trend.get('score',0)})")
+                    trending_candidates = []
+                    for _ in range(candidate_count):
+                        draft = generate_topic_post(topic, structure, planned_diagram_type)
+                        trending_candidates.append(_finalize_post_text(topic, draft, structure=structure, diagram_type=planned_diagram_type))
+                    ranked_trending = _rank_candidates(
+                        topic, trending_candidates, structure, planned_diagram_type,
+                        recent_posts, recent_hashes=recent_hashes
+                    )
+                    pick = ranked_trending[0]
+                    candidate_snapshot = ranked_trending[:ab_variants]
+                    post_text = trending_candidates[pick["index"]]
+                    if len(candidate_snapshot) >= 2:
+                        log.info(
+                            f"A/B winner: variant #{candidate_snapshot[0]['index']+1} ({candidate_snapshot[0]['score']}) "
+                            f"over #{candidate_snapshot[1]['index']+1} ({candidate_snapshot[1]['score']})"
+                        )
+                else:
+                    log.warning("No suitable trending topic found, falling back to topic mode")
+                    mode = "topic"
+            else:
+                log.warning("Trend discovery returned no results, falling back to topic mode")
+                mode = "topic"
+
+        except ImportError as e:
+            log.warning(f"Trend discovery modules not available ({e}), falling back to topic mode")
+            mode = "topic"
+        except Exception as e:
+            log.warning(f"Trending mode failed ({e}), falling back to topic mode")
+            mode = "topic"
+
     elif mode == "story":
         chosen_theme = random.choice(STORY_THEMES)
         story_candidates = []
@@ -2763,7 +2843,7 @@ if __name__ == "__main__":
     parser.add_argument("--news", type=str, default=None,
                         help="Force news mode: ai_news, layoff_news, tools_news, tech_news")
     parser.add_argument("--mode", type=str, default=None,
-                        help="Force post mode: auto, topic, story, ai_news, layoff_news, tools_news, tech_news")
+                        help="Force post mode: auto, topic, story, trending, ai_news, layoff_news, tools_news, tech_news")
     parser.add_argument("--list-topics", action="store_true")
     args = parser.parse_args()
     if args.list_topics:

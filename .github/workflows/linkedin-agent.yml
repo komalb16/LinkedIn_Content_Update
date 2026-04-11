@@ -66,6 +66,8 @@ on:
         options:
           - "auto"
           - "topic"
+          - "story"
+          - "trending"
           - "ai_news"
           - "tools_news"
           - "tech_news"
@@ -109,8 +111,37 @@ jobs:
             libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
 
       # 4. Install Python dependencies
+      # 4. Install Python dependencies
       - name: 📦 Install dependencies
         run: pip install -r requirements.txt
+
+      # 4b. Smoke test — catch render bugs before they reach LinkedIn
+      - name: 🧪 Smoke test post rendering
+        run: |
+          python - <<'EOF'
+          import sys
+          sys.path.insert(0, "src")
+          from agent import _render_linkedin_text
+
+          # Test 1: fenced block (the exact case that broke scheduled runs)
+          test1 = "Here is my insight.\n\n```python\nStep 1\nStep 2\nStep 3\n```\n\n💬 Thoughts?\n\n#AI #DevOps"
+          result1 = _render_linkedin_text(test1)
+          assert "```" not in result1, "FAIL: fenced block not stripped"
+          assert "Step 1" in result1, "FAIL: content was lost"
+          print("✅ Test 1 passed: fenced block handled correctly")
+
+          # Test 2: plain post (no fences)
+          test2 = "Simple post.\n\n💬 Thoughts?\n\n#AI"
+          result2 = _render_linkedin_text(test2)
+          assert result2 == test2.strip(), "FAIL: plain post was modified"
+          print("✅ Test 2 passed: plain post unchanged")
+
+          # Test 3: empty input
+          assert _render_linkedin_text("") == "", "FAIL: empty input should return empty"
+          print("✅ Test 3 passed: empty input handled")
+
+          print("All smoke tests passed.")
+          EOF
 
       # 5. Show run info
       - name: ℹ️ Run Info
