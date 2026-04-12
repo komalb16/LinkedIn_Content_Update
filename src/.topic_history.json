@@ -724,5 +724,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-12T14:34:03.555723",
+    "topic_id": "ai-disciplines",
+    "topic_name": "Comparing Major AI Disciplines",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 80,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 80,
+        "raw_score": 80,
+        "similarity": 0.0231,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 80,
+        "raw_score": 80,
+        "similarity": 0.0063,
+        "penalty": 0
+      }
+    ]
   }
 ]
