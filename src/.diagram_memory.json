@@ -215,5 +215,19 @@
     "style": 0,
     "signature": "9f7276b260a1d8eb55b24a368c64cfd7",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-11T23:39:42.686912",
+    "topic_id": "data-engineering",
+    "style": 0,
+    "signature": "a12fe015a082aa999cadad6da802ab8d",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-12T14:33:58.064084",
+    "topic_id": "ai-disciplines",
+    "style": 0,
+    "signature": "ee8d91683cee2b59d876a7ac17c6aac3",
+    "duplicate_avoided": true
   }
 ]
