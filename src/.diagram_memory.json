@@ -229,5 +229,12 @@
     "style": 0,
     "signature": "ee8d91683cee2b59d876a7ac17c6aac3",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-12T23:44:28.054210",
+    "topic_id": "trend-docker-pull-fails",
+    "style": 0,
+    "signature": "a64a217f9728399acc0bc0a4453ae105",
+    "duplicate_avoided": true
   }
 ]
