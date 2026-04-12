@@ -201,5 +201,12 @@
     "topic_name": "Cloudflare Block Workarounds",
     "category": "topic",
     "text": "\ud83d\udccc Cloudflare Block Workarounds\n\nProduction just broke: our Docker pulls are failing due to Cloudflare blocks \ud83d\udea8.\n\nI was wrong to assume that simply using a CDN would solve all our issues - it took me years to learn that resilient CI/CD pipelines require more \ud83d\udca1.\n\nThe Problem is clear: third-party service disruptions can cripple our systems \ud83e\udd26.\n\n```\nDocker Pulls | CDN Workarounds -> Resilient Pipelines\nBest Practices dictate using redundant services and failovers to mitigate such issues \ud83d\udcc8.\n\nCommon Mistakes include relying on a single point of failure - I've seen this happen too many times \ud83e\udd26.\n\ud83d\udcac What's your approach to mitigating Cloudflare blocks:\n\n1\ufe0f\u20e3 The Problem 2\ufe0f\u20e3 Core Concept 3\ufe0f\u20e3\n#Cloudflare #Docker #CI/CD #Resilience #SystemDesign #CDN"
+  },
+  {
+    "timestamp": "2026-04-12T23:54:37.037830",
+    "topic_id": "story-name-search-reputation-check",
+    "topic_name": "AI Name Search Reality Check",
+    "category": "story",
+    "text": "\ud83d\udccc AI Name Search Reality Check\n\nI firmly believe that our online presence is our new resume. One moment that drove this home was when I asked an AI assistant for a simple recommendation and then searched my own name. The results made me realize how public signals shape professional discovery. I was surprised by what I found - or rather, what I didn't find.\n\nThis uncomfortable realization led me to take action:\n\nUpdate my LinkedIn profile\nShare relevant content regularly\nEngage with my network consistently\nThese actions have helped me take control of my online presence. I'm no longer just a passive recipient of digital noise.\n\n\ud83d\udcac What steps are you taking to manage your online professional identity? #OnlinePresenceMatters #ProfessionalDiscovery #PersonalBranding #DigitalIdentity #CareerManagement"
   }
 ]
