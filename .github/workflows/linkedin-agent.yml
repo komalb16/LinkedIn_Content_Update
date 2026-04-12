@@ -251,6 +251,7 @@ jobs:
           fi
           git add src/.post_memory.json || true
           git add src/.diagram_memory.json || true
+          git add src/.diagram_rotation.json || true
           git diff --staged --quiet || git commit -m "chore: update topic history [skip ci]"
           git pull --rebase origin main || true
           git push || true

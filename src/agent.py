@@ -1502,42 +1502,47 @@ def _render_linkedin_text(post_text):
         return text
 
     try:
-        # LinkedIn renders fenced blocks poorly; extract content but preserve position
         visual_blocks = []
 
         def extract_visual(match):
-            # group(1) is safe — regex below has capture group ([\s\S]*?)
-            content = match.group(1).strip()
+            raw = match.group(1)
+            # Strip the optional language hint from the first line (e.g. "python\n")
+            lines = raw.split("\n")
+            # Drop first line if it's just a language tag (no spaces, all alpha)
+            if lines and re.match(r"^[a-z]*$", lines[0].strip()):
+                lines = lines[1:]
+            content = "\n".join(lines).strip()
             if content:
                 visual_blocks.append(content)
                 return f"\n[VISUAL_BLOCK_{len(visual_blocks)-1}]\n"
             return ""
 
-        # FIX: added capture group so match.group(1) works correctly
-        text = re.sub(r"```([\s\S]*?)```", extract_visual, text)
+        # Strip ALL fence variations including ```python, ```text, ```
+        text = re.sub(r"```[a-z]*\n?([\s\S]*?)```", extract_visual, text)
 
-        # Remove inline code ticks so raw markdown does not leak into final post
+        # Hard remove any remaining stray backtick fences
+        text = re.sub(r"```[a-z]*", "", text)
+        text = re.sub(r"```", "", text)
+
+        # Remove inline code ticks
         text = re.sub(r"`([^`\n]+)`", r"\1", text)
 
-        # Restore visual blocks with proper formatting
+        # Restore visual block content (no surrounding backticks)
         for i, visual_content in enumerate(visual_blocks):
             placeholder = f"[VISUAL_BLOCK_{i}]"
-            visual_formatted = "\n".join(visual_content.splitlines())
-            text = text.replace(placeholder, visual_formatted)
+            text = text.replace(placeholder, visual_content)
 
-        # Clean up spacing
         text = re.sub(r"\n{3,}", "\n\n", text).strip()
         return text
 
     except Exception as e:
-        log.warning(f"_render_linkedin_text failed ({e}), falling back to manual fence strip")
+        log.warning(f"_render_linkedin_text failed ({e}), stripping all fences")
         try:
             fallback = re.sub(r"```[a-z]*\n?", "", post_text or "")
             fallback = re.sub(r"```", "", fallback)
             fallback = re.sub(r"`([^`\n]+)`", r"\1", fallback)
             return re.sub(r"\n{3,}", "\n\n", fallback).strip()
-        except Exception as e2:
-            log.warning(f"Fallback render also failed ({e2}), returning raw text")
+        except Exception:
             return (post_text or "").strip()
 
 
@@ -2390,6 +2395,9 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
         candidate_count = int(os.environ.get("TEXT_CANDIDATES", "3"))
     except Exception:
         candidate_count = 3
+    # Dry runs use 1 candidate to skip 3x AI calls — still validates the pipeline
+    if dry_run:
+        candidate_count = 1
     candidate_count = max(1, min(5, candidate_count))
     try:
         ab_variants = int(os.environ.get("AB_VARIANTS", "2"))
@@ -2652,7 +2660,7 @@ Write a LinkedIn post that:
     score_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
     score_structure = structure or topic_mgr.get_diagram_structure(topic)
     score_card = _score_post_candidate(topic, post_text, score_structure, score_diagram_type)
-    if mode in {"topic", "story"} and score_card["score"] < 75:
+    if mode in {"topic", "story"} and score_card["score"] < 75 and not dry_run:
         log.warning(
             f"Low post quality score ({score_card['score']}/100). Regenerating once with the same topic."
         )
@@ -2701,13 +2709,24 @@ Write a LinkedIn post that:
     # ── SELECT DIAGRAM STYLE USING SMART ROTATION ──────────────────────────────
     # NEW: Use smart rotation to cycle through all 23 available diagram styles
     selected_style = _select_smart_diagram_style(topic.get("id", ""))
-    log.info(f"Selected diagram style {selected_style} from 23 available styles for visual variety")
-    
+    log.info(f"Selected diagram style {selected_style} from {len(ALL_DIAGRAM_STYLES)} available styles for visual variety")
+
     # Ensure diagram_structure is a dict and set the selected style
     if not isinstance(diagram_structure, dict):
         diagram_structure = {}
     diagram_structure_with_style = copy.deepcopy(diagram_structure)
+    # Force the rotation style — this overrides diagram_generator's own style picking
     diagram_structure_with_style["style"] = selected_style
+
+    # Sanity check: log if style 0 repeats (indicates rotation file reset)
+    recent_styles = _load_diagram_rotation_state().get("style_history", [])
+    if recent_styles.count(0) >= 3:
+        log.warning("Style 0 appearing 3+ times in rotation — rotation file may have reset. Forcing a different style.")
+        available_non_zero = [s for s in ALL_DIAGRAM_STYLES if s != 0 and s not in recent_styles[-5:]]
+        if available_non_zero:
+            selected_style = available_non_zero[0]
+            diagram_structure_with_style["style"] = selected_style
+            log.info(f"Forced style override to {selected_style}")
     
     diagram_path = diagram_gen.save_svg(
         None, topic["id"], diagram_title, diagram_type, structure=diagram_structure_with_style
