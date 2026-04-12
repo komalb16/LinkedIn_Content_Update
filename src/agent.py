@@ -795,6 +795,8 @@ Match the row labels closely so the text and image stay coherent."""
 Angle: {topic.get("angle", "practical, production-level insights")}
 Planned diagram type: {diagram_type or topic.get("diagram_type", "Architecture Diagram")}
 
+CRITICAL FORMATTING RULE: If using numbered sections (1️⃣ 2️⃣ etc), every section MUST be a complete sentence. Never end a line mid-thought with "—" followed by truncated text. Write the full description on the same line.
+
 Story archetype (hook): {hook}
 Voice: {tone}
 Format: {fmt["instruction"]}
@@ -1871,7 +1873,7 @@ def _check_topic_diversity(topic, days=7):
 
 # ─── SMART DIAGRAM ROTATION ───────────────────────────────────────────────────
 
-ALL_DIAGRAM_STYLES = list(range(8)) + list(range(8, 16)) + [17, 18, 19, 20, 22]  # Styles: 0-7, 8-15, 17-20, 22 (16, 21 disabled)
+ALL_DIAGRAM_STYLES = list(range(8)) + list(range(8, 16)) + [17, 18, 19, 20, 22, 23]
 
 def _load_diagram_rotation_state():
     """Load diagram rotation state to track style usage."""
@@ -1879,8 +1881,20 @@ def _load_diagram_rotation_state():
         try:
             with open(DIAGRAM_ROTATION_FILE, encoding="utf-8") as f:
                 data = json.load(f)
-            if isinstance(data, dict):
+            # File is a dict — normal case after first proper save
+            if isinstance(data, dict) and "rotation_index" in data:
                 return data
+            # File is a list (old format from diagram_rotation.py) — migrate it
+            if isinstance(data, list):
+                recent_styles = [
+                    e.get("style_idx", e.get("style", 0))
+                    for e in data[-15:]
+                    if isinstance(e, dict)
+                ]
+                return {
+                    "rotation_index": recent_styles[-1] + 1 if recent_styles else 0,
+                    "style_history": recent_styles,
+                }
         except Exception:
             pass
     return {"rotation_index": 0, "style_history": []}
@@ -2733,14 +2747,15 @@ Write a LinkedIn post that:
             if not post_text.strip().startswith("📌")
             else post_text
         )
-        full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
+       full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
         publish_text = _render_linkedin_text(full_post_text)
+        publish_text = _normalize_hashtags(publish_text)  # Fix: strip any leaked hashtag# tokens
         with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
             f.write(publish_text)
         
         # NEW: Log post to engagement tracker even in dry run
         post_id = _log_post_generated(topic, publish_text, selected_style, mode)
-        
+    
         with open("preview_payload_" + topic["id"] + ".json", "w", encoding="utf-8") as f:
             json.dump({
                 "topic_id": topic["id"],
@@ -2778,10 +2793,13 @@ Write a LinkedIn post that:
         else post_text
     )
     full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
-    publish_text = _render_linkedin_text(full_post_text)
-
-    # NEW: Log post to engagement tracker before publishing
-    post_id = _log_post_generated(topic, publish_text, selected_style, mode)
+        publish_text = _render_linkedin_text(full_post_text)
+        publish_text = _normalize_hashtags(publish_text)  # Fix: strip any leaked hashtag# tokens
+        with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
+            f.write(publish_text)
+        
+        # NEW: Log post to engagement tracker even in dry run
+        post_id = _log_post_generated(topic, publish_text, selected_style, mode)
     log.info(f"Engagement tracking ID assigned: {post_id}")
 
     result = poster.create_post_with_image(

@@ -2822,7 +2822,119 @@ def _style_modern_tech_cards(topic_id, topic_name, C, structure=None):
     svg += f'<text x="{W-18}" y="{H-10}" text-anchor="end" fill="#93C5FD" font-size="9" font-weight="800">AI (c) Komal Batra</text>'
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 23 — VIRAL POSTER CARD
+#  Bold typographic infographic. Designed for LinkedIn shareability.
+#  Large headline, numbered key points, clean branding, high contrast.
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_viral_poster(topic_id, topic_name, C, structure=None):
+    W, H = 1080, 1080  # Square — best for LinkedIn feed visibility
+    accent = C[0]
+    bg_dark = darken(accent, 0.72)
+    bg_darker = darken(accent, 0.82)
+    light = lighten(accent, 0.88)
 
+    sections = []
+    if structure and structure.get("sections"):
+        sections = structure["sections"][:6]
+    else:
+        sections = [
+            {"id": i+1, "label": f"Point {i+1}", "desc": "Key insight here"}
+            for i in range(5)
+        ]
+
+    subtitle = (structure or {}).get("subtitle", "Engineer's Perspective")
+    n = len(sections)
+
+    svg = ""
+
+    # ── Background ──────────────────────────────────────────────────────────
+    svg += f'<defs>'
+    svg += f'<linearGradient id="vp-bg" x1="0" y1="0" x2="1" y2="1">'
+    svg += f'<stop offset="0%" stop-color="{bg_darker}"/>'
+    svg += f'<stop offset="100%" stop-color="{bg_dark}"/>'
+    svg += f'</linearGradient>'
+    # Subtle grid pattern
+    svg += f'<pattern id="vp-grid" width="60" height="60" patternUnits="userSpaceOnUse">'
+    svg += f'<path d="M 60 0 L 0 0 0 60" fill="none" stroke="{rgba(accent,0.06)}" stroke-width="1"/>'
+    svg += f'</pattern>'
+    svg += f'</defs>'
+    svg += f'<rect width="{W}" height="{H}" fill="url(#vp-bg)"/>'
+    svg += f'<rect width="{W}" height="{H}" fill="url(#vp-grid)"/>'
+
+    # ── Top accent bar ───────────────────────────────────────────────────────
+    svg += f'<rect x="0" y="0" width="{W}" height="8" fill="{accent}"/>'
+
+    # ── Header pill ─────────────────────────────────────────────────────────
+    pill_text = subtitle.upper()
+    pill_w = len(pill_text) * 11 + 40
+    svg += f'<rect x="60" y="40" width="{pill_w}" height="34" rx="17" fill="{rgba(accent,0.25)}" stroke="{rgba(accent,0.6)}" stroke-width="1.5"/>'
+    svg += f'<text x="{60 + pill_w//2}" y="63" text-anchor="middle" fill="{lighten(accent,0.7)}" font-size="13" font-weight="800" letter-spacing="2" font-family="Arial,sans-serif">{xe(pill_text)}</text>'
+
+    # ── Main title ───────────────────────────────────────────────────────────
+    title_words = topic_name.split()
+    # Try to break title into 2 lines max
+    mid = len(title_words) // 2
+    title_line1 = " ".join(title_words[:max(1, mid)])
+    title_line2 = " ".join(title_words[max(1, mid):])
+
+    title_y = 130
+    title_fs = 72 if len(topic_name) < 20 else (58 if len(topic_name) < 30 else 46)
+    svg += f'<text x="60" y="{title_y}" fill="white" font-size="{title_fs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-1">{xe(clamp(title_line1, 20))}</text>'
+    if title_line2:
+        svg += f'<text x="60" y="{title_y + title_fs + 8}" fill="{lighten(accent, 0.55)}" font-size="{title_fs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-1">{xe(clamp(title_line2, 20))}</text>'
+
+    # Divider line
+    div_y = title_y + title_fs * (2 if title_line2 else 1) + 30
+    svg += f'<rect x="60" y="{div_y}" width="80" height="4" rx="2" fill="{accent}"/>'
+    svg += f'<rect x="152" y="{div_y}" width="40" height="4" rx="2" fill="{rgba(accent,0.35)}"/>'
+
+    # ── Numbered sections ────────────────────────────────────────────────────
+    content_y = div_y + 40
+    avail_h = H - content_y - 120
+    item_h = avail_h // max(n, 1)
+    item_h = min(item_h, 145)
+
+    for i, sec in enumerate(sections):
+        col = C[i % len(C)]
+        iy = content_y + i * item_h
+
+        # Number circle
+        svg += f'<circle cx="96" cy="{iy + item_h//2}" r="28" fill="{rgba(col, 0.20)}" stroke="{col}" stroke-width="2"/>'
+        svg += f'<text x="96" y="{iy + item_h//2 + 11}" text-anchor="middle" fill="{col}" font-size="26" font-weight="900" font-family="Arial,sans-serif">{sec.get("id", i+1)}</text>'
+
+        # Label
+        label = str(sec.get("label", ""))
+        svg += f'<text x="148" y="{iy + item_h//2 - 8}" fill="white" font-size="24" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label, 28))}</text>'
+
+        # Description
+        desc = str(sec.get("desc", ""))
+        desc_lines = fit_lines(desc, 46, 2)
+        for li, ln in enumerate(desc_lines):
+            svg += f'<text x="148" y="{iy + item_h//2 + 18 + li*20}" fill="{lighten(col, 0.50)}" font-size="16" font-family="Arial,sans-serif">{xe(ln)}</text>'
+
+        # Separator line between items (not after last)
+        if i < n - 1:
+            sep_y = iy + item_h - 8
+            svg += f'<line x1="60" y1="{sep_y}" x2="{W-60}" y2="{sep_y}" stroke="{rgba(accent,0.12)}" stroke-width="1"/>'
+
+    # ── Bottom branding bar ──────────────────────────────────────────────────
+    bar_y = H - 80
+    svg += f'<rect x="0" y="{bar_y}" width="{W}" height="80" fill="{rgba(accent,0.12)}" stroke="{rgba(accent,0.20)}" stroke-width="1"/>'
+
+    # Author pill
+    author_text = f"@{_DIAGRAM_AUTHOR.split()[0].lower() if _DIAGRAM_AUTHOR else 'komalb'}"
+    svg += f'<circle cx="92" cy="{bar_y + 40}" r="26" fill="{accent}"/>'
+    svg += f'<text x="92" y="{bar_y + 47}" text-anchor="middle" fill="white" font-size="18" font-weight="900" font-family="Arial,sans-serif">KB</text>'
+    svg += f'<text x="132" y="{bar_y + 32}" fill="white" font-size="18" font-weight="800" font-family="Arial,sans-serif">{xe(_COPYRIGHT_NAME)}</text>'
+    svg += f'<text x="132" y="{bar_y + 54}" fill="{lighten(accent, 0.45)}" font-size="13" font-family="Arial,sans-serif">Staff Engineer · AI & Systems</text>'
+
+    # Save/Share nudge (drives engagement)
+    svg += f'<rect x="{W-300}" y="{bar_y + 16}" width="240" height="48" rx="24" fill="{rgba(accent,0.25)}" stroke="{accent}" stroke-width="1.5"/>'
+    svg += f'<text x="{W-180}" y="{bar_y + 36}" text-anchor="middle" fill="{lighten(accent,0.8)}" font-size="13" font-weight="700" font-family="Arial,sans-serif">🔖 SAVE FOR LATER</text>'
+    svg += f'<text x="{W-180}" y="{bar_y + 54}" text-anchor="middle" fill="{lighten(accent,0.45)}" font-size="11" font-family="Arial,sans-serif">Share with your team</text>'
+
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 STYLES = [
     _style_vertical_flow,   # 0 — numbered pipeline steps
     _style_mind_map,        # 1 — radial hub + branches
@@ -2847,6 +2959,7 @@ STYLES = [
     _style_notebook,            # 20 - notebook style
     _style_lane_map_infographic, # 21 - editorial lane-map infographic
     _style_modern_tech_cards,   # 22 - modern comparison/stack cards
+    _style_viral_poster,       # 23 — NEW: bold square infographic for virality
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -2897,6 +3010,11 @@ TOPIC_STYLE_OVERRIDES = {
     "system-design":  20,
     "kubernetes":     20,   # override existing if you want notebook style
     "rag-systems":    20,
+    # ── Viral poster for high-engagement topics ─────────────────────────────
+    "ai-disciplines":   23,
+    "career-leverage":  23,
+    "genai-roadmap":    23,
+    "ai-agents-2025":   23,
 }
 
 DIAGRAM_TYPE_STYLE_MAP = {
@@ -2929,6 +3047,8 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "7 layers": 10,
     "ecosystem breakdown": 20,
     "signal vs noise": 17,
+    "viral poster": 23,
+    "poster": 23,
 }
 
 STYLE_FAMILIES_BY_TYPE = {
