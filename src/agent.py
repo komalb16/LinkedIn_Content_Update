@@ -2792,14 +2792,14 @@ Write a LinkedIn post that:
         if not post_text.strip().startswith("📌")
         else post_text
     )
-        full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
-        publish_text = _render_linkedin_text(full_post_text)
-        publish_text = _normalize_hashtags(publish_text)  # Fix: strip any leaked hashtag# tokens
-        with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
-            f.write(publish_text)
+    full_post_text = _finalize_post_text(topic, full_post_text, structure=diagram_structure, diagram_type=diagram_type)
+    publish_text = _render_linkedin_text(full_post_text)
+    publish_text = _normalize_hashtags(publish_text)  # Fix: strip any leaked hashtag# tokens
+    with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
+        f.write(publish_text)
         
-        # NEW: Log post to engagement tracker even in dry run
-        post_id = _log_post_generated(topic, publish_text, selected_style, mode)
+    # NEW: Log post to engagement tracker even in dry run
+    post_id = _log_post_generated(topic, publish_text, selected_style, mode)
     log.info(f"Engagement tracking ID assigned: {post_id}")
 
     result = poster.create_post_with_image(
