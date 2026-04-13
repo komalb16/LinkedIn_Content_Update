@@ -415,26 +415,36 @@ STORY_THEMES = [
 STORY_SYSTEM = """\
 You are Komal Batra writing a personal story post for LinkedIn.
 
-BANNED OPENERS — never use these:
-- "I firmly believe", "I believe that", "In today's world"
-- "Our online presence", "It's important", "As engineers"
-- Any sentence starting with "I" followed by a belief statement
+BANNED OPENERS — the post will be rejected if it starts with any of these:
+- "I recently overheard", "I firmly believe", "I believe that"
+- "In today's world", "Our online presence", "It's important"
+- "As a Staff Engineer, I", "Upon further investigation"
+- Any sentence that starts with "I" + a belief verb (believe, think, feel, know)
 
-REQUIRED STRUCTURE:
-1. Open with ONE specific moment — a scene, a number, a thing you clicked or read.
-   Not a belief. A moment. Example: "I searched my own name in ChatGPT last week."
-2. What you found (or didn't find) — be specific and a little uncomfortable.
-3. Exactly 3 numbered actions (1️⃣ 2️⃣ 3️⃣) — concrete, specific, doable today.
-4. One honest reflection — what this changed for you.
-5. 💬 + genuine question + 4 to 7 hashtags.
+REQUIRED STRUCTURE — follow this exactly:
+1. LINE 1: One specific scene. A thing you clicked, read, typed, or saw.
+   GOOD: "I searched my own name in ChatGPT last week."
+   GOOD: "A candidate told me their AI assistant found my profile before my website."
+   BAD:  "I recently overheard a colleague mention..."
+   BAD:  "I firmly believe online presence matters."
 
-FORMAT RULES:
-- Each numbered action must be a COMPLETE sentence on its own line.
-- Never truncate a thought mid-sentence.
-- No fabricated metrics or salaries.
-- Include one ``` fenced visual block with 3 to 5 lines showing the 3 actions.
-- Do NOT mention the current month or year.
-- 180 to 250 words total.
+2. LINE 2-3: What you found — specific and uncomfortable. Not vague.
+
+3. THREE NUMBERED ACTIONS — each must be:
+   - A complete sentence ending with a period
+   - Under 8 words
+   - Actionable TODAY, not aspirational
+   GOOD: "1️⃣ Rewrite your LinkedIn headline to name one specific skill."
+   BAD:  "1️⃣ I will ensure my LinkedIn profile"
+
+4. DO NOT repeat the numbered actions as plain text below them.
+
+5. One honest reflection sentence — what this changed.
+
+6. 💬 + specific question + 4-7 hashtags.
+
+FORMAT: 160-220 words. One ``` fenced block showing 3-5 action steps.
+Do NOT mention the current month or year.
 """
 
 
@@ -599,14 +609,13 @@ Pick the most technically interesting story. Write a LinkedIn post that:
 
 def _extract_story_sections(post_text, theme):
     """
-    Extract actual numbered takeaways from a generated story post
-    so the diagram labels match what was written, not generic placeholders.
-    Falls back to theme-based sections if extraction fails.
+    Extract actual numbered takeaways from a generated story post.
+    Rejects truncated items. Falls back to theme-based sections if needed.
     """
     lines = (post_text or "").splitlines()
     sections = []
+    seen_labels = set()
 
-    # Try to find numbered items (1️⃣ 2️⃣ or 1. 2. patterns)
     for line in lines:
         stripped = line.strip()
         # Match emoji numbers or plain numbers
@@ -614,32 +623,61 @@ def _extract_story_sections(post_text, theme):
             r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)])\s+(.+)$",
             stripped
         )
-        if m:
-            label = m.group(1).strip()
-            # Clean up — remove trailing punctuation, truncate
-            label = re.sub(r"\s*[—:]\s*.*$", "", label).strip(" .")
-            label = label[:40]
-            if label and len(label) > 3:
-                sections.append({
-                    "id": len(sections) + 1,
-                    "label": label,
-                    "desc": "",
-                })
+        if not m:
+            continue
+
+        label = m.group(1).strip()
+        # Clean formatting artifacts
+        label = re.sub(r"\s*[—:–]\s*.*$", "", label).strip(" .*")
+        label = re.sub(r"\*+", "", label).strip()
+
+        # Quality gates — reject truncated or duplicate items
+        if len(label) < 8:
+            continue  # Too short — probably truncated
+        if label.lower() in seen_labels:
+            continue  # Duplicate
+        # Reject items that end with prepositions/conjunctions — sign of truncation
+        last_word = label.rstrip(".!?,").split()[-1].lower() if label.split() else ""
+        if last_word in {"and", "or", "the", "a", "an", "my", "your", "their", "our", "of", "to", "in", "for", "with"}:
+            continue  # Truncated mid-thought
+
+        seen_labels.add(label.lower())
+        sections.append({
+            "id": len(sections) + 1,
+            "label": label[:42],
+            "desc": "",
+        })
         if len(sections) >= 5:
             break
 
-    # If we found 3+ real sections, use them
+    # Need at least 3 good sections
     if len(sections) >= 3:
         return sections
 
-    # Fallback: build from theme name + generic action labels
-    theme_name = theme.get("name", "Key Insight")
+    # Fallback: use theme-specific sections
+    theme_id = theme.get("id", "")
+    if "career" in theme_id or "leverage" in theme_id:
+        return [
+            {"id": 1, "label": "Old Way: Manual everything", "desc": ""},
+            {"id": 2, "label": "New Way: AI handles repetition", "desc": ""},
+            {"id": 3, "label": "Your role shifts to judgment", "desc": ""},
+            {"id": 4, "label": "Ship more with fewer people", "desc": ""},
+            {"id": 5, "label": "Leverage compounds over time", "desc": ""},
+        ]
+    if "discovery" in theme_id or "name" in theme_id or "search" in theme_id:
+        return [
+            {"id": 1, "label": "Search your own name in AI tools", "desc": ""},
+            {"id": 2, "label": "Find the gaps in your signal", "desc": ""},
+            {"id": 3, "label": "Rewrite your headline for clarity", "desc": ""},
+            {"id": 4, "label": "Publish proof, not just claims", "desc": ""},
+            {"id": 5, "label": "Stay consistent for 90 days", "desc": ""},
+        ]
     return [
-        {"id": 1, "label": "The Moment", "desc": "What triggered this realization"},
-        {"id": 2, "label": "The Insight", "desc": "What changed after this"},
-        {"id": 3, "label": "Action 1", "desc": "First practical step"},
-        {"id": 4, "label": "Action 2", "desc": "Second practical step"},
-        {"id": 5, "label": "Action 3", "desc": "Third practical step"},
+        {"id": 1, "label": "The moment that changed things", "desc": ""},
+        {"id": 2, "label": "What I was getting wrong", "desc": ""},
+        {"id": 3, "label": "First concrete action I took", "desc": ""},
+        {"id": 4, "label": "Second thing I changed", "desc": ""},
+        {"id": 5, "label": "What's different now", "desc": ""},
     ]
 
 def generate_story_post(theme=None):
@@ -861,7 +899,11 @@ Match the row labels closely so the text and image stay coherent."""
 Angle: {topic.get("angle", "practical, production-level insights")}
 Planned diagram type: {diagram_type or topic.get("diagram_type", "Architecture Diagram")}
 
-CRITICAL FORMATTING RULE: If using numbered sections (1️⃣ 2️⃣ etc), every section MUST be a complete sentence. Never end a line mid-thought with "—" followed by truncated text. Write the full description on the same line.
+CRITICAL FORMATTING RULES — violations will cause the post to fail:
+1. Every numbered item (1️⃣ 2️⃣ 3️⃣) MUST be a complete, self-contained sentence.
+2. NEVER write a numbered item that ends without a period. "1️⃣ I will ensure my LinkedIn" is WRONG. "1️⃣ Update your LinkedIn headline to name your exact expertise." is CORRECT.
+3. NEVER list the same content twice. If you write numbered items, do NOT repeat them as plain text below.
+4. Each numbered item must be SHORT enough to fit on ONE line — max 8 words per item.
 
 Story archetype (hook): {hook}
 Voice: {tone}
@@ -2328,6 +2370,20 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
             break
 
     # Pass 2: look for bold-style headers (**text**)
+    # Deduplicate — remove sections whose labels are substrings of each other
+    deduped = []
+    seen = set()
+    for sec in sections:
+        normalized = re.sub(r"\s+", " ", sec["label"].lower().strip())
+        if normalized not in seen:
+            seen.add(normalized)
+            deduped.append(sec)
+    sections = deduped
+
+    # Renumber after dedup
+    for i, sec in enumerate(sections):
+        sec["id"] = i + 1
+
     if len(sections) < 3:
         for line in lines:
             m = re.match(r"^\*\*(.+?)\*\*", line.strip())
@@ -2886,14 +2942,25 @@ Write a LinkedIn post that:
     
     # ── SELECT DIAGRAM STYLE USING SMART ROTATION ──────────────────────────────
     # NEW: Use smart rotation to cycle through all 23 available diagram styles
-    selected_style = _select_smart_diagram_style(topic.get("id", ""))
-    log.info(f"Selected diagram style {selected_style} from {len(ALL_DIAGRAM_STYLES)} available styles for visual variety")
+    # Check if the diagram type has an intentional style (e.g. Viral Poster = 23)
+    # If so, respect it — don't let rotation override a deliberate design choice
+    INTENTIONAL_STYLE_MAP = {
+        "Viral Poster": 23,
+        "poster":       23,
+    }
+    intentional_style = INTENTIONAL_STYLE_MAP.get(diagram_type)
+
+    if intentional_style is not None:
+        selected_style = intentional_style
+        log.info(f"Using intentional style {selected_style} for diagram type '{diagram_type}' (rotation bypassed)")
+    else:
+        selected_style = _select_smart_diagram_style(topic.get("id", ""))
+        log.info(f"Selected diagram style {selected_style} from {len(ALL_DIAGRAM_STYLES)} available styles for visual variety")
 
     # Ensure diagram_structure is a dict and set the selected style
     if not isinstance(diagram_structure, dict):
         diagram_structure = {}
     diagram_structure_with_style = copy.deepcopy(diagram_structure)
-    # Force the rotation style — this overrides diagram_generator's own style picking
     diagram_structure_with_style["style"] = selected_style
 
     # Sanity check: log if style 0 repeats (indicates rotation file reset)
