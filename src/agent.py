@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from topic_manager import TopicManager
 from diagram_generator import DiagramGenerator
-from diagram_rotation import DiagramRotation
 from logger import get_logger
 import notifier
 
@@ -132,6 +131,8 @@ TRENDING_HASHTAGS = {
 }
 
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
+# RSS_FEEDS: Used for news reaction posts (ai_news, tech_news, layoff_news modes)
+# For trending topic discovery (trending mode), see trend_discovery.py which uses HN + Reddit APIs
 RSS_FEEDS = {
     "ai": [
         "https://venturebeat.com/category/ai/feed/",
@@ -1037,6 +1038,20 @@ def _cleanup_generated_post(text):
     elif first_line.startswith("'") and first_line.count("'") == 1:
         text = first_line[1:].lstrip() + ("\n" + "\n".join(text.splitlines()[1:]) if len(text.splitlines()) > 1 else "")
 
+     # Strip structure-block leakage — LLM sometimes echoes the diagram labels verbatim
+    # Pattern: "Label: description" on its own line where label matches known section words
+    STRUCTURE_ECHO_PATTERN = re.compile(
+        r"^(?:The Problem|Core Concept|How It Works|Best Practices|"
+        r"Common Mistakes|Key Takeaway|Phase \d+|Step \d+|"
+        r"Foundation|Data Layer|Service Layer|Integration|User)\s*:.*$",
+        re.MULTILINE | re.IGNORECASE
+    )
+    # Only strip if there are 3+ such lines (genuine echo, not organic mention)
+    echo_matches = STRUCTURE_ECHO_PATTERN.findall(text)
+    if len(echo_matches) >= 3:
+        text = STRUCTURE_ECHO_PATTERN.sub("", text)
+        text = re.sub(r"\n{3,}", "\n\n", text).strip()
+
     return text
 
 
@@ -1584,12 +1599,61 @@ def _format_post_structure(text):
     return "\n".join(final_lines).strip()
 
 
+def _fix_truncated_numbered_items(text):
+    """
+    Remove numbered items that end mid-sentence (sign of LLM truncation).
+    Also removes the plain-text duplicate that often follows.
+    """
+    if not text:
+        return text
+
+    lines = text.splitlines()
+    result = []
+    seen_content = set()
+
+    # Collect numbered item labels first so we can detect duplicates below
+    numbered_labels = set()
+    for line in lines:
+        m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)])\s+(.+)$", line.strip())
+        if m:
+            label = m.group(1).strip().rstrip(".!?,")
+            # Truncation sign: ends with a preposition/article/conjunction
+            last_word = label.split()[-1].lower() if label.split() else ""
+            if last_word not in {"and","or","the","a","an","my","your","of","to","in","for","with","is"}:
+                numbered_labels.add(label.lower()[:30])
+
+    for line in lines:
+        stripped = line.strip()
+
+        # Check if this is a numbered item
+        m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)])\s+(.+)$", stripped)
+        if m:
+            label = m.group(1).strip()
+            last_word = label.rstrip(".!?,").split()[-1].lower() if label.split() else ""
+            # Drop truncated numbered items
+            if last_word in {"and","or","the","a","an","my","your","of","to","in","for","with","is"}:
+                continue
+            # Drop if too short (< 5 words = probably truncated)
+            if len(label.split()) < 4:
+                continue
+
+        # Drop plain-text lines that duplicate a numbered item
+        norm = re.sub(r"[^a-z0-9 ]", "", stripped.lower())[:30]
+        if norm and norm in seen_content and not stripped.startswith("#"):
+            continue
+
+        seen_content.add(norm)
+        result.append(line)
+
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(result)).strip()
+
 def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _cleanup_generated_post(post_text or "")
     finalized = _normalize_hashtags(finalized).strip()
     if not finalized:
         return finalized
     finalized = _strip_work_incident_hook(finalized, topic.get("name", ""))
+    finalized = _fix_truncated_numbered_items(finalized)   # NEW: fix truncation + duplication
     finalized = _reduce_repetitive_copy(finalized)
     finalized = _remove_raw_flow_only_lines(finalized)
     finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
@@ -2450,46 +2514,61 @@ def _get_post_subtitle(mode):
     return subtitles.get(mode, "Staff Engineer's Take")
 
 def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_structure):
-    # Story posts → viral poster, title from post hook
-    if mode == "story":
+    """
+    Decide diagram title, type, and structure based on post mode and content.
+    Viral Poster → story, news, trending, and soft/career topics
+    Technical diagrams → system design, devops, architecture topics
+    """
+    # Modes that always get Viral Poster
+    POSTER_MODES = {"story", "ai_news", "tech_news", "tools_news", "layoff_news", "trending"}
+
+    # Topic categories that suit Viral Poster over technical diagrams
+    POSTER_TOPIC_KEYWORDS = {
+        "career", "brand", "growth", "discovery", "name-search",
+        "online", "presence", "leverage", "ai-discovery", "visibility",
+        "reputation", "personal", "interview", "skill", "learning",
+        "iot", "transit",  # IoT in Transit is a story-style topic
+    }
+
+    topic_id_lower = topic.get("id", "").lower()
+    topic_name_lower = topic.get("name", "").lower()
+    is_poster_topic = any(
+        kw in topic_id_lower or kw in topic_name_lower
+        for kw in POSTER_TOPIC_KEYWORDS
+    )
+
+    use_viral_poster = (mode in POSTER_MODES) or is_poster_topic
+
+    if use_viral_poster:
         hook_title = _extract_visual_title(post_text, topic["name"])
-        return hook_title, "Viral Poster", fallback_structure
+        poster_structure = _build_viral_poster_structure(post_text, topic["name"], mode)
+        log.info(f"Using Viral Poster for mode={mode}, topic={topic.get('id','')}")
+        return hook_title, "Viral Poster", poster_structure
 
-    # Topic posts → use planned diagram type
-    if mode == "topic":
-        return topic["name"], fallback_type, fallback_structure
-
-    # Story posts → viral poster, title from post hook
-    if mode == "story":
+    # News mode that didn't match above — still use viral poster
+    if mode not in {"topic", "story"}:
         hook_title = _extract_visual_title(post_text, topic["name"])
         poster_structure = _build_viral_poster_structure(post_text, topic["name"], mode)
         return hook_title, "Viral Poster", poster_structure
-    return topic["name"], fallback_type, fallback_structure
-    
-    # News and trending → viral poster, title extracted from post
-    if mode in {"ai_news", "tech_news", "tools_news", "layoff_news", "trending"}:
-        hook_title = _extract_visual_title(post_text, topic["name"])
-        poster_structure = _build_viral_poster_structure(post_text, topic["name"], mode)
-        return hook_title, "Viral Poster", poster_structure
 
+    # Technical topic posts — use planned diagram type
     diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
     fallback_entities = [topic.get("name", topic.get("id", ""))]
     if topic.get("diagram_subject"):
-        fallback_entities.extend(re.findall(r"\b[A-Z][A-Za-z0-9+.\-]{2,}\b", topic["diagram_subject"]))
+        fallback_entities.extend(
+            re.findall(r"\b[A-Z][A-Za-z0-9+.\-]{2,}\b", topic["diagram_subject"])
+        )
     diagram_title = _extract_visual_title_for_type(
         post_text, topic["name"], diagram_type, fallback_entities=fallback_entities
     )
     diagram_structure = fallback_structure
-
     if diagram_type != fallback_type:
         diagram_structure = None
     if diagram_type == "Comparison Table" and not diagram_structure:
         diagram_structure = _build_comparison_structure_from_post(
             post_text, diagram_title, fallback_entities=fallback_entities
         )
-
     return diagram_title, diagram_type, diagram_structure
-
 
 # ─── POST MODE ────────────────────────────────────────────────────────────────
 
@@ -2551,6 +2630,9 @@ def get_post_mode():
     if rand < cumulative:
         return "tech_news"
 
+    total_prob = interview_prob + story_prob + trending_prob + ai_news_prob + layoff_prob + tools_prob + tech_prob
+    if total_prob > 1.0:
+        log.warning(f"Post mode probabilities sum to {total_prob:.2f} > 1.0 — topic mode will never run. Check env vars.")
     return "topic"
 
 
@@ -2624,7 +2706,6 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
 
     topic_mgr   = TopicManager()
     diagram_gen = DiagramGenerator()
-    diagram_rotator = DiagramRotation()  # Initialize rotation system for diagram variety
     recent_post_entries = _load_post_memory()
     recent_posts = [e.get("text", "") for e in recent_post_entries if e.get("text")]
     recent_hashes = {_content_hash(t) for t in recent_posts if t}

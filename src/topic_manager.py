@@ -15,7 +15,9 @@ log = get_logger("topics")
 
 HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".topic_history.json")
 SELECTION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".topic_selection_history.json")
-
+# CURATED TOPICS: Used as fallback when trending discovery returns nothing,
+# and for manual --topic overrides. No need to add new topics here manually
+# since trending mode auto-discovers current topics from HN + Reddit.
 TOPICS = [
     {
         "id": "llm-architecture",
