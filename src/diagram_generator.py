@@ -3015,6 +3015,12 @@ TOPIC_STYLE_OVERRIDES = {
     "career-leverage":  23,
     "genai-roadmap":    23,
     "ai-agents-2025":   23,
+        "story-ai-discovery":       23,
+    "story-career-leverage":    23,
+    "story-name-search":        23,
+    "ai-name-search":           23,
+    "career-leverage":          23,
+    "ai-discovery":             23,
 }
 
 DIAGRAM_TYPE_STYLE_MAP = {

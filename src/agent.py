@@ -406,14 +406,26 @@ STORY_THEMES = [
 STORY_SYSTEM = """\
 You are Komal Batra writing a personal story post for LinkedIn.
 
-RULES:
-- Start with a concrete moment (not a generic intro).
-- Keep it honest, practical, and specific.
-- Include exactly 3 actionable takeaways.
-- No fabricated metrics, salaries, or sweeping claims unless explicitly provided.
-- Include one ``` fenced visual block with 3 to 5 lines.
-- End with 💬 and one genuine question plus 4 to 7 hashtags.
+BANNED OPENERS — never use these:
+- "I firmly believe", "I believe that", "In today's world"
+- "Our online presence", "It's important", "As engineers"
+- Any sentence starting with "I" followed by a belief statement
+
+REQUIRED STRUCTURE:
+1. Open with ONE specific moment — a scene, a number, a thing you clicked or read.
+   Not a belief. A moment. Example: "I searched my own name in ChatGPT last week."
+2. What you found (or didn't find) — be specific and a little uncomfortable.
+3. Exactly 3 numbered actions (1️⃣ 2️⃣ 3️⃣) — concrete, specific, doable today.
+4. One honest reflection — what this changed for you.
+5. 💬 + genuine question + 4 to 7 hashtags.
+
+FORMAT RULES:
+- Each numbered action must be a COMPLETE sentence on its own line.
+- Never truncate a thought mid-sentence.
+- No fabricated metrics or salaries.
+- Include one ``` fenced visual block with 3 to 5 lines showing the 3 actions.
 - Do NOT mention the current month or year.
+- 180 to 250 words total.
 """
 
 
@@ -575,6 +587,51 @@ Pick the most technically interesting story. Write a LinkedIn post that:
     except Exception as e:
         log.warning(f"News generation failed ({news_type}), falling back to topic mode: {e}")
         return None
+
+def _extract_story_sections(post_text, theme):
+    """
+    Extract actual numbered takeaways from a generated story post
+    so the diagram labels match what was written, not generic placeholders.
+    Falls back to theme-based sections if extraction fails.
+    """
+    lines = (post_text or "").splitlines()
+    sections = []
+
+    # Try to find numbered items (1️⃣ 2️⃣ or 1. 2. patterns)
+    for line in lines:
+        stripped = line.strip()
+        # Match emoji numbers or plain numbers
+        m = re.match(
+            r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)])\s+(.+)$",
+            stripped
+        )
+        if m:
+            label = m.group(1).strip()
+            # Clean up — remove trailing punctuation, truncate
+            label = re.sub(r"\s*[—:]\s*.*$", "", label).strip(" .")
+            label = label[:40]
+            if label and len(label) > 3:
+                sections.append({
+                    "id": len(sections) + 1,
+                    "label": label,
+                    "desc": "",
+                })
+        if len(sections) >= 5:
+            break
+
+    # If we found 3+ real sections, use them
+    if len(sections) >= 3:
+        return sections
+
+    # Fallback: build from theme name + generic action labels
+    theme_name = theme.get("name", "Key Insight")
+    return [
+        {"id": 1, "label": "The Moment", "desc": "What triggered this realization"},
+        {"id": 2, "label": "The Insight", "desc": "What changed after this"},
+        {"id": 3, "label": "Action 1", "desc": "First practical step"},
+        {"id": 4, "label": "Action 2", "desc": "Second practical step"},
+        {"id": 5, "label": "Action 3", "desc": "Third practical step"},
+    ]
 
 def generate_story_post(theme=None):
     theme = theme or random.choice(STORY_THEMES)
@@ -2573,16 +2630,13 @@ Write a LinkedIn post that:
         story_meta = []
         for _ in range(candidate_count):
             st_topic, st_text = generate_story_post(theme=chosen_theme)
+            # Extract actual takeaways from the generated post text
+            # so diagram labels match what was actually written
+            extracted_sections = _extract_story_sections(st_text, chosen_theme)
             st_structure = {
-                "style": 22,
-                "subtitle": "Moment -> Insight -> Action",
-                "sections": [
-                    {"id": 1, "label": "Moment", "desc": "The trigger event that changed perspective"},
-                    {"id": 2, "label": "Insight", "desc": "What the moment reveals about AI discovery"},
-                    {"id": 3, "label": "Action 1", "desc": "Immediate profile or workflow update"},
-                    {"id": 4, "label": "Action 2", "desc": "Signal quality and clarity improvements"},
-                    {"id": 5, "label": "Action 3", "desc": "Consistent content and positioning cadence"},
-                ],
+                "style": 23,  # Viral poster — fits personal stories much better than flow diagrams
+                "subtitle": chosen_theme.get("angle", "Engineer's Perspective")[:60],
+                "sections": extracted_sections,
             }
             st_text = _finalize_post_text(st_topic, st_text, structure=st_structure, diagram_type="Modern Cards")
             story_candidates.append(st_text)
