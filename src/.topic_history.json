@@ -749,5 +749,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-13T16:45:22.220823",
+    "topic_id": "trend-iot-signal-sync",
+    "topic_name": "Realtime Signal Sync",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 98,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 98,
+        "raw_score": 98,
+        "similarity": 0.0498,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0552,
+        "penalty": 0
+      }
+    ]
   }
 ]
