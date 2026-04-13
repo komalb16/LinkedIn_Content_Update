@@ -367,13 +367,22 @@ RULES:
 - Lead with your honest reaction, not a summary of the news
 - Use "I" freely — this is a personal take, not a press release
 - One strong opinion, defended with specifics — not a both-sides take
-- Include one ``` fenced visual block that fits the post
+- Include one ``` fenced visual block with 3-5 lines max
 - End with 💬 + a sharp question + 5 to 7 hashtags
-- 200 to 300 words — reactions should be tight
+- 180 to 260 words — reactions should be tight
 - No banned words: robust, crucial, delve, landscape, seamless, synergy,
-  paradigm, unprecedented, game-changer, revolutionize, supercharge
+  paradigm, unprecedented, game-changer, revolutionize, supercharge,
+  thrilled, excited, disruptor, democratize
 - Never mention the current month or year
 - Do NOT add copyright or signature
+
+CRITICAL — FABRICATION RULES:
+- NEVER invent funding amounts, user counts, or statistics not in the provided news
+- NEVER add dollar figures ($100M, $50B etc) unless explicitly in the news text
+- NEVER say a company "raised X" unless that exact number is in the provided articles
+- If you don't have a specific number, use qualitative language: "significant funding"
+- Only reference companies and facts that appear in the provided news text
+- Do NOT mention Railway, AWS, or any company not in the provided articles
 """
 
 STORY_THEMES = [
@@ -1789,18 +1798,20 @@ def _fallback_style_for_diagram(diagram_type, structure=None):
     if structure and structure.get("rows"):
         return 20
     mapping = {
-        "Decision Tree": 9,
-        "Comparison Table": 22,
-        "Flow Chart": 0,
-        "Lane Map": 0,
-        "Signal vs Noise": 17,
-        "7 Layers": 10,
+        "Decision Tree":      9,
+        "Comparison Table":   22,
+        "Flow Chart":         0,
+        "Lane Map":           0,
+        "Signal vs Noise":    17,
+        "7 Layers":           10,
         "Ecosystem Breakdown": 20,
-        "Observability Map": 20,
-        "Winding Roadmap": 15,
+        "Observability Map":  20,
+        "Winding Roadmap":    15,
         "Architecture Diagram": 7,
-        "Architecture": 7,
-        "Modern Cards": 22,
+        "Architecture":       7,
+        "Modern Cards":       22,
+        "Viral Poster":       23,
+        "poster":             23,
     }
     return mapping.get(diagram_type, 7)
 
@@ -2288,9 +2299,122 @@ def _infer_diagram_type_from_post(post_text, fallback_type):
     return fallback_type
 
 
+def _build_viral_poster_structure(post_text, topic_name, mode):
+    """
+    Build sections for the viral poster from actual post content.
+    Extracts numbered points, or falls back to key sentences.
+    """
+    lines = (post_text or "").splitlines()
+    sections = []
+
+    # Pass 1: look for explicit numbered items (1️⃣ or 1. or 1)
+    for line in lines:
+        stripped = line.strip()
+        m = re.match(
+            r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$",
+            stripped
+        )
+        if m:
+            label = m.group(1).strip()
+            label = re.sub(r"\s*[—:–]\s*.*$", "", label).strip(" .")
+            label = re.sub(r"\*+", "", label).strip()
+            if len(label) > 4:
+                sections.append({
+                    "id": len(sections) + 1,
+                    "label": label[:42],
+                    "desc": "",
+                })
+        if len(sections) >= 6:
+            break
+
+    # Pass 2: look for bold-style headers (**text**)
+    if len(sections) < 3:
+        for line in lines:
+            m = re.match(r"^\*\*(.+?)\*\*", line.strip())
+            if m:
+                label = m.group(1).strip(" .*:")
+                if len(label) > 4:
+                    sections.append({
+                        "id": len(sections) + 1,
+                        "label": label[:42],
+                        "desc": "",
+                    })
+            if len(sections) >= 5:
+                break
+
+    # Pass 3: extract strong sentences from paragraphs
+    if len(sections) < 3:
+        sentence_count = 0
+        for line in lines:
+            stripped = line.strip()
+            # Skip fences, hashtags, emoji-only lines, short lines
+            if (stripped.startswith(("#", "```", "💬"))
+                    or len(stripped) < 20
+                    or stripped.startswith("📌")):
+                continue
+            # Take first sentence of paragraphs
+            first_sentence = re.split(r"[.!?]", stripped)[0].strip()
+            if len(first_sentence) > 15:
+                sections.append({
+                    "id": len(sections) + 1,
+                    "label": first_sentence[:42],
+                    "desc": "",
+                })
+                sentence_count += 1
+            if sentence_count >= 5:
+                break
+
+    # Final fallback
+    if len(sections) < 3:
+        sections = [
+            {"id": 1, "label": "The Problem",    "desc": ""},
+            {"id": 2, "label": "Why It Matters",  "desc": ""},
+            {"id": 3, "label": "What Changes",    "desc": ""},
+            {"id": 4, "label": "The Trade-off",   "desc": ""},
+            {"id": 5, "label": "Key Takeaway",    "desc": ""},
+        ]
+
+    return {
+        "style": 23,
+        "subtitle": _get_post_subtitle(mode),
+        "sections": sections[:6],
+    }
+
+
+def _get_post_subtitle(mode):
+    subtitles = {
+        "story":      "Personal Lessons",
+        "ai_news":    "AI Engineering Take",
+        "tech_news":  "Engineer's Perspective",
+        "tools_news": "Signal or Noise?",
+        "layoff_news":"Industry Reality Check",
+        "trending":   "What Engineers Need to Know",
+        "topic":      "Production Insights",
+    }
+    return subtitles.get(mode, "Staff Engineer's Take")
+
 def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_structure):
-    if mode in {"topic", "story"}:
+    # Story posts → viral poster, title from post hook
+    if mode == "story":
+        hook_title = _extract_visual_title(post_text, topic["name"])
+        return hook_title, "Viral Poster", fallback_structure
+
+    # Topic posts → use planned diagram type
+    if mode == "topic":
         return topic["name"], fallback_type, fallback_structure
+
+    # Story posts → viral poster, title from post hook
+    if mode == "story":
+        hook_title = _extract_visual_title(post_text, topic["name"])
+        poster_structure = _build_viral_poster_structure(post_text, topic["name"], mode)
+        return hook_title, "Viral Poster", poster_structure
+    return topic["name"], fallback_type, fallback_structure
+    
+    # News and trending → viral poster, title extracted from post
+    if mode in {"ai_news", "tech_news", "tools_news", "layoff_news", "trending"}:
+        hook_title = _extract_visual_title(post_text, topic["name"])
+        poster_structure = _build_viral_poster_structure(post_text, topic["name"], mode)
+        return hook_title, "Viral Poster", poster_structure
 
     diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
     fallback_entities = [topic.get("name", topic.get("id", ""))]

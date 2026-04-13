@@ -46,6 +46,9 @@ OUTPUT_DIR = "diagrams"
 _MOTION_PHASE = None
 DIAGRAM_MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".diagram_memory.json")
 DISABLED_STYLES = {16, 21}
+# Note: style 19 (three-panel) produces empty diagrams unless structure has exactly 3 sections
+# It is NOT disabled but should only be used with structured topics
+_STRUCTURED_ONLY_STYLES = {19, 11, 12, 13}
 
 
 def _fallback_for_disabled_style(style_idx: int, diagram_type: str = "") -> int:
@@ -3055,6 +3058,9 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "signal vs noise": 17,
     "viral poster": 23,
     "poster": 23,
+     "viral poster":  23,
+    "poster":        23,
+    "Viral Poster":  23,
 }
 
 STYLE_FAMILIES_BY_TYPE = {
