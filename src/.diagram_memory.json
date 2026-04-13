@@ -250,5 +250,19 @@
     "style": 0,
     "signature": "fdc225266b7942985970a8019c4a07d6",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-13T18:46:42.075255",
+    "topic_id": "ai-governance-playbook",
+    "style": 10,
+    "signature": "b2eefc437fb18bb7e6cbba075c22363f",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-13T18:46:42.078800",
+    "topic_id": "ai-governance-playbook",
+    "style": 19,
+    "signature": "78b517f47b11b047f517f53421ebfe53",
+    "duplicate_avoided": true
   }
 ]
