@@ -264,5 +264,12 @@
     "style": 19,
     "signature": "78b517f47b11b047f517f53421ebfe53",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-13T18:57:36.086599",
+    "topic_id": "story-ai-discovery-moment",
+    "style": 2,
+    "signature": "91c781f76d75ac4233b0f41cd91c1763",
+    "duplicate_avoided": true
   }
 ]
