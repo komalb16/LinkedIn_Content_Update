@@ -1998,9 +1998,14 @@ def _style_three_panel(topic_id, topic_name, C, structure=None):
     svg += f'<rect x="18" y="16" width="60" height="22" rx="4" fill="{C[0]}"/>'
     svg += f'<text x="48" y="31" text-anchor="middle" fill="white" font-size="10" font-weight="800" font-family="Arial,sans-serif">komalb</text>'
 
+    # Use full topic name without "Inside the" prefix
     words = topic_name.split()
-    bold_words = words[:2]; rest_words = words[2:]
-    svg += f'<text x="90" y="32" fill="#111" font-size="18" font-weight="400" font-family="Arial,sans-serif">Inside the <tspan font-weight="900" fill="{C[0]}">{xe(" ".join(bold_words))}</tspan> {xe(" ".join(rest_words))}</text>'
+    if len(words) >= 3:
+        bold_words = words[:2]
+        rest_words = words[2:]
+        svg += f'<text x="90" y="32" fill="#111" font-size="18" font-weight="400" font-family="Arial,sans-serif"><tspan font-weight="900" fill="{C[0]}">{xe(" ".join(bold_words))}</tspan> {xe(" ".join(rest_words))}</text>'
+    else:
+        svg += f'<text x="90" y="32" fill="#111" font-size="18" font-weight="900" fill="{C[0]}" font-family="Arial,sans-serif">{xe(topic_name)}</text>'
 
     px = start_x
     for i in range(n_panels):

@@ -1040,24 +1040,58 @@ def _cleanup_generated_post(text):
 
      # Strip structure-block leakage — LLM sometimes echoes the diagram labels verbatim
     # Pattern: "Label: description" on its own line where label matches known section words
+# Pattern 1: "Label: description" lines
     STRUCTURE_ECHO_PATTERN = re.compile(
         r"^(?:The Problem|Core Concept|How It Works|Best Practices|"
         r"Common Mistakes|Key Takeaway|Phase \d+|Step \d+|"
-        r"Foundation|Data Layer|Service Layer|Integration|User)\s*:.*$",
+        r"Foundation|Data Layer|Service Layer|Integration|User|"
+        r"Risk Tiering|Model Registry|Policy Controls|Monitoring|"
+        r"Auditability|Reporting|Response|Ingest|Process|Store|"
+        r"Serve|Govern|Deploy|Observe|Scale|Build|Test|Operate)\s*:.*$",
         re.MULTILINE | re.IGNORECASE
     )
-    # Only strip if there are 3+ such lines (genuine echo, not organic mention)
     echo_matches = STRUCTURE_ECHO_PATTERN.findall(text)
     if len(echo_matches) >= 3:
         text = STRUCTURE_ECHO_PATTERN.sub("", text)
         text = re.sub(r"\n{3,}", "\n\n", text).strip()
+
+    # Pattern 2: structure labels printed as a single space-separated line
+    # e.g. "Risk Tiering Model Registry Policy Controls Monitoring"
+    # Detect: a line with 4+ title-case words and no verbs/connectors
+    lines_check = text.splitlines()
+    cleaned_lines = []
+    for ln in lines_check:
+        stripped = ln.strip()
+        words = stripped.split()
+        if len(words) >= 4:
+            # Check if ALL words are title-cased and none are common connectors
+            connectors = {"and","or","the","a","an","is","are","was","were",
+                         "to","of","in","for","with","that","this","it","but"}
+            all_title = all(
+                w[0].isupper() and w.lower() not in connectors
+                for w in words if w.isalpha()
+            )
+            # Also check no sentence-ending punctuation — pure label dump
+            no_punct = not any(c in stripped for c in ".!?,;:")
+            if all_title and no_punct and len(words) >= 4:
+                continue  # Skip this line — it's a leaked structure dump
+        cleaned_lines.append(ln)
+    text = "\n".join(cleaned_lines)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
 
     return text
 
 
 def _normalize_hashtags(text):
     cleaned = text or ""
+    # Handle all variations of the hashtag# leak
     cleaned = cleaned.replace("hashtag#", "#")
+    cleaned = cleaned.replace("Hashtag#", "#")
+    cleaned = cleaned.replace("HASHTAG#", "#")
+    # Handle "hashtag #Word" (space between hashtag and #)
+    cleaned = re.sub(r"\bhashtag\s+#", "#", cleaned, flags=re.I)
+    # Handle "hashtag Word" (no # at all — LLM sometimes does this)
+    cleaned = re.sub(r"\bhashtag\s+([A-Z][A-Za-z0-9]+)", r"#\1", cleaned)
     # Fix broken tags like "# Agents" -> "#Agents"
     cleaned = re.sub(r"(?<!\w)#\s+([A-Za-z][A-Za-z0-9_]*)", r"#\1", cleaned)
     return cleaned
@@ -3042,7 +3076,17 @@ Write a LinkedIn post that:
     if not isinstance(diagram_structure, dict):
         diagram_structure = {}
     diagram_structure_with_style = copy.deepcopy(diagram_structure)
+    # CRITICAL: style must be set here AND passed through — diagram_generator
+    # will respect structure["style"] over its own _pick_candidate_styles()
     diagram_structure_with_style["style"] = selected_style
+
+    # Double-check: if viral poster was chosen, verify structure has style=23
+    # diagram_generator's internal scoring can still override if we don't assert this
+    if diagram_type in ("Viral Poster", "poster"):
+        diagram_structure_with_style["style"] = 23
+        # Also set DIAGRAM_CANDIDATES=1 via env to prevent internal style competition
+        os.environ["DIAGRAM_CANDIDATES"] = "1"
+        log.info("Viral Poster confirmed — locking style=23, candidates=1")
 
     # Sanity check: log if style 0 repeats (indicates rotation file reset)
     recent_styles = _load_diagram_rotation_state().get("style_history", [])
