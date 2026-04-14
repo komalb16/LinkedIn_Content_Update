@@ -278,5 +278,26 @@
     "style": 3,
     "signature": "7bd54fc40dd3721862638d54251b3506",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-14T00:18:29.443386",
+    "topic_id": "trend-servo-crate",
+    "style": 23,
+    "signature": "fa49f7f1baeb7aa8460990f909620ec7",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-14T22:36:38.885707",
+    "topic_id": "ai-governance-playbook",
+    "style": 10,
+    "signature": "6097d922232d71cabfd04c2abefe97bf",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-14T22:36:38.889349",
+    "topic_id": "ai-governance-playbook",
+    "style": 19,
+    "signature": "24c6ba6ffd41fad183714645d9170e4b",
+    "duplicate_avoided": true
   }
 ]
