@@ -113,7 +113,6 @@ jobs:
             libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
 
       # 4. Install Python dependencies
-      # 4. Install Python dependencies
       - name: 📦 Install dependencies
         run: pip install -r requirements.txt
 

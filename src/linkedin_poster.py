@@ -57,7 +57,7 @@ class LinkedInPoster:
             return None
 
     def _register_image_upload(self):
-        """Register image upload with LinkedIn API."""
+        """Register image upload with LinkedIn API. Retries on 429/5xx."""
         url = LINKEDIN_API + "/assets?action=registerUpload"
         payload = {
             "registerUploadRequest": {
@@ -69,15 +69,27 @@ class LinkedInPoster:
                 }]
             }
         }
-        resp = requests.post(url, headers=self.headers, json=payload, timeout=20)
-        if resp.status_code != 200:
+        for attempt in range(3):
+            resp = requests.post(url, headers=self.headers, json=payload, timeout=20)
+            if resp.status_code == 200:
+                data = resp.json()
+                upload_url = data["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
+                asset = data["value"]["asset"]
+                log.info("Upload registered. Asset: " + asset)
+                return upload_url, asset
+            if resp.status_code == 429:
+                wait = int(resp.headers.get("Retry-After", 20))
+                log.warning(f"LinkedIn rate-limited on upload registration — waiting {wait}s (attempt {attempt+1}/3)")
+                time.sleep(wait)
+                continue
+            if resp.status_code >= 500:
+                log.warning(f"LinkedIn server error {resp.status_code} on upload registration (attempt {attempt+1}/3) — retrying in 8s")
+                time.sleep(8)
+                continue
             log.error("Register upload failed: " + resp.text)
             return None, None
-        data = resp.json()
-        upload_url = data["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
-        asset = data["value"]["asset"]
-        log.info("Upload registered. Asset: " + asset)
-        return upload_url, asset
+        log.error("Register upload failed after 3 attempts")
+        return None, None
 
     def _upload_image_bytes(self, upload_url, image_bytes):
         """Upload image bytes to LinkedIn."""

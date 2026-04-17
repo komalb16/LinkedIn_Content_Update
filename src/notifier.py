@@ -59,6 +59,9 @@ def _send_email(subject: str, body: str):
     if not all([sender, password, to_email]):
         return None  # not configured
 
+    # Extract topic from subject "✅ LinkedIn Post Published — <topic>"
+    topic_label = subject.split("—", 1)[-1].strip() if "—" in subject else "your topic"
+
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
@@ -72,7 +75,7 @@ def _send_email(subject: str, body: str):
           </div>
           <div style="background:#f8fafc;padding:24px;border-radius:0 0 12px 12px;border:1px solid #e2e8f0">
             <p style="color:#475569;font-size:14px;margin-bottom:16px">
-              Your post on <strong style="color:#0ea5e9">{topic}</strong> is now live on LinkedIn.
+              Your post on <strong style="color:#0ea5e9">{topic_label}</strong> is now live on LinkedIn.
             </p>
             <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:20px">
               <p style="color:#0f172a;font-size:13px;line-height:1.6;margin:0">{body.split("Preview:")[1].split("—")[0].strip() if "Preview:" in body else ""}</p>
