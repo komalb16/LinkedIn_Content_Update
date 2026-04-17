@@ -9,19 +9,19 @@ run-name: >-
 
 # ─── Triggers ───────────────────────────────────────────────────────────────
 on:
-  # Scheduled: twice daily at 9 AM and 6 PM IST (3:30 UTC and 12:30 UTC)
+  # Four evenly-spaced triggers every 6h. schedule_checker uses a 6h window,
+  # so the 4 × 6h slots tile perfectly across all 24 hours with no gaps.
+  #
+  # Slot coverage (EDT = UTC-4):
+  #   00:00 UTC → catches  8 PM –  2 AM EDT  (late-night / overnight)
+  #   06:00 UTC → catches  2 AM –  8 AM EDT  (early morning)
+  #   12:00 UTC → catches  8 AM –  2 PM EDT  (morning / midday) ✓
+  #   18:00 UTC → catches  2 PM –  8 PM EDT  (afternoon / evening) ✓
   schedule:
-    # Three evenly-spaced triggers (every 8h). schedule_checker sleeps up to 4h
-    # after firing, so any posting time you set in the dashboard is covered.
-    #
-    # Coverage (EDT = UTC-4, 4h window each):
-    #   06:00 UTC → catches  2 AM –  6 AM EDT  (overnight/early)
-    #   14:00 UTC → catches 10 AM –  2 PM EDT  (morning window) ✓
-    #   22:00 UTC → catches  6 PM – 10 PM EDT  (evening window) ✓
-    - cron: "0 6  * * *"  #  6 AM UTC =  2 AM EDT
-    - cron: "0 14 * * *"  #  2 PM UTC = 10 AM EDT  ← morning posts
-    - cron: "0 22 * * *"  # 10 PM UTC =  6 PM EDT  ← evening posts
-    - cron: "0 1  * * *"   # ← new, covers late-night Friday
+    - cron: "0 0  * * *"  # midnight UTC  = 8 PM EDT
+    - cron: "0 6  * * *"  #  6 AM UTC     = 2 AM EDT
+    - cron: "0 12 * * *"  # noon UTC      = 8 AM EDT
+    - cron: "0 18 * * *"  #  6 PM UTC     = 2 PM EDT
   
   # Manual trigger from GitHub UI — with optional inputs
   workflow_dispatch:

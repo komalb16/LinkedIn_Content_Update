@@ -154,7 +154,7 @@ def _schedule_now(cfg: dict):
             warn(f"Could not resolve schedule timezone '{ref_tz}' ({e}) — using UTC day resolution")
     return now_utc, ""
 
-def check_times_in_window(day_cfg: dict, now_utc: datetime, window_secs: int = 4*60*60) -> bool:
+def check_times_in_window(day_cfg: dict, now_utc: datetime, window_secs: int = 6*60*60) -> bool:
     """
     Enhancement for multiple times per day support.
     Returns True if ANY of the configured times fall within the current window.
@@ -291,7 +291,7 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         return
 
     now = utc_now()   # re-fetch as UTC for time comparison
-    WINDOW = 4 * 60 * 60  # 4-hour window — cron fires every 8h, each covers a 4h posting slot
+    WINDOW = 6 * 60 * 60  # 6-hour window — cron fires every 6h, 4 slots tile all 24h with no gaps
 
     # NEW: Check if any time slot (multiple or single) is within the posting window
     if not check_times_in_window(day_cfg, now, WINDOW):
