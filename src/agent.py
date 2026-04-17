@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import json
+import time
 import random
 import argparse
 import copy
@@ -557,11 +558,32 @@ def call_ai(prompt, system):
         "max_tokens": 1024,
         "temperature": 0.92,
     }
-    resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=30)
-    if resp.status_code != 200:
-        log.error("Groq error: " + resp.text)
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
+    last_err = None
+    for attempt in range(3):
+        try:
+            resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=45)
+            if resp.status_code == 429:
+                wait = int(resp.headers.get("Retry-After", 20))
+                log.warning(f"Groq rate-limited (429) — waiting {wait}s (attempt {attempt+1}/3)")
+                time.sleep(wait)
+                continue
+            if resp.status_code >= 500:
+                log.warning(f"Groq server error {resp.status_code} (attempt {attempt+1}/3) — retrying in 8s")
+                time.sleep(8)
+                continue
+            if resp.status_code != 200:
+                log.error("Groq error: " + resp.text)
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"].strip()
+        except requests.exceptions.Timeout:
+            log.warning(f"Groq request timed out (attempt {attempt+1}/3) — retrying")
+            last_err = "timeout"
+            time.sleep(5)
+        except requests.exceptions.RequestException as e:
+            log.warning(f"Groq request failed (attempt {attempt+1}/3): {e}")
+            last_err = str(e)
+            time.sleep(5)
+    raise RuntimeError(f"Groq call failed after 3 attempts: {last_err}")
 
 
 def _fallback_visual_block(structure=None):

@@ -29,15 +29,28 @@ class LinkedInPoster:
         return cleaned
 
     def _svg_to_png_bytes(self, svg_path):
-        """Convert SVG to PNG bytes using cairosvg."""
+        """Convert SVG to PNG bytes using cairosvg, preserving the SVG's native aspect ratio."""
         try:
             import cairosvg
+            import re as _re
+            # Read SVG to detect its declared width/height so we preserve aspect ratio.
+            # LinkedIn recommends max 1200px wide; square posters stay at native 1080px.
+            with open(svg_path, "rb") as _f:
+                svg_raw = _f.read(512).decode("utf-8", errors="ignore")
+            w_m = _re.search(r'width=["\'](\d+)["\']', svg_raw)
+            h_m = _re.search(r'height=["\'](\d+)["\']', svg_raw)
+            native_w = int(w_m.group(1)) if w_m else 900
+            native_h = int(h_m.group(1)) if h_m else 620
+            # Scale up to 2× for retina/crisp quality, capped at 2160px
+            scale = min(2.0, 2160 / max(native_w, native_h))
+            out_w = int(native_w * scale)
+            out_h = int(native_h * scale)
             png_bytes = cairosvg.svg2png(
                 url=svg_path,
-                output_width=1200,
-                output_height=628,
+                output_width=out_w,
+                output_height=out_h,
             )
-            log.info("SVG converted to PNG successfully")
+            log.info(f"SVG→PNG: {native_w}×{native_h} → {out_w}×{out_h} (scale={scale:.1f}×)")
             return png_bytes
         except Exception as e:
             log.warning("SVG to PNG failed: " + str(e))
@@ -100,7 +113,7 @@ class LinkedInPoster:
         return truncated + "\n\n[continued in comments...]"
 
     def _create_ugc_post(self, text, asset=None):
-        """Create LinkedIn UGC post with optional image."""
+        """Create LinkedIn UGC post with optional image. Retries on 429/5xx."""
         text = self._truncate_text(text)
         url = LINKEDIN_API + "/ugcPosts"
         media = []
@@ -125,14 +138,24 @@ class LinkedInPoster:
                 "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
             }
         }
-        resp = requests.post(url, headers=self.headers, json=payload, timeout=20)
-        if resp.status_code == 201:
-            post_id = resp.json().get("id", "unknown")
-            log.info("Post created! ID: " + post_id)
-            return {"success": True, "post_id": post_id}
-        else:
+        for attempt in range(3):
+            resp = requests.post(url, headers=self.headers, json=payload, timeout=30)
+            if resp.status_code == 201:
+                post_id = resp.json().get("id", "unknown")
+                log.info("Post created! ID: " + post_id)
+                return {"success": True, "post_id": post_id}
+            if resp.status_code == 429:
+                wait = int(resp.headers.get("Retry-After", 30))
+                log.warning(f"LinkedIn rate-limited — waiting {wait}s (attempt {attempt+1}/3)")
+                time.sleep(wait)
+                continue
+            if resp.status_code >= 500:
+                log.warning(f"LinkedIn server error {resp.status_code} (attempt {attempt+1}/3) — retrying in 10s")
+                time.sleep(10)
+                continue
             log.error("Post creation failed: " + str(resp.status_code) + " " + resp.text)
             return {"success": False, "error": resp.text}
+        return {"success": False, "error": "LinkedIn API unavailable after 3 attempts"}
 
     def create_post_with_image(self, text, image_path, title=""):
         """Post text + diagram image to LinkedIn."""
