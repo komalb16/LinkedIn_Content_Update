@@ -168,15 +168,17 @@ RSS_FEEDS = {
 # Maps topic category keywords to a weighted pool of diagram types.
 # Used instead of always defaulting to "Modern Cards".
 _DIAGRAM_TYPE_POOLS = {
-    "ai":       ["Flow Chart", "Ecosystem Breakdown", "Comparison Table", "Observability Map", "Decision Tree"],
-    "data":     ["Comparison Table", "7 Layers", "Flow Chart", "Ecosystem Breakdown"],
-    "devops":   ["Flow Chart", "Timeline", "Lane Map", "Comparison Table"],
-    "cloud":    ["Ecosystem Breakdown", "Architecture Diagram", "Comparison Table", "Flow Chart"],
-    "security": ["Decision Tree", "7 Layers", "Flow Chart", "Lane Map"],
-    "career":   ["Winding Roadmap", "Comparison Table", "Decision Tree", "Modern Cards"],
-    "story":    ["Modern Cards", "Winding Roadmap", "Decision Tree"],
+    "ai":       ["Flow Chart", "Ecosystem Breakdown", "Comparison Table", "Observability Map", "Decision Tree",
+                 "Iceberg Diagram", "Dashboard", "Tile Grid"],
+    "data":     ["Comparison Table", "7 Layers", "Flow Chart", "Ecosystem Breakdown", "Dashboard", "Iceberg Diagram"],
+    "devops":   ["Flow Chart", "Timeline", "Lane Map", "Comparison Table", "Iceberg Diagram"],
+    "cloud":    ["Ecosystem Breakdown", "Architecture Diagram", "Comparison Table", "Flow Chart", "Dashboard"],
+    "security": ["Decision Tree", "7 Layers", "Flow Chart", "Lane Map", "Iceberg Diagram", "Maturity Model"],
+    "career":   ["Winding Roadmap", "Comparison Table", "Decision Tree", "Modern Cards", "Maturity Model", "Tile Grid"],
+    "story":    ["Modern Cards", "Winding Roadmap", "Decision Tree", "Tile Grid"],
     "default":  ["Flow Chart", "Comparison Table", "Ecosystem Breakdown", "Decision Tree", "7 Layers",
-                 "Architecture Diagram", "Winding Roadmap", "Modern Cards"],
+                 "Architecture Diagram", "Winding Roadmap", "Modern Cards",
+                 "Iceberg Diagram", "Dashboard", "Tile Grid", "Maturity Model"],
 }
 
 def _pick_diagram_type(topic_id: str = "", topic_name: str = "", category: str = "") -> str:
@@ -3334,8 +3336,20 @@ Write a LinkedIn post that:
     # Check if the diagram type has an intentional style (e.g. Viral Poster = 23)
     # If so, respect it — don't let rotation override a deliberate design choice
     INTENTIONAL_STYLE_MAP = {
-        "Viral Poster": 23,
-        "poster":       23,
+        "Viral Poster":     23,
+        "poster":           23,
+        "Info Frame":       23,
+        "Knowledge Card":   23,
+        "Tile Grid":        24,
+        "tiles":            24,
+        "Iceberg Diagram":  25,
+        "iceberg":          25,
+        "Dashboard":        26,
+        "Metrics":          26,
+        "kpi":              26,
+        "Maturity Model":   27,
+        "Radial":           27,
+        "Progress Rings":   27,
     }
     intentional_style = INTENTIONAL_STYLE_MAP.get(diagram_type)
 

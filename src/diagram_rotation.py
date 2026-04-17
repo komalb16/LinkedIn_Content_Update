@@ -28,7 +28,7 @@ except ImportError:
 ROTATION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".diagram_rotation.json")
 
 # Available diagram styles — must stay in sync with diagram_generator.py STYLES list
-AVAILABLE_STYLES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 20, 23]
+AVAILABLE_STYLES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 20, 23, 24, 25, 26, 27]
 # Styles 16, 19, 21, 22 are disabled/structured-only — excluded from rotation
 
 STYLE_NAMES = {
@@ -50,7 +50,11 @@ STYLE_NAMES = {
     15: "Vertical Timeline",
     17: "Signal vs Noise",
     20: "Dark Column Flow",
-    23: "Viral Poster",
+    23: "Info-Frame Card",
+    24: "Tile Grid",
+    25: "Iceberg Diagram",
+    26: "Dashboard Metrics",
+    27: "Radial Progress Rings",
 }
 
 # How many recent diagrams to track (prevent repetition)
