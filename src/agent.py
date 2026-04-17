@@ -3106,7 +3106,7 @@ Write a LinkedIn post that:
                     log.info(f"Trending topic selected: {topic['name']} (from {chosen_trend.get('source','?')} — score {chosen_trend.get('score',0)})")
                     trending_candidates = []
                     for _ in range(candidate_count):
-                        draft = generate_topic_post(topic, structure, planned_diagram_type)
+                        draft = generate_topic_post(topic, structure, planned_diagram_type, dry_run=dry_run)
                         trending_candidates.append(_finalize_post_text(topic, draft, structure=structure, diagram_type=planned_diagram_type))
                     ranked_trending = _rank_candidates(
                         topic, trending_candidates, structure, planned_diagram_type,
@@ -3186,7 +3186,7 @@ Write a LinkedIn post that:
         log.info(f"Planned topic diagram type: {planned_diagram_type}")
         topic_candidates = []
         for _ in range(candidate_count):
-            draft = generate_topic_post(topic, structure, planned_diagram_type)
+            draft = generate_topic_post(topic, structure, planned_diagram_type, dry_run=dry_run)
             topic_candidates.append(_finalize_post_text(topic, draft, structure=structure, diagram_type=planned_diagram_type))
         ranked_topic = _rank_candidates(
             topic, topic_candidates, structure, planned_diagram_type, recent_posts, recent_hashes=recent_hashes
