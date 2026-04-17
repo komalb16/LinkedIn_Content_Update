@@ -61,6 +61,18 @@ METRIC_PATTERN = re.compile(
 )
 EMOJI_PATTERN = re.compile(r"[\U0001F300-\U0001FAFF]")
 POLL_PREFIX_RE = re.compile(r"^\s*(?:\d+\s*[.):]|[1-9]\uFE0F\u20E3|-)\s*")
+# Matches LLM-generated placeholder tokens that should never appear in a live post
+_PLACEHOLDER_LINE_RE = re.compile(
+    r"^\s*\[(?:Step|Option|Decision|Phase|Stage|Layer|Node|Label|Title|Section|Part|Item|"
+    r"Point|Action|Result|Outcome|Choice|Poll|Answer|Insert|Replace|Your|Write|Fill)[^\[\]]*\]\s*$",
+    re.I,
+)
+_PLACEHOLDER_INLINE_RE = re.compile(
+    r"\[(?:Step|Option|Decision|Phase|Stage|Layer|Node|Label|Title|Section|Part|Item|"
+    r"Point|Action|Result|Outcome|Choice|Poll|Answer|Insert|Replace|Your|Write|Fill)[^\[\]]{1,60}\]",
+    re.I,
+)
+_NUM_ITEM_RE = re.compile(r"^([1-9])[.\)]\s+|^([1-9])\uFE0F\u20E3\s+")
 SIM_STOPWORDS = {
     "the", "and", "for", "with", "this", "that", "from", "your", "have", "has",
     "just", "into", "what", "when", "where", "which", "their", "about", "most",
@@ -1637,27 +1649,57 @@ def _fix_truncated_numbered_items(text):
     """
     Remove numbered items that end mid-sentence (sign of LLM truncation).
     Also removes the plain-text duplicate that often follows.
+    Also drops items that are part of a sequence restart (e.g. 1, 2, 1).
     """
     if not text:
         return text
 
     lines = text.splitlines()
-    result = []
-    seen_content = set()
 
-    # Collect numbered item labels first so we can detect duplicates below
-    numbered_labels = set()
-    for line in lines:
+    # ── Pass 1: find numbered items and detect sequence restarts ─────────────
+    num_items = []  # [(line_index, number)]
+    for i, line in enumerate(lines):
+        m = _NUM_ITEM_RE.match(line.strip())
+        if m:
+            n = int(m.group(1) or m.group(2))
+            num_items.append((i, n))
+
+    drop_restart = set()
+    if num_items:
+        prev_line_idx = None
+        seq = []
+        for line_idx, n in num_items:
+            is_contiguous = prev_line_idx is not None and (line_idx - prev_line_idx) <= 4
+            if is_contiguous:
+                if seq and n <= seq[-1]:
+                    # Restart detected — drop this item and any that follow in the same block
+                    drop_restart.add(line_idx)
+                    seq = []  # reset so we don't chain-drop after the restart
+                else:
+                    seq.append(n)
+            else:
+                seq = [n]
+            prev_line_idx = line_idx
+
+    # ── Pass 2: build duplicate-detection set from clean numbered items ──────
+    seen_content: set = set()
+    numbered_labels: set = set()
+    for i, line in enumerate(lines):
+        if i in drop_restart:
+            continue
         m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)])\s+(.+)$", line.strip())
         if m:
             label = m.group(1).strip().rstrip(".!?,")
-            # Truncation sign: ends with a preposition/article/conjunction
             last_word = label.split()[-1].lower() if label.split() else ""
             if last_word not in {"and","or","the","a","an","my","your","of","to","in","for","with","is"}:
                 numbered_labels.add(label.lower()[:30])
 
-    for line in lines:
+    result = []
+    for i, line in enumerate(lines):
         stripped = line.strip()
+
+        if i in drop_restart:
+            continue
 
         # Check if this is a numbered item
         m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)])\s+(.+)$", stripped)
@@ -1667,7 +1709,7 @@ def _fix_truncated_numbered_items(text):
             # Drop truncated numbered items
             if last_word in {"and","or","the","a","an","my","your","of","to","in","for","with","is"}:
                 continue
-            # Drop if too short (< 5 words = probably truncated)
+            # Drop if too short (< 4 words = probably truncated)
             if len(label.split()) < 4:
                 continue
 
@@ -1681,13 +1723,92 @@ def _fix_truncated_numbered_items(text):
 
     return re.sub(r"\n{3,}", "\n\n", "\n".join(result)).strip()
 
+
+def _strip_placeholder_text(text):
+    """
+    Remove LLM-leaked structural placeholder tokens from the post.
+    Examples of what gets removed: [Step 1], [Option A], [Decision Point 2]
+    Lines that are ONLY a placeholder are dropped entirely; inline occurrences
+    are stripped from the line (keeping the rest of the line).
+    """
+    if not text:
+        return text
+    lines = []
+    for line in text.splitlines():
+        if _PLACEHOLDER_LINE_RE.match(line):
+            continue  # drop whole line
+        cleaned = _PLACEHOLDER_INLINE_RE.sub("", line).strip()
+        lines.append(cleaned if cleaned else line)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
+
+def _has_structural_integrity_issues(text):
+    """
+    Returns a list of hard-blocker descriptions for structural integrity problems
+    that should prevent publishing regardless of quality score.
+    """
+    blockers = []
+    lines = (text or "").splitlines()
+
+    # 1. Placeholder text still present
+    for line in lines:
+        if _PLACEHOLDER_LINE_RE.match(line) or _PLACEHOLDER_INLINE_RE.search(line):
+            blockers.append("Placeholder structure text leaked into the final post.")
+            break
+
+    # 2. Truncated numbered items still present (after cleanup pass)
+    for line in lines:
+        m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)])\s+(.+)$", line.strip())
+        if m:
+            label = m.group(1).strip().rstrip(".!?,")
+            last_word = label.split()[-1].lower() if label.split() else ""
+            if last_word in {"and","or","the","a","an","my","your","of","to","in","for","with","is"}:
+                blockers.append("Truncated numbered items remain in the final post.")
+                break
+            if len(label.split()) < 4:
+                blockers.append("Truncated numbered items remain in the final post.")
+                break
+
+    # 3. Numbered sequence restart (e.g. 1, 2, 1)
+    num_items = []
+    for i, line in enumerate(lines):
+        m = _NUM_ITEM_RE.match(line.strip())
+        if m:
+            n = int(m.group(1) or m.group(2))
+            num_items.append((i, n))
+    if num_items:
+        prev_idx = None
+        seq: list = []
+        for line_idx, n in num_items:
+            is_cont = prev_idx is not None and (line_idx - prev_idx) <= 4
+            if is_cont:
+                if seq and n <= seq[-1]:
+                    seq_str = ", ".join(str(x) for x in seq) + ", " + str(n)
+                    blockers.append(
+                        f"Numbered list sequence is incomplete or skips items: {seq_str}"
+                    )
+                    break
+                seq.append(n)
+            else:
+                seq = [n]
+            prev_idx = line_idx
+
+    # 4. Poll options still contain placeholder labels
+    for line in lines:
+        if POLL_PREFIX_RE.match(line.strip()) and _PLACEHOLDER_INLINE_RE.search(line):
+            blockers.append("Poll options still contain placeholder labels instead of real choices.")
+            break
+
+    return blockers
+
 def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _cleanup_generated_post(post_text or "")
     finalized = _normalize_hashtags(finalized).strip()
     if not finalized:
         return finalized
+    finalized = _strip_placeholder_text(finalized)         # remove [Step X] / [Option A] tokens
     finalized = _strip_work_incident_hook(finalized, topic.get("name", ""))
-    finalized = _fix_truncated_numbered_items(finalized)   # NEW: fix truncation + duplication
+    finalized = _fix_truncated_numbered_items(finalized)   # fix truncation, duplication, restarts
     finalized = _reduce_repetitive_copy(finalized)
     finalized = _remove_raw_flow_only_lines(finalized)
     finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
@@ -3036,6 +3157,67 @@ Write a LinkedIn post that:
     )
     if score_card["issues"]:
         log.warning("Quality notes: " + " | ".join(score_card["issues"][:5]))
+
+    # ── HARD PUBLISH BLOCKERS ─────────────────────────────────────────────────
+    # Minimum bar for a live post. Dry-run and manual triggers bypass this gate.
+    PUBLISH_SCORE_MIN = 60
+    if not dry_run and not manual:
+        pub_blockers = []
+        if score_card["score"] < PUBLISH_SCORE_MIN:
+            pub_blockers.append(
+                f"Quality score too low for live publish ({score_card['score']}/100)."
+            )
+        if not (4 <= score_card["hashtag_count"] <= 7):
+            pub_blockers.append(
+                f"Hashtag count is outside the safe publish range (4 to 7)."
+            )
+        if pub_blockers:
+            log.warning("Publish blockers: " + " | ".join(pub_blockers))
+            log.warning("Draft failed quality checks — attempting recovery with fresh topic post.")
+            # Pick a different topic for recovery
+            failed_id = topic.get("id", "")
+            recovery_topic = topic_mgr.get_next_topic()
+            if recovery_topic.get("id") == failed_id:
+                # get_next_topic returned the same topic — force a different one
+                alt_topics = [t for t in topic_mgr.topics if t.get("id") != failed_id]
+                if alt_topics:
+                    recovery_topic = alt_topics[0]
+            log.info(f"Selected topic: {recovery_topic['name']} (category: {recovery_topic.get('category', '')})")
+            recovery_structure = topic_mgr.get_diagram_structure(recovery_topic)
+            recovery_diagram_type = topic_mgr.get_diagram_type_for_topic(recovery_topic)
+            log.info(f"Generating post: {recovery_topic['name']}")
+            recovery_text_raw = generate_topic_post(recovery_topic, recovery_structure, recovery_diagram_type)
+            recovery_text = _finalize_post_text(
+                recovery_topic, recovery_text_raw,
+                structure=recovery_structure, diagram_type=recovery_diagram_type
+            )
+            recovery_score = _score_post_candidate(
+                recovery_topic, recovery_text, recovery_structure, recovery_diagram_type
+            )
+            recovery_blockers = _has_structural_integrity_issues(recovery_text)
+            if recovery_score["score"] < PUBLISH_SCORE_MIN:
+                recovery_blockers.insert(
+                    0, f"Quality score too low for live publish ({recovery_score['score']}/100)."
+                )
+            if not (4 <= recovery_score["hashtag_count"] <= 7):
+                recovery_blockers.insert(
+                    0, f"Hashtag count is outside the safe publish range (4 to 7)."
+                )
+            if recovery_blockers:
+                log.error("Recovery post also failed quality checks. Exiting.")
+                log.error("Recovery blockers: " + " | ".join(recovery_blockers))
+                sys.exit(1)
+            # Recovery succeeded — use the recovery post for publishing
+            log.info(
+                f"Recovery quality score: {recovery_score['score']}/100 | "
+                f"hashtags={recovery_score['hashtag_count']} — proceeding with recovery post."
+            )
+            topic = recovery_topic
+            post_text = recovery_text
+            score_card = recovery_score
+            structure = recovery_structure
+            score_structure = recovery_structure
+            score_diagram_type = recovery_diagram_type
 
     write_github_output("POST_TOPIC",   topic.get("name", ""))
     write_github_output("POST_TOPIC_ID", topic.get("id", ""))
