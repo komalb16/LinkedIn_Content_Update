@@ -257,5 +257,12 @@
     "topic_name": "Scaling Agentic Coding",
     "category": "topic",
     "text": "Most engineers believe large language models like Qwen3.6-35B-A3B can be easily integrated into existing workflows \ud83e\udd16.\n\nHowever, I was wrong to think that fine-tuning and deployment would be straightforward - it took me years to learn that avoiding common pitfalls is key \ud83d\udca1.\n\nWhen integrating these models, it's essential to consider the inputs, such as chips, that feed into the system \ud83d\udcc8.\n\nThe retrieval and tools columns also play a critical role in shaping the model's performance.\n\nInputs: chips\nRetrieval + Tools: columns\nRuntime: Latency \u00b7 Throughput \u00b7 Errors \u00b7 Token Spend \u00b7 Escalation\n\nFinally, monitoring runtime metrics like latency and errors is crucial to ensure the model is performing well \ud83d\udea8.\n\nSo, what's your approach to integrating large language models into your workflow? \ud83d\udcac Where do you focus your efforts: inputs, retrieval, or runtime? #SystemDesign #DistributedSystems #ScaleEngineering #SystemDesign #ScaleEngineering"
+  },
+  {
+    "timestamp": "2026-04-17T19:50:22.115814",
+    "topic_id": "trend-android-cli-speed",
+    "topic_name": "Faster Android Builds",
+    "category": "topic",
+    "text": "Nobody talks about the hidden costs of slow Android app build times \ud83e\udd14.\n\nI was wrong to think that build times were just a minor inconvenience, but they can actually slow down the entire development cycle \ud83d\ude80.\n\n1\ufe0f\u20e3 The Problem is real\n\n2\ufe0f\u20e3 Core Concept is key\n\n3\ufe0f\u20e3 How It Works is complex\nThe fundamental idea behind optimizing Android app build times is to streamline the build process \ud83d\udcc8.\n\nI finally understood that a well-optimized build process can save hours of development time \ud83d\udd52.\n\n6\ufe0f\u20e3 Key Takeaway is important\nProduction systems use a combination of CLI tools and optimized build configurations to achieve faster build times \ud83d\ude80.\n\nHowever, most engineers get it wrong by not properly configuring their build scripts \ud83d\udcdd.\n\ud83d\udcac Which of the following is your biggest challenge?\n\n1\ufe0f\u20e3 The Problem 2\ufe0f\u20e3 Core Concept 3\ufe0f\u20e3 #SystemDesign #ScaleEngineering #DistributedSystems #DistributedSystems #SystemDesign"
   }
 ]
