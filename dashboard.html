@@ -4532,6 +4532,7 @@ async function runNow(options = {}) {
       if (r.conclusion === 'skipped') return true;
 
       if (r.event === 'schedule') {
+        if (r.status === 'in_progress' || r.status === 'queued') return true;
         // Hide cancelled scheduled runs (timeout kills, heartbeat cancels)
         if (r.conclusion === 'cancelled') return true;
         // Keep only scheduled runs that have a confirmed post marker.
