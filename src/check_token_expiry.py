@@ -149,6 +149,19 @@ def main() -> int:
         log(f"{GREEN}✅ Token is healthy — {days_remaining} days remaining. No action needed.{RESET}")
         return 0
 
+    # ── Daily dedup: only notify once per day ─────────────────────────────────
+    # Crons fire at UTC 0, 6, 12, 18.  Only the midnight window (hour 0-5)
+    # sends the notification so the user gets exactly one alert per day.
+    # Set FORCE_NOTIFY=1 to override (useful for manual/dry-run testing).
+    utc_hour = datetime.now(timezone.utc).hour
+    if utc_hour >= 6 and not os.environ.get("FORCE_NOTIFY"):
+        log(
+            f"{CYAN}ℹ️  Notification deferred — already covered by first daily run "
+            f"(UTC hour {utc_hour}, threshold {days_remaining}d). "
+            f"Set FORCE_NOTIFY=1 to override.{RESET}"
+        )
+        return exit_code
+
     # ── Send notification if threshold crossed ────────────────────────────────
     log("")
     log(f"📬 Sending {severity} notification...")

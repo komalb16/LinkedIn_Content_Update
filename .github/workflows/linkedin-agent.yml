@@ -281,6 +281,9 @@ jobs:
         if: always() && github.event.inputs.dry_run != 'true'
         env:
           LINKEDIN_TOKEN_DATE: ${{ secrets.LINKEDIN_TOKEN_DATE }}
+          # Only the midnight cron (UTC 0-5) sends the daily alert.
+          # Set FORCE_NOTIFY=1 on workflow_dispatch to test notifications manually.
+          FORCE_NOTIFY:        ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
           # Notification channels
           NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL || vars.NOTIFY_EMAIL }}
           NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS || vars.NOTIFY_EMAIL_PASS || secrets.NOTIFY_EMAIL_PASSWORD || vars.NOTIFY_EMAIL_PASSWORD }}
