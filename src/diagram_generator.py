@@ -2880,17 +2880,32 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
     svg += f'<text x="{60 + pill_w//2}" y="63" text-anchor="middle" fill="{lighten(accent,0.7)}" font-size="13" font-weight="800" letter-spacing="2" font-family="Arial,sans-serif">{xe(pill_text)}</text>'
 
     # ── Main title ───────────────────────────────────────────────────────────
+    # Adaptive font size: shrink for longer names so nothing clips
+    name_len = len(topic_name)
+    title_fs = 76 if name_len <= 12 else (62 if name_len <= 20 else (50 if name_len <= 28 else 40))
     title_words = topic_name.split()
-    # Try to break title into 2 lines max
-    mid = len(title_words) // 2
-    title_line1 = " ".join(title_words[:max(1, mid)])
-    title_line2 = " ".join(title_words[max(1, mid):])
+    # Split into at most 2 balanced lines
+    if len(title_words) == 1:
+        title_line1, title_line2 = topic_name, ""
+    else:
+        mid = max(1, len(title_words) // 2)
+        # Try to keep lines roughly equal length
+        best_split, best_diff = mid, abs(len(" ".join(title_words[:mid])) - len(" ".join(title_words[mid:])))
+        for s in range(1, len(title_words)):
+            diff = abs(len(" ".join(title_words[:s])) - len(" ".join(title_words[s:])))
+            if diff < best_diff:
+                best_diff, best_split = diff, s
+        title_line1 = " ".join(title_words[:best_split])
+        title_line2 = " ".join(title_words[best_split:])
+    # Cap each line at characters that fit the canvas width (≈ W-120 px / ~14px per char at fs)
+    max_chars = max(12, int((W - 120) / (title_fs * 0.62)))
+    title_line1 = clamp(title_line1, max_chars)
+    title_line2 = clamp(title_line2, max_chars) if title_line2 else ""
 
     title_y = 130
-    title_fs = 72 if len(topic_name) < 20 else (58 if len(topic_name) < 30 else 46)
-    svg += f'<text x="60" y="{title_y}" fill="white" font-size="{title_fs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-1">{xe(clamp(title_line1, 20))}</text>'
+    svg += f'<text x="60" y="{title_y}" fill="white" font-size="{title_fs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-1">{xe(title_line1)}</text>'
     if title_line2:
-        svg += f'<text x="60" y="{title_y + title_fs + 8}" fill="{lighten(accent, 0.55)}" font-size="{title_fs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-1">{xe(clamp(title_line2, 20))}</text>'
+        svg += f'<text x="60" y="{title_y + title_fs + 8}" fill="{lighten(accent, 0.55)}" font-size="{title_fs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-1">{xe(title_line2)}</text>'
 
     # Divider line
     div_y = title_y + title_fs * (2 if title_line2 else 1) + 30

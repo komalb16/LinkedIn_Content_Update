@@ -917,7 +917,7 @@ def _build_visual_block_instruction(diagram_type):
     )
 
 
-def generate_topic_post(topic, structure=None, diagram_type=""):
+def generate_topic_post(topic, structure=None, diagram_type="", dry_run=False):
     log.info("Generating post: " + topic["name"])
 
     # If no diagram type was provided (the most common path), pick one dynamically
@@ -1002,18 +1002,20 @@ Requirements:
     except Exception as e:
         log.warning(f"Topic generation failed for {topic.get('id', 'unknown')}, using fallback copy: {e}")
         return _fallback_topic_post(topic, structure=structure)
-    issues = _post_quality_issues(topic, post_text, structure, diagram_type)
-    if issues:
-        revision_prompt = (
-            prompt
-            + "\nRevision feedback:\n- "
-            + "\n- ".join(issues[:5])
-            + "\nRewrite the post from scratch and fix every issue above."
-        )
-        try:
-            post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
-        except Exception as e:
-            log.warning(f"Topic revision failed for {topic.get('id', 'unknown')}, keeping first draft: {e}")
+    # Skip revision pass in dry run — saves one full LLM round-trip (~30s)
+    if not dry_run:
+        issues = _post_quality_issues(topic, post_text, structure, diagram_type)
+        if issues:
+            revision_prompt = (
+                prompt
+                + "\nRevision feedback:\n- "
+                + "\n- ".join(issues[:5])
+                + "\nRewrite the post from scratch and fix every issue above."
+            )
+            try:
+                post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
+            except Exception as e:
+                log.warning(f"Topic revision failed for {topic.get('id', 'unknown')}, keeping first draft: {e}")
     return _cleanup_generated_post(post_text)
 
 
@@ -2479,6 +2481,36 @@ def _rank_candidates(topic, candidates, structure, diagram_type, recent_posts, r
     return ranked
 
 
+def _extract_poster_title(topic_name: str, post_text: str, mode: str) -> str:
+    """
+    Pick a clean, short headline for the Viral Poster diagram.
+    Priority:
+      1. A named technology/model extracted from the post (e.g. 'Qwen3', 'GPT-5')
+      2. The topic name, cleaned and capped at 32 chars
+      3. A short (<= 32 char) first non-hook line from the post
+    """
+    # Try to extract a model/product name — capitalised word(s) in the post
+    model_match = re.search(
+        r"\b([A-Z][A-Za-z0-9]{1,12}(?:[.\-][0-9A-Za-z]{1,10}){0,3})\b",
+        post_text or "",
+    )
+    if model_match:
+        candidate = model_match.group(1)
+        # Filter out generic words
+        _GENERIC = {"The", "This", "That", "They", "There", "These", "Their", "When",
+                    "What", "With", "From", "Just", "Here", "Been", "Have"}
+        if candidate not in _GENERIC and len(candidate) >= 3:
+            # If the topic name contains this word, use the full topic name (cleaner)
+            if candidate.lower() in (topic_name or "").lower():
+                return (topic_name or candidate)[:32]
+            # Use extracted name only if it looks like a real product/model name
+            if re.search(r"[0-9.\-]", candidate) or candidate.isupper():
+                return candidate[:32]
+    # Fall back to topic name (trimmed)
+    clean = re.sub(r"^(AI\s+|Tech\s+|Weekly[:\s]+|Breaking[:\s]+)", "", topic_name or "", flags=re.I).strip()
+    return clean[:32] or (topic_name or "AI Update")[:32]
+
+
 def _extract_visual_title(post_text, fallback_title):
     return _extract_visual_title_for_type(post_text, fallback_title, "")
 
@@ -2753,16 +2785,18 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
     use_viral_poster = (mode in POSTER_MODES) or is_poster_topic
 
     if use_viral_poster:
-        hook_title = _extract_visual_title(post_text, topic["name"])
-        poster_structure = _build_viral_poster_structure(post_text, topic["name"], mode)
+        # For news/trending posts use the topic name as the diagram title —
+        # the first post line is typically a hook sentence, not a good visual headline.
+        poster_title = _extract_poster_title(topic["name"], post_text, mode)
+        poster_structure = _build_viral_poster_structure(post_text, poster_title, mode)
         log.info(f"Using Viral Poster for mode={mode}, topic={topic.get('id','')}")
-        return hook_title, "Viral Poster", poster_structure
+        return poster_title, "Viral Poster", poster_structure
 
     # News mode that didn't match above — still use viral poster
     if mode not in {"topic", "story"}:
-        hook_title = _extract_visual_title(post_text, topic["name"])
-        poster_structure = _build_viral_poster_structure(post_text, topic["name"], mode)
-        return hook_title, "Viral Poster", poster_structure
+        poster_title = _extract_poster_title(topic["name"], post_text, mode)
+        poster_structure = _build_viral_poster_structure(post_text, poster_title, mode)
+        return poster_title, "Viral Poster", poster_structure
 
     # Technical topic posts — use planned diagram type
     diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
