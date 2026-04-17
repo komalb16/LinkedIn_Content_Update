@@ -299,5 +299,12 @@
     "style": 19,
     "signature": "24c6ba6ffd41fad183714645d9170e4b",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-04-17T19:33:57.559826",
+    "topic_id": "trend-agentic-coding",
+    "style": 23,
+    "signature": "5900c8df78a42916b2ea1fc4c0763f6c",
+    "duplicate_avoided": true
   }
 ]
