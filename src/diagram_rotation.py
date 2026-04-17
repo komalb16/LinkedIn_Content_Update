@@ -27,18 +27,30 @@ except ImportError:
 # Rotation history file
 ROTATION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".diagram_rotation.json")
 
-# Available diagram styles (0-7 + custom)
-AVAILABLE_STYLES = [0, 1, 2, 3, 4, 5, 6, 7]  # 0-7 per diagram_generator.py
+# Available diagram styles — must stay in sync with diagram_generator.py STYLES list
+AVAILABLE_STYLES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 20, 23]
+# Styles 16, 19, 21, 22 are disabled/structured-only — excluded from rotation
 
 STYLE_NAMES = {
-    0: "Vertical Flow",
-    1: "Mind Map",
-    2: "Pyramid/Funnel",
-    3: "Timeline",
-    4: "Hexagon Grid",
-    5: "Comparison Table",
-    6: "Circular Orbit",
-    7: "Card Grid",
+    0:  "Vertical Flow",
+    1:  "Mind Map",
+    2:  "Pyramid/Funnel",
+    3:  "Timeline",
+    4:  "Hexagon Grid",
+    5:  "Comparison Table",
+    6:  "Circular Orbit",
+    7:  "Card Grid",
+    8:  "3-Tier Data Evolution",
+    9:  "Horizontal Tree",
+    10: "Layered Horizontal Flow",
+    11: "Ecosystem Tree",
+    12: "Honeycomb Map",
+    13: "Parallel Pipelines",
+    14: "Winding Roadmap",
+    15: "Vertical Timeline",
+    17: "Signal vs Noise",
+    20: "Dark Column Flow",
+    23: "Viral Poster",
 }
 
 # How many recent diagrams to track (prevent repetition)

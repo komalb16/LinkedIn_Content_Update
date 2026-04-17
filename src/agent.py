@@ -164,6 +164,47 @@ RSS_FEEDS = {
     ],
 }
 
+# ─── DIAGRAM TYPE ROTATION ────────────────────────────────────────────────────
+# Maps topic category keywords to a weighted pool of diagram types.
+# Used instead of always defaulting to "Modern Cards".
+_DIAGRAM_TYPE_POOLS = {
+    "ai":       ["Flow Chart", "Ecosystem Breakdown", "Comparison Table", "Observability Map", "Decision Tree"],
+    "data":     ["Comparison Table", "7 Layers", "Flow Chart", "Ecosystem Breakdown"],
+    "devops":   ["Flow Chart", "Timeline", "Lane Map", "Comparison Table"],
+    "cloud":    ["Ecosystem Breakdown", "Architecture Diagram", "Comparison Table", "Flow Chart"],
+    "security": ["Decision Tree", "7 Layers", "Flow Chart", "Lane Map"],
+    "career":   ["Winding Roadmap", "Comparison Table", "Decision Tree", "Modern Cards"],
+    "story":    ["Modern Cards", "Winding Roadmap", "Decision Tree"],
+    "default":  ["Flow Chart", "Comparison Table", "Ecosystem Breakdown", "Decision Tree", "7 Layers",
+                 "Architecture Diagram", "Winding Roadmap", "Modern Cards"],
+}
+
+def _pick_diagram_type(topic_id: str = "", topic_name: str = "", category: str = "") -> str:
+    """Select a diagram type based on topic, rotating through the pool using a seeded RNG."""
+    combined = ((topic_id or "") + (topic_name or "") + (category or "")).lower()
+    if any(x in combined for x in ["llm", "rag", "agent", "mlops", "genai", "agentic", "ai"]):
+        pool = _DIAGRAM_TYPE_POOLS["ai"]
+    elif any(x in combined for x in ["kafka", "data", "lake", "lakehouse", "sql"]):
+        pool = _DIAGRAM_TYPE_POOLS["data"]
+    elif any(x in combined for x in ["git", "devops", "cicd", "ci/cd", "docker", "kube"]):
+        pool = _DIAGRAM_TYPE_POOLS["devops"]
+    elif any(x in combined for x in ["aws", "cloud", "azure", "gcp", "infra"]):
+        pool = _DIAGRAM_TYPE_POOLS["cloud"]
+    elif any(x in combined for x in ["security", "zero-trust", "devsec", "auth"]):
+        pool = _DIAGRAM_TYPE_POOLS["security"]
+    elif any(x in combined for x in ["career", "skill", "job", "interview", "brand", "growth"]):
+        pool = _DIAGRAM_TYPE_POOLS["career"]
+    elif "story" in combined:
+        pool = _DIAGRAM_TYPE_POOLS["story"]
+    else:
+        pool = _DIAGRAM_TYPE_POOLS["default"]
+    # Use a seeded RNG so consecutive runs for the same topic still vary (seed = run date + topic)
+    seed = int(hashlib.md5(
+        (combined + datetime.utcnow().strftime("%Y-%m-%d")).encode()
+    ).hexdigest()[:8], 16)
+    return random.Random(seed).choice(pool)
+
+
 # ─── HOOK STYLES ──────────────────────────────────────────────────────────────
 # Each is a story archetype, not a sentence template.
 # The model writes the entire post through this lens.
@@ -734,7 +775,11 @@ Requirements:
         "prompt": theme["prompt"],
         "angle": theme["angle"],
         "diagram_subject": theme.get("diagram_subject", theme["name"]),
-        "diagram_type": theme.get("diagram_type", "Modern Cards"),
+        "diagram_type": theme.get("diagram_type") or _pick_diagram_type(
+            topic_id=f"story-{theme['id']}",
+            topic_name=theme["name"],
+            category="story",
+        ),
     }
     return story_topic, post_text
 
@@ -780,7 +825,11 @@ def generate_interview_post():
             "category": "Interview",
             "prompt": question.get("question", ""),
             "angle": question.get("type", "opinion_poll"),
-            "diagram_type": "Modern Cards",
+            "diagram_type": _pick_diagram_type(
+                topic_id=f"interview-{parent_topic or ''}",
+                topic_name=parent_topic or "",
+                category="interview",
+            ),
             "diagram_styles": diagram_styles,
         }
         
@@ -870,6 +919,15 @@ def _build_visual_block_instruction(diagram_type):
 
 def generate_topic_post(topic, structure=None, diagram_type=""):
     log.info("Generating post: " + topic["name"])
+
+    # If no diagram type was provided (the most common path), pick one dynamically
+    # so we get real variety instead of always defaulting to Modern Cards.
+    if not diagram_type:
+        diagram_type = topic.get("diagram_type") or _pick_diagram_type(
+            topic_id=topic.get("id", ""),
+            topic_name=topic.get("name", ""),
+            category=topic.get("category", ""),
+        )
 
     hook   = random.choice(HOOK_STYLES)
     tone   = random.choice(TONE_VARIATIONS)

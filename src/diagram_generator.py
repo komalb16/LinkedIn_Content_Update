@@ -2971,64 +2971,60 @@ STYLES = [
 ]
 
 TOPIC_STYLE_OVERRIDES = {
-    "llm-architecture":  1,   # mind map — concepts radiate naturally
-    "ai-agents":         6,   # orbit — agent ecosystem
-    "mlops-pipeline":    0,   # vertical flow — pipeline steps
-    "rag-systems":       0,   # vertical flow — pipeline steps
-    "docker":            4,   # hexagon grid — Dockerfile cheatsheet
-    "aws-architecture":  6,   # orbit — AWS service ecosystem
-    "cicd-pipelines":    3,   # timeline — CI/CD history
-    "system-design":     7,   # card grid — layered architecture
-    "api-design":        5,   # comparison — protocol matrix
-    "git-workflow":      3,   # timeline — branching evolution
-    "solid-principles":  2,   # pyramid — principle hierarchy
-    "zero-trust":        1,   # mind map — concept web
-    "devsecops":         0,   # vertical flow — shift-left pipeline
-    "data-lakehouse":    2,   # pyramid — medallion architecture layers
-    "kafka-streaming":   5,   # comparison — vs other brokers
-    "data-evolution":    8,   # 3-tier data evolution
-    "ml-algorithms":     9,   # horizontal tree
-    "agentic-ai":       21,   # editorial lane map
-    "ai-disciplines":    10,  # layered horizontal flow
-    "rag-stack":         11,  # ecosystem tree
-    "ai-skills-map":     12,  # honeycomb map
-    "llm-vs-agentic":    13,  # parallel pipelines
-    "genai-roadmap":     15, # vertical dashed timeline (overriding winding 14)
-  # ── Career / Skills / Learning (also matches custom topic names) ───────
-    "career":        7,
-    "skill":         7,
-    "talent":        7,
-    "discipline":    6,
-    "learning":      14,
-    "roadmap":       14,
-    "job":           5,
-    "role":          5,
-    "interview":     7,
-    "brand":         2,
-    "prompt":        7,
-    "growth":        2,
-    "leadership":    1,
-    "tips":          0,
-    "bootcamp":      0,
-    "course":        0,
-    "certification": 3,
-    "agentic-ai":       20,   # dark column flow — RAG vs Agentic vs Memory
-    "docker-cheatsheet": 19,  # three panel — Client/Host/Hub
-    "enterprise-ai":  20,
-    "system-design":  20,
-    "kubernetes":     20,   # override existing if you want notebook style
-    "rag-systems":    20,
-    # ── Viral poster for high-engagement topics ─────────────────────────────
-    "ai-disciplines":   23,
-    "career-leverage":  23,
-    "genai-roadmap":    23,
-    "ai-agents-2025":   23,
-        "story-ai-discovery":       23,
-    "story-career-leverage":    23,
-    "story-name-search":        23,
-    "ai-name-search":           23,
-    "career-leverage":          23,
-    "ai-discovery":             23,
+    # ── Tech / Infrastructure ────────────────────────────────────────────────
+    "llm-architecture":   1,   # mind map — concepts radiate naturally
+    "ai-agents":          6,   # orbit — agent ecosystem
+    "ai-agents-2025":    23,   # viral poster — high engagement
+    "mlops-pipeline":     0,   # vertical flow — pipeline steps
+    "rag-systems":       20,   # dark column flow — retrieval layers
+    "rag-stack":         11,   # ecosystem tree
+    "docker":             4,   # hexagon grid — Dockerfile cheatsheet
+    "docker-cheatsheet": 19,   # three panel — Client/Host/Hub
+    "aws-architecture":   6,   # orbit — AWS service ecosystem
+    "cicd-pipelines":     3,   # timeline — CI/CD history
+    "system-design":     20,   # dark column flow — layered architecture
+    "api-design":         5,   # comparison — protocol matrix
+    "git-workflow":       3,   # timeline — branching evolution
+    "solid-principles":   2,   # pyramid — principle hierarchy
+    "zero-trust":         1,   # mind map — concept web
+    "devsecops":          0,   # vertical flow — shift-left pipeline
+    "data-lakehouse":     2,   # pyramid — medallion architecture layers
+    "kafka-streaming":    5,   # comparison — vs other brokers
+    "data-evolution":     8,   # 3-tier data evolution
+    "ml-algorithms":      9,   # horizontal tree
+    "agentic-ai":        20,   # dark column flow — RAG vs Agentic vs Memory
+    "ai-disciplines":    23,   # viral poster — high engagement
+    "rag-stack":         11,   # ecosystem tree
+    "ai-skills-map":     12,   # honeycomb map
+    "llm-vs-agentic":    13,   # parallel pipelines
+    "genai-roadmap":     23,   # viral poster — high engagement
+    "enterprise-ai":     20,   # dark column flow
+    "kubernetes":        20,   # dark column flow — k8s layers
+    # ── Career / Skills / Learning (also matches custom topic names) ─────────
+    "career":            7,
+    "skill":             7,
+    "talent":            7,
+    "discipline":        6,
+    "learning":         14,
+    "roadmap":          14,
+    "job":               5,
+    "role":              5,
+    "interview":         7,
+    "brand":             2,
+    "prompt":            7,
+    "growth":            2,
+    "leadership":        1,
+    "tips":              0,
+    "bootcamp":          0,
+    "course":            0,
+    "certification":     3,
+    # ── Story posts ──────────────────────────────────────────────────────────
+    "story-ai-discovery":    23,
+    "story-career-leverage": 23,
+    "story-name-search":     23,
+    "ai-name-search":        23,
+    "career-leverage":       23,
+    "ai-discovery":          23,
 }
 
 DIAGRAM_TYPE_STYLE_MAP = {
@@ -3063,9 +3059,6 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "signal vs noise": 17,
     "viral poster": 23,
     "poster": 23,
-     "viral poster":  23,
-    "poster":        23,
-    "Viral Poster":  23,
 }
 
 STYLE_FAMILIES_BY_TYPE = {
@@ -3323,6 +3316,24 @@ def _render_gif(topic_name: str, topic_id: str, diagram_type: str = "", structur
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  Rotation bridge — records each generated style into diagram_rotation.py
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _record_rotation(style_idx: int, topic_id: str, topic_name: str, diagram_type: str) -> None:
+    """Record the selected style into DiagramRotation history for cross-run diversity tracking."""
+    try:
+        from diagram_rotation import DiagramRotation
+        DiagramRotation().record_style_used(
+            style_idx=style_idx,
+            topic_id=topic_id,
+            topic_name=topic_name,
+            diagram_type=diagram_type,
+        )
+    except Exception as e:
+        log.warning(f"Could not record rotation history: {e}")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  DiagramGenerator — interface used by agent.py
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -3437,6 +3448,7 @@ class DiagramGenerator:
                     "duplicate_avoided": bool(non_duplicate),
                 })
                 _save_diagram_memory(memory)
+                _record_rotation(best_style, topic_id, topic_name, diagram_type)
                 return gif_name
 
             with open(filename, "w", encoding="utf-8") as f:
@@ -3451,5 +3463,6 @@ class DiagramGenerator:
                 "duplicate_avoided": bool(non_duplicate),
             })
             _save_diagram_memory(memory)
+            _record_rotation(best_style, topic_id, topic_name, diagram_type)
         
         return filename
