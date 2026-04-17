@@ -7,52 +7,52 @@
       "time_ist": "12:45",
       "time_local": "12:45",
       "time_tz": "America/New_York",
-      "time_utc": "20:45"
+      "time_utc": "16:45"
     },
     "tue": {
       "enabled": true,
       "time_ist": "17:00",
       "time_local": "17:00",
       "time_tz": "America/New_York",
-      "time_utc": "01:00"
+      "time_utc": "21:00"
     },
     "wed": {
       "enabled": true,
       "time_ist": "15:30",
       "time_local": "15:30",
       "time_tz": "America/New_York",
-      "time_utc": "23:30"
+      "time_utc": "19:30"
     },
     "thu": {
       "enabled": true,
       "time_ist": "22:30",
       "time_local": "22:30",
       "time_tz": "America/New_York",
-      "time_utc": "06:30"
+      "time_utc": "02:30"
     },
     "fri": {
       "enabled": true,
-      "time_ist": "18:15",
-      "time_local": "18:15",
+      "time_ist": "19:15",
+      "time_local": "19:15",
       "time_tz": "America/New_York",
-      "time_utc": "02:15"
+      "time_utc": "23:15"
     },
     "sat": {
       "enabled": true,
       "time_ist": "10:00",
       "time_local": "10:00",
       "time_tz": "America/New_York",
-      "time_utc": "18:00"
+      "time_utc": "14:00"
     },
     "sun": {
       "enabled": true,
       "time_ist": "10:00",
       "time_local": "10:00",
       "time_tz": "America/New_York",
-      "time_utc": "18:00"
+      "time_utc": "14:00"
     }
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-04-09T05:21:04.822Z"
+  "updated_at": "2026-04-17T21:45:40.076Z"
 }
