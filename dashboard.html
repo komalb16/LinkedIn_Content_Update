@@ -2273,6 +2273,12 @@
       color: var(--acc)
     }
 
+    .tc.sf {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #f87171
+    }
+
     .tgrid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -3457,41 +3463,40 @@
               <div class="tc sa" onclick="selType('a',this)">🎲 Auto-mix</div>
               <div class="tc" onclick="selType('n',this)">📰 News</div>
               <div class="tc" onclick="selType('t',this)">🔧 Tech Topic</div>
+              <div class="tc" onclick="selType('f',this)">🔥 Trending</div>
             </div>
-            <div class="xl">Select topic (or add your own)</div>
-            <div class="tgrid" id="tgrid"></div>
-            <!-- Add custom topic -->
-            <div class="add-topic-row">
-              <input class="add-topic-inp" id="customTopicInp" placeholder="Add your own topic e.g. GraphQL APIs..."
-                onkeydown="if(event.key==='Enter')addCustomTopic()" />
-              <button class="add-btn" onclick="addCustomTopic()">＋ Add</button>
-            </div>
-            <p style="font-size:11px;color:var(--txd);margin-top:8px">Custom topics are saved permanently and added to
-              your rotation list.</p>
-          </div>
-        </div>
-      </div>
 
-      <!-- RUNS LOG -->
-      <!-- TRENDING NOW CARD -->
-      <div class="card" id="trendingCard">
-        <div class="ch" style="display:flex;align-items:center;justify-content:space-between">
-          <span class="ct">🔥 Trending Now</span>
-          <div style="display:flex;gap:8px;align-items:center">
-            <span id="trendLastFetch" style="font-size:11px;color:var(--txd)"></span>
-            <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadTrending(true)">↻ Refresh</button>
-          </div>
-        </div>
-        <div class="cb" style="padding:0">
-          <!-- Source filter tabs -->
-          <div style="display:flex;gap:0;border-bottom:1px solid var(--bd);padding:0 18px">
-            <button class="trend-tab act" id="trtab-all"    onclick="filterTrending('all',this)">All</button>
-            <button class="trend-tab"     id="trtab-hn"     onclick="filterTrending('hackernews',this)">HackerNews</button>
-            <button class="trend-tab"     id="trtab-reddit" onclick="filterTrending('reddit',this)">Reddit</button>
-            <button class="trend-tab"     id="trtab-devto"  onclick="filterTrending('devto',this)">Dev.to</button>
-          </div>
-          <div id="trendingList" style="padding:8px 0">
-            <div class="run-empty"><div class="run-empty-ico">🔄</div><span>Fetching trending topics...</span></div>
+            <!-- Normal topic grid (hidden when Trending tab active) -->
+            <div id="topicPickerContent">
+              <div class="xl">Select topic (or add your own)</div>
+              <div class="tgrid" id="tgrid"></div>
+              <div class="add-topic-row">
+                <input class="add-topic-inp" id="customTopicInp" placeholder="Add your own topic e.g. GraphQL APIs..."
+                  onkeydown="if(event.key==='Enter')addCustomTopic()" />
+                <button class="add-btn" onclick="addCustomTopic()">＋ Add</button>
+              </div>
+              <p style="font-size:11px;color:var(--txd);margin-top:8px">Custom topics are saved permanently and added to
+                your rotation list.</p>
+            </div>
+
+            <!-- Trending feed (shown only when Trending tab active) -->
+            <div id="trendingPickerContent" style="display:none;margin:0 -18px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 0">
+                <div style="display:flex;gap:0;border-bottom:1px solid var(--bd);flex:1">
+                  <button class="trend-tab act" id="trtab-all"    onclick="filterTrending('all',this)">All</button>
+                  <button class="trend-tab"     id="trtab-hn"     onclick="filterTrending('hackernews',this)">HackerNews</button>
+                  <button class="trend-tab"     id="trtab-reddit" onclick="filterTrending('reddit',this)">Reddit</button>
+                  <button class="trend-tab"     id="trtab-devto"  onclick="filterTrending('devto',this)">Dev.to</button>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;padding-left:12px;padding-bottom:1px">
+                  <span id="trendLastFetch" style="font-size:11px;color:var(--txd)"></span>
+                  <button class="btn bg" style="font-size:11px;padding:4px 10px" onclick="loadTrending(true)">↻</button>
+                </div>
+              </div>
+              <div id="trendingList" style="padding:4px 0;max-height:340px;overflow-y:auto">
+                <div class="run-empty"><div class="run-empty-ico">🔄</div><span>Fetching trending topics...</span></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -5693,6 +5698,17 @@ async function runNow(options = {}) {
     function selType(t, el) {
       document.querySelectorAll('.tc').forEach(c => { c.className = 'tc'; });
       el.classList.add('s' + t);
+      const isTrending = t === 'f';
+      const topicContent = document.getElementById('topicPickerContent');
+      const trendContent = document.getElementById('trendingPickerContent');
+      if (topicContent) topicContent.style.display = isTrending ? 'none' : '';
+      if (trendContent) trendContent.style.display = isTrending ? '' : 'none';
+      if (isTrending) {
+        // set post mode dropdown to trending
+        const sel = document.getElementById('postModeSel');
+        if (sel) { sel.value = 'trending'; setPostMode('trending'); }
+        loadTrending();
+      }
     }
 
     // ── DRY TOGGLE ────────────────────────────────────────────────────────────────
