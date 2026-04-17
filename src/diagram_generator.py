@@ -85,15 +85,15 @@ def _diagram_signature(svg):
     body = re.sub(r"\s+", " ", (svg or "").strip())
     return hashlib.md5(body.encode("utf-8")).hexdigest() if body else ""
 
-# ── Colour palettes ────────────────────────────────────────────────────────────
+# ── Colour palettes — modern, vibrant, Tailwind 600-level + extras ────────────
 PALETTES = {
-    "ai":       ["#7C3AED","#2563EB","#059669","#D97706","#DB2777","#0891B2"],
-    "cloud":    ["#2563EB","#0891B2","#059669","#7C3AED","#D97706","#DB2777"],
-    "security": ["#DC2626","#D97706","#7C3AED","#2563EB","#059669","#DB2777"],
-    "data":     ["#059669","#7C3AED","#2563EB","#0891B2","#D97706","#DC2626"],
-    "devops":   ["#059669","#2563EB","#7C3AED","#D97706","#DC2626","#0891B2"],
-    "career":   ["#7C3AED","#DB2777","#D97706","#059669","#2563EB","#0891B2"],
-    "default":  ["#2563EB","#7C3AED","#059669","#D97706","#DC2626","#0891B2"],
+    "ai":       ["#7C3AED","#2563EB","#0891B2","#059669","#D97706","#DB2777"],
+    "cloud":    ["#1D4ED8","#0284C7","#0891B2","#7C3AED","#16A34A","#D97706"],
+    "security": ["#DC2626","#EA580C","#7C3AED","#1D4ED8","#059669","#DB2777"],
+    "data":     ["#059669","#0891B2","#7C3AED","#1D4ED8","#D97706","#DC2626"],
+    "devops":   ["#16A34A","#1D4ED8","#7C3AED","#EA580C","#DC2626","#0284C7"],
+    "career":   ["#7C3AED","#DB2777","#D97706","#059669","#1D4ED8","#0891B2"],
+    "default":  ["#1D4ED8","#7C3AED","#059669","#D97706","#DC2626","#0891B2"],
 }
 
 def get_pal(tid, topic_name=""):
@@ -190,60 +190,84 @@ def _dotted_flow_line(x1, y1, x2, y2, stroke, dot_colors=("#2563EB", "#DC2626"),
     return svg
 
 # ── Shared CSS animations ──────────────────────────────────────────────────────
+FONT  = "'Segoe UI',system-ui,-apple-system,Arial,sans-serif"
 ANIM = """<style>
-  @keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fd{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes si{from{opacity:0;transform:scale(0.62)}to{opacity:1;transform:scale(1)}}
+  @keyframes sl{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
   @keyframes fr{0%{stroke-dashoffset:24}100%{stroke-dashoffset:0}}
-  @keyframes pu{0%,100%{opacity:1}50%{opacity:0.55}}
-  .fi{animation:fd .5s ease-out both}
+  @keyframes pu{0%,100%{opacity:1}50%{opacity:0.50}}
+  @keyframes gw{0%,100%{filter:drop-shadow(0 0 3px currentColor)}50%{filter:drop-shadow(0 0 8px currentColor)}}
+  .fi{animation:fd .48s cubic-bezier(0.22,1,0.36,1) both}
+  .si{animation:si .38s cubic-bezier(0.34,1.56,0.64,1) both}
+  .sl{animation:sl .42s cubic-bezier(0.22,1,0.36,1) both}
   .flow{stroke-dasharray:8 4;animation:fr 1.4s linear infinite}
   .pu{animation:pu 2.2s ease-in-out infinite}
+  .gw{animation:gw 2.8s ease-in-out infinite}
 </style>"""
 
 # ── Common footer / header wrapper ─────────────────────────────────────────────
 def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
-    dark_hdr = darken(accent, 0.55)
-    mid_hdr  = darken(accent, 0.35)
-    foot_bg  = lighten(accent, 0.95) if not dark else "#0D1117"
-    foot_bdr = "#E2E8F0" if not dark else rgba(accent, 0.35)
-    foot_txt = "#94A3B8"
+    dark_hdr  = darken(accent, 0.58)
+    mid_hdr   = darken(accent, 0.32)
+    foot_bg   = lighten(accent, 0.96) if not dark else "#0D1117"
+    foot_bdr  = "#E2E8F0" if not dark else rgba(accent, 0.30)
+    foot_txt  = "#64748B" if not dark else "#94A3B8"
+    HDR_H     = 66   # header height
 
     bg_rect = f'<rect width="{W}" height="{H}" fill="url(#BG)"/>'
-    dot_pat = ""
+    # Subtle grid pattern on light bg; dot-grid on dark
     if not dark:
-        dot_pat = (f'<pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">'
-                   f'<circle cx="1" cy="1" r="0.65" fill="{rgba(accent,0.10)}"/></pattern>'
-                   f'<rect width="{W}" height="{H}" fill="url(#dots)"/>')
-        dot_pat = (f'<pattern id="grid" width="26" height="26" patternUnits="userSpaceOnUse">'
-                   f'<path d="M26 0 L0 0 0 26" fill="none" stroke="{rgba(accent,0.06)}" stroke-width="0.5"/></pattern>'
-                   f'<rect width="{W}" height="{H}" fill="url(#grid)"/>')
+        dot_pat = (f'<pattern id="bg_pat" width="28" height="28" patternUnits="userSpaceOnUse">'
+                   f'<path d="M28 0 L0 0 0 28" fill="none" stroke="{rgba(accent,0.055)}" stroke-width="0.6"/>'
+                   f'</pattern>'
+                   f'<rect width="{W}" height="{H}" fill="url(#bg_pat)"/>')
+    else:
+        dot_pat = (f'<pattern id="bg_pat" width="22" height="22" patternUnits="userSpaceOnUse">'
+                   f'<circle cx="1" cy="1" r="0.7" fill="{rgba(accent,0.12)}"/>'
+                   f'</pattern>'
+                   f'<rect width="{W}" height="{H}" fill="url(#bg_pat)"/>')
 
-    pill_w = len(subtitle)*7 + 22
+    pill_w  = len(subtitle) * 7 + 28
+    title_c = clamp(title, 52)
 
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif;overflow:hidden">
+    # KB initials circle (right side of header)
+    kb_cx = W - 26
+    kb_cy = HDR_H // 2
+
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:{FONT};overflow:hidden">
 <defs>
   <linearGradient id="HG" x1="0" x2="1" y1="0" y2="0">
     <stop offset="0%" stop-color="{dark_hdr}"/>
+    <stop offset="60%" stop-color="{darken(accent,0.44)}"/>
     <stop offset="100%" stop-color="{mid_hdr}"/>
   </linearGradient>
   <linearGradient id="BG" x1="0" x2="0" y1="0" y2="1">
     <stop offset="0%" stop-color="{bg_top}"/>
     <stop offset="100%" stop-color="{bg_bot}"/>
   </linearGradient>
+  <filter id="hdr_sh" x="-5%" y="-5%" width="110%" height="200%">
+    <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="{rgba(dark_hdr,0.35)}"/>
+  </filter>
 </defs>
 {ANIM}
 {bg_rect}
 {dot_pat}
-<rect x="0" y="0" width="{W}" height="58" fill="url(#HG)"/>
-<rect x="0" y="56" width="{W}" height="2" fill="{accent}" opacity="0.7"/>
-<rect x="16" y="13" width="{pill_w}" height="18" rx="9" fill="{rgba(accent,0.25)}" stroke="{rgba(accent,0.55)}" stroke-width="1"/>
-<text x="28" y="25" fill="white" font-size="8" font-weight="700" letter-spacing="1.6">{xe(subtitle.upper())}</text>
-<text x="{W//2}" y="40" text-anchor="middle" fill="white" font-size="20" font-weight="900" letter-spacing="-0.3">{xe(clamp(title,54))}</text>
+<rect x="0" y="0" width="{W}" height="{HDR_H}" fill="url(#HG)" filter="url(#hdr_sh)"/>
+<rect x="0" y="{HDR_H-2}" width="{W}" height="3" fill="{accent}" opacity="0.8"/>
+<rect x="14" y="14" width="{pill_w}" height="19" rx="9.5" fill="{rgba(accent,0.28)}" stroke="{rgba(accent,0.60)}" stroke-width="1"/>
+<text x="24" y="27" fill="white" font-size="8.5" font-weight="700" letter-spacing="1.8" font-family="{FONT}">{xe(subtitle.upper())}</text>
+<text x="{(W - 52) // 2}" y="{HDR_H - 18}" text-anchor="middle" fill="white" font-size="22" font-weight="900" letter-spacing="-0.4" font-family="{FONT}">{xe(title_c)}</text>
+<circle cx="{kb_cx}" cy="{kb_cy}" r="18" fill="{rgba(accent,0.30)}" stroke="{rgba(accent,0.70)}" stroke-width="1.5"/>
+<text x="{kb_cx}" y="{kb_cy+5}" text-anchor="middle" fill="white" font-size="10" font-weight="900" letter-spacing="0.5" font-family="{FONT}">KB</text>
 {inner_svg}
-<rect x="0" y="{H-30}" width="{W}" height="30" fill="{foot_bg}"/>
-<rect x="0" y="{H-31}" width="{W}" height="1" fill="{foot_bdr}"/>
-<text x="18" y="{H-11}" fill="{foot_txt}" font-size="8.5">{datetime.now().strftime("%B %Y")}</text>
-<rect x="{W-220}" y="{H-24}" width="208" height="18" rx="9" fill="{rgba(accent,0.12)}" stroke="{accent}" stroke-width="1"/>
-<text x="{W-116}" y="{H-12}" text-anchor="middle" fill="{accent}" font-size="9" font-weight="800" letter-spacing="0.8">AI (c) {_COPYRIGHT_NAME}</text>
+<rect x="0" y="{H-32}" width="{W}" height="32" fill="{foot_bg}"/>
+<rect x="0" y="{H-33}" width="{W}" height="1" fill="{foot_bdr}"/>
+<rect x="0" y="{H-32}" width="4" height="32" fill="{accent}" opacity="0.55"/>
+<text x="18" y="{H-12}" fill="{foot_txt}" font-size="8.5" font-family="{FONT}">{datetime.now().strftime("%B %Y")}</text>
+<rect x="{W-218}" y="{H-26}" width="206" height="20" rx="10" fill="{rgba(accent,0.12)}" stroke="{rgba(accent,0.35)}" stroke-width="1"/>
+<circle cx="{W-208}" cy="{H-16}" r="7" fill="{accent}"/>
+<text x="{W-198}" cy="{H-16}" y="{H-12}" fill="{accent}" font-size="9" font-weight="800" letter-spacing="0.5" font-family="{FONT}">AI · {_COPYRIGHT_NAME}</text>
 </svg>'''
 
 
@@ -353,7 +377,7 @@ def _style_vertical_flow(topic_id, topic_name, C, structure=None):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 1 — MIND MAP  (hub + branches + sub-leaves, dark theme)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_mind_map(topic_id, topic_name, C):
+def _style_mind_map(topic_id, topic_name, C, structure=None):
     W, H = 900, 600
     accent = C[0]
     dark_bg  = darken(accent, 0.60)
@@ -465,7 +489,7 @@ def _style_mind_map(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 2 — PYRAMID  (stacked trapezoids, narrow at top)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_pyramid(topic_id, topic_name, C):
+def _style_pyramid(topic_id, topic_name, C, structure=None):
     W, H = 900, 600
     accent = C[0]
     bg_top = lighten(accent, 0.91)
@@ -561,7 +585,7 @@ def _style_pyramid(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 3 — TIMELINE  (horizontal spine, cards alternate above/below)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_timeline(topic_id, topic_name, C):
+def _style_timeline(topic_id, topic_name, C, structure=None):
     W, H = 900, 560
     accent = C[0]
     dark_bg  = darken(accent, 0.58)
@@ -659,7 +683,7 @@ def _style_timeline(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 4 — HEXAGON GRID  (honeycomb concept cells, dark theme)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_hexagon(topic_id, topic_name, C):
+def _style_hexagon(topic_id, topic_name, C, structure=None):
     W, H = 900, 600
     accent = C[0]
     dark_bg  = darken(accent, 0.62)
@@ -876,7 +900,7 @@ def _style_comparison(topic_id, topic_name, C, structure=None):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 6 — CIRCULAR ORBIT  (central hub + inner + outer satellites)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_orbit(topic_id, topic_name, C):
+def _style_orbit(topic_id, topic_name, C, structure=None):
     W, H = 900, 600
     accent = C[0]
     dark_bg  = darken(accent, 0.62)
@@ -1005,7 +1029,7 @@ def _style_orbit(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 7 — CARD GRID  (grouped cards, light theme)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_card_grid(topic_id, topic_name, C):
+def _style_card_grid(topic_id, topic_name, C, structure=None):
     W, H = 900, 580
     accent = C[0]
     bg_top = lighten(accent, 0.91)
@@ -1077,7 +1101,7 @@ def _style_card_grid(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 8 — 3-TIER DATA EVOLUTION
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_data_evolution(topic_id, topic_name, C):
+def _style_data_evolution(topic_id, topic_name, C, structure=None):
     W, H = 900, 580
     accent = C[0]
     bg_top = lighten(accent, 0.90)
@@ -1136,7 +1160,7 @@ def _style_data_evolution(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 9 — HORIZONTAL TREE
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_horizontal_tree(topic_id, topic_name, C):
+def _style_horizontal_tree(topic_id, topic_name, C, structure=None):
     W, H = 900, 640
     accent = C[0]
     bg_top = lighten(accent, 0.92)
@@ -1235,7 +1259,7 @@ def _style_horizontal_tree(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 10 — LAYERED HORIZONTAL FLOW
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_layered_flow(topic_id, topic_name, C):
+def _style_layered_flow(topic_id, topic_name, C, structure=None):
     W, H = 900, 720
     accent = C[0]
     bg_top = lighten(accent, 0.94)
@@ -1334,7 +1358,7 @@ def _style_layered_flow(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 11 — ECOSYSTEM TREE (RAG STACK)
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_ecosystem_tree(topic_id, topic_name, C):
+def _style_ecosystem_tree(topic_id, topic_name, C, structure=None):
     W, H = 1000, 850
     accent = C[0]
     bg_top = lighten(accent, 0.95)
@@ -1434,7 +1458,7 @@ def _hex_poly(cx, cy, r):
         pts.append(f"{cx + r * math.cos(angle_rad)},{cy + r * math.sin(angle_rad)}")
     return " ".join(pts)
 
-def _style_honeycomb_map(topic_id, topic_name, C):
+def _style_honeycomb_map(topic_id, topic_name, C, structure=None):
     W, H = 1000, 950
     accent = C[0]
     bg_top = lighten(accent, 0.98)
@@ -1517,7 +1541,7 @@ def _style_honeycomb_map(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 13 — PARALLEL PIPELINES
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_parallel_pipelines(topic_id, topic_name, C):
+def _style_parallel_pipelines(topic_id, topic_name, C, structure=None):
     W, H = 1000, 850
     accent = C[0]
     bg_top = lighten(accent, 0.94)
@@ -1591,7 +1615,7 @@ def _style_parallel_pipelines(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 14 — WINDING ROADMAP
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_winding_roadmap(topic_id, topic_name, C):
+def _style_winding_roadmap(topic_id, topic_name, C, structure=None):
     W, H = 1000, 1100
     accent = C[0]
     bg_top = lighten(accent, 0.94)
@@ -1673,7 +1697,7 @@ def _style_winding_roadmap(topic_id, topic_name, C):
 # ══════════════════════════════════════════════════════════════════════════════
 #  STYLE 15 — VERTICAL TIMELINE
 # ══════════════════════════════════════════════════════════════════════════════
-def _style_vertical_timeline(topic_id, topic_name, C):
+def _style_vertical_timeline(topic_id, topic_name, C, structure=None):
     W, H = 1000, 1100
     accent = C[0]
     bg_top = lighten(accent, 0.96)
@@ -2896,7 +2920,7 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
             f'fill="{rgba(accent,0.30)}" stroke="{rgba(accent,0.65)}" stroke-width="1.5"/>')
     svg += (f'<text x="{pill_x + pill_w//2}" y="{PAD+50}" text-anchor="middle" '
             f'fill="{light}" font-size="12" font-weight="800" letter-spacing="2.2" '
-            f'font-family="Arial,sans-serif">{xe(pill_txt)}</text>')
+            f'font-family="{FONT}">{xe(pill_txt)}</text>')
 
     # Main title — adaptive size + balanced split
     name_len = len(topic_name)
@@ -2916,10 +2940,10 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
 
     ty = PAD + 108
     svg += (f'<text x="{PAD+36}" y="{ty}" fill="white" font-size="{tfs}" font-weight="900" '
-            f'font-family="Arial,sans-serif" letter-spacing="-0.5">{xe(tl1)}</text>')
+            f'font-family="{FONT}" letter-spacing="-0.5">{xe(tl1)}</text>')
     if tl2:
         svg += (f'<text x="{PAD+36}" y="{ty + tfs + 4}" fill="{lighten(accent,0.50)}" '
-                f'font-size="{tfs}" font-weight="900" font-family="Arial,sans-serif" '
+                f'font-size="{tfs}" font-weight="900" font-family="{FONT}" '
                 f'letter-spacing="-0.5">{xe(tl2)}</text>')
 
     # ── Item rows ────────────────────────────────────────────────────────────
@@ -2941,19 +2965,21 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
         # Left accent stripe
         svg += (f'<rect x="{rx}" y="{ry}" width="5" height="{row_h-10}" rx="3" '
                 f'fill="{col}"/>')
-        # Number badge
+        # Number badge — use .si for pop-in bounce
         badge_cx = rx + 44
         badge_cy = ry + (row_h-10)//2
-        svg += f'<circle cx="{badge_cx}" cy="{badge_cy}" r="22" fill="{rgba(col,0.25)}" stroke="{col}" stroke-width="2"/>'
-        svg += (f'<text x="{badge_cx}" y="{badge_cy+8}" text-anchor="middle" fill="{light}" '
-                f'font-size="20" font-weight="900" font-family="Arial,sans-serif">'
-                f'{sec.get("id", i+1)}</text>')
+        badge_delay = f"animation-delay:{i*0.07+0.05:.2f}s"
+        svg += (f'<circle cx="{badge_cx}" cy="{badge_cy}" r="22" fill="{rgba(col,0.28)}" '
+                f'stroke="{col}" stroke-width="2.5" class="si" style="{badge_delay}"/>')
+        svg += (f'<text x="{badge_cx}" y="{badge_cy+8}" text-anchor="middle" fill="white" '
+                f'font-size="20" font-weight="900" font-family="{FONT}" '
+                f'class="si" style="{badge_delay}">{sec.get("id", i+1)}</text>')
 
         # Label
         label = str(sec.get("label", ""))
         lbl_y = badge_cy - (8 if sec.get("desc") else 0)
         svg += (f'<text x="{rx+82}" y="{lbl_y}" fill="white" font-size="22" font-weight="800" '
-                f'font-family="Arial,sans-serif">{xe(clamp(label, 32))}</text>')
+                f'font-family="{FONT}">{xe(clamp(label, 32))}</text>')
 
         # Description (up to 2 lines)
         desc = str(sec.get("desc", ""))
@@ -2961,7 +2987,7 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
             desc_lines = fit_lines(desc, 54, 2)
             for li, ln in enumerate(desc_lines):
                 svg += (f'<text x="{rx+82}" y="{lbl_y+20+li*16}" fill="{lighten(col,0.42)}" '
-                        f'font-size="14" font-family="Arial,sans-serif">{xe(ln)}</text>')
+                        f'font-size="14" font-family="{FONT}">{xe(ln)}</text>')
 
         # Subtle separator
         if i < n - 1:
@@ -2973,18 +2999,18 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
     foot_y = H - PAD - 58
     svg += (f'<rect x="{PAD+36}" y="{foot_y}" width="{W-PAD*2-72}" height="44" rx="22" '
             f'fill="{rgba(accent,0.18)}" stroke="{rgba(accent,0.30)}" stroke-width="1"/>')
-    svg += (f'<circle cx="{PAD+62}" cy="{foot_y+22}" r="16" fill="{accent}"/>')
+    svg += (f'<circle cx="{PAD+62}" cy="{foot_y+22}" r="18" fill="{accent}"/>')
     svg += (f'<text x="{PAD+62}" y="{foot_y+28}" text-anchor="middle" fill="white" '
-            f'font-size="13" font-weight="900" font-family="Arial,sans-serif">KB</text>')
+            f'font-size="13" font-weight="900" font-family="{FONT}">KB</text>')
     svg += (f'<text x="{PAD+86}" y="{foot_y+16}" fill="white" font-size="14" '
-            f'font-weight="700" font-family="Arial,sans-serif">{xe(_COPYRIGHT_NAME)}</text>')
+            f'font-weight="700" font-family="{FONT}">{xe(_COPYRIGHT_NAME)}</text>')
     svg += (f'<text x="{PAD+86}" y="{foot_y+32}" fill="{lighten(accent,0.40)}" '
-            f'font-size="11" font-family="Arial,sans-serif">Staff Engineer · AI &amp; Systems</text>')
-    svg += (f'<text x="{W-PAD-50}" y="{foot_y+28}" text-anchor="middle" fill="{lighten(accent,0.55)}" '
-            f'font-size="12" font-weight="700" font-family="Arial,sans-serif">🔖 Save</text>')
+            f'font-size="11" font-family="{FONT}">Staff Engineer · AI &amp; Systems</text>')
+    svg += (f'<text x="{W-PAD-50}" y="{foot_y+28}" text-anchor="middle" fill="{lighten(accent,0.60)}" '
+            f'font-size="13" font-weight="700" font-family="{FONT}">🔖 Save</text>')
 
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" '
-            f'width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">'
+            f'width="{W}" height="{H}" style="display:block;font-family:{FONT}">'
             f'{ANIM}{svg}</svg>')
 
 
@@ -3008,7 +3034,8 @@ def _style_tile_grid(topic_id, topic_name, C, structure=None):
     n = len(sections)
 
     svg  = ""
-    svg += (f'<defs><linearGradient id="tgbg" x1="0" y1="0" x2="0" y2="1">'
+    svg += (f'<defs>'
+            f'<linearGradient id="tgbg" x1="0" y1="0" x2="0" y2="1">'
             f'<stop offset="0%" stop-color="{bg_dark}"/>'
             f'<stop offset="100%" stop-color="{bg_body}"/>'
             f'</linearGradient>'
@@ -3019,7 +3046,7 @@ def _style_tile_grid(topic_id, topic_name, C, structure=None):
     svg += f'<rect width="{W}" height="{H}" fill="url(#tggrid)"/>'
 
     # Top accent bar
-    svg += f'<rect x="0" y="0" width="{W}" height="6" fill="{accent}"/>'
+    svg += f'<rect x="0" y="0" width="{W}" height="7" fill="{accent}"/>'
 
     # Header
     HDR_Y = 48
@@ -3027,29 +3054,30 @@ def _style_tile_grid(topic_id, topic_name, C, structure=None):
     pill_w = len(pill_txt) * 11 + 44
     svg += (f'<rect x="{(W-pill_w)//2}" y="{HDR_Y}" width="{pill_w}" height="34" rx="17" '
             f'fill="{rgba(accent,0.25)}" stroke="{rgba(accent,0.55)}" stroke-width="1.5"/>')
-    svg += (f'<text x="{W//2}" y="{HDR_Y+23}" text-anchor="middle" fill="{lighten(accent,0.75)}" '
-            f'font-size="12" font-weight="800" letter-spacing="2" font-family="Arial,sans-serif">'
+    svg += (f'<text x="{W//2}" y="{HDR_Y+23}" text-anchor="middle" fill="{lighten(accent,0.80)}" '
+            f'font-size="12" font-weight="800" letter-spacing="2" font-family="{FONT}">'
             f'{xe(pill_txt)}</text>')
 
     name_len = len(topic_name)
     tfs = 68 if name_len <= 14 else (54 if name_len <= 22 else (42 if name_len <= 32 else 34))
     svg += (f'<text x="{W//2}" y="{HDR_Y+80}" text-anchor="middle" fill="white" '
-            f'font-size="{tfs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-0.5">'
+            f'font-size="{tfs}" font-weight="900" font-family="{FONT}" letter-spacing="-0.5">'
             f'{xe(clamp(topic_name, 28))}</text>')
 
-    # Divider
+    # Divider — accent bar with secondary shadow strip
     div_y = HDR_Y + 100
-    svg += f'<rect x="{W//2-60}" y="{div_y}" width="120" height="3" rx="2" fill="{accent}"/>'
+    svg += f'<rect x="{W//2-80}" y="{div_y}" width="160" height="3" rx="1.5" fill="{rgba(accent,0.30)}"/>'
+    svg += f'<rect x="{W//2-55}" y="{div_y}" width="110" height="3" rx="1.5" fill="{accent}"/>'
 
     # Tile grid — 2 columns
     COLS   = 2
     ROWS   = math.ceil(n / COLS)
     PAD    = 36
-    GUTTER = 16
+    GUTTER = 18
     tile_w = (W - PAD*2 - GUTTER*(COLS-1)) // COLS
-    content_top = div_y + 22
+    content_top = div_y + 24
     avail_h = H - content_top - 80
-    tile_h = min(180, max(100, (avail_h - GUTTER*(ROWS-1)) // ROWS))
+    tile_h = min(185, max(100, (avail_h - GUTTER*(ROWS-1)) // ROWS))
 
     for i, sec in enumerate(sections):
         col   = C[i % len(C)]
@@ -3058,59 +3086,68 @@ def _style_tile_grid(topic_id, topic_name, C, structure=None):
         tx    = PAD + col_i * (tile_w + GUTTER)
         ty    = content_top + row_i * (tile_h + GUTTER)
         delay = f"animation-delay:{i*0.06:.2f}s"
+        bdly  = f"animation-delay:{i*0.06+0.08:.2f}s"
 
         # Tile shadow
         svg += (f'<rect x="{tx+4}" y="{ty+4}" width="{tile_w}" height="{tile_h}" '
                 f'rx="16" fill="{rgba(col,0.15)}"/>')
-        # Tile body
+        # Tile body — subtle gradient fill
+        svg += (f'<defs><linearGradient id="tg{i}" x1="0" y1="0" x2="1" y2="1">'
+                f'<stop offset="0%" stop-color="{rgba(col,0.22)}"/>'
+                f'<stop offset="100%" stop-color="{rgba(col,0.09)}"/>'
+                f'</linearGradient></defs>')
         svg += (f'<rect x="{tx}" y="{ty}" width="{tile_w}" height="{tile_h}" '
-                f'rx="16" fill="{rgba(col,0.14)}" stroke="{rgba(col,0.40)}" '
+                f'rx="16" fill="url(#tg{i})" stroke="{rgba(col,0.42)}" '
                 f'stroke-width="1.5" class="fi" style="{delay}"/>')
         # Top accent strip
-        svg += f'<rect x="{tx}" y="{ty}" width="{tile_w}" height="5" rx="3" fill="{col}"/>'
+        svg += f'<rect x="{tx}" y="{ty}" width="{tile_w}" height="6" rx="3" fill="{col}"/>'
 
-        # Number
-        num_x = tx + 32
-        num_y = ty + 42
-        svg += f'<circle cx="{num_x}" cy="{num_y}" r="20" fill="{rgba(col,0.30)}" stroke="{col}" stroke-width="2"/>'
-        svg += (f'<text x="{num_x}" y="{num_y+7}" text-anchor="middle" fill="white" '
-                f'font-size="18" font-weight="900" font-family="Arial,sans-serif">'
+        # Number badge — .si bounce
+        num_x = tx + 34
+        num_y = ty + 44
+        svg += (f'<circle cx="{num_x}" cy="{num_y}" r="21" fill="{rgba(col,0.32)}" '
+                f'stroke="{col}" stroke-width="2.5" class="si" style="{bdly}"/>')
+        svg += (f'<text x="{num_x}" y="{num_y+8}" text-anchor="middle" fill="white" '
+                f'font-size="18" font-weight="900" font-family="{FONT}" class="si" style="{bdly}">'
                 f'{sec.get("id", i+1)}</text>')
 
         # Label
         label = str(sec.get("label", ""))
         label_lines = fit_lines(label, 18, 2)
-        label_x = tx + 64
+        label_x = tx + 68
         label_base_y = ty + 32
         for li, ln in enumerate(label_lines):
             svg += (f'<text x="{label_x}" y="{label_base_y + li*22}" fill="white" '
-                    f'font-size="19" font-weight="800" font-family="Arial,sans-serif">'
+                    f'font-size="19" font-weight="800" font-family="{FONT}">'
                     f'{xe(ln)}</text>')
 
         # Description
         desc = str(sec.get("desc", ""))
         if desc:
-            desc_lines = fit_lines(desc, 26, 2)
-            desc_y = ty + tile_h - 38
+            desc_lines = fit_lines(desc, 28, 2)
+            desc_y = ty + tile_h - 36
             for li, ln in enumerate(desc_lines):
-                svg += (f'<text x="{tx+16}" y="{desc_y + li*16}" fill="{lighten(col,0.38)}" '
-                        f'font-size="13" font-family="Arial,sans-serif">{xe(ln)}</text>')
+                svg += (f'<text x="{tx+16}" y="{desc_y + li*16}" fill="{lighten(col,0.42)}" '
+                        f'font-size="13" font-family="{FONT}">{xe(ln)}</text>')
 
-        # Corner glyph
-        svg += (f'<text x="{tx+tile_w-22}" y="{ty+tile_h-14}" fill="{rgba(col,0.22)}" '
-                f'font-size="32" font-weight="900" font-family="Arial,sans-serif">'
+        # Corner ghost number
+        svg += (f'<text x="{tx+tile_w-18}" y="{ty+tile_h-12}" fill="{rgba(col,0.18)}" '
+                f'font-size="34" font-weight="900" font-family="{FONT}">'
                 f'{sec.get("id", i+1):02d}</text>')
 
     # Footer
-    foot_y = H - 58
-    svg += (f'<rect x="0" y="{foot_y-4}" width="{W}" height="62" fill="{rgba(accent,0.15)}"/>')
-    svg += (f'<rect x="0" y="{foot_y-4}" width="{W}" height="1" fill="{rgba(accent,0.25)}"/>')
-    svg += (f'<text x="{W//2}" y="{foot_y+28}" text-anchor="middle" fill="{lighten(accent,0.40)}" '
-            f'font-size="13" font-weight="700" font-family="Arial,sans-serif">'
+    foot_y = H - 60
+    svg += (f'<rect x="0" y="{foot_y-4}" width="{W}" height="64" fill="{rgba(accent,0.15)}"/>')
+    svg += (f'<rect x="0" y="{foot_y-4}" width="{W}" height="1" fill="{rgba(accent,0.28)}"/>')
+    svg += (f'<circle cx="{W//2-90}" cy="{foot_y+28}" r="14" fill="{accent}"/>')
+    svg += (f'<text x="{W//2-90}" y="{foot_y+33}" text-anchor="middle" fill="white" '
+            f'font-size="9" font-weight="900" font-family="{FONT}">KB</text>')
+    svg += (f'<text x="{W//2-68}" y="{foot_y+32}" fill="{lighten(accent,0.50)}" '
+            f'font-size="13" font-weight="700" font-family="{FONT}">'
             f'{xe(_COPYRIGHT_NAME)} · Staff Engineer · AI &amp; Systems</text>')
 
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" '
-            f'width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">'
+            f'width="{W}" height="{H}" style="display:block;font-family:{FONT}">'
             f'{ANIM}{svg}</svg>')
 
 
@@ -3316,17 +3353,17 @@ def _style_dashboard(topic_id, topic_name, C, structure=None):
         # Top color accent strip
         svg += f'<rect x="{cx_}" y="{cy_}" width="{card_w}" height="5" rx="3" fill="{col}"/>'
 
-        # KPI number (large) — use section id as the "metric"
+        # KPI number (large) — bold colored
         kpi_val = str(sec.get("id", i+1))
-        svg += (f'<text x="{cx_+20}" y="{cy_+54}" fill="{col}" font-size="42" '
-                f'font-weight="900" font-family="Arial,sans-serif">{xe(kpi_val)}</text>')
+        svg += (f'<text x="{cx_+20}" y="{cy_+56}" fill="{col}" font-size="44" '
+                f'font-weight="900" font-family="{FONT}">{xe(kpi_val)}</text>')
 
         # Label
         label = str(sec.get("label", ""))
         lbl_lines = fit_lines(label, 17, 2)
         for li, ln in enumerate(lbl_lines):
-            svg += (f'<text x="{cx_+20}" y="{cy_+76+li*15}" fill="{darken(col,0.12)}" '
-                    f'font-size="12" font-weight="700" font-family="Arial,sans-serif">'
+            svg += (f'<text x="{cx_+20}" y="{cy_+78+li*15}" fill="{darken(col,0.12)}" '
+                    f'font-size="12" font-weight="700" font-family="{FONT}">'
                     f'{xe(ln)}</text>')
 
         # Progress bar at bottom of card
@@ -3341,8 +3378,8 @@ def _style_dashboard(topic_id, topic_name, C, structure=None):
         # Description (if fits)
         desc = str(sec.get("desc", ""))
         if desc and card_h > 120:
-            svg += (f'<text x="{cx_+20}" y="{bar_y-12}" fill="{rgba("#000000",0.38) if False else rgba("#64748B",0.85)}" '
-                    f'font-size="9.5" font-family="Arial,sans-serif">{xe(clamp(desc, 24))}</text>')
+            svg += (f'<text x="{cx_+20}" y="{bar_y-12}" fill="{rgba("#64748B",0.85)}" '
+                    f'font-size="9.5" font-family="{FONT}">{xe(clamp(desc, 24))}</text>')
 
     return _wrap(svg, W, H, topic_name, "Dashboard", accent, bg_top, bg_bot)
 
@@ -3421,12 +3458,14 @@ def _style_radial_rings(topic_id, topic_name, C, structure=None):
                 f'fill="none" stroke="{col}" stroke-width="{track}" '
                 f'stroke-linecap="round" class="fi" style="animation-delay:{idx*0.08:.2f}s"/>')
 
-        # Dot at end of arc
+        # Dot at end of arc — glow pulse
         end_a = math.radians(START_ANGLE + sweep_deg)
         dot_x = cx + r * math.cos(end_a)
         dot_y = cy + r * math.sin(end_a)
-        svg += (f'<circle cx="{dot_x:.1f}" cy="{dot_y:.1f}" r="{track//2+2}" '
-                f'fill="{col}" class="pu" style="animation-delay:{idx*0.08:.2f}s"/>')
+        svg += (f'<circle cx="{dot_x:.1f}" cy="{dot_y:.1f}" r="{track//2+3}" '
+                f'fill="{col}" class="gw" style="animation-delay:{idx*0.08:.2f}s"/>')
+        svg += (f'<circle cx="{dot_x:.1f}" cy="{dot_y:.1f}" r="{track//2-1}" '
+                f'fill="white" opacity="0.6"/>')
 
         # Label — place to the right of the diagram
         label    = str(sec.get("label", ""))
@@ -3436,138 +3475,16 @@ def _style_radial_rings(topic_id, topic_name, C, structure=None):
         svg += (f'<line x1="{dot_x:.1f}" y1="{dot_y:.1f}" x2="{label_x-8}" y2="{label_y}" '
                 f'stroke="{rgba(col,0.45)}" stroke-width="1.2" stroke-dasharray="4 3"/>')
         svg += (f'<text x="{label_x}" y="{label_y+5}" fill="white" font-size="12" '
-                f'font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label, 22))}</text>')
+                f'font-weight="800" font-family="{FONT}">{xe(clamp(label, 22))}</text>')
         desc = str(sec.get("desc", ""))
         if desc:
             svg += (f'<text x="{label_x}" y="{label_y+19}" fill="{lighten(col,0.42)}" '
-                    f'font-size="9.5" font-family="Arial,sans-serif">'
+                    f'font-size="9.5" font-family="{FONT}">'
                     f'{xe(clamp(desc, 28))}</text>')
 
     return _wrap(svg, W, H, topic_name, "Maturity Model", accent, bg_dark2, bg_dark, dark=True)
 
 
-    W, H = 1080, 1080  # Square — best for LinkedIn feed visibility
-    accent = C[0]
-    bg_dark = darken(accent, 0.72)
-    bg_darker = darken(accent, 0.82)
-    light = lighten(accent, 0.88)
-
-    sections = []
-    if structure and structure.get("sections"):
-        sections = structure["sections"][:6]
-    else:
-        sections = [
-            {"id": i+1, "label": f"Point {i+1}", "desc": "Key insight here"}
-            for i in range(5)
-        ]
-
-    subtitle = (structure or {}).get("subtitle", "Engineer's Perspective")
-    n = len(sections)
-
-    svg = ""
-
-    # ── Background ──────────────────────────────────────────────────────────
-    svg += f'<defs>'
-    svg += f'<linearGradient id="vp-bg" x1="0" y1="0" x2="1" y2="1">'
-    svg += f'<stop offset="0%" stop-color="{bg_darker}"/>'
-    svg += f'<stop offset="100%" stop-color="{bg_dark}"/>'
-    svg += f'</linearGradient>'
-    # Subtle grid pattern
-    svg += f'<pattern id="vp-grid" width="60" height="60" patternUnits="userSpaceOnUse">'
-    svg += f'<path d="M 60 0 L 0 0 0 60" fill="none" stroke="{rgba(accent,0.06)}" stroke-width="1"/>'
-    svg += f'</pattern>'
-    svg += f'</defs>'
-    svg += f'<rect width="{W}" height="{H}" fill="url(#vp-bg)"/>'
-    svg += f'<rect width="{W}" height="{H}" fill="url(#vp-grid)"/>'
-
-    # ── Top accent bar ───────────────────────────────────────────────────────
-    svg += f'<rect x="0" y="0" width="{W}" height="8" fill="{accent}"/>'
-
-    # ── Header pill ─────────────────────────────────────────────────────────
-    pill_text = subtitle.upper()
-    pill_w = len(pill_text) * 11 + 40
-    svg += f'<rect x="60" y="40" width="{pill_w}" height="34" rx="17" fill="{rgba(accent,0.25)}" stroke="{rgba(accent,0.6)}" stroke-width="1.5"/>'
-    svg += f'<text x="{60 + pill_w//2}" y="63" text-anchor="middle" fill="{lighten(accent,0.7)}" font-size="13" font-weight="800" letter-spacing="2" font-family="Arial,sans-serif">{xe(pill_text)}</text>'
-
-    # ── Main title ───────────────────────────────────────────────────────────
-    # Adaptive font size: shrink for longer names so nothing clips
-    name_len = len(topic_name)
-    title_fs = 76 if name_len <= 12 else (62 if name_len <= 20 else (50 if name_len <= 28 else 40))
-    title_words = topic_name.split()
-    # Split into at most 2 balanced lines
-    if len(title_words) == 1:
-        title_line1, title_line2 = topic_name, ""
-    else:
-        mid = max(1, len(title_words) // 2)
-        # Try to keep lines roughly equal length
-        best_split, best_diff = mid, abs(len(" ".join(title_words[:mid])) - len(" ".join(title_words[mid:])))
-        for s in range(1, len(title_words)):
-            diff = abs(len(" ".join(title_words[:s])) - len(" ".join(title_words[s:])))
-            if diff < best_diff:
-                best_diff, best_split = diff, s
-        title_line1 = " ".join(title_words[:best_split])
-        title_line2 = " ".join(title_words[best_split:])
-    # Cap each line at characters that fit the canvas width (≈ W-120 px / ~14px per char at fs)
-    max_chars = max(12, int((W - 120) / (title_fs * 0.62)))
-    title_line1 = clamp(title_line1, max_chars)
-    title_line2 = clamp(title_line2, max_chars) if title_line2 else ""
-
-    title_y = 130
-    svg += f'<text x="60" y="{title_y}" fill="white" font-size="{title_fs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-1">{xe(title_line1)}</text>'
-    if title_line2:
-        svg += f'<text x="60" y="{title_y + title_fs + 8}" fill="{lighten(accent, 0.55)}" font-size="{title_fs}" font-weight="900" font-family="Arial,sans-serif" letter-spacing="-1">{xe(title_line2)}</text>'
-
-    # Divider line
-    div_y = title_y + title_fs * (2 if title_line2 else 1) + 30
-    svg += f'<rect x="60" y="{div_y}" width="80" height="4" rx="2" fill="{accent}"/>'
-    svg += f'<rect x="152" y="{div_y}" width="40" height="4" rx="2" fill="{rgba(accent,0.35)}"/>'
-
-    # ── Numbered sections ────────────────────────────────────────────────────
-    content_y = div_y + 40
-    avail_h = H - content_y - 120
-    item_h = avail_h // max(n, 1)
-    item_h = min(item_h, 145)
-
-    for i, sec in enumerate(sections):
-        col = C[i % len(C)]
-        iy = content_y + i * item_h
-
-        # Number circle
-        svg += f'<circle cx="96" cy="{iy + item_h//2}" r="28" fill="{rgba(col, 0.20)}" stroke="{col}" stroke-width="2"/>'
-        svg += f'<text x="96" y="{iy + item_h//2 + 11}" text-anchor="middle" fill="{col}" font-size="26" font-weight="900" font-family="Arial,sans-serif">{sec.get("id", i+1)}</text>'
-
-        # Label
-        label = str(sec.get("label", ""))
-        svg += f'<text x="148" y="{iy + item_h//2 - 8}" fill="white" font-size="24" font-weight="800" font-family="Arial,sans-serif">{xe(clamp(label, 28))}</text>'
-
-        # Description
-        desc = str(sec.get("desc", ""))
-        desc_lines = fit_lines(desc, 46, 2)
-        for li, ln in enumerate(desc_lines):
-            svg += f'<text x="148" y="{iy + item_h//2 + 18 + li*20}" fill="{lighten(col, 0.50)}" font-size="16" font-family="Arial,sans-serif">{xe(ln)}</text>'
-
-        # Separator line between items (not after last)
-        if i < n - 1:
-            sep_y = iy + item_h - 8
-            svg += f'<line x1="60" y1="{sep_y}" x2="{W-60}" y2="{sep_y}" stroke="{rgba(accent,0.12)}" stroke-width="1"/>'
-
-    # ── Bottom branding bar ──────────────────────────────────────────────────
-    bar_y = H - 80
-    svg += f'<rect x="0" y="{bar_y}" width="{W}" height="80" fill="{rgba(accent,0.12)}" stroke="{rgba(accent,0.20)}" stroke-width="1"/>'
-
-    # Author pill
-    author_text = f"@{_DIAGRAM_AUTHOR.split()[0].lower() if _DIAGRAM_AUTHOR else 'komalb'}"
-    svg += f'<circle cx="92" cy="{bar_y + 40}" r="26" fill="{accent}"/>'
-    svg += f'<text x="92" y="{bar_y + 47}" text-anchor="middle" fill="white" font-size="18" font-weight="900" font-family="Arial,sans-serif">KB</text>'
-    svg += f'<text x="132" y="{bar_y + 32}" fill="white" font-size="18" font-weight="800" font-family="Arial,sans-serif">{xe(_COPYRIGHT_NAME)}</text>'
-    svg += f'<text x="132" y="{bar_y + 54}" fill="{lighten(accent, 0.45)}" font-size="13" font-family="Arial,sans-serif">Staff Engineer · AI & Systems</text>'
-
-    # Save/Share nudge (drives engagement)
-    svg += f'<rect x="{W-300}" y="{bar_y + 16}" width="240" height="48" rx="24" fill="{rgba(accent,0.25)}" stroke="{accent}" stroke-width="1.5"/>'
-    svg += f'<text x="{W-180}" y="{bar_y + 36}" text-anchor="middle" fill="{lighten(accent,0.8)}" font-size="13" font-weight="700" font-family="Arial,sans-serif">🔖 SAVE FOR LATER</text>'
-    svg += f'<text x="{W-180}" y="{bar_y + 54}" text-anchor="middle" fill="{lighten(accent,0.45)}" font-size="11" font-family="Arial,sans-serif">Share with your team</text>'
-
-    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:Arial,sans-serif">{ANIM}{svg}</svg>'
 STYLES = [
     _style_vertical_flow,        # 0  — numbered pipeline steps
     _style_mind_map,             # 1  — radial hub + branches
