@@ -2192,6 +2192,40 @@
       opacity: .4
     }
 
+    /* ── TRENDING NOW PANEL ── */
+    .trend-tab {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; padding: 9px 14px;
+      color: var(--txm); border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .trend-tab:hover { color: var(--tx); }
+    .trend-tab.act { color: var(--acc); border-bottom-color: var(--acc); font-weight: 600; }
+    .trend-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 11px 18px; border-bottom: 1px solid var(--bd);
+      cursor: pointer; transition: background .12s;
+    }
+    .trend-item:last-child { border-bottom: none; }
+    .trend-item:hover { background: var(--sur2); }
+    .trend-src {
+      flex-shrink: 0; font-size: 10px; font-weight: 600; letter-spacing: .04em;
+      padding: 2px 7px; border-radius: 10px; margin-top: 2px; text-transform: uppercase;
+    }
+    .trend-src-hn     { background: rgba(255,102,0,.15); color: #ff6600; }
+    .trend-src-reddit { background: rgba(255,69,0,.12);  color: #ff4500; }
+    .trend-src-devto  { background: rgba(99,171,255,.13); color: var(--acc); }
+    .trend-body { flex: 1; min-width: 0; }
+    .trend-title { font-size: 13px; font-weight: 500; color: var(--tx); line-height: 1.4; margin-bottom: 4px; }
+    .trend-meta  { font-size: 11px; color: var(--txd); display: flex; gap: 10px; flex-wrap: wrap; }
+    .trend-score { color: var(--grn); font-weight: 600; }
+    .trend-post-btn {
+      flex-shrink: 0; font-size: 11px; padding: 4px 10px;
+      background: var(--acc); color: #fff; border: none; border-radius: 5px;
+      cursor: pointer; opacity: 0; transition: opacity .15s;
+    }
+    .trend-item:hover .trend-post-btn { opacity: 1; }
+
 
     /* ── TOPIC PICKER ── */
     .typerow {
@@ -3297,6 +3331,7 @@
           <select class="tz-sel" id="postModeSel" onchange="setPostMode(this.value)" title="Choose generation mode">
             <option value="auto">Auto mode</option>
             <option value="topic">Topic only</option>
+            <option value="trending">🔥 Trending</option>
             <option value="ai_news">AI news</option>
             <option value="tools_news">Tools news</option>
             <option value="tech_news">Tech news</option>
@@ -3433,6 +3468,30 @@
             </div>
             <p style="font-size:11px;color:var(--txd);margin-top:8px">Custom topics are saved permanently and added to
               your rotation list.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RUNS LOG -->
+      <!-- TRENDING NOW CARD -->
+      <div class="card" id="trendingCard">
+        <div class="ch" style="display:flex;align-items:center;justify-content:space-between">
+          <span class="ct">🔥 Trending Now</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="trendLastFetch" style="font-size:11px;color:var(--txd)"></span>
+            <button class="btn bg" style="font-size:11px;padding:5px 12px" onclick="loadTrending(true)">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="cb" style="padding:0">
+          <!-- Source filter tabs -->
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--bd);padding:0 18px">
+            <button class="trend-tab act" id="trtab-all"    onclick="filterTrending('all',this)">All</button>
+            <button class="trend-tab"     id="trtab-hn"     onclick="filterTrending('hackernews',this)">HackerNews</button>
+            <button class="trend-tab"     id="trtab-reddit" onclick="filterTrending('reddit',this)">Reddit</button>
+            <button class="trend-tab"     id="trtab-devto"  onclick="filterTrending('devto',this)">Dev.to</button>
+          </div>
+          <div id="trendingList" style="padding:8px 0">
+            <div class="run-empty"><div class="run-empty-ico">🔄</div><span>Fetching trending topics...</span></div>
           </div>
         </div>
       </div>
@@ -4031,9 +4090,11 @@
         localStorage.setItem('gh_token', token);
         showDash(u.login);
         await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo(), loadBuiltinTopicsManifest()]);
+        loadTrending();
         toast('Connected as ' + u.login + ' ✓', 'ok');
         // Auto-refresh every 5 minutes
         setInterval(async () => { await loadRuns(); await loadStats(); }, 300000);
+        setInterval(loadTrending, 30 * 60 * 1000); // refresh trending every 30 min
       } catch (e) { toast('Failed: ' + e.message, 'err'); }
       finally { setLoad('conSpin', 'conTxt', false, 'Connect'); }
     }
@@ -4051,8 +4112,10 @@
         const u = await r.json();
         showDash(u.login);
         await Promise.all([loadRuns(), loadStats(), loadSchedule(), loadTopicsConfigFromRepo(), loadBuiltinTopicsManifest()]);
+        loadTrending();
         // Auto-refresh every 5 minutes
         setInterval(async () => { await loadRuns(); await loadStats(); }, 300000);
+        setInterval(loadTrending, 30 * 60 * 1000); // refresh trending every 30 min
       } catch (e) { localStorage.removeItem('gh_token'); token = ''; }
     }
 
@@ -4776,6 +4839,180 @@ async function runNow(options = {}) {
     }
 
     // ── STATS ─────────────────────────────────────────────────────────────────────
+    // ── TRENDING NOW ─────────────────────────────────────────────────────────────
+    let _allTrends = [];
+    let _trendFilter = 'all';
+
+    const TREND_RELEVANT_KW = [
+      'llm','ai','agent','rag','kubernetes','docker','devops','api','cloud','ml',
+      'gpt','model','engineer','system','architecture','database','python',
+      'microservice','platform','monitoring','security','vector','embedding',
+      'inference','typescript','rust','golang','react','nextjs','github',
+      'cicd','testing','performance','observability','streaming','kafka',
+    ];
+    function _trendRelevant(title) {
+      const l = (title || '').toLowerCase();
+      return TREND_RELEVANT_KW.some(k => l.includes(k));
+    }
+
+    async function _fetchHN(max = 12) {
+      try {
+        const r = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json', { cache: 'no-cache' });
+        const ids = (await r.json()).slice(0, 50);
+        const stories = [];
+        for (const id of ids) {
+          if (stories.length >= max) break;
+          try {
+            const s = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(r => r.json());
+            if (!s || s.type !== 'story') continue;
+            if (!_trendRelevant(s.title) || (s.score || 0) < 50) continue;
+            stories.push({ title: s.title, score: s.score || 0, url: s.url || `https://news.ycombinator.com/item?id=${id}`, source: 'hackernews', comments: s.descendants || 0 });
+          } catch { continue; }
+        }
+        return stories;
+      } catch { return []; }
+    }
+
+    async function _fetchReddit(max = 10) {
+      const subs = ['MachineLearning','LocalLLaMA','devops','softwarearchitecture','programming'];
+      const stories = [];
+      for (const sub of subs) {
+        try {
+          const r = await fetch(`https://www.reddit.com/r/${sub}/hot.json?limit=5`, {
+            headers: { 'User-Agent': 'LinkedInDashboard/1.0' }, cache: 'no-cache'
+          });
+          if (!r.ok) continue;
+          const posts = (await r.json()).data?.children || [];
+          for (const p of posts) {
+            const d = p.data || {};
+            if ((d.score || 0) > 100 && _trendRelevant(d.title)) {
+              stories.push({ title: d.title, score: d.score, url: `https://reddit.com${d.permalink}`, source: 'reddit', subreddit: sub, comments: d.num_comments || 0 });
+            }
+          }
+        } catch { continue; }
+      }
+      stories.sort((a, b) => b.score - a.score);
+      return stories.slice(0, max);
+    }
+
+    async function _fetchDevTo(max = 8) {
+      try {
+        const r = await fetch('https://dev.to/api/articles?top=7&per_page=20', { cache: 'no-cache' });
+        const articles = await r.json();
+        const relTags = new Set(['ai','machinelearning','devops','cloud','kubernetes','docker','programming','webdev','architecture','python','llm','opensource','security']);
+        const relevant = articles
+          .filter(a => (a.tag_list || []).some(t => relTags.has(t.toLowerCase())))
+          .map(a => ({ title: a.title, score: a.positive_reactions_count || 0, url: a.url || '', source: 'devto', tags: (a.tag_list || []).slice(0, 3) }));
+        relevant.sort((a, b) => b.score - a.score);
+        return relevant.slice(0, max);
+      } catch { return []; }
+    }
+
+    async function loadTrending(forceRefresh = false) {
+      // Cache for 30 min in sessionStorage
+      const CACHE_KEY = 'trending_cache';
+      const CACHE_TTL = 30 * 60 * 1000;
+      if (!forceRefresh) {
+        try {
+          const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+          if (cached && (Date.now() - cached.ts) < CACHE_TTL) {
+            _allTrends = cached.data;
+            renderTrending();
+            document.getElementById('trendLastFetch').textContent = 'cached ' + _trendAgo(cached.ts);
+            return;
+          }
+        } catch {}
+      }
+      document.getElementById('trendingList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">🔄</div><span>Fetching from HackerNews, Reddit &amp; Dev.to...</span></div>';
+      const [hn, rd, dv] = await Promise.all([_fetchHN(), _fetchReddit(), _fetchDevTo()]);
+      // Merge + deduplicate by title similarity
+      const all = [...hn, ...rd, ...dv];
+      const deduped = [];
+      for (const item of all) {
+        const dup = deduped.some(x => _trendSim(x.title, item.title) > 0.45);
+        if (!dup) deduped.push(item);
+      }
+      deduped.sort((a, b) => b.score - a.score);
+      _allTrends = deduped;
+      try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: _allTrends })); } catch {}
+      const el = document.getElementById('trendLastFetch');
+      if (el) el.textContent = 'updated just now';
+      renderTrending();
+    }
+
+    function _trendSim(a, b) {
+      const sw = new Set(['the','a','an','is','are','for','to','of','in','and','how','why','what','this']);
+      const wa = new Set(a.toLowerCase().split(/\W+/).filter(w => w.length > 2 && !sw.has(w)));
+      const wb = new Set(b.toLowerCase().split(/\W+/).filter(w => w.length > 2 && !sw.has(w)));
+      if (!wa.size || !wb.size) return 0;
+      const inter = [...wa].filter(w => wb.has(w)).length;
+      return inter / (wa.size + wb.size - inter);
+    }
+
+    function _trendAgo(ts) {
+      const mins = Math.round((Date.now() - ts) / 60000);
+      return mins < 2 ? 'just now' : mins + 'm ago';
+    }
+
+    function filterTrending(src, btn) {
+      _trendFilter = src;
+      document.querySelectorAll('.trend-tab').forEach(b => b.classList.remove('act'));
+      btn.classList.add('act');
+      renderTrending();
+    }
+
+    function renderTrending() {
+      const el = document.getElementById('trendingList');
+      if (!el) return;
+      const items = _trendFilter === 'all' ? _allTrends : _allTrends.filter(t => t.source === _trendFilter);
+      if (!items.length) {
+        el.innerHTML = '<div class="run-empty"><div class="run-empty-ico">📭</div><span>No trending topics found for this source</span></div>';
+        return;
+      }
+      const srcLabel = { hackernews: 'HN', reddit: 'Reddit', devto: 'Dev.to' };
+      const srcCls   = { hackernews: 'trend-src-hn', reddit: 'trend-src-reddit', devto: 'trend-src-devto' };
+      el.innerHTML = items.slice(0, 20).map((t, i) => {
+        const meta = [];
+        if (t.score)      meta.push(`<span class="trend-score">▲ ${t.score}</span>`);
+        if (t.comments)   meta.push(`${t.comments} comments`);
+        if (t.subreddit)  meta.push(`r/${t.subreddit}`);
+        if (t.tags?.length) meta.push(t.tags.slice(0,2).map(tg=>`#${tg}`).join(' '));
+        const encoded = encodeURIComponent(JSON.stringify({ title: t.title, source: t.source, url: t.url }));
+        return `<div class="trend-item" onclick="openTrendLink('${t.url.replace(/'/g,"&#39;")}')">
+  <div class="trend-src ${srcCls[t.source] || ''}"> ${srcLabel[t.source] || t.source}</div>
+  <div class="trend-body">
+    <div class="trend-title">${_escHtml(t.title)}</div>
+    <div class="trend-meta">${meta.join('<span style="color:var(--txd)"> · </span>')}</div>
+  </div>
+  <button class="trend-post-btn" onclick="postTrendingItem(event,'${_escAttr(t.title)}')" title="Post about this topic">▶ Post</button>
+</div>`;
+      }).join('');
+    }
+
+    function _escHtml(s) {
+      return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function _escAttr(s) {
+      return (s||'').replace(/'/g,"&#39;").replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function openTrendLink(url) {
+      if (url) window.open(url, '_blank', 'noopener');
+    }
+
+    async function postTrendingItem(evt, title) {
+      evt.stopPropagation();
+      if (!token) { toast('Connect GitHub first', 'err'); return; }
+      if (!confirm(`Post about "${title}" using Trending mode?`)) return;
+      // Set mode to trending and trigger post
+      const sel = document.getElementById('postModeSel');
+      if (sel) { sel.value = 'trending'; setPostMode('trending'); }
+      toast('🔥 Triggering trending post…', 'info');
+      await handlePost();
+    }
+
+    // ── END TRENDING NOW ─────────────────────────────────────────────────────────
+
     async function loadStats() {
       try {
         let runs = allRuns;
