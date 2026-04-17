@@ -70,7 +70,11 @@
     {
       "id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
       "name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity"
+    },
+    {
+      "id": "llm-agents",
+      "name": "LLM Agents"
     }
   ],
-  "updated_at": "2026-04-08T20:35:04.141Z"
+  "updated_at": "2026-04-17T21:49:45.503Z"
 }
