@@ -1,18 +1,10 @@
 [
   {
-    "timestamp": "2026-04-17T19:33:57.571912",
-    "style_idx": 23,
-    "style_name": "Viral Poster",
-    "topic_id": "trend-agentic-coding",
-    "topic_name": "Most engineers believe large language models like Qwen",
-    "diagram_type": "Viral Poster"
-  },
-  {
-    "timestamp": "2026-04-17T19:50:22.112909",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-android-cli-speed",
-    "topic_name": "Faster Android Builds",
-    "diagram_type": "Viral Poster"
+    "timestamp": "2026-04-17T21:46:08.259528",
+    "style_idx": 20,
+    "style_name": "Dark Column Flow",
+    "topic_id": "microsoft-ai-ecosystem",
+    "topic_name": "1\ufe0f\u20e3 Models are the foundation",
+    "diagram_type": "Ecosystem Breakdown"
   }
 ]
