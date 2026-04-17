@@ -3562,7 +3562,7 @@
     // ── TIMEZONE HELPERS ──────────────────────────────────────────────────────────
     function tzNow() { return new Date(new Date().toLocaleString('en-US', { timeZone: userTZ })); }
     function tzFmt(d, opts) { return new Date(d).toLocaleString('en-US', { timeZone: userTZ, ...opts }); }
-    function tzLabel() { const off = -new Date().getTimezoneOffset(); const h = Math.floor(Math.abs(off) / 60), m = Math.abs(off) % 60; return userTZ.split('/').pop().replace(/_/g, ' ') + ' (UTC' + (off >= 0 ? '+' : '-') + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ')'; }
+    function tzLabel() { const off = tzOffsetMins(); const h = Math.floor(Math.abs(off) / 60), m = Math.abs(off) % 60; return userTZ.split('/').pop().replace(/_/g, ' ') + ' (UTC' + (off >= 0 ? '+' : '-') + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ')'; }
     function tzOffsetMins() {
       // Get offset of userTZ from UTC in minutes (positive = ahead)
       const now = new Date();
@@ -4112,12 +4112,14 @@
 
     function localTimeToUtc(hhmm, tz) {
       const [h, m] = (hhmm || '09:30').split(':').map(Number);
-      const nowUtc = new Date();
-      const localNow = new Date(nowUtc.toLocaleString('en-US', { timeZone: tz }));
-      localNow.setHours(h, m, 0, 0);
-      const utcMs = localNow.getTime() - tzOffsetMins() * 60000;
-      const utcDate = new Date(utcMs);
-      return `${String(utcDate.getUTCHours()).padStart(2, '0')}:${String(utcDate.getUTCMinutes()).padStart(2, '0')}`;
+      const now = new Date();
+      // Compute the UTC offset of `tz` at the current moment (DST-aware, browser-tz agnostic)
+      const utcStr = now.toLocaleString('en-US', { timeZone: 'UTC' });
+      const tzStr = now.toLocaleString('en-US', { timeZone: tz });
+      const offsetMins = Math.round((new Date(tzStr) - new Date(utcStr)) / 60000);
+      // UTC = local - offset (wrap around midnight)
+      const totalMins = ((h * 60 + m - offsetMins) % (24 * 60) + 24 * 60) % (24 * 60);
+      return `${String(Math.floor(totalMins / 60)).padStart(2, '0')}:${String(totalMins % 60).padStart(2, '0')}`;
     }
 
     async function downloadArtifactZipBuffer(artifactId) {
@@ -4528,16 +4530,22 @@ async function runNow(options = {}) {
       const title = (r.display_title || r.name || '').toLowerCase();
       if (title.includes('dry-run') || title.includes('dry run')) return true;
 
-      // Always hide skipped runs
+      // Always hide skipped conclusions
       if (r.conclusion === 'skipped') return true;
 
       if (r.event === 'schedule') {
+        // Never show in-progress / queued cron runs
         if (r.status === 'in_progress' || r.status === 'queued') return true;
-        // Hide cancelled scheduled runs (timeout kills, heartbeat cancels)
+        // Always hide cancelled scheduled runs (timeout kills, heartbeat cancels)
         if (r.conclusion === 'cancelled') return true;
-        // Keep only scheduled runs that have a confirmed post marker.
-        if (r.conclusion === 'success' && _enrichmentDone && !_topicCache[r.id]) return true;
-
+        // For successful scheduled runs: only show after enrichment confirms "✅ Posted ·"
+        // If enrichment hasn't fetched this run yet (undefined) → hide it (loading)
+        // If enrichment fetched and found null (no post step) → it's a cron heartbeat → hide
+        if (r.conclusion === 'success') {
+          const enriched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
+          return !enriched || !_topicCache[r.id];
+        }
+        // failure = real post attempt that failed → show
         return false;
       }
 
@@ -4546,8 +4554,8 @@ async function runNow(options = {}) {
         const durMs = r.updated_at ? new Date(r.updated_at) - new Date(r.created_at) : 0;
         return durMs < 15000;
       }
-      // Manual success runs are kept unless enrichment explicitly says no post step.
-      if (r.event === 'workflow_dispatch' && r.conclusion === 'success' && _enrichmentDone) {
+      // Manual success runs: hide if enrichment confirmed no post step
+      if (r.event === 'workflow_dispatch' && r.conclusion === 'success') {
         const fetched = Object.prototype.hasOwnProperty.call(_topicCache, r.id);
         if (fetched && !_topicCache[r.id]) return true;
       }
