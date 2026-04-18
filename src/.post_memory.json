@@ -278,5 +278,12 @@
     "topic_name": "Agentic AI Decision Tree",
     "category": "topic",
     "text": "Most engineers think building agents is the hard part \ud83e\udd14. But I was wrong - the hard part is deciding when you don't need them.\n\nIf the task is structured, you can use a simple approach.\n\nWhen the task requires open-ended reasoning, then you need to consider more options \ud83c\udf10.\n\nYou should use RAG if knowledge retrieval is enough to solve the problem.\n\n|                         -> Complexity\n|                         -> Decision\nIf actions matter, then consider using an agent \ud83e\udd16.\nStart with a single-agent approach before moving to multi-agent to avoid unnecessary complexity.\n\nSo what's the simplest way to decide?\nUse the simplest architecture that works, whether it's traditional software, ML, or agents \ud83d\udcc8.\n\n\ud83d\udcac What's your approach:\nStructured task with traditional software\nOpen-ended task with RAG\nAction-oriented task with a single agent\nComplex task with multi-agents\nTraditional approach with ML \ud83e\udd14 #ScaleEngineering #SoftwareArchitecture #SoftwareArchitecture #SoftwareArchitecture #SystemDesign"
+  },
+  {
+    "timestamp": "2026-04-18T18:59:42.730396",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust Architecture",
+    "category": "topic",
+    "text": "Most engineers think Zero Trust is just about firewalls \ud83d\udeab.\nBut I was wrong - it's about always verifying identities and access \ud83e\udd14.\n\nZero Trust is now a business requirement, and it's time to get it right \ud83d\udcbc.\n\n1\ufe0f\u20e3 Identity is the foundation of Zero\n\n2\ufe0f\u20e3 Policy Engine makes access decisions \ud83e\udd16\n\n3\ufe0f\u20e3 Network security relies on\n\n4\ufe0f\u20e3 Device posture checks prevent breaches \ud83d\udcca\n\n5\ufe0f\u20e3 Data protection is the final line\n\nv               v               v\nI finally understood that Zero Trust is not just a concept, but a practical implementation \ud83c\udf1f.\n\nIt took me years to learn that identity-first approach is key \ud83d\udd11.\n\nMicrosegmentation and continuous verification are also crucial \ud83d\udd52.\n\n\ud83d\udcac What's the most challenging part of Zero Trust for you?\nIdP integration  |  Policy Engine customization  |  Microsegmentation  |  Device posture checks  |  Data encryption #SystemDesign #SystemDesign #ScaleEngineering #SystemDesign #SystemDesign"
   }
 ]

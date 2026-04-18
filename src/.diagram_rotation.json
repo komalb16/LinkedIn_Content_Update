@@ -1,10 +1,10 @@
 [
   {
-    "timestamp": "2026-04-18T02:06:57.815657",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "agentic-ai-decision-tree",
-    "topic_name": "Agentic AI Decision Tree",
-    "diagram_type": "Decision Tree"
+    "timestamp": "2026-04-18T18:59:37.569965",
+    "style_idx": 2,
+    "style_name": "Pyramid/Funnel",
+    "topic_id": "zero-trust",
+    "topic_name": "Most engineers think Zero Trust is just about firewall",
+    "diagram_type": "Architecture Diagram"
   }
 ]

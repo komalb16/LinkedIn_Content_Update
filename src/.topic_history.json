@@ -824,5 +824,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-18T18:59:42.731228",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust Architecture",
+    "category": "Security",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 92,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 92,
+        "raw_score": 92,
+        "similarity": 0.0282,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 84,
+        "raw_score": 84,
+        "similarity": 0.0268,
+        "penalty": 0
+      }
+    ]
   }
 ]
