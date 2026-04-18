@@ -1,10 +1,10 @@
 [
   {
-    "timestamp": "2026-04-17T21:46:08.259528",
-    "style_idx": 20,
-    "style_name": "Dark Column Flow",
-    "topic_id": "microsoft-ai-ecosystem",
-    "topic_name": "1\ufe0f\u20e3 Models are the foundation",
-    "diagram_type": "Ecosystem Breakdown"
+    "timestamp": "2026-04-18T02:06:57.815657",
+    "style_idx": 23,
+    "style_name": "Info-Frame Card",
+    "topic_id": "agentic-ai-decision-tree",
+    "topic_name": "Agentic AI Decision Tree",
+    "diagram_type": "Decision Tree"
   }
 ]

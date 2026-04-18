@@ -271,5 +271,12 @@
     "topic_name": "Microsoft AI Ecosystem Map",
     "category": "topic",
     "text": "Nobody talks about the hidden connections in Microsoft's AI ecosystem.\n\nI've seen teams use one tool and miss the stack-level leverage that comes from understanding how the layers connect \ud83e\udd16.\n\nHere's the reality:\n\n1\ufe0f\u20e3 Models are the foundation\n\n2\ufe0f\u20e3 Agent frameworks build on top\n\n3\ufe0f\u20e3 Security governs the entire stack\n\nFoundation | Models \u2014 chips\nBuild/Orchestrate | Agent + Dev Layer \u2014 columns\nThe real win is understanding how these layers connect and where teams usually break integration \ud83d\ude80. To get the most out of Microsoft's AI ecosystem, start narrow and then expand stack coverage \ud83d\udcc8.\n\nI've found that teams that focus on one tool often overlook the bigger picture \ud83c\udf10. By understanding the connections between models, agent frameworks, and security controls, you can unlock the full potential of the ecosystem \ud83d\udd13.\n\n\ud83d\udcac What's your approach to integrating Microsoft's AI tools: start with models, build with agent frameworks, or focus on security governance? #DistributedSystems #SoftwareArchitecture #DistributedSystems #ScaleEngineering #DistributedSystems"
+  },
+  {
+    "timestamp": "2026-04-18T02:07:03.329983",
+    "topic_id": "agentic-ai-decision-tree",
+    "topic_name": "Agentic AI Decision Tree",
+    "category": "topic",
+    "text": "Most engineers think building agents is the hard part \ud83e\udd14. But I was wrong - the hard part is deciding when you don't need them.\n\nIf the task is structured, you can use a simple approach.\n\nWhen the task requires open-ended reasoning, then you need to consider more options \ud83c\udf10.\n\nYou should use RAG if knowledge retrieval is enough to solve the problem.\n\n|                         -> Complexity\n|                         -> Decision\nIf actions matter, then consider using an agent \ud83e\udd16.\nStart with a single-agent approach before moving to multi-agent to avoid unnecessary complexity.\n\nSo what's the simplest way to decide?\nUse the simplest architecture that works, whether it's traditional software, ML, or agents \ud83d\udcc8.\n\n\ud83d\udcac What's your approach:\nStructured task with traditional software\nOpen-ended task with RAG\nAction-oriented task with a single agent\nComplex task with multi-agents\nTraditional approach with ML \ud83e\udd14 #ScaleEngineering #SoftwareArchitecture #SoftwareArchitecture #SoftwareArchitecture #SystemDesign"
   }
 ]
