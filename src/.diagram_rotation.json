@@ -1,10 +1,7 @@
-[
-  {
-    "timestamp": "2026-04-19T06:28:35.961310",
-    "style_idx": 2,
-    "style_name": "Pyramid/Funnel",
-    "topic_id": "trend-browser-tab-closure",
-    "topic_name": "Top Strategy",
-    "diagram_type": "Engineering Flow"
-  }
-]
+{
+  "rotation_index": 4,
+  "style_history": [
+    2,
+    3
+  ]
+}
