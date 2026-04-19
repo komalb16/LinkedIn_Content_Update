@@ -22,6 +22,9 @@ import random
 import re
 import io
 import json
+import base64
+import zlib
+import requests
 from datetime import datetime
 from pathlib import Path
 
@@ -3444,7 +3447,27 @@ def _style_dashboard(topic_id, topic_name, C, structure=None):
             svg += (f'<text x="{cx_+20}" y="{bar_y-12}" fill="{rgba("#64748B",0.85)}" '
                     f'font-size="9.5" font-family="{FONT}">{xe(clamp(desc, 24))}</text>')
 
-    return _wrap(svg, W, H, topic_name, "Dashboard", accent, bg_top, bg_bot)
+def generate_external_diagram(source_text: str, diag_type: str = "mermaid", output_format: str = "png") -> str:
+    """
+    Renders a diagram using the Kroki.io internet API.
+    Supported types: mermaid, d2, graphviz, plantuml, etc.
+    Returns: Binary content (bytes) or None on failure.
+    """
+    try:
+        # Kroki encoding: UTF-8 -> zlib compress -> base64 urlsafe
+        payload = base64.urlsafe_b64encode(zlib.compress(source_text.encode('utf-8'), 9)).decode('ascii')
+        url = f"https://kroki.io/{diag_type}/{output_format}/{payload}"
+        
+        response = requests.get(url, timeout=15)
+        if response.status_code == 200:
+            return response.content
+        else:
+            log.warning(f"Kroki API failed ({response.status_code}): {response.text[:100]}")
+    except Exception as e:
+        log.error(f"Error calling Kroki API: {e}")
+    return None
+
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -3979,6 +4002,23 @@ class DiagramGenerator:
     def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None):
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
+
+        # --- Kroki Internet Rendering Fallback ---
+        # Fulfills user request: "get diagrams from internet"
+        if structure and structure.get("mermaid_code"):
+            mermaid_code = structure["mermaid_code"]
+            log.info(f"Rendering professional architecture diagram via Kroki (Internet)...")
+            k_type = structure.get("diagram_style", "mermaid")
+            
+            img_data = generate_external_diagram(mermaid_code, diag_type=k_type, output_format="png")
+            if img_data:
+                png_filename = filename.replace(".svg", ".png")
+                with open(png_filename, "wb") as f:
+                    f.write(img_data)
+                log.info(f"External diagram saved: {png_filename}")
+                return png_filename
+            else:
+                log.warning("Kroki rendering failed, falling back to local styles.")
         
         # Check for existing diagram (SVG, PNG, or GIF)
         existing_svg = f"{OUTPUT_DIR}/{topic_id}.svg"

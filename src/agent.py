@@ -2654,7 +2654,6 @@ def _rank_candidates(topic, candidates, structure, diagram_type, recent_posts, r
     ranked.sort(key=lambda r: (r["score"], r["raw_score"]), reverse=True)
     return ranked
 
-
 def _extract_poster_title(topic_name: str, post_text: str, mode: str) -> str:
     """
     Pick a clean, short, authoritative headline for the Viral Poster diagram.
@@ -2663,12 +2662,14 @@ def _extract_poster_title(topic_name: str, post_text: str, mode: str) -> str:
         return (topic_name or "Engineering Insight")[:32]
 
     # Priority 1: Check for very short, bolded lines at the start (often a better title than topic_name)
-    lines = post_text.splitlines()
+    lines = (post_text or "").splitlines()
     for line in lines[:3]:
         m = re.match(r"^\*\*(.+?)\*\*", line.strip())
         if m:
             t = m.group(1).strip(" .*:")
             if 8 <= len(t) <= 35:
+                # Filter structural nonsense
+                if any(p in t.lower() for p in ["problem", "concept", "works"]): continue
                 return t[:32]
 
     # Priority 2: Extract a specific model/product name if it's a news/trending item
@@ -2679,12 +2680,39 @@ def _extract_poster_title(topic_name: str, post_text: str, mode: str) -> str:
             if re.search(r"[0-9.\-]", cand) or cand.isupper():
                 return cand[:32]
 
-    # Priority 3: Clean topic name
-    clean = re.sub(r"^(AI\s+|Tech\s+|Weekly[:\s]+|Breaking[:\s]+|Topic[:\s]+)", "", topic_name or "", flags=re.I).strip()
-    if len(clean) > 4:
-        return clean.title()[:32]
-    
+    # Priority 3: Contextual search for tech keywords
+    tech_keywords = ["Pipeline", "System", "Architecture", "Detection", "Workflow", "Service", "Engine", "Platform", "Model", "Node"]
+    for kw in tech_keywords:
+        if kw.lower() in post_text.lower():
+            m = re.search(r"(\w+)\s+" + kw, post_text, re.I)
+            if m:
+                return f"{m.group(1).title()} {kw}"[:32]
+            return f"Technical {kw}"[:32]
+
+    # Final fallback
     return (topic_name or "Production Insight")[:32]
+
+
+def _build_mermaid_code(title, sections):
+    """
+    Translates sections into a valid Mermaid flowchart for Kroki.io rendering.
+    """
+    mermaid = f"graph TD\n"
+    mermaid += f'  Title["{title}"]\n'
+    mermaid += f'  Title --- Node1\n'
+    
+    for i, sec in enumerate(sections):
+        label = sec["label"].replace('"', "'").strip()
+        # Create a node
+        mermaid += f'  Node{i+1}["{label}"]\n'
+        # Connect to next
+        if i < len(sections) - 1:
+            mermaid += f'  Node{i+1} --> Node{i+2}\n'
+            
+    # Styling for professional engineering look
+    mermaid += "  classDef default fill:#111,stroke:#3b82f6,stroke-width:2px,color:#fff,font-family:Inter,font-size:14px;\n"
+    mermaid += "  class Title fill:#1e293b,stroke:#60a5fa,stroke-width:4px,color:#fff,font-size:18px,font-weight:bold;\n"
+    return mermaid
 
 
 
@@ -2935,10 +2963,19 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
             {"id": 5, "label": "Key Takeaway",    "desc": ""},
         ]
 
+    # If this is a technical topic, prepare Mermaid code for Kroki (Internet Diagram)
+    mermaid_code = ""
+    title = _extract_poster_title(topic_name, post_text, mode)
+    is_tech = any(kw in (topic_name or "").lower() for kw in ["architecture", "system", "design", "pipeline", "code", "ai", "detection"])
+    if is_tech and len(sections) >= 3:
+        mermaid_code = _build_mermaid_code(title, sections)
+
     return {
         "style": 23,
         "subtitle": _get_post_subtitle(mode),
         "sections": sections[:6],
+        "mermaid_code": mermaid_code,
+        "diagram_style": "mermaid" if mermaid_code else None
     }
 
 
