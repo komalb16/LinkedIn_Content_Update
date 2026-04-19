@@ -313,5 +313,12 @@
     "topic_name": "Tab Closure Strategies",
     "category": "topic",
     "text": "I recently heard that 'too many open tabs is a productivity killer' \ud83d\udeab.\n\n1\ufe0f\u20e3 Tab explosion hurts focus\n\n2\ufe0f\u20e3 Prioritizing tabs is key\n\n3\ufe0f\u20e3 Organize tabs to reduce context switching\n\n4\ufe0f\u20e3 Implement a tab management strategy \ud83d\udcca\n\n5\ufe0f\u20e3 Avoid overloading a single window \ud83d\uddd1\ufe0f\n6\ufe0f\u20e3 Use a flow-based approach to prioritize\n\n\ud83d\udcac Which tab management strategy do you use?"
+  },
+  {
+    "timestamp": "2026-04-19T03:26:48.767619",
+    "topic_id": "trend-ai-detection-techniques",
+    "topic_name": "Authentic Code Submission",
+    "category": "topic",
+    "text": "Only 1 in 5 educators can detect AI-generated code in student assignments \ud83e\udd16.\n\nThis statistic highlights the limitations of relying on plagiarism detectors and the importance of manual code review \ud83d\udcca.\n\nThe Problem is that many educators rely solely on automated tools to detect plagiarism, which can lead to false negatives \ud83d\udeab.\n\nBest Practices in production systems involve a combination of automated tools and manual review to ensure authenticity \ud83d\udcdd.\n\n\ud83d\udcac What is the most critical aspect of detecting AI-generated code:\nThe Problem\nCore Concept\nHow It Works\nBest Practices\nCommon Mistakes\nKey Takeaway"
   }
 ]
