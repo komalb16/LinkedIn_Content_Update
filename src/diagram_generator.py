@@ -3994,7 +3994,7 @@ def _record_rotation(style_idx: int, topic_id: str, topic_name: str, diagram_typ
 #  Internet Search Fallback (Bing Images scraper)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _fetch_internet_image(topic_name: str) -> bytes:
+def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
     """
     Search multiple trusted technical platforms for a diagram matching the topic.
     Collects candidates from all sources, scores them by platform + image size,
@@ -4018,6 +4018,23 @@ def _fetch_internet_image(topic_name: str) -> bytes:
         )
     }
 
+    # Extract additional keywords from post_text for better alignment
+    extra_keywords = ""
+    if post_text:
+        # Get top 2-3 longest words from the first few lines of post_text
+        first_lines = "\n".join(post_text.splitlines()[:5])
+        words = re.findall(r'\b[A-Za-z]{6,}\b', first_lines)
+        if words:
+            # Deduplicate and take top 2
+            seen = set()
+            picked = []
+            for w in words:
+                if w.lower() not in seen:
+                    seen.add(w.lower())
+                    picked.append(w)
+                if len(picked) >= 2: break
+            extra_keywords = " ".join(picked)
+
     # Source-priority mapping: a substring of the domain -> score
     SOURCE_PRIORITY = {
         "bytebytego.com":       5,
@@ -4033,11 +4050,12 @@ def _fetch_internet_image(topic_name: str) -> bytes:
     }
 
     # Each search query targets a different angle / platform emphasis
+    base_query = f"{topic_name} {extra_keywords}".strip()
     SEARCH_QUERIES = [
-        f"{topic_name} architecture diagram bytebytego",
-        f"{topic_name} system design diagram infographic",
-        f"{topic_name} engineering diagram medium dev.to",
-        f"site:bytebytego.com {topic_name}",
+        f"{base_query} diagram architecture bytebytego",
+        f"{base_query} system design diagram infographic",
+        f"{base_query} engineering diagram medium dev.to",
+        f"site:bytebytego.com {base_query}",
     ]
 
     def _priority(url: str) -> int:
@@ -4135,13 +4153,13 @@ class DiagramGenerator:
         Path(OUTPUT_DIR).mkdir(exist_ok=True)
         log.info("Diagram output dir: " + OUTPUT_DIR + "/")
 
-    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None):
+    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None, post_text=""):
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
 
         # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
         # Fetches real diagrams from ByteByteGo, Medium, Dev.to, etc.
-        img_bytes, img_source_url = _fetch_internet_image(topic_name or topic_id)
+        img_bytes, img_source_url = _fetch_internet_image(topic_name or topic_id, post_text=post_text)
         if img_bytes:
             png_filename = filename.replace(".svg", ".png")
             # Apply branding
