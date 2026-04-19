@@ -4076,6 +4076,7 @@ def _fetch_internet_image(topic_name: str) -> bytes:
 
     # 3. Download candidates; track best by (priority, file_size)
     best_bytes = None
+    best_url = ""
     best_score = (0, 0)   # (priority, size)
 
     for img_url, priority in candidates[:20]:
@@ -4090,6 +4091,7 @@ def _fetch_internet_image(topic_name: str) -> bytes:
                 if score > best_score:
                     best_score = score
                     best_bytes = img_r.content
+                    best_url = img_url
                     log.info(
                         f"New best candidate (priority={priority}, size={size}): {img_url}"
                     )
@@ -4104,7 +4106,7 @@ def _fetch_internet_image(topic_name: str) -> bytes:
         log.info(f"Selected best internet diagram — score={best_score}.")
     else:
         log.warning("No valid internet diagram found across all platforms.")
-    return best_bytes
+    return best_bytes, best_url
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -4122,7 +4124,7 @@ class DiagramGenerator:
 
         # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
         # Fetches real diagrams from ByteByteGo, Medium, Dev.to, etc.
-        img_bytes = _fetch_internet_image(topic_name or topic_id)
+        img_bytes, img_source_url = _fetch_internet_image(topic_name or topic_id)
         if img_bytes:
             png_filename = filename.replace(".svg", ".png")
             # Apply branding
@@ -4155,23 +4157,45 @@ class DiagramGenerator:
                 draw.rectangle([0, 0, width, ty + th + 20], fill=(15, 23, 42, 220))
                 draw.text((tx, ty), title_text, font=font, fill=(56, 189, 248))
 
-                copy_text = "© Komal Batra"
-                c_font_size = max(10, int(width * 0.02))
+                # --- Attribution footer bar (proper IP practice) ---
+                # We keep the source's logo intact and add a footer strip below the image
+                # so the source gets credit and Komal is credited as curator.
+                footer_h = max(36, int(height * 0.06))
+                footer_img = Image.new("RGB", (width, height + footer_h), (15, 23, 42))
+                footer_img.paste(img, (0, 0))
+                draw2 = ImageDraw.Draw(footer_img)
+
+                foot_font_size = max(11, int(width * 0.022))
                 try:
-                    c_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", c_font_size)
+                    foot_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", foot_font_size)
+                    foot_font_bold = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", foot_font_size)
                 except Exception:
-                    c_font = ImageFont.load_default()
+                    foot_font = foot_font_bold = ImageFont.load_default()
 
-                left, top, right, bottom = draw.textbbox((0, 0), copy_text, font=c_font)
-                cw, ch = right - left, bottom - top
-                cx = width - cw - int(width * 0.05)
-                cy = height - ch - int(height * 0.03)
+                # Left side: "Curated by Komal Batra"
+                curator_text = "✦  Curated by Komal Batra"
+                draw2.text(
+                    (int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
+                    curator_text, font=foot_font_bold, fill=(56, 189, 248)
+                )
 
-                draw.text((cx + 2, cy + 2), copy_text, font=c_font, fill=(0, 0, 0, 180))
-                draw.text((cx, cy), copy_text, font=c_font, fill=(248, 250, 252, 220))
+                # Right side: "Source: [domain]" — extract domain from the downloaded URL
+                try:
+                    from urllib.parse import urlparse
+                    source_domain = urlparse(img_source_url).netloc.replace("www.", "")
+                except Exception:
+                    source_domain = "internet"
+                source_text = f"Source: {source_domain}"
+                sb = draw2.textbbox((0, 0), source_text, font=foot_font)
+                sw = sb[2] - sb[0]
+                draw2.text(
+                    (width - sw - int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
+                    source_text, font=foot_font, fill=(148, 163, 184)
+                )
 
-                img.save(png_filename)
-                log.info(f"Internet diagram saved & branded: {png_filename} (Topic: {title_text})")
+                footer_img.save(png_filename)
+                log.info(f"Internet diagram saved with attribution footer: {png_filename} (Topic: {title_text})")
+
             except Exception as e:
                 log.warning(f"Branding failed for internet image ({e}), saving raw.")
                 with open(png_filename, "wb") as f:
