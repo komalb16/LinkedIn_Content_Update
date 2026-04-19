@@ -2692,18 +2692,30 @@ def _extract_poster_title(topic_name: str, post_text: str, mode: str) -> str:
                 return cand[:32]
 
     # Priority 3: Contextual search for technical Subject Actors (e.g. "RAG Pipeline")
-    tech_keywords = ["Pipeline", "System", "Architecture", "Detection", "Workflow", "Service", "Engine", "Platform", "Model", "Node", "RAG", "LLM", "Agent"]
+    tech_keywords = [
+        "Pipeline", "System", "Architecture", "Detection", "Workflow", "Service", 
+        "Engine", "Platform", "Model", "Node", "RAG", "LLM", "Agent",
+        "Railway", "Infrastructure", "Traffic", "Protocol", "Strategy", "Framework", "Stack", "Process"
+    ]
     for kw in tech_keywords:
         # Switch to strict word boundary matching to avoid "Engine" in "Engineers"
-        pattern = r"\b" + kw + r"\b"
+        pattern = r"\b" + re.escape(kw) + r"\b"
         if re.search(pattern, post_text, re.I):
-            # Find the word BEFORE it
+            # Try to find the word BEFORE it first
             m = re.search(r"(\w+)\s+" + re.escape(kw), post_text, re.I)
             if m:
                 actor = m.group(1).title()
                 # Blacklist generic descriptors
-                if actor.upper() not in {"MOST", "THE", "OUR", "THIS", "STAFF", "YOUR"}:
+                if actor.upper() not in {"MOST", "THE", "OUR", "THIS", "STAFF", "YOUR", "RELIABLE"}:
                     return f"{actor} {kw}"[:32]
+            
+            # If no good actor, try to see if topic_name has a better word
+            if topic_name and kw.lower() in topic_name.lower():
+                # Extract first word of topic name if it's meaningful
+                t_parts = topic_name.split()
+                if t_parts and len(t_parts[0]) > 3:
+                     return f"{t_parts[0]} {kw}"[:32]
+            
             return f"Professional {kw}"[:32]
 
     # Final fallback
@@ -2875,162 +2887,99 @@ def _infer_diagram_type_from_post(post_text, fallback_type):
 def _build_viral_poster_structure(post_text, topic_name, mode):
     """
     Build sections for the viral poster from actual post content.
-    Extracts numbered points, or falls back to key sentences.
+    Extracts UNIQUE, non-redundant take-aways. Ignore the 'Hook'.
     """
     lines = (post_text or "").splitlines()
     sections = []
     
-    # Mandatory Similarity Protection:
-    # Identify snippets already used in the post body (especially numbered bullets)
+    # 1. IDENTIFY THE HOOK (First 2-3 sentences / 300 chars)
+    # We explicitly EXCLUDE this text from the diagram to avoid redundancy.
+    hook_text = (post_text or "")[:350].lower()
+    
+    # 2. IDENTIFY BULLETS 
     post_bullets = []
     for line in lines:
         bm = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$", line.strip())
         if bm: post_bullets.append(bm.group(1).lower().strip())
 
-    def is_too_similar(cand):
+    def is_too_redundant(cand):
         c = cand.lower().strip()
+        if not c: return True
+        # If it's in the HOOK, it's redundant nonsense for a diagram
+        if c in hook_text or (len(c) > 20 and hook_text.find(c) != -1):
+            return True
+        # If it's already a bullet, we might use it ONLY if we summarize later
         for pb in post_bullets:
             if len(c) > 10 and (c in pb or pb in c): return True
         return False
 
+    def clean_label(label):
+        # Truncate and summarize to a punchy label
+        label = re.sub(r"\s*[—:–]\s*.*$", "", label).strip(" .*")
+        return label[:60].strip()
+
     # Pass 1: look for explicit key-takeaway bolding (**Takeaway**)
     for line in lines:
-        stripped = line.strip()
-        m = re.match(r"^\*\*(.+?)\*\*", stripped)
+        m = re.match(r"^\*\*(.+?)\*\*", line.strip())
         if m:
-            label = m.group(1).strip(" .*:")
-            if 5 <= len(label) <= 120 and not is_too_similar(label):
+            label = clean_label(m.group(1))
+            if 5 <= len(label) <= 120 and not is_too_redundant(label):
                 sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
-
         if len(sections) >= 6: break
 
-    # Pass 2: look for numbered list items ONLY if we have low variety
+    # Pass 2: Numbered items (only if we need more variety)
     if len(sections) < 3:
         for line in lines:
             m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$", line.strip())
             if m:
-                # IMPORTANT: For diagrams, we often want a SUMMARIZED version, not the exact bullet.
-                # If we use the exact bullet, the user sees it as "redundant nonsense".
-                # We will only use them if we have absolutely nothing else.
-                label = m.group(1).strip()
-                label = re.sub(r"\s*[—:–]\s*.*$", "", label).strip(" .")
-                if len(label) > 6 and not is_too_similar(label):
+                label = clean_label(m.group(1))
+                if len(label) > 6 and not is_too_redundant(label):
                     sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
             if len(sections) >= 6: break
 
-    # Pass 1: look for explicit key-takeaway bolding (**Takeaway**)
-    for line in lines:
-        stripped = line.strip()
-        # Prefer bolded headers if they exist
-        m = re.match(r"^\*\*(.+?)\*\*", stripped)
-        if m:
-            label = m.group(1).strip(" .*:")
-            if 5 <= len(label) <= 60:
-                sections.append({
-                    "id": len(sections) + 1,
-                    "label": label[:120],
-                    "desc": "",
-                })
-
-        if len(sections) >= 6:
-            break
-
-    # Pass 2: look for explicit numbered items (1️⃣ or 1.)
-    # BUT EXCLUDE them if we already have sections (to avoid redundancy)
-    if not sections:
-        for line in lines:
-            stripped = line.strip()
-            # Match number emoji or "1. " style
-            m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$", stripped)
-            if m:
-                label = m.group(1).strip()
-                label = re.sub(r"\s*[—:–]\s*.*$", "", label).strip(" .")
-                label = re.sub(r"\*+", "", label).strip()
-                if len(label) > 6:
-                    sections.append({
-                        "id": len(sections) + 1,
-                        "label": label[:120],
-                        "desc": "",
-                    })
-
-            if len(sections) >= 6:
-                break
-
-
-    # Pass 2: look for bold-style headers (**text**)
-    # Deduplicate — remove sections whose labels are substrings of each other
-    deduped = []
-    seen = set()
-    for sec in sections:
-        normalized = re.sub(r"\s+", " ", sec["label"].lower().strip())
-        if normalized not in seen:
-            seen.add(normalized)
-            deduped.append(sec)
-    sections = deduped
-
-    # Renumber after dedup
-    for i, sec in enumerate(sections):
-        sec["id"] = i + 1
-
+    # Pass 3: Extract technical headers or deep paragraph sentences
     if len(sections) < 3:
         for line in lines:
-            m = re.match(r"^\*\*(.+?)\*\*", line.strip())
-            if m:
-                label = m.group(1).strip(" .*:")
-                if len(label) > 4:
-                    sections.append({
-                        "id": len(sections) + 1,
-                        "label": label[:42],
-                        "desc": "",
-                    })
-            if len(sections) >= 5:
-                break
-
-    # Pass 3: extract strong sentences from paragraphs
-    if len(sections) < 3:
-        sentence_count = 0
-        for line in lines:
             stripped = line.strip()
-            # Skip fences, hashtags, emoji-only lines, short lines
-            if (stripped.startswith(("#", "```", "💬"))
-                    or len(stripped) < 20
-                    or stripped.startswith("📌")):
-                continue
-            # Take first sentence of paragraphs
+            if len(stripped) < 40 or stripped.startswith(("#", "`", "💬", "📌")): continue
             first_sentence = re.split(r"[.!?]", stripped)[0].strip()
-            if len(first_sentence) > 15:
-                sections.append({
-                    "id": len(sections) + 1,
-                    "label": first_sentence[:120],
-                    "desc": "",
-                })
-                sentence_count += 1
-            if sentence_count >= 5:
-                break
+            label = clean_label(first_sentence)
+            if len(label) > 15 and not is_too_redundant(label):
+                sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
+            if len(sections) >= 5: break
 
-    # Final fallback
+    # Final fallback if still empty
     if len(sections) < 3:
         sections = [
-            {"id": 1, "label": "The Problem",    "desc": ""},
-            {"id": 2, "label": "Why It Matters",  "desc": ""},
-            {"id": 3, "label": "What Changes",    "desc": ""},
-            {"id": 4, "label": "The Trade-off",   "desc": ""},
-            {"id": 5, "label": "Key Takeaway",    "desc": ""},
+            {"id": 1, "label": "Technical Problem",    "desc": ""},
+            {"id": 2, "label": "Root Cause Analysis",  "desc": ""},
+            {"id": 3, "label": "Engineering Fix",      "desc": ""},
+            {"id": 4, "label": "Production Outcome",   "desc": ""},
         ]
 
-    # Universal Internet Diagrams (User Request: "get diagrams from internet")
-    # We now enable professional Mermaid/Kroki rendering for ALL topics by default
-    # to maintain high-end engineering visual standards.
-    mermaid_code = ""
+    # Deduplicate and renumber
+    final_sections = []
+    seen = set()
+    for sec in sections:
+        norm = sec["label"].lower()
+        if norm not in seen:
+            seen.add(norm)
+            final_sections.append(sec)
+    
+    for i, sec in enumerate(final_sections):
+        sec["id"] = i + 1
+
+    # UNIVERSAL PROFESSIONAL PIVOT:
+    # Every post now earns a professional Mermaid/Kroki diagram (Engineering standard).
     title = _extract_poster_title(topic_name, post_text, mode)
-    # is_tech check removed — every post earns a professional diagram
-    if len(sections) >= 3:
-        mermaid_code = _build_mermaid_code(title, sections)
+    mermaid_code = ""
+    if len(final_sections) >= 3:
+        mermaid_code = _build_mermaid_code(title, final_sections)
 
     return {
         "style": 23,
         "subtitle": _get_post_subtitle(mode),
-        "sections": sections[:6],
+        "sections": final_sections[:6],
         "mermaid_code": mermaid_code,
         "diagram_style": "mermaid"
     }
