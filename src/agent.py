@@ -26,6 +26,7 @@ DIAGRAM_ROTATION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "llama-3.3-70b-versatile"
+MODEL_FALLBACK = "llama-3.1-8b-instant"  # Faster, higher rate limits for 429 fallback
 
 USER_NAME = os.environ.get("USER_NAME", os.environ.get("AUTHOR_NAME", "Komal Batra"))
 
@@ -613,48 +614,67 @@ def _deduplicate_hashtags(text):
 
 # ─── AI CALL ──────────────────────────────────────────────────────────────────
 
-def call_ai(prompt, system):
+def call_ai(prompt, system, json_mode=False):
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         raise ValueError("GROQ_API_KEY secret not set")
+    
+    current_model = MODEL
+    
     headers = {
         "Authorization": "Bearer " + api_key,
         "Content-Type": "application/json",
     }
-    payload = {
-        "model": MODEL,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": prompt},
-        ],
-        "max_tokens": 1024,
-        "temperature": 0.92,
-    }
+    
     last_err = None
     for attempt in range(3):
+        payload = {
+            "model": current_model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            "max_tokens": 2048 if json_mode else 1024,
+            "temperature": 0.85,
+        }
+        
+        if json_mode:
+            payload["response_format"] = {"type": "json_object"}
+
         try:
             resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=45)
+            
             if resp.status_code == 429:
-                wait = int(resp.headers.get("Retry-After", 20))
-                log.warning(f"Groq rate-limited (429) — waiting {wait}s (attempt {attempt+1}/3)")
-                time.sleep(wait)
-                continue
+                if current_model == MODEL:
+                    log.warning(f"Groq primary model (70B) rate-limited. Falling back INSTANTLY to 8B model...")
+                    current_model = MODEL_FALLBACK
+                    continue
+                else:
+                    wait = int(resp.headers.get("Retry-After", 20))
+                    log.warning(f"Groq fallback model also rate-limited. Waiting {wait}s...")
+                    time.sleep(wait)
+                    continue
+                    
             if resp.status_code >= 500:
-                log.warning(f"Groq server error {resp.status_code} (attempt {attempt+1}/3) — retrying in 8s")
-                time.sleep(8)
+                log.warning(f"Groq server error {resp.status_code} (attempt {attempt+1}/3) — retrying in 5s")
+                time.sleep(5)
                 continue
+                
             if resp.status_code != 200:
-                log.error("Groq error: " + resp.text)
+                log.error(f"Groq error ({resp.status_code}): {resp.text}")
+                
             resp.raise_for_status()
             return resp.json()["choices"][0]["message"]["content"].strip()
+            
         except requests.exceptions.Timeout:
             log.warning(f"Groq request timed out (attempt {attempt+1}/3) — retrying")
             last_err = "timeout"
-            time.sleep(5)
+            time.sleep(3)
         except requests.exceptions.RequestException as e:
             log.warning(f"Groq request failed (attempt {attempt+1}/3): {e}")
             last_err = str(e)
-            time.sleep(5)
+            time.sleep(3)
+            
     raise RuntimeError(f"Groq call failed after 3 attempts: {last_err}")
 
 
@@ -2884,11 +2904,21 @@ def _infer_diagram_type_from_post(post_text, fallback_type):
     return fallback_type
 
 
-def _build_viral_poster_structure(post_text, topic_name, mode):
+def _build_viral_poster_structure(post_text, topic_name, mode, topic=None):
     """
     Build sections for the viral poster from actual post content.
-    Extracts UNIQUE, non-redundant take-aways. Ignore the 'Hook'.
+    Extracts UNIQUE, non-redundant take-aways.
     """
+    # NEW: If we used JSON mode, the nodes are already extracted and optimized!
+    if isinstance(topic, dict) and topic.get("_extracted_nodes"):
+        nodes = topic["_extracted_nodes"]
+        sections = []
+        for i, node in enumerate(nodes[:5]):
+            sections.append({"id": i + 1, "label": node.strip()[:50], "desc": ""})
+        if sections:
+            log.info(f"Using {len(sections)} pre-extracted nodes from JSON mode.")
+            return {"style": 23, "subtitle": topic_name[:60], "sections": sections}
+
     lines = (post_text or "").splitlines()
     sections = []
     
@@ -3043,12 +3073,12 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
     
     if use_viral_poster:
         poster_title = _extract_poster_title(topic["name"], post_text, mode)
-        poster_structure = _build_viral_poster_structure(post_text, poster_title, mode)
+        poster_structure = _build_viral_poster_structure(post_text, poster_title, mode, topic=topic)
         return poster_title, "Viral Poster", poster_structure
 
     # ALL TECHNICAL/NEWS/TRENDING modes now use Professional Engineering Charts (Mermaid + Kroki)
     diagram_title = _extract_poster_title(topic["name"], post_text, mode)
-    diagram_structure = _build_viral_poster_structure(post_text, diagram_title, mode)
+    diagram_structure = _build_viral_poster_structure(post_text, diagram_title, mode, topic=topic)
     
     # Ensure it triggers the Kroki/Internet path
     diagram_structure["diagram_style"] = "mermaid"
