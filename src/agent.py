@@ -3594,6 +3594,7 @@ Write a LinkedIn post that:
         if pub_blockers:
             log.warning("Publish blockers: " + " | ".join(pub_blockers))
             log.warning("Draft failed quality checks — attempting recovery with fresh topic post.")
+<<<<<<< Updated upstream
             # Pick a different topic for recovery
             failed_id = topic.get("id", "")
             recovery_topic = topic_mgr.get_next_topic()
@@ -3638,6 +3639,28 @@ Write a LinkedIn post that:
             structure = recovery_structure
             score_structure = recovery_structure
             score_diagram_type = recovery_diagram_type
+=======
+            try:
+                recovery_topic = topic_mgr.get_next_topic()
+                recovery_structure = topic_mgr.get_diagram_structure(recovery_topic)
+                recovery_diagram_type = topic_mgr.get_diagram_type_for_topic(recovery_topic)
+                recovery_text = generate_topic_post(recovery_topic, recovery_structure, recovery_diagram_type)
+                recovery_text = _finalize_post_text(recovery_topic, recovery_text, structure=recovery_structure, diagram_type=recovery_diagram_type)
+                recovery_blockers = _hard_publish_blockers(recovery_text)
+                if not recovery_blockers:
+                    log.info(f"Recovery successful — switching to topic: {recovery_topic['name']}")
+                    topic = recovery_topic
+                    structure = recovery_structure
+                    post_text = recovery_text
+                    score_card = _score_post_candidate(topic, post_text, recovery_structure, recovery_diagram_type)
+                    publish_blockers = []
+                else:
+                    log.warning("Recovery post also had quality issues — publishing best available post.")
+                    log.warning("Recovery blockers: " + " | ".join(recovery_blockers[:4]))
+                    # Don't exit — continue with the original post rather than losing the run entirely
+            except Exception as e:
+                log.warning(f"Recovery attempt failed ({e}) — continuing with original post.")
+>>>>>>> Stashed changes
 
     write_github_output("POST_TOPIC",   topic.get("name", ""))
     write_github_output("POST_TOPIC_ID", topic.get("id", ""))
