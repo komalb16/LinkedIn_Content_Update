@@ -18,6 +18,8 @@ import os
 import json
 import random
 import hashlib
+import requests
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 
@@ -286,28 +288,96 @@ class TrendingTopicDetectorEnhanced:
         return counts
     
     def _fetch_ai_tech_topics(self) -> int:
-        """Fetch AI/Tech topics from HackerNews, Reddit, etc. (existing logic)."""
-        # TODO: Integrate with existing trending_topics.py logic
-        # For now, return 0 (will be implemented)
-        return 0
-    
+        """Fetch AI/Tech topics from HackerNews."""
+        try:
+            # HN Top Stories
+            res = requests.get("https://hacker-news.firebaseio.com/v0/topstories.json", timeout=10)
+            if res.status_code != 200: return 0
+            
+            story_ids = res.json()[:40] # Check top 40 items
+            count = 0
+            for sid in story_ids:
+                s_res = requests.get(f"https://hacker-news.firebaseio.com/v0/item/{sid}.json", timeout=5)
+                if s_res.status_code == 200:
+                    story = s_res.json()
+                    title = story.get("title", "")
+                    category = self.categorize_topic(title)
+                    if category == "ai_tech":
+                        topic = {
+                            "id": f"hn-{sid}",
+                            "title": title,
+                            "url": story.get("url", f"https://news.ycombinator.com/item?id={sid}"),
+                            "score": story.get("score", 0),
+                            "timestamp": datetime.now().isoformat()
+                        }
+                        self.add_topic_to_cache("ai_tech", topic)
+                        count += 1
+            return count
+        except Exception as e:
+            log.warning(f"Failed to fetch HN topics: {e}")
+            return 0
+
     def _fetch_industry_news(self) -> int:
-        """Fetch industry news topics (tech news, funding, releases, etc.)."""
-        # TODO: Use Google News API or similar
-        # Look for keywords: Microsoft, Google, OpenAI, "raises", "announces", etc.
-        return 0
-    
+        """Fetch industry news topics from Google News RSS."""
+        try:
+            # Google News RSS for AI and Tech
+            url = "https://news.google.com/rss/search?q=AI+Machine+Learning+Technology&hl=en-US&gl=US&ceid=US:en"
+            res = requests.get(url, timeout=10)
+            if res.status_code != 200: return 0
+            
+            root = ET.fromstring(res.text)
+            count = 0
+            for item in root.findall(".//item")[:15]:
+                title = item.find("title").text if item.find("title") is not None else ""
+                url = item.find("link").text if item.find("link") is not None else ""
+                
+                category = self.categorize_topic(title)
+                if category == "industry_news":
+                    topic = {
+                        "id": hashlib.md5(url.encode()).hexdigest(),
+                        "title": title,
+                        "url": url,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    self.add_topic_to_cache("industry_news", topic)
+                    count += 1
+            return count
+        except Exception as e:
+            log.warning(f"Failed to fetch Google News topics: {e}")
+            return 0
+
     def _fetch_personal_story_topics(self) -> int:
-        """Fetch personal story topics from Medium, Dev.to, personal blogs."""
-        # TODO: Use Medium API or RSS feeds
-        # Look for keywords: "My experience", "I learned", "My journey", etc.
-        return 0
-    
+        """Fetch personal story topics from Medium/Dev.to RSS."""
+        # Using a broad Tech/Engineering Feed for inspiration
+        try:
+            url = "https://dev.to/feed"
+            res = requests.get(url, timeout=10)
+            if res.status_code != 200: return 0
+            
+            root = ET.fromstring(res.text)
+            count = 0
+            for item in root.findall(".//item")[:10]:
+                title = item.find("title").text if item.find("title") is not None else ""
+                url = item.find("link").text if item.find("link") is not None else ""
+                
+                category = self.categorize_topic(title)
+                if category == "personal_story":
+                    topic = {
+                        "id": hashlib.md5(url.encode()).hexdigest(),
+                        "title": title,
+                        "url": url,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    self.add_topic_to_cache("personal_story", topic)
+                    count += 1
+            return count
+        except Exception as e:
+            log.warning(f"Failed to fetch personal stories: {e}")
+            return 0
+
     def _fetch_tips_lessons_topics(self) -> int:
-        """Fetch tips/lessons topics from blogs, Dev.to, Twitter."""
-        # TODO: Use DEV API or similar
-        # Look for keywords: "5 Ways", "Lessons", "Best Practices", etc.
-        return 0
+        """Fetch tips/lessons topics from Engineering Blogs."""
+        return self._fetch_personal_story_topics() # Dev.to covers both
     
     def get_category_post_for_frequency(self, frequencies: Dict[str, float]) -> str:
         """

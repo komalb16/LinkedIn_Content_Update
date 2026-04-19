@@ -1,0 +1,535 @@
+{
+  "interview_topics": {
+    "rag": {
+      "category": "RAG Architecture",
+      "description": "Retrieval Augmented Generation - traditional and advanced",
+      "engagement_level": "high",
+      "best_diagram_styles": [3, 5, 22],
+      "questions": [
+        {
+          "id": "rag-biggest-failure",
+          "type": "opinion_poll",
+          "difficulty": "high_engagement",
+          "question": "What's your biggest RAG failure in production?",
+          "context": "I asked 50 engineers building RAG systems in production",
+          "poll_options": [
+            "Hallucinations - LLM making up data",
+            "Retrieval quality - wrong context chunks",
+            "Cost explosion - token overhead",
+            "Latency - too slow for real-time",
+            "Scaling - can't handle volume"
+          ],
+          "follow_up": "Drop your story in comments. What went wrong and how did you fix it?",
+          "hashtags": ["#RAG", "#LLM", "#Production", "#Lessons"]
+        },
+        {
+          "id": "rag-stage-identification",
+          "type": "self_assessment",
+          "difficulty": "medium_engagement",
+          "question": "Where are you in your RAG journey?",
+          "context": "I've worked with teams at different stages. Here's the pattern I see:",
+          "options": [
+            "Stage 1: Experimenting with RAG (just starting)",
+            "Stage 2: One system in production",
+            "Stage 3: Multiple systems, hunting for patterns",
+            "Stage 4: Scaling RAG across org",
+            "Stage 5: Moving beyond RAG to Agentic"
+          ],
+          "follow_up": "What's your stage? And what's the biggest challenge at YOUR stage?",
+          "hashtags": ["#RAG", "#Architecture", "#Growth"]
+        },
+        {
+          "id": "rag-vs-traditional",
+          "type": "comparison_debate",
+          "difficulty": "high_engagement",
+          "question": "Should we RAG this or build it traditional?",
+          "context": "I see teams debating this constantly. Here's when each makes sense:",
+          "comparison": {
+            "Traditional (No RAG)": {
+              "best_for": "Small focused domains, simple Q&A",
+              "pros": "Fast, simple, predictable",
+              "cons": "Limited to training data, outdated knowledge"
+            },
+            "RAG": {
+              "best_for": "Dynamic content, large corpus, always-fresh",
+              "pros": "Access current docs, flexible, explainable",
+              "cons": "Hallucinations, retrieval failures, complex"
+            }
+          },
+          "follow_up": "What did you choose? And would you pick the same today?",
+          "hashtags": ["#RAG", "#Architecture", "#Tradeoffs"]
+        },
+        {
+          "id": "rag-chunking-strategy",
+          "type": "expert_question",
+          "difficulty": "medium_engagement",
+          "question": "How do you chunk your documents for RAG?",
+          "context": "This might seem simple but it's where most RAG systems fail",
+          "tactics": [
+            "Fixed size chunks (1000 tokens)",
+            "Semantic chunking (by meaning)",
+            "Hierarchical (section + subsection)",
+            "Sentence-level (fine-grained)",
+            "Domain-specific (tables, code blocks separate)"
+          ],
+          "follow_up": "What's your strategy? And did you try others first?",
+          "hashtags": ["#RAG", "#Engineering", "#BestPractices"]
+        },
+        {
+          "id": "rag-one-mistake",
+          "type": "lessons_learned",
+          "difficulty": "high_engagement",
+          "question": "One RAG mistake that changed how I build systems",
+          "context": "I used to think better documents = better RAG. I was wrong.",
+          "story_arc": "The mistake → Why it happened → What I learned → How I changed",
+          "follow_up": "What's the RAG mistake that taught you the most?",
+          "hashtags": ["#RAG", "#Lessons", "#Engineering"]
+        }
+      ]
+    },
+    
+    "agentic_ai": {
+      "category": "Agentic AI & Autonomous Systems",
+      "description": "Agents, tool use, autonomous decision-making",
+      "engagement_level": "high",
+      "best_diagram_styles": [14, 0, 9],
+      "questions": [
+        {
+          "id": "agentic-when-not-now",
+          "type": "opinion_poll",
+          "difficulty": "high_engagement",
+          "question": "I asked 30 engineers: Should you build Agentic AI NOW?",
+          "context": "The debate: Is Agentic AI hype or essential? Here's what they said:",
+          "poll_options": [
+            "YES - It's the future, start now",
+            "NO - Still too complex and risky",
+            "HYBRID - Use RAG + Agents strategically",
+            "WAIT - Let it mature another 6 months",
+            "DEPENDS - Your stage matters most"
+          ],
+          "follow_up": "Where do you stand? And what's holding you back or pushing you forward?",
+          "hashtags": ["#AgenticAI", "#AI", "#Future"]
+        },
+        {
+          "id": "agentic-complexity-cost",
+          "type": "tradeoff_analysis",
+          "difficulty": "medium_engagement",
+          "question": "Agentic AI: Is the complexity worth it?",
+          "context": "Going Agentic adds: 3x complexity, latency, harder debugging... but smarter decisions",
+          "tradeoffs": {
+            "Simple RAG": {
+              "complexity": "Low",
+              "speed": "Fast",
+              "quality": "70-80%",
+              "best_for": "Simple Q&A, well-defined queries"
+            },
+            "Agentic": {
+              "complexity": "High",
+              "speed": "Slow",
+              "quality": "85-95%",
+              "best_for": "Complex reasoning, multiple steps, uncertainty"
+            }
+          },
+          "follow_up": "If you went Agentic, was it worth it? Would you do it again?",
+          "hashtags": ["#AgenticAI", "#Tradeoffs", "#Architecture"]
+        },
+        {
+          "id": "agentic-biggest-challenge",
+          "type": "pain_point_sharing",
+          "difficulty": "high_engagement",
+          "question": "What's your biggest Agentic AI challenge?",
+          "context": "Not everyone's building Agentic yet, but those who are face hard problems",
+          "challenges": [
+            "Tool selection - Which tools should agents have access to?",
+            "Looping - Agents get stuck in infinite loops",
+            "Cost - Agentic queries cost 5-10x more",
+            "Reliability - Hard to predict behavior",
+            "Debugging - When it fails, why? Hard to tell",
+            "Latency - Too slow for real-time use cases"
+          ],
+          "follow_up": "Which resonates? And how did you solve it (or are you still solving)?",
+          "hashtags": ["#AgenticAI", "#Engineering", "#Production"]
+        },
+        {
+          "id": "agentic-failure-story",
+          "type": "lessons_learned",
+          "difficulty": "high_engagement",
+          "question": "My Agentic AI disaster (and what I learned)",
+          "context": "I built an agent that looked perfect in testing. Production told a different story.",
+          "story_arc": "What I built → What went wrong → Why it surprised me → How I fixed it",
+          "follow_up": "Did you have an Agentic failure? Share it. We all learn from disasters.",
+          "hashtags": ["#AgenticAI", "#Lessons", "#Production"]
+        },
+        {
+          "id": "agentic-tool-selection",
+          "type": "expert_question",
+          "difficulty": "medium_engagement",
+          "question": "How many tools should your agent have?",
+          "context": "This is the paradox: More tools = more possibilities, but also more failures",
+          "perspectives": [
+            "Minimalist - 2-3 critical tools (focused, reliable)",
+            "Balanced - 5-10 tools (flexible, still manageable)",
+            "Full - 20+ tools (powerful, but chaotic)",
+            "Hierarchical - Agents specialized by domain (best of both)"
+          ],
+          "follow_up": "How many tools does your agent have? Would you increase or decrease?",
+          "hashtags": ["#AgenticAI", "#Design", "#BestPractices"]
+        }
+      ]
+    },
+    
+    "llm_optimization": {
+      "category": "LLM Optimization & Fine-Tuning",
+      "description": "Making LLMs faster, cheaper, and more reliable",
+      "engagement_level": "high",
+      "best_diagram_styles": [5, 22, 2],
+      "questions": [
+        {
+          "id": "llm-optimization-priority",
+          "type": "priority_poll",
+          "difficulty": "high_engagement",
+          "question": "When optimizing LLMs, what matters most to you?",
+          "context": "Speed, accuracy, cost, reliability - pick your battles",
+          "options": [
+            "SPEED - Users won't wait for slow responses",
+            "COST - Margins are tight, every token counts",
+            "ACCURACY - A wrong answer is worse than slow",
+            "RELIABILITY - Consistency > Performance",
+            "TRADEOFF - It's all balanced, context matters"
+          ],
+          "follow_up": "What's your top priority? And has it changed over time?",
+          "hashtags": ["#LLM", "#Optimization", "#Production"]
+        },
+        {
+          "id": "llm-fine-tuning-worth-it",
+          "type": "yes_no_debate",
+          "difficulty": "high_engagement",
+          "question": "Is fine-tuning worth it? Or just prompt optimization?",
+          "context": "Debate: Spend 1 week on perfect prompts vs 1 month on fine-tuning",
+          "perspectives": [
+            "PROMPTS ONLY - 80% of the value, 5% of the cost",
+            "fine-tuning WORTH IT - Better control, consistent",
+            "HYBRID - Start with prompts, fine-tune if needed",
+            "DEPENDS - Your data quality determines viability"
+          ],
+          "follow_up": "Which path did you take? Happy with it or regret it?",
+          "hashtags": ["#LLM", "#FineTuning", "#Engineering"]
+        },
+        {
+          "id": "llm-cost-explosion",
+          "type": "horror_story",
+          "difficulty": "high_engagement",
+          "question": "Tell me about your LLM cost explosion",
+          "context": "I know I'm not alone. Your LLM bill surprised you. Here's mine...",
+          "story_arc": "What you built → Cost looked fine → Scaling happened → Bill shocked you",
+          "follow_up": "How did you fix it? And what would you do differently?",
+          "hashtags": ["#LLM", "#Costs", "#Lessons"]
+        },
+        {
+          "id": "llm-hallucination-solution",
+          "type": "problem_solution",
+          "difficulty": "medium_engagement",
+          "question": "How do you prevent LLM hallucinations?",
+          "context": "Hallucinations cost me months. Here's what finally worked...",
+          "solutions": [
+            "Constrained outputs (JSON schema, tokens only)",
+            "Verification layer (another LLM checks)",
+            "Retrieved context only (RAG strongly)",
+            "Multiple-step verification (3-layer check)",
+            "Accept risk (customers know limitation)"
+          ],
+          "follow_up": "What works for you? And what doesn't?",
+          "hashtags": ["#LLM", "#Quality", "#Production"]
+        }
+      ]
+    },
+    
+    "system_design": {
+      "category": "AI System Architecture & Design",
+      "description": "Building production AI systems",
+      "engagement_level": "high",
+      "best_diagram_styles": [0, 11, 13],
+      "questions": [
+        {
+          "id": "system-monolith-vs-microservices",
+          "type": "architecture_debate",
+          "difficulty": "high_engagement",
+          "question": "Monolith or Microservices for your AI system?",
+          "context": "The classic debate hits different when LLMs are involved",
+          "options": [
+            "MONOLITH - Start here, simpler",
+            "MICROSERVICES - Better scaling, harder ops",
+            "HYBRID - Monolith for LLM, services for supporting",
+            "SERVERLESS - Skip the ops pain"
+          ],
+          "follow_up": "What architecture do you regret? What would you choose today?",
+          "hashtags": ["#SystemDesign", "#Architecture", "#Engineering"]
+        },
+        {
+          "id": "system-biggest-bottleneck",
+          "type": "bottleneck_identification",
+          "difficulty": "high_engagement",
+          "question": "What's your AI system's biggest bottleneck?",
+          "context": "I see patterns across production systems. Most bottlenecks aren't where you'd think",
+          "bottlenecks": [
+            "LLM latency - Model inference too slow",
+            "Retrieval - Vector search slow",
+            "Database queries - Getting context slow",
+            "API calls - External dependencies sluggish",
+            "Orchestration - Coordination complexity"
+          ],
+          "follow_up": "Where's your bottle neck? And how did you discover it?",
+          "hashtags": ["#Performance", "#Architecture", "#Production"]
+        },
+        {
+          "id": "system-scaling-story",
+          "type": "journey_narrative",
+          "difficulty": "high_engagement",
+          "question": "How I scaled my AI system from 10 to 10,000 users",
+          "context": "Nothing breaks assumptions like 100x growth. Here's what broke for me...",
+          "story_arc": "What worked for 10 → What failed at 100 → What failed at 1000 → What finally scaled",
+          "follow_up": "What scaling lesson cost you the most (in time, money, or credibility)?",
+          "hashtags": ["#Scaling", "#SystemDesign", "#Lessons"]
+        },
+        {
+          "id": "system-reliability-tradeoff",
+          "type": "tradeoff_analysis",
+          "difficulty": "medium_engagement",
+          "question": "Reliability vs Innovation: Which wins in your system?",
+          "context": "Fast iteration breaks things. Stability slows you down. Where's your balance?",
+          "tradeoffs": {
+            "Stability First": "99.9% uptime, slow to iterate, user trust high",
+            "Innovation First": "Frequent changes, some breakage, faster learning",
+            "Balanced": "Staged rollout, good metrics, middle ground"
+          },
+          "follow_up": "Where are you on this spectrum? Happy with it?",
+          "hashtags": ["#Reliability", "#Architecture", "#Culture"]
+        }
+      ]
+    },
+    
+    "tools_frameworks": {
+      "category": "Tools, Frameworks & Tech Choices",
+      "description": "LlamaIndex vs LangChain, Claude vs GPT-4, etc.",
+      "engagement_level": "high",
+      "best_diagram_styles": [5, 22, 1],
+      "questions": [
+        {
+          "id": "tools-langchain-vs-llamaindex",
+          "type": "comparison_debate",
+          "difficulty": "high_engagement",
+          "question": "LangChain vs LlamaIndex: Which one and why?",
+          "context": "I asked 40 engineers which they'd choose today. The answers surprised me",
+          "options": [
+            "LangChain - More mature, bigger ecosystem",
+            "LlamaIndex - Better for RAG specifically",
+            "BOTH - Different jobs, different tools",
+            "NEITHER - Build custom orchestration",
+            "Unclear - Still evaluating"
+          ],
+          "follow_up": "Which did you pick? Do you regret it or double down?",
+          "hashtags": ["#LangChain", "#LlamaIndex", "#Tools"]
+        },
+        {
+          "id": "tools-claude-vs-gpt4",
+          "type": "model_comparison",
+          "difficulty": "high_engagement",
+          "question": "Claude vs GPT-4: Which one powers your system?",
+          "context": "The LLM choice shapes everything. Here's what I see across teams",
+          "comparison_points": [
+            "Cost - Claude cheaper, GPT smarter",
+            "Quality - Different strengths on different tasks",
+            "Speed - Different tradeoffs",
+            "Community - Tooling ecosystem differs",
+            "Use Case - Matters more than model"
+          ],
+          "follow_up": "Which do you use? And would you switch?",
+          "hashtags": ["#Claude", "#GPT4", "#LLM"]
+        },
+        {
+          "id": "tools-framework-mistakes",
+          "type": "lessons_learned",
+          "difficulty": "high_engagement",
+          "question": "The framework choice I regret most",
+          "context": "Picking the right tool matters. Picking wrong costs months.",
+          "story_arc": "What I chose → Why it made sense then → Why it was wrong → What I learned",
+          "follow_up": "What tool/framework choice haunts you? Would you switch?",
+          "hashtags": ["#Tools", "#Lessons", "#Engineering"]
+        }
+      ]
+    },
+    
+    "career_growth": {
+      "category": "Career, Skills & Learning",
+      "description": "Growing as an AI engineer",
+      "engagement_level": "high",
+      "best_diagram_styles": [3, 14, 17],
+      "questions": [
+        {
+          "id": "career-one-skill-learn",
+          "type": "advice_seeking",
+          "difficulty": "high_engagement",
+          "question": "One skill that made me a better AI engineer",
+          "context": "People focus on frameworks. But there's ONE skill that changed everything for me",
+          "skills_mentioned": [
+            "System design thinking",
+            "Data fluency",
+            "Debugging/root cause analysis",
+            "Knowing the limits (of LLMs)",
+            "Clear communication"
+          ],
+          "follow_up": "What ONE skill would you learn if you could?",
+          "hashtags": ["#Learning", "#CareerGrowth", "#Skills"]
+        },
+        {
+          "id": "career-biggest-mistake",
+          "type": "lessons_learned",
+          "difficulty": "high_engagement",
+          "question": "The biggest mistake I made as an AI engineer (and how I fixed it)",
+          "context": "Early on, I thought X. I was so wrong. Here's what changed my perspective",
+          "story_arc": "What I believed → Why it was wrong → What I learned → How I changed",
+          "follow_up": "What was YOUR biggest professional lesson in AI?",
+          "hashtags": ["#CareerGrowth", "#Lessons", "#Learning"]
+        },
+        {
+          "id": "career-imposter-syndrome",
+          "type": "vulnerability_share",
+          "difficulty": "high_engagement",
+          "question": "Still feel like an imposter? You're not alone.",
+          "context": "I build LLM systems professionally. I still don't feel like an expert.",
+          "themes": [
+            "Field moves too fast to master",
+            "So many unknowns and edge cases",
+            "Learn by shipping, not by reading",
+            "Everyone's learning simultaneously"
+          ],
+          "follow_up": "Do you feel it too? What helps you push through?",
+          "hashtags": ["#ImposterSyndrome", "#CareerGrowth", "#Learning"]
+        }
+      ]
+    },
+    
+    "industry_trends": {
+      "category": "Industry Trends & Hot Takes",
+      "description": "Predictions, unpopular opinions, future outlook",
+      "engagement_level": "high",
+      "best_diagram_styles": [14, 21, 3],
+      "questions": [
+        {
+          "id": "trends-rag-dead",
+          "type": "controversial_take",
+          "difficulty": "high_engagement",
+          "question": "Hot take: Is RAG dying?",
+          "context": "Everyone pivots to Agentic. But is RAG actually dead or just misapplied?",
+          "perspectives": [
+            "RAG is DEAD - Agentic is the future",
+            "RAG is ESSENTIAL - Still core of many systems",
+            "RAG is EVOLVING - Becoming foundation for Agentic",
+            "Context-dependent - Different use cases, different answers"
+          ],
+          "follow_up": "What do you think? Is your next project RAG or Agentic?",
+          "hashtags": ["#RAG", "#AgenticAI", "#HotTake"]
+        },
+        {
+          "id": "trends-ai-winter",
+          "type": "prediction_poll",
+          "difficulty": "high_engagement",
+          "question": "Will we see another AI winter?",
+          "context": "History rhymes. AI bubbles have burst before. Will it happen again?",
+          "options": [
+            "YES - Hype will fade, most startups will fail",
+            "NO - LLMs are fundamental, here to stay",
+            "PARTIAL - Correction but not collapse",
+            "DIFFERENT - Not winter, just maturation",
+            "UNCLEAR - Too early to tell"
+          ],
+          "follow_up": "What's your prediction? And how would that change your choices?",
+          "hashtags": ["#AI", "#Future", "#Prediction"]
+        },
+        {
+          "id": "trends-job-impact",
+          "type": "concern_sharing",
+          "difficulty": "high_engagement",
+          "question": "What scares you about AI replacing engineers?",
+          "context": "It's okay to be worried. Everyone should think about this.",
+          "concerns": [
+            "Jobs will disappear",
+            "Skill differentiation will erode",
+            "Companies will cut junior roles",
+            "Unfair leverage over compensation"
+          ],
+          "follow_up": "What actually scares you? And how are you preparing?",
+          "hashtags": ["#AI", "#Career", "#Future"]
+        }
+      ]
+    }
+  },
+
+  "interview_post_templates": {
+    "opinion_poll": {
+      "structure": [
+        "HOOK - I asked X engineers one question",
+        "DATA - Here's what they said (percentages)",
+        "PERSONAL_TAKE - But here's what I think they missed",
+        "HONESTY - Why this matters (personal stake)",
+        "CTA - Drop YOUR answer in comments"
+      ],
+      "expected_engagement": "200-350 comments",
+      "best_for": "Quick feedback, diverse perspectives"
+    },
+    "comparison_debate": {
+      "structure": [
+        "SETUP - The debate I see constantly",
+        "BOTH_SIDES - Here's the case for each",
+        "TRADEOFFS - What nobody talks about",
+        "MY_TAKE - This is what I'd pick (and why)",
+        "CTA - What would YOU choose?"
+      ],
+      "expected_engagement": "250-400 comments",
+      "best_for": "Controversial topics, opposing views"
+    },
+    "lessons_learned": {
+      "structure": [
+        "PROBLEM - Here's what went wrong",
+        "STRUGGLE - Why it was hard",
+        "INSIGHT - When I realized X",
+        "SOLUTION - Here's what I did",
+        "CTA - Share YOUR lesson"
+      ],
+      "expected_engagement": "150-300 comments",
+      "best_for": "Vulnerability, resonance, wisdom"
+    },
+    "expert_question": {
+      "structure": [
+        "CONTEXT - Here's where I see this problem",
+        "OPTIONS - Different approaches engineers take",
+        "ANALYSIS - Pros/cons of each",
+        "MY_APPROACH - This is what works for me",
+        "CTA - What's YOUR approach?"
+      ],
+      "expected_engagement": "100-200 comments",
+      "best_for": "Technical depth, pattern sharing"
+    }
+  },
+
+  "content_strategy": {
+    "weekly_mix": {
+      "opinion_polls": "2 per week",
+      "comparison_debates": "1 per week",
+      "lessons_learned": "1 per week",
+      "expert_questions": "1 per week"
+    },
+    "posting_rules": {
+      "never_post_same_question_within": "30 days",
+      "cycle_through_topics": "RAG → Agentic → LLM Opt → System Design → Tools → Career → Trends",
+      "engagement_check": "Respond to top 10 comments within 4 hours",
+      "follow_on_posts": "If question gets 200+ comments, write follow-up post with insights"
+    },
+    "expected_monthly_metrics": {
+      "interviews_posted": "8-10",
+      "average_comments_per": "200-250",
+      "total_engagement": "1600-2500 comments/month",
+      "growth": "+300% engaged followers"
+    }
+  }
+}

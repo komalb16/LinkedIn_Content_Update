@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Content Generator - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info span {
+            font-size: 14px;
+            color: #666;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        button.logout {
+            background: #dc3545;
+        }
+
+        button.logout:hover {
+            background: #c82333;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .tier-free {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .tier-pro {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .tier-trial {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .button-group button.secondary {
+            background: #6c757d;
+        }
+
+        .button-group button.secondary:hover {
+            background: #5a6268;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .post-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .post-item h4 {
+            margin-bottom: 5px;
+        }
+
+        .post-item .meta {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tier-upgrade {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .tier-upgrade h3 {
+            margin-bottom: 10px;
+        }
+
+        .tier-upgrade button {
+            background: white;
+            color: #667eea;
+            margin-top: 15px;
+        }
+
+        .tier-upgrade button:hover {
+            background: #f0f0f0;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: 1;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .user-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LinkedIn Content Generator</h1>
+            <div class="user-info">
+                <span id="userEmail">User</span>
+                <button class="logout" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <div class="dashboard">
+            <!-- Account Card -->
+            <div class="card">
+                <h2>Account</h2>
+                <div id="tierBadge" class="tier-badge tier-free">Free Tier</div>
+                
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="number" id="postsThisWeek">0</div>
+                        <div class="label">Posts This Week</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="postsLimit">2</div>
+                        <div class="label">Weekly Limit</div>
+                    </div>
+                </div>
+
+                <div id="trialInfo" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 5px;">
+                    <strong>Free Trial Active!</strong>
+                    <p id="trialDays" style="font-size: 12px; margin-top: 5px;"></p>
+                </div>
+
+                <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                    Free Tier: 2 posts/week, Basic features<br>
+                    Pro Tier: Unlimited posts, Priority support
+                </p>
+
+                <div id="upgradeSection" class="tier-upgrade" style="display: none;">
+                    <h3>Ready to create more?</h3>
+                    <p>Upgrade to Pro for unlimited posts and advanced features</p>
+                    <button onclick="upgradeToPro()">Upgrade Now</button>
+                </div>
+            </div>
+
+            <!-- Generate Post Card -->
+            <div class="card">
+                <h2>Generate Post</h2>
+                
+                <div class="form-group">
+                    <label>Post Type</label>
+                    <select id="postType" onchange="updatePostForm()">
+                        <option value="topic">Topic-Based</option>
+                        <option value="news">News & Trends</option>
+                        <option value="story">Personal Story</option>
+                        <option value="interview">Interview Insight</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="postTopic">Topic/Subject</label>
+                    <input type="text" id="postTopic" placeholder="e.g., Machine Learning, Web Development...">
+                </div>
+
+                <div class="form-group">
+                    <label for="postContent">Preview (will be generated)</label>
+                    <textarea id="postContent" placeholder="Your post content will appear here..." readonly></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="generatePost()">Generate Post</button>
+                    <button class="secondary" onclick="clearForm()">Clear</button>
+                </div>
+
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Generating your post...</p>
+                </div>
+            </div>
+
+            <!-- Recent Posts Card -->
+            <div class="card full-width">
+                <h2>Recent Posts</h2>
+                <div id="postsList" class="posts-grid">
+                    <p style="color: #999; text-align: center; padding: 30px;">No posts yet. Generate your first post!</p>
+                </div>
+            </div>
+
+            <!-- Scheduling Card -->
+            <div class="card">
+                <h2>Schedule Post</h2>
+                
+                <!-- Method 1: Multiple Times Per Day -->
+                <div style="margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid #eee;">
+                    <h3 style="margin-bottom: 15px;">Method 1: Schedule Multiple Times Per Day</h3>
+                    
+                    <div class="form-group">
+                        <label for="scheduleDay">Select Day</label>
+                        <select id="scheduleDay" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <option value="monday">Monday</option>
+                            <option value="tuesday">Tuesday</option>
+                            <option value="wednesday">Wednesday</option>
+                            <option value="thursday">Thursday</option>
+                            <option value="friday">Friday</option>
+                            <option value="saturday">Saturday</option>
+                            <option value="sunday">Sunday</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Times for Selected Day</label>
+                        <div id="timesContainer" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+                            <div class="time-slot" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                <input type="time" class="schedule-time-input" value="09:00" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                                <button type="button" onclick="removeTimeSlot(this)" style="padding: 8px 15px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">Remove</button>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addTimeSlot()" style="padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">+ Add Another Time</button>
+                    </div>
+
+                    <div class="form-group" style="display: flex; gap: 10px;">
+                        <button onclick="saveMultipleTimeSchedule()" style="flex: 1; padding: 12px; background: #51cf66; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Save Schedule</button>
+                        <button type="button" onclick="clearTimeSlots()" style="flex: 1; padding: 12px; background: #868e96; color: white; border: none; border-radius: 5px; cursor: pointer;">Clear All</button>
+                    </div>
+                </div>
+
+                <!-- Method 2: Cron Format -->
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">Method 2: Advanced Cron Format</h3>
+                    
+                    <div class="form-group">
+                        <label for="scheduleCron">Cron Expression</label>
+                        <input type="text" id="scheduleCron" placeholder="0 9,21 * * * (9 AM & 9 PM daily)" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <small style="color: #999; margin-top: 5px; display: block;">
+                            Format: minute hour day month weekday<br>
+                            Examples: 0 9 * * * (daily 9 AM) | 0 9,21 * * * (9 AM & 9 PM)
+                        </small>
+                    </div>
+                    <button onclick="saveCronSchedule()" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Save Cron Schedule</button>
+                </div>
+
+                <div class="form-group tier-badge tier-free">
+                    Free Tier: 2 posts/week maximum | Up to 2 times per day
+                </div>
+            </div>
+
+            <!-- Analytics Card -->
+            <div class="card">
+                <h2>Analytics (30 Days)</h2>
+                
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="number" id="totalEngagement">0</div>
+                        <div class="label">Total Engagement</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="avgEngagement">0</div>
+                        <div class="label">Avg per Post</div>
+                    </div>
+                </div>
+
+                <div class="stat-box" style="margin-top: 15px;">
+                    <div class="number" id="topicPerformance">-</div>
+                    <div class="label">Top Performing Topic</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let currentUser = null;
+        let currentToken = null;
+
+        // Initialize dashboard
+        async function initDashboard() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/index.html';
+                return;
+            }
+
+            currentToken = token;
+            try {
+                // Get current user
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user');
+                }
+
+                currentUser = await response.json();
+                document.getElementById('userEmail').textContent = currentUser.email;
+
+                // Update tier badge
+                const tierBadge = document.getElementById('tierBadge');
+                tierBadge.textContent = currentUser.tier.toUpperCase() + ' Tier';
+                tierBadge.className = 'tier-badge tier-' + currentUser.tier;
+
+                // Update stats
+                await updateStats();
+
+                // Load recent posts
+                await loadPosts();
+
+                // Check if free tier and show upgrade
+                if (currentUser.tier === 'free') {
+                    document.getElementById('upgradeSection').style.display = 'block';
+                }
+
+                // Show trial info if in trial
+                if (currentUser.is_trial_active) {
+                    const trialInfo = document.getElementById('trialInfo');
+                    trialInfo.style.display = 'block';
+                    const daysLeft = Math.ceil((new Date(currentUser.user_id) - new Date()) / (1000 * 60 * 60 * 24));
+                    document.getElementById('trialDays').textContent = `${daysLeft} days remaining in your free trial`;
+                }
+
+            } catch (error) {
+                showError('Failed to load dashboard: ' + error.message);
+            }
+        }
+
+        async function updateStats() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/analytics/engagement`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalEngagement').textContent = data.total_engagement || 0;
+                    document.getElementById('avgEngagement').textContent = data.avg_engagement || 0;
+                    document.getElementById('topicPerformance').textContent = data.top_topic || 'N/A';
+                }
+            } catch (error) {
+                console.log('Could not load analytics:', error);
+            }
+        }
+
+        async function loadPosts() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/posts`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const posts = await response.json();
+                    const postsList = document.getElementById('postsList');
+
+                    if (posts.length === 0) {
+                        postsList.innerHTML = '<p style="color: #999; text-align: center; padding: 30px;">No posts yet. Generate your first post!</p>';
+                        return;
+                    }
+
+                    postsList.innerHTML = posts.map(post => `
+                        <div class="post-item">
+                            <h4>${post.topic || 'Generated Post'}</h4>
+                            <p>${post.content.substring(0, 150)}...</p>
+                            <div class="meta">
+                                Created: ${new Date(post.created_at).toLocaleDateString()} | 
+                                Status: <strong>${post.status}</strong> | 
+                                Engagement: ${post.engagement_score || 0}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.log('Could not load posts:', error);
+            }
+        }
+
+        async function generatePost() {
+            const postType = document.getElementById('postType').value;
+            const postTopic = document.getElementById('postTopic').value;
+
+            if (!postTopic) {
+                showError('Please enter a topic/subject');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/posts/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        post_type: postType,
+                        topic: postTopic
+                    })
+                });
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to generate post');
+                }
+
+                const post = await response.json();
+                document.getElementById('postContent').value = post.content;
+                showSuccess('Post generated successfully!');
+                await updateStats();
+
+            } catch (error) {
+                showError('Error: ' + error.message);
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function schedulePost() {
+            showSuccess('Scheduling feature coming soon! Posts on free tier are limited to 2 per week.');
+        }
+
+        function addTimeSlot() {
+            const container = document.getElementById('timesContainer');
+            const newSlot = document.createElement('div');
+            newSlot.className = 'time-slot';
+            newSlot.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+            newSlot.innerHTML = `
+                <input type="time" class="schedule-time-input" value="09:00" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                <button type="button" onclick="removeTimeSlot(this)" style="padding: 8px 15px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">Remove</button>
+            `;
+            container.appendChild(newSlot);
+        }
+
+        function removeTimeSlot(button) {
+            const container = document.getElementById('timesContainer');
+            const slots = container.querySelectorAll('.time-slot');
+            
+            // Prevent removal if only one slot remains  
+            if (slots.length <= 1) {
+                showError('At least one time slot is required');
+                return;
+            }
+            
+            button.closest('.time-slot').remove();
+        }
+
+        function clearTimeSlots() {
+            const container = document.getElementById('timesContainer');
+            const slots = container.querySelectorAll('.time-slot');
+            
+            if (slots.length <= 1) {
+                showError('At least one time slot is required');
+                return;
+            }
+            
+            // Keep only the first slot with default time
+            slots.forEach((slot, idx) => {
+                if (idx > 0) slot.remove();
+            });
+            
+            container.querySelector('.schedule-time-input').value = '09:00';
+            showSuccess('Time slots cleared, reset to 9:00 AM');
+        }
+
+        function saveMultipleTimeSchedule() {
+            const day = document.getElementById('scheduleDay').value;
+            const container = document.getElementById('timesContainer');
+            const timeInputs = container.querySelectorAll('.schedule-time-input');
+            
+            if (timeInputs.length === 0) {
+                showError('Please add at least one time slot');
+                return;
+            }
+
+            const times = [];
+            timeInputs.forEach(input => {
+                const time = input.value;
+                if (!time) {
+                    throw new Error('All time fields must be filled');
+                }
+                times.push({
+                    time_ist: time,  // TODO: Convert to IST when integrated with backend
+                    time_utc: time,  // Will be calculated server-side
+                    timezone: 'IST'
+                });
+            });
+
+            // Prepare schedule data
+            const scheduleData = {
+                day: day,
+                times: times,
+                frequency: 'weekly'
+            };
+
+            console.log('Schedule to save:', scheduleData);
+            showSuccess(`✓ Schedule saved for ${day} at times: ${times.map(t => t.time_ist).join(', ')}`);
+            
+            // TODO: Send to backend API endpoint /api/v1/schedule/update
+            // fetch('/api/v1/schedule/update', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': `Bearer ${localStorage.getItem('token')}`
+            //     },
+            //     body: JSON.stringify(scheduleData)
+            // })
+        }
+
+        function saveCronSchedule() {
+            const cron = document.getElementById('scheduleCron').value;
+            
+            if (!cron.trim()) {
+                showError('Please enter a valid cron expression');
+                return;
+            }
+
+            // Basic cron validation (simple check)
+            const cronParts = cron.trim().split(/\s+/);
+            if (cronParts.length !== 5) {
+                showError('Cron format must have 5 fields: minute hour day month weekday');
+                return;
+            }
+
+            console.log('Cron schedule to save:', cron);
+            showSuccess(`✓ Cron schedule saved: ${cron}`);
+            
+            // TODO: Send to backend API endpoint /api/v1/schedule/cron
+            // fetch('/api/v1/schedule/cron', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': `Bearer ${localStorage.getItem('token')}`
+            //     },
+            //     body: JSON.stringify({ cron_expression: cron })
+            // })
+        }
+
+        function upgradeToPro() {
+            // In Phase 2b: redirect to Stripe checkout
+            showSuccess('Redirecting to payment page...');
+            // window.location.href = '/checkout.html';
+        }
+
+        function updatePostForm() {
+            const type = document.getElementById('postType').value;
+            const topicLabel = document.querySelector('label[for="postTopic"]');
+            const topicInput = document.getElementById('postTopic');
+
+            if (type === 'news') {
+                topicLabel.textContent = 'Industry';
+                topicInput.placeholder = 'e.g., AI, Tech, Business...';
+            } else if (type === 'story') {
+                topicLabel.textContent = 'Story Theme';
+                topicInput.placeholder = 'e.g., Learning Journey, Career Transition...';
+            } else if (type === 'interview') {
+                topicLabel.textContent = 'Interview Focus';
+                topicInput.placeholder = 'Will use interview questions from config';
+            } else {
+                topicLabel.textContent = 'Topic/Subject';
+                topicInput.placeholder = 'e.g., Machine Learning, Web Development...';
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('postTopic').value = '';
+            document.getElementById('postContent').value = '';
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/index.html';
+        }
+
+        function showError(message) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        // Load dashboard on page load
+        window.addEventListener('load', initDashboard);
+    </script>
+</body>
+</html>

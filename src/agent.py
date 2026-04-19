@@ -156,21 +156,25 @@ TRENDING_HASHTAGS = {
 # For trending topic discovery (trending mode), see trend_discovery.py which uses HN + Reddit APIs
 RSS_FEEDS = {
     "ai": [
+        "https://hnrss.org/frontpage?q=AI|ML|LLM|GPT|Transformer",
         "https://venturebeat.com/category/ai/feed/",
         "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "https://news.google.com/rss/search?q=AI+Machine+Learning&hl=en-US&gl=US&ceid=US:en"
     ],
     "tech": [
+        "https://hnrss.org/frontpage",
         "https://techcrunch.com/feed/",
-        "https://www.theverge.com/tech/rss/index.xml",
+        "https://www.theverge.com/rss/index.xml"
     ],
     "layoffs": [
-        "https://techcrunch.com/feed/",
-        "https://news.ycombinator.com/rss",
+        "https://news.google.com/rss/search?q=tech+layoffs&hl=en-US&gl=US&ceid=US:en",
+        "https://layoffs.fyi/feed/"
     ],
     "tools": [
-        "https://news.ycombinator.com/rss",
-        "https://techcrunch.com/feed/",
-    ],
+        "https://hnrss.org/newest?q=Show+HN",
+        "https://producthunt.com/feed"
+    ]
+}
 }
 
 # ─── DIAGRAM TYPE ROTATION ────────────────────────────────────────────────────
@@ -451,28 +455,36 @@ RULES:
 
 STORY_THEMES = [
     {
-        "id": "ai-discovery-moment",
-        "name": "AI Discovery Moment",
-        "prompt": "A personal but practical realization about how AI tools discover businesses, professionals, and expertise from public signals.",
-        "angle": "Use one concrete moment, then extract 3 practical actions readers can apply to their own profile or workflow.",
-        "diagram_type": "Modern Cards",
-        "diagram_subject": "Moment -> Realization -> Actions -> Outcome",
+        "id": "llm-agent-realization",
+        "name": "AI Agent Interaction",
+        "prompt": "The technical moment you realized a multi-agent system wasn't behaving as expected, and how you fixed the signal-to-noise ratio in agent communication.",
+        "angle": "Explain the technical 'why', then give 3 architectural fixes for better agent reliability.",
+        "diagram_type": "Architecture Diagram",
+        "diagram_subject": "Agent A -> Brain -> Agent B -> Feedback Loop",
     },
     {
-        "id": "career-leverage-shift",
-        "name": "Career Leverage Shift",
-        "prompt": "How AI changes leverage at work: small teams shipping more by automating repetitive workflows.",
-        "angle": "Ground it in practical examples and avoid fear language.",
-        "diagram_type": "Modern Cards",
-        "diagram_subject": "Old workflow vs AI workflow vs role shift",
+        "id": "rag-strategy-shift",
+        "name": "RAG Strategy Shift",
+        "prompt": "Why simple vector retrieval isn't enough for production AI. A story about high latency or low relevance solved by hybrid search or reranking.",
+        "angle": "Focus on the performance metrics (latency/relevance) and 3 specific retrieval optimizations.",
+        "diagram_type": "System Design",
+        "diagram_subject": "User Query -> Vector DB -> Hybrid Search -> Reranker -> LLM",
     },
     {
-        "id": "name-search-reputation-check",
-        "name": "AI Name Search Reality Check",
-        "prompt": "A personal moment: using an AI assistant for a simple recommendation, then searching your own name and realizing how public signals shape professional discovery.",
-        "angle": "Tell it as a real story: one relatable trigger moment, one uncomfortable realization, then 3 specific profile/content actions.",
-        "diagram_type": "Modern Cards",
-        "diagram_subject": "Trigger moment -> self-search -> signal gaps -> profile fixes -> outcome",
+        "id": "personal-ai-daily-life",
+        "name": "Personal AI Productivity",
+        "prompt": "How you built a custom AI agent (using LangGraph/Autogen/Modal) to handle a repetitive part of your personal life: travel planning, meal prep, or learning a new skill.",
+        "angle": "Name specific tools and libraries. Show the transition from manual friction to AI automation.",
+        "diagram_type": "Workflow",
+        "diagram_subject": "Friction Point -> AI Tooling -> Automated Flow -> Time Saved",
+    },
+    {
+        "id": "ml-model-fine-tuning",
+        "name": "Model Observability Moment",
+        "prompt": "The day you found drift or hallucination in a production ML model, and the specific metrics you used to diagnose and repair it.",
+        "angle": "Be technical: discuss perplexity, semantic similarity, or drift detection tools.",
+        "diagram_type": "Monitoring Map",
+        "diagram_subject": "Feature Input -> Prediction -> Drift Detection -> Alert -> Retrain",
     },
 ]
 
@@ -2680,14 +2692,20 @@ def _extract_poster_title(topic_name: str, post_text: str, mode: str) -> str:
             if re.search(r"[0-9.\-]", cand) or cand.isupper():
                 return cand[:32]
 
-    # Priority 3: Contextual search for tech keywords
-    tech_keywords = ["Pipeline", "System", "Architecture", "Detection", "Workflow", "Service", "Engine", "Platform", "Model", "Node"]
+    # Priority 3: Contextual search for technical Subject Actors (e.g. "RAG Pipeline")
+    tech_keywords = ["Pipeline", "System", "Architecture", "Detection", "Workflow", "Service", "Engine", "Platform", "Model", "Node", "RAG", "LLM", "Agent"]
     for kw in tech_keywords:
-        if kw.lower() in post_text.lower():
-            m = re.search(r"(\w+)\s+" + kw, post_text, re.I)
+        # Switch to strict word boundary matching to avoid "Engine" in "Engineers"
+        pattern = r"\b" + kw + r"\b"
+        if re.search(pattern, post_text, re.I):
+            # Find the word BEFORE it
+            m = re.search(r"(\w+)\s+" + re.escape(kw), post_text, re.I)
             if m:
-                return f"{m.group(1).title()} {kw}"[:32]
-            return f"Technical {kw}"[:32]
+                actor = m.group(1).title()
+                # Blacklist generic descriptors
+                if actor.upper() not in {"MOST", "THE", "OUR", "THIS", "STAFF", "YOUR"}:
+                    return f"{actor} {kw}"[:32]
+            return f"Professional {kw}"[:32]
 
     # Final fallback
     return (topic_name or "Production Insight")[:32]
@@ -2862,6 +2880,44 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
     """
     lines = (post_text or "").splitlines()
     sections = []
+    
+    # Mandatory Similarity Protection:
+    # Identify snippets already used in the post body (especially numbered bullets)
+    post_bullets = []
+    for line in lines:
+        bm = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$", line.strip())
+        if bm: post_bullets.append(bm.group(1).lower().strip())
+
+    def is_too_similar(cand):
+        c = cand.lower().strip()
+        for pb in post_bullets:
+            if len(c) > 10 and (c in pb or pb in c): return True
+        return False
+
+    # Pass 1: look for explicit key-takeaway bolding (**Takeaway**)
+    for line in lines:
+        stripped = line.strip()
+        m = re.match(r"^\*\*(.+?)\*\*", stripped)
+        if m:
+            label = m.group(1).strip(" .*:")
+            if 5 <= len(label) <= 120 and not is_too_similar(label):
+                sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
+
+        if len(sections) >= 6: break
+
+    # Pass 2: look for numbered list items ONLY if we have low variety
+    if len(sections) < 3:
+        for line in lines:
+            m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$", line.strip())
+            if m:
+                # IMPORTANT: For diagrams, we often want a SUMMARIZED version, not the exact bullet.
+                # If we use the exact bullet, the user sees it as "redundant nonsense".
+                # We will only use them if we have absolutely nothing else.
+                label = m.group(1).strip()
+                label = re.sub(r"\s*[—:–]\s*.*$", "", label).strip(" .")
+                if len(label) > 6 and not is_too_similar(label):
+                    sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
+            if len(sections) >= 6: break
 
     # Pass 1: look for explicit key-takeaway bolding (**Takeaway**)
     for line in lines:
@@ -2963,11 +3019,13 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
             {"id": 5, "label": "Key Takeaway",    "desc": ""},
         ]
 
-    # If this is a technical topic, prepare Mermaid code for Kroki (Internet Diagram)
+    # Universal Internet Diagrams (User Request: "get diagrams from internet")
+    # We now enable professional Mermaid/Kroki rendering for ALL topics by default
+    # to maintain high-end engineering visual standards.
     mermaid_code = ""
     title = _extract_poster_title(topic_name, post_text, mode)
-    is_tech = any(kw in (topic_name or "").lower() for kw in ["architecture", "system", "design", "pipeline", "code", "ai", "detection"])
-    if is_tech and len(sections) >= 3:
+    # is_tech check removed — every post earns a professional diagram
+    if len(sections) >= 3:
         mermaid_code = _build_mermaid_code(title, sections)
 
     return {
@@ -2975,7 +3033,7 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
         "subtitle": _get_post_subtitle(mode),
         "sections": sections[:6],
         "mermaid_code": mermaid_code,
-        "diagram_style": "mermaid" if mermaid_code else None
+        "diagram_style": "mermaid"
     }
 
 

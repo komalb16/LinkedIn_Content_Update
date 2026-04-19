@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Content Generator - Auto-Post with AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #0A66C2 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-hover {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- NAVBAR -->
+    <nav class="fixed w-full bg-white/95 backdrop-blur z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3.5 2A1.5 1.5 0 002 3.5v13A1.5 1.5 0 003.5 18h13a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-13zM5 11a2 2 0 100-4 2 2 0 000 4z"/>
+                </svg>
+                <span class="text-xl font-bold text-gray-900">LinkedIn AI Generator</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="#pricing" class="text-gray-700 hover:text-gray-900">Pricing</a>
+                <a href="https://github.com" class="text-gray-700 hover:text-gray-900">GitHub</a>
+                <a href="/login" class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50">Login</a>
+                <a href="/signup" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="pt-32 pb-20 px-4 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-6xl font-bold text-gray-900 mb-6">
+                AI-Powered LinkedIn Posts
+                <span class="gradient-text"> On Autopilot</span>
+            </h1>
+            <p class="text-2xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Generate engaging professional posts daily. Zero writing required. LinkedIn handles engagement automatically.
+            </p>
+            
+            <div class="flex gap-4 justify-center mb-12">
+                <a href="/signup" class="px-8 py-4 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 font-semibold">
+                    Start Free Trial
+                </a>
+                <a href="#how-it-works" class="px-8 py-4 border-2 border-gray-300 text-gray-900 text-lg rounded-lg hover:border-gray-400 font-semibold">
+                    How It Works
+                </a>
+            </div>
+
+            <!-- STATS -->
+            <div class="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+                <div>
+                    <div class="text-4xl font-bold text-blue-600">280%</div>
+                    <div class="text-gray-600">Avg Engagement ↑</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-purple-600">23</div>
+                    <div class="text-gray-600">Diagram Styles</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-green-600">~0</div>
+                    <div class="text-gray-600">Mins to Setup</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works" class="py-20 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-16">How It Works</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">1️⃣</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Connect LinkedIn</h3>
+                    <p class="text-gray-600">Authorize your LinkedIn account (one-time)</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">2️⃣</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Set Topics</h3>
+                    <p class="text-gray-600">Choose topics (AI, System Design, etc.)</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">3️⃣</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">AI Generates</h3>
+                    <p class="text-gray-600">Posts created with engagement optimization</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">4️⃣</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Auto-Publish</h3>
+                    <p class="text-gray-600">Posts go live on your schedule</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="py-20 px-4 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-16">What You Get</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card-hover bg-white p-8 rounded-lg border border-gray-200">
+                    <div class="text-3xl mb-4">🤖</div>
+                    <h3 class="font-bold text-lg mb-2">AI Writing</h3>
+                    <p class="text-gray-600">Llama 3.3 (70B) generates professional posts tailored for LinkedIn</p>
+                </div>
+                
+                <div class="card-hover bg-white p-8 rounded-lg border border-gray-200">
+                    <div class="text-3xl mb-4">📊</div>
+                    <h3 class="font-bold text-lg mb-2">Auto Diagrams</h3>
+                    <p class="text-gray-600">Beautiful SVG diagrams generated for every post (23 styles)</p>
+                </div>
+                
+                <div class="card-hover bg-white p-8 rounded-lg border border-gray-200">
+                    <div class="text-3xl mb-4">📈</div>
+                    <h3 class="font-bold text-lg mb-2">Analytics</h3>
+                    <p class="text-gray-600">Track engagement by topic, post type, and over time</p>
+                </div>
+                
+                <div class="card-hover bg-white p-8 rounded-lg border border-gray-200">
+                    <div class="text-3xl mb-4">🎯</div>
+                    <h3 class="font-bold text-lg mb-2">Smart Scheduling</h3>
+                    <p class="text-gray-600">Prevent topic repetition with 7-day diversity checks</p>
+                </div>
+                
+                <div class="card-hover bg-white p-8 rounded-lg border border-gray-200">
+                    <div class="text-3xl mb-4">✍️</div>
+                    <h3 class="font-bold text-lg mb-2">Draft Preview</h3>
+                    <p class="text-gray-600">Review before publishing with engagement prediction</p>
+                </div>
+                
+                <div class="card-hover bg-white p-8 rounded-lg border border-gray-200">
+                    <div class="text-3xl mb-4">⚡</div>
+                    <h3 class="font-bold text-lg mb-2">Set & Forget</h3>
+                    <p class="text-gray-600">Posts publish automatically. We update tokens. You relax.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="py-20 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-4">Simple Pricing</h2>
+            <p class="text-center text-gray-600 mb-16">Choose the plan that fits your needs</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- FREE TIER -->
+                <div class="card-hover bg-gray-50 p-8 rounded-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold mb-2">Self-Hosted</h3>
+                    <p class="text-gray-600 mb-6">For developers</p>
+                    <div class="text-4xl font-bold text-green-600 mb-6">Free</div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-2">
+                            <span class="text-green-600">✓</span>
+                            <span>2 posts per week</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-green-600">✓</span>
+                            <span>14 diagram styles</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-green-600">✓</span>
+                            <span>GitHub Pages dashboard</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-green-600">✓</span>
+                            <span>Self-hosted (Docker)</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-gray-400">✗</span>
+                            <span class="text-gray-400">Email support</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-gray-400">✗</span>
+                            <span class="text-gray-400">Analytics sync</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="https://github.com" class="block text-center px-6 py-3 border-2 border-gray-300 text-gray-900 rounded-lg hover:bg-gray-100 font-semibold">
+                        Fork on GitHub
+                    </a>
+                    <p class="text-xs text-gray-500 text-center mt-4">45 min setup • Manual token updates</p>
+                </div>
+                
+                <!-- PAID TIER -->
+                <div class="card-hover bg-blue-600 text-white p-8 rounded-lg border-2 border-blue-600 relative">
+                    <div class="absolute top-4 right-4 bg-yellow-400 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">
+                        POPULAR
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-2">Pro</h3>
+                    <p class="text-blue-100 mb-6">For professionals & teams</p>
+                    <div class="text-4xl font-bold mb-2">$29<span class="text-lg">/month</span></div>
+                    <p class="text-blue-100 text-sm mb-6">or $290/year (save $58)</p>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-2">
+                            <span class="text-yellow-400">✓</span>
+                            <span>Unlimited posts</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-yellow-400">✓</span>
+                            <span>All 23 diagram styles</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-yellow-400">✓</span>
+                            <span>SaaS dashboard (hosted)</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-yellow-400">✓</span>
+                            <span>0 setup time (1-click sign up)</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-yellow-400">✓</span>
+                            <span>Email support (24h)</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-yellow-400">✓</span>
+                            <span>LinkedIn analytics sync</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-yellow-400">✓</span>
+                            <span>Auto token refresh</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="/signup" class="block text-center px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-50 font-semibold">
+                        Start Free Trial (7 days)
+                    </a>
+                    <p class="text-xs text-blue-200 text-center mt-4">No credit card required</p>
+                </div>
+            </div>
+
+            <!-- COMPARISON TABLE -->
+            <div class="mt-20">
+                <h3 class="text-2xl font-bold mb-8 text-center">Feature Comparison</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-4 px-4">Feature</th>
+                                <th class="text-center py-4 px-4">Self-Hosted</th>
+                                <th class="text-center py-4 px-4">Pro ($29/mo)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-4 px-4">Posts per week</td>
+                                <td class="text-center">2</td>
+                                <td class="text-center text-green-600 font-bold">Unlimited</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-4 px-4">Diagram styles</td>
+                                <td class="text-center">14</td>
+                                <td class="text-center text-green-600 font-bold">23</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-4 px-4">Setup time</td>
+                                <td class="text-center">45 minutes</td>
+                                <td class="text-center text-green-600 font-bold">&lt; 1 minute</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-4 px-4">Dashboard</td>
+                                <td class="text-center">GitHub Pages</td>
+                                <td class="text-center text-green-600 font-bold">Professional SaaS</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-4 px-4">Analytics</td>
+                                <td class="text-center">Basic</td>
+                                <td class="text-center text-green-600 font-bold">LinkedIn Engagement</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-4 px-4">Token refresh</td>
+                                <td class="text-center">Manual (every 60 days)</td>
+                                <td class="text-center text-green-600 font-bold">Automatic</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-4 px-4">Support</td>
+                                <td class="text-center">Community</td>
+                                <td class="text-center text-green-600 font-bold">Email support</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 px-4">Server costs</td>
+                                <td class="text-center">You pay</td>
+                                <td class="text-center text-green-600 font-bold">Included</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-6">Ready to Transform Your LinkedIn Presence?</h2>
+            <p class="text-xl text-blue-100 mb-8">Start free for 7 days. No credit card required. Cancel anytime.</p>
+            
+            <div class="flex gap-4 justify-center">
+                <a href="/signup" class="px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-50 font-bold text-lg">
+                    Start Free Trial
+                </a>
+                <a href="https://github.com" class="px-8 py-4 border-2 border-white text-white rounded-lg hover:bg-white/10 font-bold text-lg">
+                    Fork on GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-gray-400 py-12 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h4 class="font-bold text-white mb-4">Product</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white">Features</a></li>
+                        <li><a href="#pricing" class="hover:text-white">Pricing</a></li>
+                        <li><a href="https://github.com" class="hover:text-white">GitHub</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/docs" class="hover:text-white">Docs</a></li>
+                        <li><a href="/blog" class="hover:text-white">Blog</a></li>
+                        <li><a href="/support" class="hover:text-white">Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white">About</a></li>
+                        <li><a href="#" class="hover:text-white">Privacy</a></li>
+                        <li><a href="#" class="hover:text-white">Terms</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white mb-4">Connect</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white">Twitter</a></li>
+                        <li><a href="#" class="hover:text-white">LinkedIn</a></li>
+                        <li><a href="mailto:support@example.com" class="hover:text-white">Email</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 text-center">
+                <p>&copy; 2026 LinkedIn Content Generator. Built with ❤️ in India.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

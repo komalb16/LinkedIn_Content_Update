@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Content Generator - Dashboard</title>
+    
+    <!-- HTMX for interactivity -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- TailwindCSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js for reactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #0A66C2;
+            --success: #31A24C;
+            --warning: #F1C21B;
+            --danger: #DA1E28;
+        }
+        body {
+            background: #F3F2EF;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        }
+        .navbar { background: white; }
+        .sidebar { background: white; }
+        .card { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+        .btn-primary { background: var(--primary); }
+        .btn-primary:hover { background: #0a5fa3; }
+        .text-primary { color: var(--primary); }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- NAVBAR -->
+    <nav class="navbar sticky top-0 border-b border-gray-200 z-50">
+        <div class="px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3.5 2A1.5 1.5 0 002 3.5v13A1.5 1.5 0 003.5 18h13a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-13zM5 11a2 2 0 100-4 2 2 0 000 4z"/>
+                </svg>
+                <h1 class="text-xl font-bold text-gray-900">LinkedIn Content Generator</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600" hx-get="/api/v1/status" hx-trigger="load" hx-swap="innerHTML">
+                    Status: Loading...
+                </span>
+                <button class="px-4 py-2 text-primary border border-primary rounded hover:bg-blue-50">
+                    Profile
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen" style="margin-top: -3rem; padding-top: 3rem;">
+        <!-- SIDEBAR -->
+        <aside class="sidebar w-64 border-r border-gray-200 p-4 overflow-y-auto">
+            <nav class="space-y-2">
+                <a href="#dashboard" class="block px-4 py-2 rounded hover:bg-gray-100 text-gray-900 font-medium">
+                    📊 Dashboard
+                </a>
+                <a href="#posts" class="block px-4 py-2 rounded hover:bg-gray-100 text-gray-700">
+                    ✍️ Posts
+                </a>
+                <a href="#analytics" class="block px-4 py-2 rounded hover:bg-gray-100 text-gray-700">
+                    📈 Analytics
+                </a>
+                <a href="#topics" class="block px-4 py-2 rounded hover:bg-gray-100 text-gray-700">
+                    🏷️ Topics
+                </a>
+                <a href="#schedule" class="block px-4 py-2 rounded hover:bg-gray-100 text-gray-700">
+                    ⏰ Schedule
+                </a>
+                <a href="#settings" class="block px-4 py-2 rounded hover:bg-gray-100 text-gray-700">
+                    ⚙️ Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto p-6">
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard" class="space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Dashboard</h2>
+                </div>
+
+                <!-- QUICK STATS -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="card p-6 rounded">
+                        <div class="text-gray-600 text-sm mb-2">Posts Generated</div>
+                        <div class="text-3xl font-bold text-gray-900" hx-get="/api/v1/posts?limit=1" hx-trigger="load" hx-target="this" hx-swap="innerHTML">
+                            -
+                        </div>
+                    </div>
+                    <div class="card p-6 rounded">
+                        <div class="text-gray-600 text-sm mb-2">Avg Engagement</div>
+                        <div class="text-3xl font-bold text-green-600" hx-get="/api/v1/analytics/engagement" hx-trigger="load" hx-target="this" hx-swap="innerHTML">
+                            -
+                        </div>
+                    </div>
+                    <div class="card p-6 rounded">
+                        <div class="text-gray-600 text-sm mb-2">Top Topic</div>
+                        <div class="text-lg font-semibold text-gray-900 mt-2">
+                            Loading...
+                        </div>
+                    </div>
+                    <div class="card p-6 rounded">
+                        <div class="text-gray-600 text-sm mb-2">Status</div>
+                        <div class="text-lg font-semibold text-green-600 mt-2">
+                            ✅ Running
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GENERATE POST SECTION -->
+                <div class="card p-6 rounded">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Generate New Post</h3>
+                    <form hx-post="/api/v1/posts/generate" hx-target="#preview" hx-swap="innerHTML swap:1s">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Topic</label>
+                                <select name="topic" class="w-full px-3 py-2 border border-gray-300 rounded">
+                                    <option value="">Random Topic</option>
+                                    <option value="AI & Machine Learning">AI & Machine Learning</option>
+                                    <option value="System Design">System Design</option>
+                                    <option value="Python Development">Python Development</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Post Type</label>
+                                <select name="post_type" class="w-full px-3 py-2 border border-gray-300 rounded">
+                                    <option value="topic">Topic Post</option>
+                                    <option value="story">Story</option>
+                                    <option value="interview">Interview Q&A</option>
+                                    <option value="ai_news">AI News</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="submit" class="btn-primary text-white px-6 py-2 rounded font-medium">
+                                Generate & Preview
+                            </button>
+                            <button type="submit" name="dry_run" value="false" class="bg-green-600 text-white px-6 py-2 rounded font-medium hover:bg-green-700">
+                                Generate & Publish
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PREVIEW -->
+                <div id="preview" class="card p-6 rounded">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Preview</h3>
+                    <div class="bg-gray-50 p-4 rounded min-h-64 border-2 border-dashed border-gray-300">
+                        <p class="text-gray-500 text-center mt-20">Generate a post to see preview here</p>
+                    </div>
+                </div>
+
+                <!-- RECENT POSTS -->
+                <div class="card p-6 rounded">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Posts</h3>
+                    <div hx-get="/api/v1/posts?limit=5" hx-trigger="load" hx-swap="innerHTML">
+                        <div class="space-y-3">
+                            <div class="p-3 border border-gray-200 rounded">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALYTICS VIEW -->
+            <div id="analytics" class="space-y-6" style="display:none;">
+                <h2 class="text-2xl font-bold text-gray-900">Analytics</h2>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="card p-6 rounded">
+                        <h3 class="text-lg font-semibold mb-4">Engagement Trend</h3>
+                        <canvas id="engagementChart"></canvas>
+                    </div>
+                    <div class="card p-6 rounded">
+                        <h3 class="text-lg font-semibold mb-4">Posts by Type</h3>
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded">
+                    <h3 class="text-lg font-semibold mb-4">Performance by Topic</h3>
+                    <div hx-get="/api/v1/analytics/topics" hx-trigger="load" hx-swap="innerHTML">
+                        <p class="text-gray-500">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOPICS VIEW -->
+            <div id="topics" class="space-y-6" style="display:none;">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">Topics</h2>
+                    <button class="btn-primary text-white px-4 py-2 rounded" onclick="showAddTopic()">
+                        + Add Topic
+                    </button>
+                </div>
+                
+                <div hx-get="/api/v1/topics" hx-trigger="load" hx-swap="innerHTML">
+                    <div class="text-gray-500">Loading topics...</div>
+                </div>
+            </div>
+
+            <!-- SETTINGS VIEW -->
+            <div id="settings" class="space-y-6" style="display:none;">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
+                
+                <div class="card p-6 rounded">
+                    <h3 class="text-lg font-semibold mb-4">General Settings</h3>
+                    <form hx-put="/api/v1/settings" hx-swap="innerHTML swap:1s">
+                        <div class="space-y-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="auto_post" class="w-4 h-4" checked>
+                                <span class="ml-3">Auto-publish posts on schedule</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="enable_topic_diversity" class="w-4 h-4" checked>
+                                <span class="ml-3">Check topic diversity (prevent repeats)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="enable_engagement_tracking" class="w-4 h-4" checked>
+                                <span class="ml-3">Track engagement analytics</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="enable_diagram_rotation" class="w-4 h-4" checked>
+                                <span class="ml-3">Rotate diagram styles (prevent fatigue)</span>
+                            </label>
+                        </div>
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Schedule (Cron)</label>
+                            <input type="text" name="schedule_cron" value="0 9,21 * * *" class="w-full px-3 py-2 border border-gray-300 rounded">
+                            <p class="text-xs text-gray-500 mt-1">Format: minute hour day month weekday (9 AM & 9 PM daily)</p>
+                        </div>
+                        <button type="submit" class="mt-6 btn-primary text-white px-6 py-2 rounded font-medium">
+                            Save Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- NAVIGATION SCRIPT -->
+    <script>
+        const sections = ['dashboard', 'posts', 'analytics', 'topics', 'schedule', 'settings'];
+        
+        document.querySelectorAll('aside a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.getAttribute('href').substring(1);
+                
+                // Hide all sections
+                sections.forEach(s => {
+                    document.getElementById(s).style.display = 'none';
+                });
+                
+                // Show target section
+                document.getElementById(target).style.display = 'block';
+                
+                // Update active link
+                document.querySelectorAll('aside a').forEach(a => a.classList.remove('font-medium'));
+                link.classList.add('font-medium');
+            });
+        });
+    </script>
+</body>
+</html>

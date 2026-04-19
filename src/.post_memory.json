@@ -350,6 +350,7 @@
     "text": "\ud83d\udccc Detecting AI Written Code\n\nAI-generated code is already a bigger problem in production environments than most engineers admit.\n\n1\ufe0f\u20e3 Code submissions need human review\n\n2\ufe0f\u20e3 AI detection methods are limited\nThe current state of AI detection methods relies heavily on pattern recognition and machine learning algorithms, which can be easily tricked by sophisticated AI-generated code.\n\nCode Submission -> Human Review | AI Detection -> Flagged Code\n\n3\ufe0f\u20e3 Best practices include code reviews\nProduction systems that effectively prevent AI-generated code prioritize human review and manual inspection of code submissions, rather than relying solely on automated detection methods \ud83d\udeab.\n\n4\ufe0f\u20e3 Common mistakes include over-reliance on\nMost engineers get wrong the assumption that AI detection methods are foolproof, when in reality, they are only a supplement to human review and oversight \ud83e\udd16.\n\nThe one thing to remember is that human review and oversight are essential to preventing AI-generated code in production environments, and should not be replaced by automated methods \ud83d\udcdd.\n\n\ud83d\udcac What's the most effective way to prevent AI-generated code:\n\n#AIGeneratedCode #CodeReview #HumanOversight #ProductionEnvironments #SoftwareEngineering #CodeSecurity \ud83d\udd12\ud83d\udcbb\ud83d\udd0d"
   },
   {
+<<<<<<< HEAD
     "timestamp": "2026-04-19T05:42:34.484340",
     "topic_id": "trend-browser-tab-closing",
     "topic_name": "Tab Closing Strategies",
@@ -362,5 +363,19 @@
     "topic_name": "Tab Management",
     "category": "topic",
     "text": "\ud83d\udccc Tab Management\n\nMost engineers believe that more browser tabs mean more productivity \ud83e\udd2f.\n\nHowever, this approach leads to context switching overhead, decreased focus, and reduced overall efficiency \ud83d\udcbc.\n\n1\ufe0f\u20e3 Tab explosions happen quickly\n\n2\ufe0f\u20e3 Context switching costs time\n\n3\ufe0f\u20e3 Organization is key \ud83d\udca1\n\nBest Practices: Regularly closing unused tabs\nCommon Mistakes: Overwhelming the browser\n\nTo optimize browser tab usage, it's essential to implement practical tab organization strategies \ud83d\udcc8. By grouping similar tasks, reducing context switches, and regularly closing unused tabs, engineers can improve their development productivity \ud83d\ude80.\n\n\ud83d\udcac What's the most significant challenge you face with browser tab management?\n\ud83d\udc49 The Problem\n\ud83d\udc49 Core Concept\n\ud83d\udc49 How It Works\n\ud83d\udc49 Best Practices\n\ud83d\udc49 Common Mistakes\n\ud83d\udc49 Key Takeaway\n\n#ProductivityHacks #BrowserTabManagement #DevelopmentEfficiency #FocusEnhancement #TabOrganization #SoftwareEngineering"
+=======
+    "timestamp": "2026-04-19T01:52:17.534666",
+    "topic_id": "interview-system-reliability-tradeoff",
+    "topic_name": "Interview: System_Design",
+    "category": "interview",
+    "text": "\ud83d\udccc Interview: System_Design\n\nReliability vs Innovation: Which wins in your system?\n\nFast iteration breaks things. Stability slows you down. Where's your balance?\n\nDifferent approaches I've seen:\n\nWhat I use:\n\nWhy:\n\nWhere are you on this spectrum? Happy with it?\n\n#Reliability #Architecture #Culture #InterviewQuestions #EngineeringMindset"
+  },
+  {
+    "timestamp": "2026-04-19T01:52:34.879453",
+    "topic_id": "genai-roadmap",
+    "topic_name": "Generative AI Learning Roadmap",
+    "category": "topic",
+    "text": "\ud83d\udccc Generative AI Learning Roadmap\n\nGenerative AI Learning Roadmap is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: A step-by-step roadmap to guide a developer's journey from basics to building autonomous agentic systems.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #ScaleEngineering #Scalability #TechLeadership"
+>>>>>>> b8ee170 (feat: AI/ML Specialist pivot, HackerNews trend discovery, and Interview series activation)
   }
 ]

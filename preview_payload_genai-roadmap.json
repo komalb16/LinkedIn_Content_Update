@@ -1,0 +1,26 @@
+{
+  "topic_id": "genai-roadmap",
+  "topic_name": "Generative AI Learning Roadmap",
+  "category": "AI Learning",
+  "mode": "topic",
+  "diagram_type": "Viral Poster",
+  "diagram_title": "Current Architecture",
+  "diagram_file": "genai-roadmap_20260419_015233.png",
+  "post_file": "output_post_genai-roadmap.txt",
+  "post_id_for_tracking": "8d638682078b",
+  "diagram_style_used": 23,
+  "quality_notes": [
+    "Add vulnerability: mention a mistake, failure, or lesson learned. Try 'I was wrong', 'took me years to learn', or 'finally understood'.",
+    "Add more relevant emojis to improve scanability and engagement (target: 4 to 10).",
+    "Keep the post in the LinkedIn sweet spot: roughly 140 to 340 words."
+  ],
+  "ab_variants": [
+    {
+      "variant_index": 1,
+      "score": 76,
+      "raw_score": 76,
+      "similarity": 0.0067,
+      "penalty": 0
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "topic_id": "interview-system-reliability-tradeoff",
+  "topic_name": "Interview: System_Design",
+  "category": "Interview",
+  "mode": "interview",
+  "diagram_type": "Viral Poster",
+  "diagram_title": "Professional System",
+  "diagram_file": "interview-system-reliability-tradeoff_20260419_015215.png",
+  "post_file": "output_post_interview-system-reliability-tradeoff.txt",
+  "post_id_for_tracking": "d545d1ca39cb",
+  "diagram_style_used": 23,
+  "quality_notes": [
+    "Add vulnerability: mention a mistake, failure, or lesson learned. Try 'I was wrong', 'took me years to learn', or 'finally understood'.",
+    "Add more relevant emojis to improve scanability and engagement (target: 4 to 10).",
+    "Align the post more closely to the planned diagram labels so the image and text tell the same story.",
+    "Include one fenced visual block that matches the planned diagram type.",
+    "Keep the post in the LinkedIn sweet spot: roughly 140 to 340 words."
+  ],
+  "ab_variants": []
+}

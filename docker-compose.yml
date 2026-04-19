@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: linkedin_content_agent
+    environment:
+      # Required - Get from environment or .env
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      LINKEDIN_ACCESS_TOKEN: ${LINKEDIN_ACCESS_TOKEN}
+      LINKEDIN_PERSON_URN: ${LINKEDIN_PERSON_URN}
+      
+      # Features
+      AUTO_POST: ${AUTO_POST:-true}
+      ENABLE_TOPIC_DIVERSITY: ${ENABLE_TOPIC_DIVERSITY:-true}
+      ENABLE_ENGAGEMENT_TRACKING: ${ENABLE_ENGAGEMENT_TRACKING:-true}
+      ENABLE_DIAGRAM_ROTATION: ${ENABLE_DIAGRAM_ROTATION:-true}
+      
+      # Schedule
+      SCHEDULE_CRON: ${SCHEDULE_CRON:-"0 9,21 * * *"}
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      PYTHON_ENV: ${PYTHON_ENV:-production}
+    
+    volumes:
+      # Config files
+      - ./schedule_config.json:/app/schedule_config.json
+      - ./topics_config.json:/app/topics_config.json
+      - ./interview_questions.json:/app/interview_questions.json:ro
+      
+      # Data files (persisted)
+      - ./data:/app/data
+      - ./logs:/app/logs
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    name: linkedin_network
+    driver: bridge
+
+volumes:
+  data:
+    driver: local
