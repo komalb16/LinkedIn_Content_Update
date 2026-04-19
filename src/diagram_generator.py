@@ -3994,11 +3994,10 @@ def _record_rotation(style_idx: int, topic_id: str, topic_name: str, diagram_typ
 #  Internet Search Fallback (Bing Images scraper)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _fetch_internet_image(topic_name: str) -> bytes:
+def _fetch_internet_image(search_query: str) -> tuple:
     """
-    Search multiple trusted technical platforms for a diagram matching the topic.
-    Collects candidates from all sources, scores them by platform + image size,
-    and returns the best match.
+    Search multiple trusted technical platforms for the best diagram matching the query.
+    Returns (best_image_bytes, source_url) or (None, '').
 
     Priority tiers (higher = better):
       5  bytebytego.com        — Premium engineering learning diagrams
@@ -4034,10 +4033,10 @@ def _fetch_internet_image(topic_name: str) -> bytes:
 
     # Each search query targets a different angle / platform emphasis
     SEARCH_QUERIES = [
-        f"{topic_name} architecture diagram bytebytego",
-        f"{topic_name} system design diagram infographic",
-        f"{topic_name} engineering diagram medium dev.to",
-        f"site:bytebytego.com {topic_name}",
+        f"{search_query} architecture diagram bytebytego",
+        f"{search_query} system design diagram infographic",
+        f"{search_query} engineering diagram medium dev.to",
+        f"site:bytebytego.com {search_query}",
     ]
 
     def _priority(url: str) -> int:
@@ -4118,13 +4117,37 @@ class DiagramGenerator:
         Path(OUTPUT_DIR).mkdir(exist_ok=True)
         log.info("Diagram output dir: " + OUTPUT_DIR + "/")
 
-    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None):
+    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None, post_text=""):
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
 
         # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
-        # Fetches real diagrams from ByteByteGo, Medium, Dev.to, etc.
-        img_bytes, img_source_url = _fetch_internet_image(topic_name or topic_id)
+        # Build a sharp query from actual post content keywords, not just the topic name.
+        search_query = topic_name or topic_id
+        if post_text:
+            # Extract key technical noun phrases from the post: bold terms, capitalized phrases
+            import re as _re
+            bold_terms = _re.findall(r'\*\*([^*]{3,40})\*\*', post_text)
+            cap_phrases = _re.findall(r'\b([A-Z][a-z]+(?: [A-Z][a-z]+){0,2})\b', post_text)
+            # Combine and deduplicate, skip very generic stop-words
+            STOP = {"The", "This", "That", "When", "What", "How", "Why", "Most", "Our", "Your", "Here",
+                    "In", "If", "As", "At", "By", "Or", "And", "But", "For", "Now", "So", "On",
+                    "It", "We", "You", "They", "Not", "No", "Yes", "Today", "Just"}
+            candidates_kw = []
+            for t in bold_terms + cap_phrases:
+                t = t.strip()
+                if t and t not in STOP and len(t) > 4:
+                    candidates_kw.append(t)
+            # Deduplicate while preserving order
+            seen_kw = set()
+            unique_kw = [k for k in candidates_kw if not (k.lower() in seen_kw or seen_kw.add(k.lower()))]
+            if unique_kw:
+                # Use up to 3 most relevant keywords alongside the topic name
+                extra = " ".join(unique_kw[:3])
+                search_query = f"{topic_name} {extra}".strip()
+                log.info(f"Post-aware search query: '{search_query}'")
+
+        img_bytes, img_source_url = _fetch_internet_image(search_query)
         if img_bytes:
             png_filename = filename.replace(".svg", ".png")
             # Apply branding

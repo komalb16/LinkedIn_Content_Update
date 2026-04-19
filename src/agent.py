@@ -3673,7 +3673,8 @@ Write a LinkedIn post that:
             log.info(f"Forced style override to {selected_style}")
     
     diagram_path = diagram_gen.save_svg(
-        None, topic["id"], diagram_title, diagram_type, structure=diagram_structure_with_style
+        None, topic["id"], diagram_title, diagram_type,
+        structure=diagram_structure_with_style, post_text=post_text
     )
     
     alignment = _diagram_alignment_score(diagram_path, diagram_structure_with_style)
@@ -3687,7 +3688,8 @@ Write a LinkedIn post that:
             f"Low diagram/text alignment ({alignment:.2f}). Regenerating diagram with style {fallback_style}."
         )
         diagram_path = diagram_gen.save_svg(
-            None, topic["id"], diagram_title, diagram_type, structure=forced_structure
+            None, topic["id"], diagram_title, diagram_type,
+            structure=forced_structure, post_text=post_text
         )
         alignment = _diagram_alignment_score(diagram_path, forced_structure)
         diagram_structure = forced_structure
