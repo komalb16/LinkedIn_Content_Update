@@ -19,5 +19,12 @@
     "topic_name": "AI Written Work",
     "category": "topic",
     "text": "\ud83d\udccc AI Written Work\n\nI used to think AI detection tools could catch all AI-generated content in student submissions \ud83e\udd16.\n\n1\ufe0f\u20e3 AI writes better essays now\n\n2\ufe0f\u20e3 Tools can't keep up always\n\n- > Best Practices -> Common Mistakes\n3\ufe0f\u20e3 Human evaluation is key still\n\n4\ufe0f\u20e3 Context matters in evaluation\n\n5\ufe0f\u20e3 Mistakes happen without context\n\n\ud83d\udcac Which part of identifying AI-generated content is most important to you?\nBest Practices\nCommon Mistakes\n\n#AIEthics #AcademicIntegrity #EducationTechnology #ArtificialIntelligence #TeachingTips #EdTech"
+  },
+  {
+    "timestamp": "2026-04-19T06:22:28.089074",
+    "topic_id": "trend-ai-detection-strategies",
+    "topic_name": "Authentic Code Detection",
+    "category": "topic",
+    "text": "\ud83d\udccc Authentic Code Detection\n\nMost engineers believe automated tools can detect AI-generated code on their own \ud83e\udd16.\n\nHowever, I've found that relying solely on these tools can lead to false negatives and overlooked vulnerabilities \ud83d\udea8.\n\nTo identify and prevent AI-generated code, a combination of automated tools and human review is necessary \ud83d\udcc8.\n\nAutomated Tools -> Human Review\nFalse Negatives -> Caught Vulnerabilities\nOverlooked Code -> Secure Codebase\n\n5\ufe0f\u20e3 Common Mistakes include relying solely on\n\nThe rule-of-thumb is to use automated tools for initial screening, but always have a human reviewer verify the results \ud83d\udcca.\n\nThis ensures that AI-generated code is accurately identified and prevented from entering the project \ud83d\udeab.\n\n\ud83d\udcac What's your approach to detecting AI-generated code?\n\n#AIGeneratedCode #CodeAuthenticity #HumanReview #AutomatedTools #CodeSecurity #SecureCodingPractices"
   }
 ]
