@@ -4049,6 +4049,15 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
         "highscalability.com":  3,
     }
 
+    # Domain blacklist: Exclude sites that mostly host generic templates or low-quality previews
+    DOMAIN_BLACKLIST = [
+        "slideteam.net", "sketchbubble.com", "powerpointify.com",
+        "slidesalad.com", "slideegg.com", "sketching.com",
+        "presentationgo.com", "slideshare.net", "pinterest.com",
+        "shutterstock.com", "gettyimages.com", "dreamstime.com",
+        "123rf.com", "depositphotos.com", "canva.com",
+    ]
+
     # --- Disambiguation Logic ---
     topic_lower = topic_name.lower()
     rails_context = "rails" in topic_lower or "rails " in topic_lower
@@ -4060,11 +4069,12 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
         query_modifiers = " railway train -ruby -programming -software"
     
     # Each search query targets a different angle / platform emphasis
-    base_query = f"{topic_name} {extra_keywords}{query_modifiers}".strip()
+    negative_terms = " -template -slide -powerpoint -marketplace -stock -placeholder"
+    base_query = f"{topic_name} {extra_keywords}{query_modifiers}{negative_terms}".strip()
     SEARCH_QUERIES = [
         f"{base_query} diagram architecture bytebytego",
-        f"{base_query} system design diagram infographic",
-        f"{base_query} engineering diagram medium dev.to",
+        f"{base_query} system design diagram infographic explained",
+        f"{base_query} engineering visual technical breakdown medium dev.to",
         f"site:bytebytego.com {base_query}",
     ]
 
@@ -4094,6 +4104,10 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
     for query in SEARCH_QUERIES:
         log.info(f"Searching: {query}")
         for url, pri in _scrape_bing(query):
+            url_lower = url.lower()
+            if any(domain in url_lower for domain in DOMAIN_BLACKLIST):
+                log.info(f"Skipping blacklisted candidate: {url[:60]}...")
+                continue
             if url not in seen_urls:
                 seen_urls.add(url)
                 candidates.append((url, pri))

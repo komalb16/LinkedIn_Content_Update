@@ -21,6 +21,9 @@ RELEVANT_KEYWORDS = [
 BLACKLISTED_KEYWORDS = [
     "railway", "train", "transport", "shinkansen", "aviation", "maritime", 
     "logistics", "rails", "locomotive", "track", "transit",
+    "game", "gaming", "esports", "sports", "athlete", "nba", "nfl", 
+    "casino", "betting", "gambling", "travel", "tourism", "food",
+    "fitness", "lifestyle", "marketing", "ads", "advertising",
 ]
 
 ENGINEERING_SUBREDDITS = [
