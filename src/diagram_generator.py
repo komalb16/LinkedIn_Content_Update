@@ -320,6 +320,11 @@ def _style_vertical_flow(topic_id, topic_name, C, structure=None):
     }
     tid = topic_id.lower()
     key = next((k for k in STEP_DATA if k in tid), None)
+    
+    # NEW: Dynamic Title and Subtitle
+    display_title = structure.get("title", topic_name) if structure else topic_name
+    display_sub = structure.get("subtitle", "Step-by-Step") if structure else "Step-by-Step"
+
     if structure and structure.get("sections"):
         steps = [
             (str(s.get("label", f"Step {i+1}")), str(s.get("desc", "")))
@@ -339,7 +344,7 @@ def _style_vertical_flow(topic_id, topic_name, C, structure=None):
     BOX_W, ARROW_H = 500, 30
     max_flow_h = H - 90
     BOX_H = max(50, int((max_flow_h - ARROW_H * (n_steps - 1)) / n_steps))
-    BOX_H = min(64, BOX_H)
+    BOX_H = min(72, BOX_H)
     cx = W // 2
     y = 70
     svg = ""
@@ -355,9 +360,12 @@ def _style_vertical_flow(topic_id, topic_name, C, structure=None):
         svg += f'<rect x="{bx}" y="{y}" width="6" height="{BOX_H}" rx="3" fill="{col}"/>'
         svg += f'<circle cx="{bx+32}" cy="{y+BOX_H//2}" r="14" fill="{col}"/>'
         svg += f'<text x="{bx+32}" y="{y+BOX_H//2+5}" text-anchor="middle" fill="white" font-size="13" font-weight="900">{i+1}</text>'
-        label_lines = fit_lines(label, 34, 1)
-        sub_lines = fit_lines(sub, 58, 2)
-        label_y = y + max(18, BOX_H // 2 - 8)
+        
+        # INCREASED LIMITS
+        label_lines = fit_lines(label, 50, 1)
+        sub_lines = fit_lines(sub, 92, 3) 
+        
+        label_y = y + max(18, BOX_H // 2 - 12)
         svg += f'<text x="{bx+58}" y="{label_y}" fill="{darken(col,0.08)}" font-size="13" font-weight="800">{xe(label_lines[0])}</text>'
         for li, ln in enumerate(sub_lines):
             svg += f'<text x="{bx+58}" y="{label_y+16+li*11}" fill="#64748B" font-size="9.5">{xe(ln)}</text>'
@@ -371,7 +379,8 @@ def _style_vertical_flow(topic_id, topic_name, C, structure=None):
             svg += f'<polygon points="{ax},{ay2+8} {ax-7},{ay2} {ax+7},{ay2}" fill="{col}" class="pu"/>'
         y += BOX_H + ARROW_H
 
-    return _wrap(svg, W, H, topic_name, "Step-by-Step", accent, bg_top, bg_bot)
+    return _wrap(svg, W, H, display_title, display_sub, accent, bg_top, bg_bot)
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -427,13 +436,24 @@ def _style_mind_map(topic_id, topic_name, C, structure=None):
     }
     tid = topic_id.lower()
     key = next((k for k in BRANCHES if k in tid), None)
-    branches = BRANCHES[key] if key else [
-        ("Ingest","Data collection layer","APIs + streams"),
-        ("Process","Transform and enrich","Spark + dbt"),
-        ("Store","Persist and index","PostgreSQL + S3"),
-        ("Serve","APIs and dashboards","REST + Grafana"),
-        ("Govern","Quality and lineage","Catalog + policies"),
-    ]
+    
+    # NEW: Dynamic Title and Subtitle
+    display_title = structure.get("title", topic_name) if structure else topic_name
+    display_sub = structure.get("subtitle", "Mind Map") if structure else "Mind Map"
+
+    if structure and structure.get("sections"):
+        branches = [
+            (str(s.get("label", "")), str(s.get("desc", "")), "")
+            for i, s in enumerate(structure.get("sections", [])[:6])
+        ]
+    else:
+        branches = BRANCHES[key] if key else [
+            ("Ingest","Data collection layer","APIs + streams"),
+            ("Process","Transform and enrich","Spark + dbt"),
+            ("Store","Persist and index","PostgreSQL + S3"),
+            ("Serve","APIs and dashboards","REST + Grafana"),
+            ("Govern","Quality and lineage","Catalog + policies"),
+        ]
 
     cx, cy = W // 2, H // 2 + 10
     r_hub = 68
@@ -443,13 +463,14 @@ def _style_mind_map(topic_id, topic_name, C, structure=None):
     svg += f'<circle cx="{cx}" cy="{cy}" r="{r_hub}" fill="{darken(accent,0.45)}"/>'
     svg += f'<circle cx="{cx}" cy="{cy}" r="{r_hub-4}" fill="{darken(accent,0.55)}" stroke="{lighten(accent,0.4)}" stroke-width="1.5"/>'
 
-    words = topic_name.replace("&","and").split()
+    words = display_title.replace("&","and").split()
     mid = len(words) // 2
-    line1 = " ".join(words[:mid]) or topic_name[:14]
+    line1 = " ".join(words[:mid]) or display_title[:18]
     line2 = " ".join(words[mid:]) or ""
-    svg += f'<text x="{cx}" y="{cy-6}" text-anchor="middle" fill="white" font-size="13" font-weight="900">{xe(clamp(line1,14))}</text>'
+    # INCREASED HUB CLAMP
+    svg += f'<text x="{cx}" y="{cy-6}" text-anchor="middle" fill="white" font-size="13" font-weight="900">{xe(clamp(line1,22))}</text>'
     if line2:
-        svg += f'<text x="{cx}" y="{cy+12}" text-anchor="middle" fill="{lighten(accent,0.6)}" font-size="12" font-weight="700">{xe(clamp(line2,14))}</text>'
+        svg += f'<text x="{cx}" y="{cy+12}" text-anchor="middle" fill="{lighten(accent,0.6)}" font-size="12" font-weight="700">{xe(clamp(line2,22))}</text>'
 
     n = len(branches)
     for i, (bname, bdesc, bsub) in enumerate(branches):
@@ -471,8 +492,12 @@ def _style_mind_map(topic_id, topic_name, C, structure=None):
         br = 46
         svg += f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="{br+3}" fill="{rgba(col,0.12)}"/>'
         svg += f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="{br}" fill="{darken(col,0.50)}" stroke="{col}" stroke-width="2" class="fi" style="animation-delay:{i*0.1:.2f}s"/>'
-        svg += f'<text x="{bx:.1f}" y="{by-7:.1f}" text-anchor="middle" fill="white" font-size="10" font-weight="800">{xe(clamp(bname,13))}</text>'
-        svg += f'<text x="{bx:.1f}" y="{by+8:.1f}" text-anchor="middle" fill="{lighten(col,0.55)}" font-size="8">{xe(clamp(bdesc,16))}</text>'
+        
+        # INCREASED BRANCH LIMITS
+        svg += f'<text x="{bx:.1f}" y="{by-7:.1f}" text-anchor="middle" fill="white" font-size="10" font-weight="800">{xe(clamp(bname,24))}</text>'
+        desc_ls = fit_lines(bdesc, 32, 2)
+        for li, ln in enumerate(desc_ls):
+            svg += f'<text x="{bx:.1f}" y="{by+8+li*10:.1f}" text-anchor="middle" fill="{lighten(col,0.55)}" font-size="8">{xe(ln)}</text>'
 
         R_leaf = 308
         lx = cx + R_leaf * math.cos(angle_rad)
@@ -539,14 +564,20 @@ def _style_pyramid(topic_id, topic_name, C, structure=None):
             ("Application Layer","Your services, APIs, and business logic"),
         ],
     }
+    
+    tid = topic_id.lower()
+    key = next((k for k in LAYERS if k in tid), None)
+
+    # NEW: Dynamic Title and Subtitle
+    display_title = structure.get("title", topic_name) if structure else topic_name
+    display_sub = structure.get("subtitle", "Pyramid Model") if structure else "Pyramid Model"
+
     if structure and structure.get("sections"):
         layers = [
             (str(s.get("label", f"Layer {i+1}")), str(s.get("desc", "")))
             for i, s in enumerate(structure.get("sections", [])[:8])
         ]
     else:
-        tid = topic_id.lower()
-        key = next((k for k in LAYERS if k in tid), None)
         layers = LAYERS[key] if key else [
             ("Foundation","Core infrastructure and platform services"),
             ("Data Layer","Storage, caching, and streaming systems"),
@@ -583,10 +614,16 @@ def _style_pyramid(topic_id, topic_name, C, structure=None):
         ny = (y_top + y_bot) // 2
         svg += f'<circle cx="{x_top+26}" cy="{ny}" r="13" fill="{col}"/>'
         svg += f'<text x="{x_top+26}" y="{ny+5}" text-anchor="middle" fill="white" font-size="12" font-weight="900">{n-i}</text>'
-        svg += f'<text x="{cx_row}" y="{ny-5}" text-anchor="middle" fill="{darken(col,0.10)}" font-size="13" font-weight="800">{xe(label)}</text>'
-        svg += f'<text x="{cx_row}" y="{ny+12}" text-anchor="middle" fill="#475569" font-size="9.5">{xe(desc)}</text>'
+        
+        # INCREASED LIMITS
+        label_txt = clamp(label, 48)
+        desc_ls = fit_lines(desc, 80, 2)
+        
+        svg += f'<text x="{cx_row}" y="{ny-5}" text-anchor="middle" fill="{darken(col,0.10)}" font-size="13" font-weight="800">{xe(label_txt)}</text>'
+        for li, ln in enumerate(desc_ls):
+            svg += f'<text x="{cx_row}" y="{ny+12+li*11}" text-anchor="middle" fill="#475569" font-size="9.5">{xe(ln)}</text>'
 
-    return _wrap(svg, W, H, topic_name, structure.get("subtitle", "Pyramid Model") if structure else "Pyramid Model", accent, bg_top, bg_bot)
+    return _wrap(svg, W, H, display_title, display_sub, accent, bg_top, bg_bot)
 
 
 
@@ -654,6 +691,9 @@ def _style_timeline(topic_id, topic_name, C, structure=None):
             ("Phase 7","Scale","Optimise and grow capacity"),
         ]
 
+    # NEW: Dynamic Title and Subtitle
+    display_title = structure.get("title", topic_name) if structure else topic_name
+    display_sub = structure.get("subtitle", "Evolution Timeline") if structure else "Evolution Timeline"
 
     svg = ""
     n = len(milestones)

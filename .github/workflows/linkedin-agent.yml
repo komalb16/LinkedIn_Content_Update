@@ -18,10 +18,7 @@ on:
   #   12:00 UTC → catches  8 AM –  2 PM EDT  (morning / midday) ✓
   #   18:00 UTC → catches  2 PM –  8 PM EDT  (afternoon / evening) ✓
   schedule:
-    - cron: "0 0  * * *"  # midnight UTC  = 8 PM EDT
-    - cron: "0 6  * * *"  #  6 AM UTC     = 2 AM EDT
-    - cron: "0 12 * * *"  # noon UTC      = 8 AM EDT
-    - cron: "0 18 * * *"  #  6 PM UTC     = 2 PM EDT
+    - cron: "0 */3 * * *"  # Every 3 hours (8 times daily) - 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 UTC
   
   # Manual trigger from GitHub UI — with optional inputs
   workflow_dispatch:
@@ -30,25 +27,7 @@ on:
         description: "Topic ID (leave blank for auto-selection)"
         required: false
         default: ""
-        type: choice
-        options:
-          - ""                    # auto
-          - llm-architecture
-          - ai-agents-2025
-          - mlops-pipeline
-          - rag-systems
-          - kubernetes-mastery
-          - docker-cheatsheet
-          - aws-architecture
-          - cicd-pipelines
-          - system-design
-          - api-design
-          - git-workflow
-          - solid-principles
-          - zero-trust
-          - devsecops
-          - data-lakehouse
-          - kafka-streaming
+        type: string
 
       dry_run:
         description: "Dry run (generate but don't post)"

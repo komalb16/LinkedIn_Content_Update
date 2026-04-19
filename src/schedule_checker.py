@@ -291,12 +291,13 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         return
 
     now = utc_now()   # re-fetch as UTC for time comparison
-    WINDOW = 6 * 60 * 60  # 6-hour window — cron fires every 6h, 4 slots tile all 24h with no gaps
+    WINDOW = 3 * 60 * 60         # 3-hour lookahead window (matches 3h cron frequency)
+    LOOKBACK_LIMIT = 1.5 * 60 * 60  # 1.5-hour strict lookback limit for missed runs
 
     # NEW: Check if any time slot (multiple or single) is within the posting window
     if not check_times_in_window(day_cfg, now, WINDOW):
         # No time slots matched the current window
-        info(f"⏭️  No active time slots for {day_key.upper()} in current window. Exiting.")
+        info(f"⏭️  No active time slots for {day_key.upper()} in current window (3h). Exiting.")
         _mark_skip()
         sys.exit(0)
     
@@ -336,9 +337,17 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
             diff_secs = (target - now).total_seconds()
 
             # Check if within window
-            if -WINDOW <= diff_secs <= WINDOW:
-                # Valid slot — prefer the nearest future time, or most recent past if all are past
-                if best_diff_secs is None or (diff_secs >= 0 and (best_diff_secs < 0 or diff_secs < best_diff_secs)):
+            # Future: diff_secs > 0, check against WINDOW
+            # Past: diff_secs < 0, check against LOOKBACK_LIMIT
+            if diff_secs > 0 and diff_secs <= WINDOW:
+                # Valid future slot
+                if best_diff_secs is None or best_diff_secs < 0 or diff_secs < best_diff_secs:
+                    best_time_str = time_str
+                    best_diff_secs = diff_secs
+                    target_time = target
+            elif diff_secs < 0 and diff_secs >= -LOOKBACK_LIMIT:
+                # Valid past slot (recent enough to still fire)
+                if best_diff_secs is None or (best_diff_secs < 0 and diff_secs > best_diff_secs):
                     best_time_str = time_str
                     best_diff_secs = diff_secs
                     target_time = target
@@ -346,7 +355,7 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
             continue
 
     if best_time_str is None:
-        info(f"⏭️  Could not find valid time slot — exiting")
+        info(f"⏭️  Could not find valid time slot (none within future {WINDOW//3600}h or past {LOOKBACK_LIMIT//3600}h) — exiting")
         _mark_skip()
         sys.exit(0)
 
@@ -364,14 +373,16 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
             if remaining > 60:
                 info(f"   ... {int(remaining // 60)}m remaining until {best_time_str} UTC")
         info(f"✅ Reached {best_time_str} UTC — starting agent")
-    elif diff_secs >= -WINDOW:
-        # Slightly past the target (cron fired just after) — run immediately
-        info(f"✅ Within window of {best_time_str} UTC — proceeding immediately")
+    elif diff_secs >= -LOOKBACK_LIMIT:
+        # Recently past the target — run immediately
+        mins_past = int(-diff_secs // 60)
+        info(f"✅ Within window of {best_time_str} UTC ({mins_past}m past) — proceeding immediately")
     else:
-        # This shouldn't happen given the check above, but handle it
-        info(f"⏭️  {best_time_str} UTC was too far in the past — skipping")
+        # This shouldn't happen given the check above
+        info(f"⏭️  {best_time_str} UTC was too far in the past — skipping today")
         _mark_skip()
         sys.exit(0)
+
 
 
 # ─── Quick diagnostic (python src/schedule_checker.py) ───────────────────────

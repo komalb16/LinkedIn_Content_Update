@@ -336,17 +336,17 @@
     "duplicate_avoided": true
   },
   {
-    "timestamp": "2026-04-19T02:14:40.823494",
-    "topic_id": "trend-railway-systems",
-    "style": 23,
-    "signature": "5404ed54815839790a36bc1564e484d0",
+    "timestamp": "2026-04-18T22:08:54.553342",
+    "topic_id": "test_pyramid_fix",
+    "style": 0,
+    "signature": "52da65b517304fe63ca4b682964e6bc6",
     "duplicate_avoided": true
   },
   {
-    "timestamp": "2026-04-19T02:18:10.733660",
-    "topic_id": "trend-ai-detection-methods",
-    "style": 23,
-    "signature": "161563e9d0fd4cef252cc7dd5e8ecc17",
+    "timestamp": "2026-04-18T22:08:54.761925",
+    "topic_id": "test_timeline_fix",
+    "style": 3,
+    "signature": "9de2f089e7d86989a6705d55c6d0c4f8",
     "duplicate_avoided": true
   }
 ]

@@ -8,19 +8,19 @@
     "diagram_type": "Architecture Diagram"
   },
   {
-    "timestamp": "2026-04-19T02:14:40.826650",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-railway-systems",
-    "topic_name": "Reliable Transit",
-    "diagram_type": "Viral Poster"
+    "timestamp": "2026-04-18T22:08:54.635158",
+    "style_idx": 0,
+    "style_name": "Vertical Flow",
+    "topic_id": "test_pyramid_fix",
+    "topic_name": "Workflow Hierarchy",
+    "diagram_type": "Pyramid"
   },
   {
-    "timestamp": "2026-04-19T02:18:10.736879",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-ai-detection-methods",
-    "topic_name": "Detection Strategies",
-    "diagram_type": "Viral Poster"
+    "timestamp": "2026-04-18T22:08:54.799057",
+    "style_idx": 3,
+    "style_name": "Timeline",
+    "topic_id": "test_timeline_fix",
+    "topic_name": "Product Roadmap",
+    "diagram_type": "Timeline"
   }
 ]
