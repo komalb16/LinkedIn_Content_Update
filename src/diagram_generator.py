@@ -3995,34 +3995,116 @@ def _record_rotation(style_idx: int, topic_id: str, topic_name: str, diagram_typ
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _fetch_internet_image(topic_name: str) -> bytes:
-    """Scrape Bing Images for technical diagrams related to the topic, prioritizing high-quality platforms."""
-    query = f"{topic_name} diagram architecture bytebytego"
-    url = f"https://www.bing.com/images/search?q={requests.utils.quote(query)}"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-    }
-    try:
-        log.info(f"Searching internet for image: {query}")
-        r = requests.get(url, headers=headers, timeout=10)
-        urls = re.findall(r'murl&quot;:&quot;(https://[^&]*?(?:\.png|\.jpg|\.jpeg|/blob/[^&]*))&quot;', r.text, re.IGNORECASE)
-        # Unique URLs while preserving order
-        seen = set()
-        unique_urls = [u for u in urls if not (u in seen or seen.add(u))]
-        
-        for img_url in unique_urls[:10]:
-            try:
-                img_r = requests.get(img_url, headers=headers, timeout=8)
-                content_type = img_r.headers.get('content-type', '')
-                if img_r.status_code == 200 and 'image' in content_type:
-                    if len(img_r.content) > 15000: # Ensure it's not a tiny icon 
-                        log.info(f"Successfully downloaded diagram: {img_url}")
-                        return img_r.content
-            except Exception as e:
-                pass
-    except Exception as e:
-        log.warning(f"Internet image search failed: {e}")
-    return None
+    """
+    Search multiple trusted technical platforms for a diagram matching the topic.
+    Collects candidates from all sources, scores them by platform + image size,
+    and returns the best match.
 
+    Priority tiers (higher = better):
+      5  bytebytego.com        — Premium engineering learning diagrams
+      4  blog.bytebytego.com   — ByteByteGo blog posts
+      4  substack.com          — Technical newsletters/visuals
+      3  medium.com            — Engineering articles
+      3  dev.to                — Developer community
+      2  geeksforgeeks.org     — Reference diagrams
+      2  educba.com            — Structured tutorials
+      1  everything else       — General internet
+    """
+    HEADERS = {
+        'User-Agent': (
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+            'AppleWebKit/537.36 (KHTML, like Gecko) '
+            'Chrome/119.0.0.0 Safari/537.36'
+        )
+    }
+
+    # Source-priority mapping: a substring of the domain -> score
+    SOURCE_PRIORITY = {
+        "bytebytego.com":       5,
+        "blog.bytebytego":      4,
+        "substack.com":         4,
+        "medium.com":           3,
+        "dev.to":               3,
+        "geeksforgeeks.org":    2,
+        "educba.com":           2,
+        "dzone.com":            2,
+        "martinfowler.com":     3,
+        "highscalability.com":  3,
+    }
+
+    # Each search query targets a different angle / platform emphasis
+    SEARCH_QUERIES = [
+        f"{topic_name} architecture diagram bytebytego",
+        f"{topic_name} system design diagram infographic",
+        f"{topic_name} engineering diagram medium dev.to",
+        f"site:bytebytego.com {topic_name}",
+    ]
+
+    def _priority(url: str) -> int:
+        url_lower = url.lower()
+        for domain, score in SOURCE_PRIORITY.items():
+            if domain in url_lower:
+                return score
+        return 1
+
+    def _scrape_bing(query: str) -> list:
+        """Return a list of (url, priority_score) from one Bing Images search."""
+        search_url = f"https://www.bing.com/images/search?q={requests.utils.quote(query)}"
+        try:
+            r = requests.get(search_url, headers=HEADERS, timeout=10)
+            raw_urls = re.findall(
+                r'murl&quot;:&quot;(https://[^&]*?(?:\.png|\.jpg|\.jpeg))&quot;',
+                r.text, re.IGNORECASE
+            )
+            return [(u, _priority(u)) for u in raw_urls]
+        except Exception:
+            return []
+
+    # 1. Collect candidates from all queries
+    candidates = []   # list of (url, priority)
+    seen_urls = set()
+    for query in SEARCH_QUERIES:
+        log.info(f"Searching: {query}")
+        for url, pri in _scrape_bing(query):
+            if url not in seen_urls:
+                seen_urls.add(url)
+                candidates.append((url, pri))
+
+    # 2. Sort by priority descending (high-quality sources first), then try to download
+    candidates.sort(key=lambda x: x[1], reverse=True)
+    log.info(f"Gathered {len(candidates)} image candidates across all platforms.")
+
+    # 3. Download candidates; track best by (priority, file_size)
+    best_bytes = None
+    best_score = (0, 0)   # (priority, size)
+
+    for img_url, priority in candidates[:20]:
+        try:
+            img_r = requests.get(img_url, headers=HEADERS, timeout=8)
+            content_type = img_r.headers.get('content-type', '')
+            if img_r.status_code == 200 and 'image' in content_type:
+                size = len(img_r.content)
+                if size < 15_000:
+                    continue  # Skip tiny icons/thumbnails
+                score = (priority, size)
+                if score > best_score:
+                    best_score = score
+                    best_bytes = img_r.content
+                    log.info(
+                        f"New best candidate (priority={priority}, size={size}): {img_url}"
+                    )
+                # Stop early if we already have a top-tier source
+                if priority >= 4 and size > 50_000:
+                    log.info(f"Top-tier source found — stopping search early.")
+                    break
+        except Exception:
+            pass
+
+    if best_bytes:
+        log.info(f"Selected best internet diagram — score={best_score}.")
+    else:
+        log.warning("No valid internet diagram found across all platforms.")
+    return best_bytes
 
 
 # ══════════════════════════════════════════════════════════════════════════════
