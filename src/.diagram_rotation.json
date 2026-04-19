@@ -22,5 +22,13 @@
     "topic_id": "test_timeline_fix",
     "topic_name": "Product Roadmap",
     "diagram_type": "Timeline"
+  },
+  {
+    "timestamp": "2026-04-19T03:07:29.529723",
+    "style_idx": 23,
+    "style_name": "Info-Frame Card",
+    "topic_id": "trend-openclaw-challenge",
+    "topic_name": "Optimizing Claw",
+    "diagram_type": "Viral Poster"
   }
 ]
