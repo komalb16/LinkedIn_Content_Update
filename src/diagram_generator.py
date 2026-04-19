@@ -539,15 +539,22 @@ def _style_pyramid(topic_id, topic_name, C, structure=None):
             ("Application Layer","Your services, APIs, and business logic"),
         ],
     }
-    tid = topic_id.lower()
-    key = next((k for k in LAYERS if k in tid), None)
-    layers = LAYERS[key] if key else [
-        ("Foundation","Core infrastructure and platform services"),
-        ("Data Layer","Storage, caching, and streaming systems"),
-        ("Service Layer","Business logic and API endpoints"),
-        ("Integration","Third-party services, messaging, and events"),
-        ("User / Client","Web, mobile, and CLI consumers"),
-    ]
+    if structure and structure.get("sections"):
+        layers = [
+            (str(s.get("label", f"Layer {i+1}")), str(s.get("desc", "")))
+            for i, s in enumerate(structure.get("sections", [])[:8])
+        ]
+    else:
+        tid = topic_id.lower()
+        key = next((k for k in LAYERS if k in tid), None)
+        layers = LAYERS[key] if key else [
+            ("Foundation","Core infrastructure and platform services"),
+            ("Data Layer","Storage, caching, and streaming systems"),
+            ("Service Layer","Business logic and API endpoints"),
+            ("Integration","Third-party services, messaging, and events"),
+            ("User / Client","Web, mobile, and CLI consumers"),
+        ]
+
 
     n = len(layers)
     pad_top = 75
@@ -579,7 +586,8 @@ def _style_pyramid(topic_id, topic_name, C, structure=None):
         svg += f'<text x="{cx_row}" y="{ny-5}" text-anchor="middle" fill="{darken(col,0.10)}" font-size="13" font-weight="800">{xe(label)}</text>'
         svg += f'<text x="{cx_row}" y="{ny+12}" text-anchor="middle" fill="#475569" font-size="9.5">{xe(desc)}</text>'
 
-    return _wrap(svg, W, H, topic_name, "Pyramid Model", accent, bg_top, bg_bot)
+    return _wrap(svg, W, H, topic_name, structure.get("subtitle", "Pyramid Model") if structure else "Pyramid Model", accent, bg_top, bg_bot)
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -628,17 +636,24 @@ def _style_timeline(topic_id, topic_name, C, structure=None):
                   ("2023","Tiered Storage","S3-backed log, infinite retention"),
                   ("2025","Kafka 4.0","KRaft GA, 2M msg/s per broker")],
     }
-    tid = topic_id.lower()
-    key = next((k for k in MILESTONES if k in tid), None)
-    milestones = MILESTONES[key] if key else [
-        ("Phase 1","Foundation","Core infrastructure established"),
-        ("Phase 2","Build","Services and APIs developed"),
-        ("Phase 3","Integrate","Systems connected, data flowing"),
-        ("Phase 4","Test","Load testing and security scans"),
-        ("Phase 5","Deploy","Staged rollout to production"),
-        ("Phase 6","Operate","Monitor, alert, and improve"),
-        ("Phase 7","Scale","Optimise and grow capacity"),
-    ]
+    if structure and structure.get("sections"):
+        milestones = [
+            (str(s.get("label", f"Step {i+1}")), str(s.get("desc", "")), "")
+            for i, s in enumerate(structure.get("sections", [])[:8])
+        ]
+    else:
+        tid = topic_id.lower()
+        key = next((k for k in MILESTONES if k in tid), None)
+        milestones = MILESTONES[key] if key else [
+            ("Phase 1","Foundation","Core infrastructure established"),
+            ("Phase 2","Build","Services and APIs developed"),
+            ("Phase 3","Integrate","Systems connected, data flowing"),
+            ("Phase 4","Test","Load testing and security scans"),
+            ("Phase 5","Deploy","Staged rollout to production"),
+            ("Phase 6","Operate","Monitor, alert, and improve"),
+            ("Phase 7","Scale","Optimise and grow capacity"),
+        ]
+
 
     svg = ""
     n = len(milestones)
@@ -721,15 +736,22 @@ def _style_hexagon(topic_id, topic_name, C, structure=None):
                   ("Flink",C[3]),("ksqlDB",C[4]),("Streams",C[5]),
                   ("Dead Letter",C[0]),("Compaction",C[1]),("Tiered",C[2])],
     }
-    tid = topic_id.lower()
-    key = next((k for k in HEXES if k in tid), None)
-    hexes = HEXES[key] if key else [
-        ("Ingest",C[0]),("Process",C[1]),("Store",C[2]),
-        ("Cache",C[3]),("Serve",C[4]),("Monitor",C[5]),
-        ("Alert",C[0]),("Scale",C[1]),("Deploy",C[2]),
-        ("Test",C[3]),("Secure",C[4]),("Govern",C[5]),
-        ("Observe",C[0]),("Optimise",C[1]),("Recover",C[2]),
-    ]
+    if structure and structure.get("sections"):
+        hexes = [
+            (str(s.get("label", f"Node {i+1}")), C[i % len(C)])
+            for i, s in enumerate(structure.get("sections", [])[:15])
+        ]
+    else:
+        tid = topic_id.lower()
+        key = next((k for k in HEXES if k in tid), None)
+        hexes = HEXES[key] if key else [
+            ("Ingest",C[0]),("Process",C[1]),("Store",C[2]),
+            ("Cache",C[3]),("Serve",C[4]),("Monitor",C[5]),
+            ("Alert",C[0]),("Scale",C[1]),("Deploy",C[2]),
+            ("Test",C[3]),("Secure",C[4]),("Govern",C[5]),
+            ("Observe",C[0]),("Optimise",C[1]),("Recover",C[2]),
+        ]
+
 
     def hex_points(cx, cy, r):
         pts = []

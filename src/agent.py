@@ -64,15 +64,23 @@ EMOJI_PATTERN = re.compile(r"[\U0001F300-\U0001FAFF]")
 POLL_PREFIX_RE = re.compile(r"^\s*(?:\d+\s*[.):]|[1-9]\uFE0F\u20E3|-)\s*")
 # Matches LLM-generated placeholder tokens that should never appear in a live post
 _PLACEHOLDER_LINE_RE = re.compile(
-    r"^\s*\[(?:Step|Option|Decision|Phase|Stage|Layer|Node|Label|Title|Section|Part|Item|"
-    r"Point|Action|Result|Outcome|Choice|Poll|Answer|Insert|Replace|Your|Write|Fill)[^\[\]]*\]\s*$",
+    r"^\s*(?:\[|\()?(?:Step|Option|Decision|Phase|Stage|Layer|Node|Label|Title|Section|Part|Item|"
+    r"Point|Action|Result|Outcome|Choice|Poll|Answer|Insert|Replace|Your|Write|Fill|Task|Constraint|"
+    r"Alternative|Solution|Scenario|Step\u00a0)[^\[\]()]*[\])]\s*$",
     re.I,
 )
 _PLACEHOLDER_INLINE_RE = re.compile(
-    r"\[(?:Step|Option|Decision|Phase|Stage|Layer|Node|Label|Title|Section|Part|Item|"
-    r"Point|Action|Result|Outcome|Choice|Poll|Answer|Insert|Replace|Your|Write|Fill)[^\[\]]{1,60}\]",
+    r"(?:\[|\()?(?:Step|Option|Decision|Phase|Stage|Layer|Node|Label|Title|Section|Part|Item|"
+    r"Point|Action|Result|Outcome|Choice|Poll|Answer|Insert|Replace|Your|Write|Fill|Task|Constraint|"
+    r"Alternative|Solution|Scenario|Step\u00a0)[^\[\]()]{1,60}[\])]",
     re.I,
 )
+_VISUAL_ARTIFACT_RE = re.compile(
+    r"^\s*(?:[\.vV\^><\-]\s*){3,}\s*$",
+    re.M
+)
+
+
 _NUM_ITEM_RE = re.compile(r"^([1-9])[.\)]\s+|^([1-9])\uFE0F\u20E3\s+")
 SIM_STOPWORDS = {
     "the", "and", "for", "with", "this", "that", "from", "your", "have", "has",
@@ -406,14 +414,17 @@ HARD RULES — no exceptions:
 - No banned words: robust, crucial, delve, landscape, testament, realm, \
 ever-evolving, foster, tapestry, seamless, synergy, paradigm, unprecedented, \
 game-changer, leverage, revolutionize, supercharge, holistic, transformative
-- No corporate-speak. If you would not say it to a colleague, do not write it.
+- Always lead with a punchy hook.
+- Ensure technical depth: name specific tools, metrics (e.g. 500ms, 10k QPS), or trade-offs.
 - ALWAYS end with 💬 + a genuine question + blank line + 5 to 7 hashtags
 - Include exactly ONE fenced visual block that matches the planned diagram type
 - If planned type is "Comparison Table", use a simple `left -> right` format
 - For non-comparison topics, avoid forcing vendor-vs-vendor comparisons
-- Do NOT add copyright, signature, or author name
-- Never mention the current month or year
+- Do NOT add copyright, signature, author name, or current month/year
+- CRITICAL: No "visual arrows" like "v v v", "^ ^ ^", or ASCII diagrams outside the visual block.
+- CRITICAL: No structural placeholders like "(Option A)" or "[Step 1]" in your final output.
 """
+
 
 
 NEWS_SYSTEM = """\
@@ -424,22 +435,15 @@ RULES:
 - Lead with your honest reaction, not a summary of the news
 - Use "I" freely — this is a personal take, not a press release
 - One strong opinion, defended with specifics — not a both-sides take
-- Include one ``` fenced visual block with 3-5 lines max
-- End with 💬 + a sharp question + 5 to 7 hashtags
-- 180 to 260 words — reactions should be tight
+- Include one ``` fenced visual block with 3-5 lines max. No ASCII art or visual arrows inside or outside the block.
+- End with 💬 + a sharp question + 5 to 7 hashtags.
+- 180 to 260 words — reactions should be tight.
 - No banned words: robust, crucial, delve, landscape, seamless, synergy,
   paradigm, unprecedented, game-changer, revolutionize, supercharge,
-  thrilled, excited, disruptor, democratize
-- Never mention the current month or year
-- Do NOT add copyright or signature
-
-CRITICAL — FABRICATION RULES:
-- NEVER invent funding amounts, user counts, or statistics not in the provided news
-- NEVER add dollar figures ($100M, $50B etc) unless explicitly in the news text
-- NEVER say a company "raised X" unless that exact number is in the provided articles
-- If you don't have a specific number, use qualitative language: "significant funding"
-- Only reference companies and facts that appear in the provided news text
-- Do NOT mention Railway, AWS, or any company not in the provided articles
+  thrilled, excited, disruptor, democratize.
+- CRITICAL: No structural placeholders like "[Option A]" or "(Step 1)".
+- Never mention the current month or year.
+- Do NOT add copyright or signature.
 """
 
 STORY_THEMES = [
@@ -510,6 +514,7 @@ Do NOT mention the current month or year.
 def optimize_hashtags_for_reach(post_text, post_type="topic"):
     """Replace generic hashtags with trending ones for better reach."""
     existing_tags = re.findall(r"(?<!\w)#\w+", post_text)
+    existing_lower = {t.lower() for t in existing_tags}
     
     # Get relevant trend tag list
     type_key = "interview" if "interview" in post_type.lower() else post_type
@@ -524,19 +529,61 @@ def optimize_hashtags_for_reach(post_text, post_type="topic"):
     
     updatedText = post_text
     for old_tag in tags_to_replace[:2]:  # Replace max 2 generic tags
-        if trending:
-            new_tag = random.choice(trending)
+        candidates = [t for t in trending if t.lower() not in existing_lower]
+        if candidates:
+            new_tag = random.choice(candidates)
             updatedText = updatedText.replace(old_tag, new_tag, 1)
+            existing_lower.add(new_tag.lower())
     
     # Ensure 5-7 total hashtags (sweet spot for LinkedIn)
     final_tags = re.findall(r"(?<!\w)#\w+", updatedText)
+    seen_lower = {t.lower() for t in final_tags}
     if len(final_tags) < 5 and trending:
-        # Add missing tags
+        # Add missing tags — only add ones not already present
         for _ in range(5 - len(final_tags)):
-            if trending:
-                updatedText += f" {random.choice(trending)}"
+            candidates = [t for t in trending if t.lower() not in seen_lower]
+            if candidates:
+                new_tag = random.choice(candidates)
+                updatedText += f" {new_tag}"
+                seen_lower.add(new_tag.lower())
     
     return updatedText
+
+
+def _deduplicate_hashtags(text):
+    """Final safety net: deduplicate hashtags and cap at 7."""
+    if not text:
+        return text
+    lines = text.splitlines()
+    # Find the last contiguous block of hashtag-only lines
+    hashtag_start = None
+    for i in range(len(lines) - 1, -1, -1):
+        stripped = lines[i].strip()
+        if stripped and all(t.startswith("#") for t in stripped.split()):
+            hashtag_start = i
+        else:
+            break
+    if hashtag_start is None:
+        return text
+    # Extract all hashtags from the hashtag block
+    hashtag_block = " ".join(lines[hashtag_start:])
+    all_tags = re.findall(r"(?<!\w)#\w+", hashtag_block)
+    # Deduplicate preserving order (case-insensitive)
+    seen = set()
+    unique_tags = []
+    for tag in all_tags:
+        key = tag.lower()
+        if key not in seen:
+            seen.add(key)
+            unique_tags.append(tag)
+    # Cap at 7
+    unique_tags = unique_tags[:7]
+    # Rebuild
+    body_lines = lines[:hashtag_start]
+    # Remove trailing empty lines from body
+    while body_lines and not body_lines[-1].strip():
+        body_lines.pop()
+    return "\n".join(body_lines) + "\n\n" + " ".join(unique_tags)
 
 
 # ─── AI CALL ──────────────────────────────────────────────────────────────────
@@ -1811,9 +1858,7 @@ def _fix_truncated_numbered_items(text):
 def _strip_placeholder_text(text):
     """
     Remove LLM-leaked structural placeholder tokens from the post.
-    Examples of what gets removed: [Step 1], [Option A], [Decision Point 2]
-    Lines that are ONLY a placeholder are dropped entirely; inline occurrences
-    are stripped from the line (keeping the rest of the line).
+    Examples of what gets removed: [Step 1], (Option A), [Decision Point 2]
     """
     if not text:
         return text
@@ -1824,6 +1869,45 @@ def _strip_placeholder_text(text):
         cleaned = _PLACEHOLDER_INLINE_RE.sub("", line).strip()
         lines.append(cleaned if cleaned else line)
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
+
+def _strip_visual_artifacts(text):
+    """Remove repetitive visual 'pointing' characters like 'v v v' or '---'."""
+    if not text:
+        return text
+    # Strip lines that only contain visual markers like v v v or ^ ^ ^
+    cleaned = _VISUAL_ARTIFACT_RE.sub("", text)
+    # Also strip common inline artifacts
+    cleaned = re.sub(r"\s+[vV\^]{3,}\s*", " ", cleaned)
+    return re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+
+
+def _normalize_poll_separators(text):
+    """Convert poll options using | or other non-standard separators into separate lines."""
+    if not text:
+        return text
+    lines = text.splitlines()
+    poll_idx = None
+    for i, ln in enumerate(lines):
+        if "💬" in ln:
+            poll_idx = i
+            break
+    if poll_idx is None:
+        return text
+    
+    # Look for a line containing options separated by | or /
+    for i in range(poll_idx + 1, min(len(lines), poll_idx + 3)):
+        ln = lines[i].strip()
+        if "|" in ln or (" / " in ln and not ln.startswith(("http", "/"))):
+            sep = "|" if "|" in ln else " / "
+            parts = [p.strip() for p in ln.split(sep) if p.strip()]
+            if len(parts) >= 2:
+                # Replace with separate numbered lines
+                replacement = [f"{j+1}\uFE0F\u20E3 {p}" for j, p in enumerate(parts[:4])]
+                lines[i] = "\n".join(replacement)
+                break
+    return "\n".join(lines).strip()
+
 
 
 def _has_structural_integrity_issues(text):
@@ -1890,21 +1974,31 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _normalize_hashtags(finalized).strip()
     if not finalized:
         return finalized
-    finalized = _strip_placeholder_text(finalized)         # remove [Step X] / [Option A] tokens
+    
+    # ── STAGE 1: Artifact & Placeholder Stripping ─────────────────────────────
+    finalized = _strip_placeholder_text(finalized)         # remove [Step X] tokens
+    finalized = _strip_visual_artifacts(finalized)         # remove v v v arrows
     finalized = _strip_work_incident_hook(finalized, topic.get("name", ""))
-    finalized = _fix_truncated_numbered_items(finalized)   # fix truncation, duplication, restarts
+    
+    # ── STAGE 2: Structural Repair ────────────────────────────────────────────
+    finalized = _fix_truncated_numbered_items(finalized)   # fix LLM truncation
     finalized = _reduce_repetitive_copy(finalized)
     finalized = _remove_raw_flow_only_lines(finalized)
+    
+    # ── STAGE 3: Poll Normalization ───────────────────────────────────────────
+    finalized = _normalize_poll_separators(finalized)      # fix | separators
     finalized = _upgrade_weak_poll_options(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _align_poll_with_structure(finalized, structure=structure, diagram_type=diagram_type)
     finalized = _enforce_numbered_poll_options(finalized)
     finalized = _tighten_poll_options(finalized)
+    
+    # ── STAGE 4: Final Formatting & Reach ─────────────────────────────────────
     finalized = _normalize_hashtags(finalized)
-    # Format post structure for better readability (NEW)
     finalized = _format_post_structure(finalized)
-    # NEW: Optimize hashtags for better reach
     finalized = optimize_hashtags_for_reach(finalized, post_type=topic.get("category", "topic"))
+    finalized = _deduplicate_hashtags(finalized)
     return finalized
+
 
 
 def _render_linkedin_text(post_text):
@@ -3320,9 +3414,9 @@ Write a LinkedIn post that:
                     0, f"Hashtag count is outside the safe publish range (4 to 7)."
                 )
             if recovery_blockers:
-                log.error("Recovery post also failed quality checks. Exiting.")
-                log.error("Recovery blockers: " + " | ".join(recovery_blockers))
-                sys.exit(1)
+                log.warning("Recovery post also had quality issues — publishing best available post.")
+                log.warning("Recovery blockers: " + " | ".join(recovery_blockers))
+                # Don't exit — continue with the original post rather than losing the run entirely
             # Recovery succeeded — use the recovery post for publishing
             log.info(
                 f"Recovery quality score: {recovery_score['score']}/100 | "
