@@ -849,5 +849,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-19T15:29:00.059095",
+    "topic_id": "trend-pause-game-architecture",
+    "topic_name": "Game Pause Mechanics",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 96,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 96,
+        "raw_score": 96,
+        "similarity": 0.0305,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 90,
+        "raw_score": 90,
+        "similarity": 0.0476,
+        "penalty": 0
+      }
+    ]
   }
 ]
