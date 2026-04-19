@@ -4103,35 +4103,37 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
         matches = sum(1 for kw in topic_keywords if kw in url_lower)
         return min(matches, 3)
 
-    # 3. Download candidates; score = (source_priority + relevance_bonus, size)
-    #    This prevents a giant off-topic ByteByteGo poster from beating a
-    #    smaller but perfectly on-topic diagram.
+    # 3. Download candidates; score = (relevance * 100 + source_priority, size)
+    #    This ENSURES that a relevant diagram from a general site (score 101+) 
+    #    always beats an irrelevant ByteByteGo poster (score 5).
     best_bytes = None
     best_url = ""
     best_score = (-1, 0)
 
-    for img_url, priority in candidates[:25]:
+    # Increase candidate pool to find better matches
+    for img_url, priority in candidates[:35]:
         relevance = _relevance(img_url)
-        combined_priority = priority + relevance   # e.g. BBG(5) + on-topic(2) = 7
+        combined_score = (relevance * 100) + priority
         try:
             img_r = requests.get(img_url, headers=HEADERS, timeout=8)
             content_type = img_r.headers.get('content-type', '')
             if img_r.status_code == 200 and 'image' in content_type:
                 size = len(img_r.content)
-                if size < 15_000:
-                    continue  # Skip tiny icons/thumbnails
-                score = (combined_priority, size)
+                if size < 12_000:
+                    continue  # Skip tiny icons
+                
+                score = (combined_score, size)
                 if score > best_score:
                     best_score = score
                     best_bytes = img_r.content
                     best_url = img_url
                     log.info(
                         f"New best candidate "
-                        f"(source_priority={priority}, relevance={relevance}, size={size}): {img_url}"
+                        f"(relevance={relevance}, priority={priority}, size={size}): {img_url}"
                     )
-                # Early-exit only when both top-tier source AND highly relevant AND large enough
-                if priority >= 4 and relevance >= 1 and size > 80_000:
-                    log.info("Top-tier relevant source found — stopping search early.")
+                # Early-exit only for highly relevant, top-tier, large images
+                if combined_score >= 205 and size > 100_000:
+                    log.info("Highly relevant top-tier source found — stopping search early.")
                     break
         except Exception:
             pass
