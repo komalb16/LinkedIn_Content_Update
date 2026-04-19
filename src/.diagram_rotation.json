@@ -1,90 +1,17 @@
-[
-  {
-    "timestamp": "2026-04-18T18:59:37.569965",
-    "style_idx": 2,
-    "style_name": "Pyramid/Funnel",
-    "topic_id": "zero-trust",
-    "topic_name": "Most engineers think Zero Trust is just about firewall",
-    "diagram_type": "Architecture Diagram"
-  },
-  {
-    "timestamp": "2026-04-18T22:08:54.635158",
-    "style_idx": 0,
-    "style_name": "Vertical Flow",
-    "topic_id": "test_pyramid_fix",
-    "topic_name": "Workflow Hierarchy",
-    "diagram_type": "Pyramid"
-  },
-  {
-    "timestamp": "2026-04-18T22:08:54.799057",
-    "style_idx": 3,
-    "style_name": "Timeline",
-    "topic_id": "test_timeline_fix",
-    "topic_name": "Product Roadmap",
-    "diagram_type": "Timeline"
-  },
-  {
-    "timestamp": "2026-04-19T03:07:29.529723",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-openclaw-challenge",
-    "topic_name": "Optimizing Claw",
-    "diagram_type": "Viral Poster"
-  },
-  {
-    "timestamp": "2026-04-19T03:26:05.556862",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-browser-tab-management",
-    "topic_name": "Tab Closure Strategies",
-    "diagram_type": "Viral Poster"
-  },
-  {
-    "timestamp": "2026-04-19T03:26:48.764731",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-ai-detection-techniques",
-    "topic_name": "Authentic Code Submission",
-    "diagram_type": "Viral Poster"
-  },
-  {
-    "timestamp": "2026-04-19T05:01:00.078294",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-ai-detection-strategies",
-    "topic_name": "AI-generated",
-    "diagram_type": "Viral Poster"
-  },
-  {
-    "timestamp": "2026-04-19T05:18:52.063197",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-tech-brain-shifts",
-    "topic_name": "Engineering Mindset Changes",
-    "diagram_type": "Viral Poster"
-  },
-  {
-    "timestamp": "2026-04-19T05:30:31.443924",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-detecting-ai-written-code",
-    "topic_name": "Code Detection",
-    "diagram_type": "Viral Poster"
-  },
-  {
-    "timestamp": "2026-04-19T05:35:46.150073",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-ai-detection-tools",
-    "topic_name": "AI-generated",
-    "diagram_type": "Viral Poster"
-  },
-  {
-    "timestamp": "2026-04-19T05:43:35.312288",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "trend-browser-tab-terror",
-    "topic_name": "Most Engine",
-    "diagram_type": "Viral Poster"
-  }
-]
+{
+  "rotation_index": 5,
+  "style_history": [
+    2,
+    0,
+    3,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    4
+  ]
+}

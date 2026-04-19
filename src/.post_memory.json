@@ -12,5 +12,12 @@
     "topic_name": "Detecting AI Written Code",
     "category": "topic",
     "text": "\ud83d\udccc Detecting AI Written Code\n\nMost engineers think linter rules can catch AI-generated code \ud83d\ude45\u200d\u2642\ufe0f.\n\nHowever, this approach is incomplete in production environments, as it can't replace human code review \ud83d\udeab.\n\nHere are the limitations:\n\n1\ufe0f\u20e3 Linter rules are incomplete\n\n2\ufe0f\u20e3 Code review is essential\n\n3\ufe0f\u20e3 AI detection is hard\n\nThe core concept is that code review processes are crucial in identifying and preventing AI-generated code \ud83d\udcdd.\n\nCode Submission -> Review -> Approval | Rejection -> Feedback\n\nBest practices in production systems involve a combination of automated tools and human review \ud83d\udc65.\n\nCommon mistakes include relying solely on linter rules and neglecting code review \ud83d\ude45\u200d\u2642\ufe0f.\n\nThe key takeaway is that a multi-faceted approach is necessary to effectively identify and prevent AI-generated code \ud83d\ude80.\n\n\ud83d\udcac What is the most important aspect of preventing AI-generated code in production environments?\n\n#SoftwareArchitecture #CodeReview #ProductionEnvironments #CodeQuality #SoftwareEngineering #ScaleEngineering"
+  },
+  {
+    "timestamp": "2026-04-19T06:13:27.591185",
+    "topic_id": "trend-detecting-ai-written",
+    "topic_name": "AI Written Work",
+    "category": "topic",
+    "text": "\ud83d\udccc AI Written Work\n\nI used to think AI detection tools could catch all AI-generated content in student submissions \ud83e\udd16.\n\n1\ufe0f\u20e3 AI writes better essays now\n\n2\ufe0f\u20e3 Tools can't keep up always\n\n- > Best Practices -> Common Mistakes\n3\ufe0f\u20e3 Human evaluation is key still\n\n4\ufe0f\u20e3 Context matters in evaluation\n\n5\ufe0f\u20e3 Mistakes happen without context\n\n\ud83d\udcac Which part of identifying AI-generated content is most important to you?\nBest Practices\nCommon Mistakes\n\n#AIEthics #AcademicIntegrity #EducationTechnology #ArtificialIntelligence #TeachingTips #EdTech"
   }
 ]
