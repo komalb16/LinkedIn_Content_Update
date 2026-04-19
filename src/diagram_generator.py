@@ -4049,8 +4049,18 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
         "highscalability.com":  3,
     }
 
+    # --- Disambiguation Logic ---
+    topic_lower = topic_name.lower()
+    rails_context = "rails" in topic_lower or "rails " in topic_lower
+    railway_context = any(k in topic_lower for k in ["japan", "railway", "train", "transport", "shinkansen"])
+    
+    query_modifiers = ""
+    if rails_context and railway_context:
+        # User meant trains, but search engines will often return Ruby on Rails
+        query_modifiers = " railway train -ruby -programming -software"
+    
     # Each search query targets a different angle / platform emphasis
-    base_query = f"{topic_name} {extra_keywords}".strip()
+    base_query = f"{topic_name} {extra_keywords}{query_modifiers}".strip()
     SEARCH_QUERIES = [
         f"{base_query} diagram architecture bytebytego",
         f"{base_query} system design diagram infographic",

@@ -14,6 +14,8 @@ RELEVANT_KEYWORDS = [
     "api", "cloud", "ml", "gpt", "model", "engineer", "system",
     "architecture", "database", "python", "microservice", "platform",
     "monitoring", "security", "vector", "embedding", "inference",
+    "training", "fine-tuning", "agentic", "transformer", "cuda", "gpu",
+    "pytorch", "tensorflow", "mcp", "anthropic", "openai", "mistral",
 ]
 
 ENGINEERING_SUBREDDITS = [

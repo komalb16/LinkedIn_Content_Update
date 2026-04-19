@@ -3128,8 +3128,8 @@ def get_post_mode():
 
     interview_prob = interview_freq
     story_prob     = _env_float("STORY_MODE_PROB",      0.18)
-    trending_prob  = _env_float("TREND_MODE_PROB",      0.20)  # NEW: trending topics
-    ai_news_prob   = _env_float("AI_NEWS_MODE_PROB",    0.10)
+    trending_prob  = _env_float("TREND_MODE_PROB",      0.35)  # BUMPED: prioritized trending news
+    ai_news_prob   = _env_float("AI_NEWS_MODE_PROB",    0.20)  # BUMPED: more AI focus
     layoff_prob    = _env_float("LAYOFF_MODE_PROB",     0.04)
     tools_prob     = _env_float("TOOLS_NEWS_MODE_PROB", 0.06)
     tech_prob      = _env_float("TECH_NEWS_MODE_PROB",  0.04)
