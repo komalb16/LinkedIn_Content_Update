@@ -62,5 +62,13 @@
     "topic_id": "trend-tech-brain-shifts",
     "topic_name": "Engineering Mindset Changes",
     "diagram_type": "Viral Poster"
+  },
+  {
+    "timestamp": "2026-04-19T05:30:31.443924",
+    "style_idx": 23,
+    "style_name": "Info-Frame Card",
+    "topic_id": "trend-detecting-ai-written-code",
+    "topic_name": "Code Detection",
+    "diagram_type": "Viral Poster"
   }
 ]
