@@ -4346,7 +4346,16 @@ async function handlePost() {
         const resp = await gh('/repos/' + REPO + '/contents/preview_cache/latest_preview.json?ref=preview-cache');
         if (resp.ok) {
           const data = await resp.json();
-          const preview = JSON.parse(decodeBase64Utf8(data.content || ''));
+          let b64Str = data.content;
+          if (!b64Str && data.git_url) {
+            const gitUrlPath = data.git_url.replace('https://api.github.com', '');
+            const blobResp = await gh(gitUrlPath);
+            if (blobResp.ok) {
+              const blobData = await blobResp.json();
+              b64Str = blobData.content;
+            }
+          }
+          const preview = JSON.parse(decodeBase64Utf8(b64Str || ''));
           if (String(preview.run_id) === String(run.id)) {
             let diagram = null;
             if (preview.diagram?.kind === 'svg') {
