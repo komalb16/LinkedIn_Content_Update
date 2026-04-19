@@ -4120,69 +4120,67 @@ class DiagramGenerator:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
 
-        # --- DYNAMIC INTERNET SEARCH FALLBACK ---
-        # Fulfills user request: Real "ready to attach" images from Bing/ByteByteGo
-        target_categories = {"system", "architecture", "infra", "network", "data", "pipeline", "reliability", "railway", "load"}
-        is_tech = any(cat in (topic_name or "").lower() for cat in target_categories)
-        if is_tech or (structure and structure.get("style") == 23):
-            img_bytes = _fetch_internet_image(topic_name or topic_id)
-            if img_bytes:
-                png_filename = filename.replace(".svg", ".png")
-                # Apply branding
+        # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
+        # Fetches real diagrams from ByteByteGo, Medium, Dev.to, etc.
+        img_bytes = _fetch_internet_image(topic_name or topic_id)
+        if img_bytes:
+            png_filename = filename.replace(".svg", ".png")
+            # Apply branding
+            try:
+                from PIL import Image, ImageDraw, ImageFont
+                img = Image.open(io.BytesIO(img_bytes)).convert("RGBA")
+                # Normalize transparent images onto a white background
+                bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
+                img = Image.alpha_composite(bg, img).convert("RGB")
+
+                draw = ImageDraw.Draw(img)
+                width, height = img.size
+
+                title_text = (topic_name or "Technical Architecture").strip()
+                font_size = max(16, int(width * 0.045))
                 try:
-                    from PIL import Image, ImageDraw, ImageFont
-                    img = Image.open(io.BytesIO(img_bytes)).convert("RGBA")
-                    # Create a white background if transparent
-                    bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
-                    img = Image.alpha_composite(bg, img).convert("RGB")
-                    
-                    draw = ImageDraw.Draw(img)
-                    width, height = img.size
-                    
-                    title_text = (topic_name or "Technical Architecture").strip()
-                    font_size = max(16, int(width * 0.045)) 
+                    font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", font_size)
+                except Exception:
                     try:
-                        font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", font_size)
-                    except:
-                        try:
-                            font = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", font_size)
-                        except:
-                            font = ImageFont.load_default()
-                    
-                    left, top, right, bottom = draw.textbbox((0, 0), title_text, font=font)
-                    tw, th = right - left, bottom - top
-                    tx = (width - tw) // 2
-                    ty = max(10, int(height * 0.05))
-                    
-                    # Draw a semi-transparent band behind title for readability on complex web images
-                    draw.rectangle([0, 0, width, ty + th + 20], fill=(15, 23, 42, 220))
-                    
-                    draw.text((tx, ty), title_text, font=font, fill=(56, 189, 248)) 
-                    
-                    copy_text = "© Komal Batra"
-                    c_font_size = max(10, int(width * 0.02))
-                    try:
-                        c_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", c_font_size)
-                    except:
-                        c_font = ImageFont.load_default()
-                        
-                    left, top, right, bottom = draw.textbbox((0, 0), copy_text, font=c_font)
-                    cw, ch = right - left, bottom - top
-                    cx = width - cw - int(width * 0.05)
-                    cy = height - ch - int(height * 0.03)
-                    
-                    # Small shadow for copyright
-                    draw.text((cx+2, cy+2), copy_text, font=c_font, fill=(0,0,0,180))
-                    draw.text((cx, cy), copy_text, font=c_font, fill=(248, 250, 252, 220)) 
-                    
-                    img.save(png_filename)
-                    log.info(f"Dynamic Internet Image Saved & Branded: {png_filename} (Topic: {title_text})")
-                except Exception as e:
-                    log.warning(f"Branding engine failed for internet image ({e}), saving raw copy.")
-                    with open(png_filename, "wb") as f:
-                        f.write(img_bytes)
-                    
-                return png_filename
+                        font = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", font_size)
+                    except Exception:
+                        font = ImageFont.load_default()
+
+                left, top, right, bottom = draw.textbbox((0, 0), title_text, font=font)
+                tw, th = right - left, bottom - top
+                tx = (width - tw) // 2
+                ty = max(10, int(height * 0.05))
+
+                # Semi-transparent dark banner so title is always readable
+                draw.rectangle([0, 0, width, ty + th + 20], fill=(15, 23, 42, 220))
+                draw.text((tx, ty), title_text, font=font, fill=(56, 189, 248))
+
+                copy_text = "© Komal Batra"
+                c_font_size = max(10, int(width * 0.02))
+                try:
+                    c_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", c_font_size)
+                except Exception:
+                    c_font = ImageFont.load_default()
+
+                left, top, right, bottom = draw.textbbox((0, 0), copy_text, font=c_font)
+                cw, ch = right - left, bottom - top
+                cx = width - cw - int(width * 0.05)
+                cy = height - ch - int(height * 0.03)
+
+                draw.text((cx + 2, cy + 2), copy_text, font=c_font, fill=(0, 0, 0, 180))
+                draw.text((cx, cy), copy_text, font=c_font, fill=(248, 250, 252, 220))
+
+                img.save(png_filename)
+                log.info(f"Internet diagram saved & branded: {png_filename} (Topic: {title_text})")
+            except Exception as e:
+                log.warning(f"Branding failed for internet image ({e}), saving raw.")
+                with open(png_filename, "wb") as f:
+                    f.write(img_bytes)
+
+            return png_filename
+
+        log.warning("Internet image search returned nothing — falling back to local SVG generation.")
+
 
         # --- Kroki Internet Rendering Fallback ---
         
