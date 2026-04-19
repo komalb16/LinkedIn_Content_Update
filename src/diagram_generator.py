@@ -3994,10 +3994,11 @@ def _record_rotation(style_idx: int, topic_id: str, topic_name: str, diagram_typ
 #  Internet Search Fallback (Bing Images scraper)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _fetch_internet_image(search_query: str) -> tuple:
+def _fetch_internet_image(topic_name: str) -> bytes:
     """
-    Search multiple trusted technical platforms for the best diagram matching the query.
-    Returns (best_image_bytes, source_url) or (None, '').
+    Search multiple trusted technical platforms for a diagram matching the topic.
+    Collects candidates from all sources, scores them by platform + image size,
+    and returns the best match.
 
     Priority tiers (higher = better):
       5  bytebytego.com        — Premium engineering learning diagrams
@@ -4033,10 +4034,10 @@ def _fetch_internet_image(search_query: str) -> tuple:
 
     # Each search query targets a different angle / platform emphasis
     SEARCH_QUERIES = [
-        f"{search_query} architecture diagram bytebytego",
-        f"{search_query} system design diagram infographic",
-        f"{search_query} engineering diagram medium dev.to",
-        f"site:bytebytego.com {search_query}",
+        f"{topic_name} architecture diagram bytebytego",
+        f"{topic_name} system design diagram infographic",
+        f"{topic_name} engineering diagram medium dev.to",
+        f"site:bytebytego.com {topic_name}",
     ]
 
     def _priority(url: str) -> int:
@@ -4073,12 +4074,27 @@ def _fetch_internet_image(search_query: str) -> tuple:
     candidates.sort(key=lambda x: x[1], reverse=True)
     log.info(f"Gathered {len(candidates)} image candidates across all platforms.")
 
-    # 3. Download candidates; track best by (priority, file_size)
+    # Build topic keyword set for relevance scoring
+    topic_keywords = set(
+        w.lower() for w in re.split(r'\W+', topic_name) if len(w) >= 3
+    )
+
+    def _relevance(url: str) -> int:
+        """Score 0-3: how many topic keywords appear in the image URL/filename."""
+        url_lower = url.lower()
+        matches = sum(1 for kw in topic_keywords if kw in url_lower)
+        return min(matches, 3)
+
+    # 3. Download candidates; score = (source_priority + relevance_bonus, size)
+    #    This prevents a giant off-topic ByteByteGo poster from beating a
+    #    smaller but perfectly on-topic diagram.
     best_bytes = None
     best_url = ""
-    best_score = (0, 0)   # (priority, size)
+    best_score = (-1, 0)
 
-    for img_url, priority in candidates[:20]:
+    for img_url, priority in candidates[:25]:
+        relevance = _relevance(img_url)
+        combined_priority = priority + relevance   # e.g. BBG(5) + on-topic(2) = 7
         try:
             img_r = requests.get(img_url, headers=HEADERS, timeout=8)
             content_type = img_r.headers.get('content-type', '')
@@ -4086,26 +4102,28 @@ def _fetch_internet_image(search_query: str) -> tuple:
                 size = len(img_r.content)
                 if size < 15_000:
                     continue  # Skip tiny icons/thumbnails
-                score = (priority, size)
+                score = (combined_priority, size)
                 if score > best_score:
                     best_score = score
                     best_bytes = img_r.content
                     best_url = img_url
                     log.info(
-                        f"New best candidate (priority={priority}, size={size}): {img_url}"
+                        f"New best candidate "
+                        f"(source_priority={priority}, relevance={relevance}, size={size}): {img_url}"
                     )
-                # Stop early if we already have a top-tier source
-                if priority >= 4 and size > 50_000:
-                    log.info(f"Top-tier source found — stopping search early.")
+                # Early-exit only when both top-tier source AND highly relevant AND large enough
+                if priority >= 4 and relevance >= 1 and size > 80_000:
+                    log.info("Top-tier relevant source found — stopping search early.")
                     break
         except Exception:
             pass
 
     if best_bytes:
-        log.info(f"Selected best internet diagram — score={best_score}.")
+        log.info(f"Selected best internet diagram — score={best_score}, url={best_url}")
     else:
         log.warning("No valid internet diagram found across all platforms.")
     return best_bytes, best_url
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -4117,37 +4135,13 @@ class DiagramGenerator:
         Path(OUTPUT_DIR).mkdir(exist_ok=True)
         log.info("Diagram output dir: " + OUTPUT_DIR + "/")
 
-    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None, post_text=""):
+    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None):
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
 
         # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
-        # Build a sharp query from actual post content keywords, not just the topic name.
-        search_query = topic_name or topic_id
-        if post_text:
-            # Extract key technical noun phrases from the post: bold terms, capitalized phrases
-            import re as _re
-            bold_terms = _re.findall(r'\*\*([^*]{3,40})\*\*', post_text)
-            cap_phrases = _re.findall(r'\b([A-Z][a-z]+(?: [A-Z][a-z]+){0,2})\b', post_text)
-            # Combine and deduplicate, skip very generic stop-words
-            STOP = {"The", "This", "That", "When", "What", "How", "Why", "Most", "Our", "Your", "Here",
-                    "In", "If", "As", "At", "By", "Or", "And", "But", "For", "Now", "So", "On",
-                    "It", "We", "You", "They", "Not", "No", "Yes", "Today", "Just"}
-            candidates_kw = []
-            for t in bold_terms + cap_phrases:
-                t = t.strip()
-                if t and t not in STOP and len(t) > 4:
-                    candidates_kw.append(t)
-            # Deduplicate while preserving order
-            seen_kw = set()
-            unique_kw = [k for k in candidates_kw if not (k.lower() in seen_kw or seen_kw.add(k.lower()))]
-            if unique_kw:
-                # Use up to 3 most relevant keywords alongside the topic name
-                extra = " ".join(unique_kw[:3])
-                search_query = f"{topic_name} {extra}".strip()
-                log.info(f"Post-aware search query: '{search_query}'")
-
-        img_bytes, img_source_url = _fetch_internet_image(search_query)
+        # Fetches real diagrams from ByteByteGo, Medium, Dev.to, etc.
+        img_bytes, img_source_url = _fetch_internet_image(topic_name or topic_id)
         if img_bytes:
             png_filename = filename.replace(".svg", ".png")
             # Apply branding
