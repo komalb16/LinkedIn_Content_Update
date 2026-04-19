@@ -1,18 +1,10 @@
-{
-  "rotation_index": 6,
-  "style_history": [
-    2,
-    0,
-    3,
-    23,
-    23,
-    23,
-    23,
-    23,
-    23,
-    23,
-    23,
-    4,
-    5
-  ]
-}
+[
+  {
+    "timestamp": "2026-04-19T06:25:40.503590",
+    "style_idx": 0,
+    "style_name": "Vertical Flow",
+    "topic_id": "trend-openclaw-challenge",
+    "topic_name": "Optimizing Claw Code",
+    "diagram_type": "Engineering Flow"
+  }
+]
