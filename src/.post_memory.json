@@ -320,5 +320,12 @@
     "topic_name": "Authentic Code Submission",
     "category": "topic",
     "text": "Only 1 in 5 educators can detect AI-generated code in student assignments \ud83e\udd16.\n\nThis statistic highlights the limitations of relying on plagiarism detectors and the importance of manual code review \ud83d\udcca.\n\nThe Problem is that many educators rely solely on automated tools to detect plagiarism, which can lead to false negatives \ud83d\udeab.\n\nBest Practices in production systems involve a combination of automated tools and manual review to ensure authenticity \ud83d\udcdd.\n\n\ud83d\udcac What is the most critical aspect of detecting AI-generated code:\nThe Problem\nCore Concept\nHow It Works\nBest Practices\nCommon Mistakes\nKey Takeaway"
+  },
+  {
+    "timestamp": "2026-04-19T05:01:00.081155",
+    "topic_id": "trend-ai-detection-strategies",
+    "topic_name": "Authentic Code Detection",
+    "category": "topic",
+    "text": "I used to think automated plagiarism tools were enough to prevent AI-generated solutions \ud83e\udd16.\n\u2014 But human evaluation in code review is essential to encourage original student work \ud83d\udcdd.\n\n1\ufe0f\u20e3 Code review is key\n\n2\ufe0f\u20e3 AI detection is not enough\n\nMost engineers rely solely on automated tools \u2014 but what actually works is a combination of human evaluation and careful assignment design \ud83d\udcda.\n\n\ud83d\udcac Which is most important to you?"
   }
 ]
