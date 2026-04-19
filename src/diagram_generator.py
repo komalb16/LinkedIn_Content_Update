@@ -28,7 +28,7 @@ import zlib
 import requests
 from datetime import datetime
 from pathlib import Path
-
+from PIL import Image, ImageDraw, ImageFont, ImageStat
 try:
     _DIAGRAM_AUTHOR = os.environ.get("USER_NAME") or os.environ.get("AUTHOR_NAME") or "Komal Batra"
 except Exception:
@@ -4131,6 +4131,20 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
                 size = len(img_r.content)
                 if size < 12_000:
                     continue  # Skip tiny icons
+                
+                # --- Complexity Filter ---
+                # Check color variance to avoid flat icons (like the red castle issue)
+                try:
+                    p_img = Image.open(io.BytesIO(img_r.content)).convert("RGB")
+                    stat = ImageStat.Stat(p_img)
+                    # Average standard deviation across RGB channels
+                    avg_stddev = sum(stat.stddev) / 3
+                    if avg_stddev < 18:
+                        log.info(f"Skipping low-complexity image (stddev={avg_stddev:.1f}): {img_url[:60]}")
+                        continue
+                except Exception as e:
+                    log.warning(f"Complexity check failed for {img_url[:60]}: {e}")
+                    # Allow fallback if check fails but size is good
                 
                 score = (combined_score, size)
                 if score > best_score:
