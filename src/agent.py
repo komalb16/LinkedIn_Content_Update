@@ -2948,13 +2948,28 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
                 sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
             if len(sections) >= 5: break
 
-    # Final fallback if still empty
+    # Final fallback if still empty — call AI to extract 4 technical keywords from the post
+    if len(sections) < 3:
+        log.info("No bullets found. Calling AI for elite content extraction...")
+        extraction_prompt = f"""Identify 4 technical stages, components, or key architectural concepts discussed in this LinkedIn post.
+Post Text: {post_text[:1000]}
+
+Return exactly 4 punchy items, each 3-5 words max. One per line. No numbers.
+"""
+        raw_items = call_ai(extraction_prompt, "You are a Technical Diagram Specialist.")
+        if raw_items:
+            for line in raw_items.splitlines()[:5]:
+                label = clean_label(line.strip())
+                if len(label) > 4:
+                    sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
+    
+    # Second fallback if AI somehow fails — use topic-related tags
     if len(sections) < 3:
         sections = [
-            {"id": 1, "label": "Technical Problem",    "desc": ""},
-            {"id": 2, "label": "Root Cause Analysis",  "desc": ""},
-            {"id": 3, "label": "Engineering Fix",      "desc": ""},
-            {"id": 4, "label": "Production Outcome",   "desc": ""},
+            {"id": 1, "label": f"{topic_name} Initial State", "desc": ""},
+            {"id": 2, "label": f"{topic_name} Implementation", "desc": ""},
+            {"id": 3, "label": f"{topic_name} Validation", "desc": ""},
+            {"id": 4, "label": "Deployment", "desc": ""},
         ]
 
     # Deduplicate and renumber
