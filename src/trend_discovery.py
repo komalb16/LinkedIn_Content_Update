@@ -18,6 +18,11 @@ RELEVANT_KEYWORDS = [
     "pytorch", "tensorflow", "mcp", "anthropic", "openai", "mistral",
 ]
 
+BLACKLISTED_KEYWORDS = [
+    "railway", "train", "transport", "shinkansen", "aviation", "maritime", 
+    "logistics", "rails", "locomotive", "track", "transit",
+]
+
 ENGINEERING_SUBREDDITS = [
     "MachineLearning", "LocalLLaMA", "devops",
     "kubernetes", "programming", "softwarearchitecture",
@@ -25,8 +30,11 @@ ENGINEERING_SUBREDDITS = [
 
 
 def _is_relevant(title):
-    """Check if a title is relevant to engineering/AI audience."""
+    """Check if a title is relevant to engineering/AI audience and not blacklisted."""
     lowered = (title or "").lower()
+    # Must contain relevance, must NOT contain blacklist
+    if any(bl in lowered for bl in BLACKLISTED_KEYWORDS):
+        return False
     return any(kw in lowered for kw in RELEVANT_KEYWORDS)
 
 

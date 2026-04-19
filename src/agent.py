@@ -428,6 +428,7 @@ game-changer, leverage, revolutionize, supercharge, holistic, transformative
 - CRITICAL: No structural placeholders like "(Option A)" or "[Step 1]" in your final output.
 - PERSONAL ACCURACY: Do NOT invent personal life events or family details (e.g., becoming a parent, weddings, moving house, personal childhood memories) unless they are explicitly provided in the topic prompt. Keep the professional 'Staff Engineer' persona grounded strictly in the provided content.
 - NEGATIVE CONSTRAINT: Never output generic structural labels like "The Problem", "Core Concept", "How It Works", or "Key Takeaway" as standalone headers or narrative transitions. Just dive into the technical insight directly. Avoid saying "The problem is" or "The core concept is" - be more specific and authoritative.
+- ZERO TOLERANCE: Never use ASCII art, box-drawing characters (┌, ┐, └, ┘, │, ─), or manual table boundaries (+---+) in the post text. If you need a comparison, use a simple 'Left -> Right' text format.
 """
 
 
@@ -451,6 +452,7 @@ RULES:
 - CRITICAL: No structural placeholders like "[Option A]" or "(Step 1)".
 - Never mention the current month or year.
 - Do NOT add copyright or signature.
+- ZERO TOLERANCE: Never use ASCII art or box-drawing characters (+---+ or |---|) in the text.
 """
 
 STORY_THEMES = [
@@ -1136,6 +1138,13 @@ Requirements:
 
 
 def _cleanup_generated_post(text):
+    if not text:
+        return text
+    
+    # 1. Strip ASCII art and box-drawing leak from LLM
+    text = _strip_ascii_art(text)
+    
+    # 2. Basic cleanup
     text = (text or "").replace("hashtag#", "#").strip()
     if not text:
         return text
@@ -1995,6 +2004,37 @@ def _normalize_poll_separators(text):
                 break
     return "\n".join(lines).strip()
 
+
+
+def _strip_ascii_art(text):
+    """
+    Remove ASCII art boxes (+---+), separators (----), and box-drawing characters
+    that LLMs sometimes leak into the post body.
+    """
+    if not text:
+        return text
+    
+    lines = []
+    # Match patterns like +-----+ or | Text | or |-------|
+    # Also matches Unicode box-drawing: ┌ ─ ┐ │ └ ┘ ├ ┤ ┬ ┴ ┼
+    box_chars = "[\u2500-\u257F\u2580-\u259F\u25A0-\u25FF]"
+    box_pattern = re.compile(rf"^\s*(?:[\+\-\|]{3,}|{box_chars}{{3,}})\s*$")
+    
+    for line in text.splitlines():
+        # Remove lines that look like box boundaries (+---+ or |---|)
+        if box_pattern.match(line):
+            continue
+        
+        # Remove inline box characters | or + if they appear in a structural way
+        # but preserve them if they are likely math or logic (e.g. A | B)
+        cleaned = re.sub(rf"{box_chars}", " ", line)
+        # Only strip | and + if they are at the edges of a line (LLM table artifact)
+        cleaned = re.sub(r"^\s*[\+\|]\s*", " ", cleaned)
+        cleaned = re.sub(r"\s*[\+\|]\s*$", " ", cleaned)
+        
+        lines.append(cleaned.rstrip())
+        
+    return "\n".join(lines).strip()
 
 
 def _has_structural_integrity_issues(text):
