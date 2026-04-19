@@ -1,10 +1,7 @@
-[
-  {
-    "timestamp": "2026-04-19T07:30:19.044669",
-    "style_idx": 19,
-    "style_name": "Style 19",
-    "topic_id": "trend-ai-generated-content-bad-habits",
-    "topic_name": "Professional Strategy",
-    "diagram_type": "Engineering Flow"
-  }
-]
+{
+  "rotation_index": 21,
+  "style_history": [
+    19,
+    22
+  ]
+}
