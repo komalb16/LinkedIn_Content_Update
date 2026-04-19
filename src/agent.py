@@ -421,9 +421,11 @@ game-changer, leverage, revolutionize, supercharge, holistic, transformative
 - If planned type is "Comparison Table", use a simple `left -> right` format
 - For non-comparison topics, avoid forcing vendor-vs-vendor comparisons
 - Do NOT add copyright, signature, author name, or current month/year
-- CRITICAL: No "visual arrows" like "v v v", "^ ^ ^", or ASCII diagrams outside the visual block.
 - CRITICAL: No structural placeholders like "(Option A)" or "[Step 1]" in your final output.
+- PERSONAL ACCURACY: Do NOT invent personal life events or family details (e.g., becoming a parent, weddings, moving house, personal childhood memories) unless they are explicitly provided in the topic prompt. Keep the professional 'Staff Engineer' persona grounded strictly in the provided content.
+- NEGATIVE CONSTRAINT: Never output generic structural labels like "The Problem", "Core Concept", "How It Works", or "Key Takeaway" as standalone headers in your response.
 """
+
 
 
 
@@ -1148,6 +1150,47 @@ def _cleanup_generated_post(text):
                 break
 
     text = "\n".join(lines).strip()
+
+    # --- Structural Cleanup ---
+    # 1. Remove lines containing just structural pipe separators like "A | B | C"
+    text = re.sub(r"(?m)^\s*(?:[A-Za-z\s]+\s*\|\s*){2,}[A-Za-z\s]*\s*$", "", text)
+    
+    # 2. Strip generic placeholder-only lines
+    _PLACEHOLDERS = {
+        "the problem", "core concept", "how it works", "key takeaway", 
+        "takeaway", "summary", "conclusion", "introduction", "hook"
+    }
+    cleaned_lines = []
+    for line in text.splitlines():
+        trimmed = line.strip(" .*:!")
+        if trimmed.lower() in _PLACEHOLDERS:
+            continue
+        # Remove lines that are just "The Problem | Core Concept"
+        if "|" in line and any(p in line.lower() for p in _PLACEHOLDERS):
+            continue
+        cleaned_lines.append(line)
+    text = "\n".join(cleaned_lines).strip()
+
+    # 3. Bullet Validator for CTA (Poll)
+    # If we see "1️⃣ The Problem 2️⃣ Core Concept", wipe those specific items as they are hallucinations.
+    # An item is valid if it has at least 3 descriptive words or a technical term.
+    lines = text.splitlines()
+    if lines:
+        last_few = lines[-12:] # Check CTA area
+        new_lines = list(lines)
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            # Match 1️⃣, 2️⃣, etc.
+            m = re.match(r"^([1-9]\uFE0F\u20E3|[1-9][\.\)])\s*(.+)$", stripped)
+            if m:
+                content = m.group(2).strip(" .*:!")
+                # If content is in placeholders or very short nonsense
+                if content.lower() in _PLACEHOLDERS or len(content.split()) < 3:
+                    # Remove this line by setting it empty
+                    new_lines[i] = ""
+        text = "\n".join(ln for ln in new_lines if ln or not ln.isspace()).strip()
+
+    return text
 
     # Collapse accidental repeated title/header lines at the top.
     split_lines = text.splitlines()
