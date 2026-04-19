@@ -14,5 +14,13 @@
     "topic_id": "trend-railway-systems",
     "topic_name": "Reliable Transit",
     "diagram_type": "Viral Poster"
+  },
+  {
+    "timestamp": "2026-04-19T02:18:10.736879",
+    "style_idx": 23,
+    "style_name": "Info-Frame Card",
+    "topic_id": "trend-ai-detection-methods",
+    "topic_name": "Detection Strategies",
+    "diagram_type": "Viral Poster"
   }
 ]
