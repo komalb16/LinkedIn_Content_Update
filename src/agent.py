@@ -535,6 +535,14 @@ def optimize_hashtags_for_reach(post_text, post_type="topic"):
             updatedText = updatedText.replace(old_tag, new_tag, 1)
             existing_lower.add(new_tag.lower())
     
+    # Ensure double newline before hashtags if we are adding them
+    if not re.search(r"\n\n#", updatedText):
+        # If text ends with text (not hashtags/newlines), add the spacing
+        if not updatedText.rstrip().endswith("#"):
+            # If it already has hashtags but no double newline, try to inject it
+            if "#" in updatedText and not "\n\n#" in updatedText:
+                updatedText = re.sub(r"([^\n])(\s*#)", r"\1\n\n\2", updatedText, count=1)
+    
     # Ensure 5-7 total hashtags (sweet spot for LinkedIn)
     final_tags = re.findall(r"(?<!\w)#\w+", updatedText)
     seen_lower = {t.lower() for t in final_tags}
@@ -544,10 +552,13 @@ def optimize_hashtags_for_reach(post_text, post_type="topic"):
             candidates = [t for t in trending if t.lower() not in seen_lower]
             if candidates:
                 new_tag = random.choice(candidates)
-                updatedText += f" {new_tag}"
+                # Ensure spacing for the first newly added tag if none existed
+                sep = " " if "#" in updatedText else "\n\n"
+                updatedText = updatedText.rstrip() + f"{sep}{new_tag}"
                 seen_lower.add(new_tag.lower())
     
     return updatedText
+
 
 
 def _deduplicate_hashtags(text):

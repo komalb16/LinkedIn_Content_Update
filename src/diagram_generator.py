@@ -190,7 +190,8 @@ def _dotted_flow_line(x1, y1, x2, y2, stroke, dot_colors=("#2563EB", "#DC2626"),
     return svg
 
 # ── Shared CSS animations ──────────────────────────────────────────────────────
-FONT  = "'Segoe UI',system-ui,-apple-system,Arial,sans-serif"
+FONT  = "'Inter', 'Outfit', 'Segoe UI', system-ui, -apple-system, Tahoma, sans-serif"
+
 ANIM = """<style>
   @keyframes fd{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
   @keyframes si{from{opacity:0;transform:scale(0.62)}to{opacity:1;transform:scale(1)}}
@@ -255,11 +256,10 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
 {dot_pat}
 <rect x="0" y="0" width="{W}" height="{HDR_H}" fill="url(#HG)" filter="url(#hdr_sh)"/>
 <rect x="0" y="{HDR_H-2}" width="{W}" height="3" fill="{accent}" opacity="0.8"/>
-<rect x="14" y="14" width="{pill_w}" height="19" rx="9.5" fill="{rgba(accent,0.28)}" stroke="{rgba(accent,0.60)}" stroke-width="1"/>
-<text x="24" y="27" fill="white" font-size="8.5" font-weight="700" letter-spacing="1.8" font-family="{FONT}">{xe(subtitle.upper())}</text>
-<text x="{(W - 52) // 2}" y="{HDR_H - 18}" text-anchor="middle" fill="white" font-size="22" font-weight="900" letter-spacing="-0.4" font-family="{FONT}">{xe(title_c)}</text>
+<text x="{W // 2}" y="{HDR_H // 2 + 10}" text-anchor="middle" fill="white" font-size="24" font-weight="900" letter-spacing="-0.4" font-family="{FONT}">{xe(title_c)}</text>
 <circle cx="{kb_cx}" cy="{kb_cy}" r="18" fill="{rgba(accent,0.30)}" stroke="{rgba(accent,0.70)}" stroke-width="1.5"/>
 <text x="{kb_cx}" y="{kb_cy+5}" text-anchor="middle" fill="white" font-size="10" font-weight="900" letter-spacing="0.5" font-family="{FONT}">KB</text>
+
 {inner_svg}
 <rect x="0" y="{H-32}" width="{W}" height="32" fill="{foot_bg}"/>
 <rect x="0" y="{H-33}" width="{W}" height="1" fill="{foot_bdr}"/>
@@ -343,8 +343,8 @@ def _style_vertical_flow(topic_id, topic_name, C, structure=None):
     n_steps = max(1, len(steps))
     BOX_W, ARROW_H = 500, 30
     max_flow_h = H - 90
-    BOX_H = max(50, int((max_flow_h - ARROW_H * (n_steps - 1)) / n_steps))
-    BOX_H = min(72, BOX_H)
+    BOX_H = max(60, int((max_flow_h - ARROW_H * (n_steps - 1)) / n_steps))
+    BOX_H = min(88, BOX_H)
     cx = W // 2
     y = 70
     svg = ""
@@ -361,15 +361,20 @@ def _style_vertical_flow(topic_id, topic_name, C, structure=None):
         svg += f'<circle cx="{bx+32}" cy="{y+BOX_H//2}" r="14" fill="{col}"/>'
         svg += f'<text x="{bx+32}" y="{y+BOX_H//2+5}" text-anchor="middle" fill="white" font-size="13" font-weight="900">{i+1}</text>'
         
-        # INCREASED LIMITS
-        label_lines = fit_lines(label, 50, 1)
-        sub_lines = fit_lines(sub, 92, 3) 
+        # INCREASED LIMITS FOR SOPHISTICATION
+        label_lines = fit_lines(label, 85, 2)
+        sub_lines = fit_lines(sub, 160, 3) 
         
-        label_y = y + max(18, BOX_H // 2 - 12)
-        svg += f'<text x="{bx+58}" y="{label_y}" fill="{darken(col,0.08)}" font-size="13" font-weight="800">{xe(label_lines[0])}</text>'
+        label_y = y + 20
+        for li, ln in enumerate(label_lines):
+            svg += f'<text x="{bx+58}" y="{label_y + li*15}" fill="{darken(col,0.08)}" font-size="13" font-weight="800">{xe(ln)}</text>'
+        
+        sub_y_start = label_y + (len(label_lines) * 15) + 2
         for li, ln in enumerate(sub_lines):
-            svg += f'<text x="{bx+58}" y="{label_y+16+li*11}" fill="#64748B" font-size="9.5">{xe(ln)}</text>'
+            svg += f'<text x="{bx+58}" y="{sub_y_start + li*11}" fill="#64748B" font-size="9.5" font-weight="500">{xe(ln)}</text>'
+        
         svg += f'<text x="{bx+BOX_W-40}" y="{y+BOX_H//2+9}" fill="{rgba(col,0.18)}" font-size="28" font-weight="900">{i+1:02d}</text>'
+
 
         if i < len(steps) - 1:
             ax = cx; ay1 = y + BOX_H; ay2 = ay1 + ARROW_H - 8
