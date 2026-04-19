@@ -5,17 +5,12 @@
     "mon": {
       "enabled": true,
       "time_local": "12:45",
-<<<<<<< Updated upstream
       "time_tz": "America/New_York",
       "time_utc": "16:45"
-=======
-      "time_tz": "America/New_York"
->>>>>>> Stashed changes
     },
     "tue": {
       "enabled": true,
       "time_local": "17:00",
-<<<<<<< Updated upstream
       "time_tz": "America/New_York",
       "time_utc": "21:00"
     },
@@ -25,19 +20,10 @@
       "time_local": "15:30",
       "time_tz": "America/New_York",
       "time_utc": "19:30"
-=======
-      "time_tz": "America/New_York"
-    },
-    "wed": {
-      "enabled": true,
-      "time_local": "15:30",
-      "time_tz": "America/New_York"
->>>>>>> Stashed changes
     },
     "thu": {
       "enabled": true,
       "time_local": "22:30",
-<<<<<<< Updated upstream
       "time_tz": "America/New_York",
       "time_utc": "02:30"
     },
@@ -47,41 +33,21 @@
       "time_local": "20:30",
       "time_tz": "America/New_York",
       "time_utc": "00:30"
-=======
-      "time_tz": "America/New_York"
-    },
-    "fri": {
-      "enabled": true,
-      "time_local": "18:15",
-      "time_tz": "America/New_York"
->>>>>>> Stashed changes
     },
     "sat": {
       "enabled": true,
       "time_local": "10:00",
-<<<<<<< Updated upstream
       "time_tz": "America/New_York",
       "time_utc": "14:00"
-=======
-      "time_tz": "America/New_York"
->>>>>>> Stashed changes
     },
     "sun": {
       "enabled": true,
       "time_local": "10:00",
-<<<<<<< Updated upstream
       "time_tz": "America/New_York",
       "time_utc": "14:00"
-=======
-      "time_tz": "America/New_York"
->>>>>>> Stashed changes
     }
   },
   "skip_dates": [],
   "force_dates": [],
-<<<<<<< Updated upstream
   "updated_at": "2026-04-17T21:49:56.441Z"
-=======
-  "updated_at": "2026-04-17T18:36:00.000Z"
->>>>>>> Stashed changes
 }
