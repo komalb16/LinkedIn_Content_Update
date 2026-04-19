@@ -6,7 +6,7 @@
 //   Fonts / CDN     → cache-first (static assets, safe to cache long-term)
 
 // Bump this version any time dashboard.html changes — forces old cache eviction.
-const CACHE   = 'li-agent-v5';
+const CACHE = 'li-agent-v4';
 const CDN_ASSETS = [
   'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
