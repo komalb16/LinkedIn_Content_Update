@@ -2612,32 +2612,35 @@ def _rank_candidates(topic, candidates, structure, diagram_type, recent_posts, r
 
 def _extract_poster_title(topic_name: str, post_text: str, mode: str) -> str:
     """
-    Pick a clean, short headline for the Viral Poster diagram.
-    Priority:
-      1. A named technology/model extracted from the post (e.g. 'Qwen3', 'GPT-5')
-      2. The topic name, cleaned and capped at 32 chars
-      3. A short (<= 32 char) first non-hook line from the post
+    Pick a clean, short, authoritative headline for the Viral Poster diagram.
     """
-    # Try to extract a model/product name — capitalised word(s) in the post
-    model_match = re.search(
-        r"\b([A-Z][A-Za-z0-9]{1,12}(?:[.\-][0-9A-Za-z]{1,10}){0,3})\b",
-        post_text or "",
-    )
+    if not post_text:
+        return (topic_name or "Engineering Insight")[:32]
+
+    # Priority 1: Check for very short, bolded lines at the start (often a better title than topic_name)
+    lines = post_text.splitlines()
+    for line in lines[:3]:
+        m = re.match(r"^\*\*(.+?)\*\*", line.strip())
+        if m:
+            t = m.group(1).strip(" .*:")
+            if 8 <= len(t) <= 35:
+                return t[:32]
+
+    # Priority 2: Extract a specific model/product name if it's a news/trending item
+    model_match = re.search(r"\b([A-Z][A-Za-z0-9]{1,12}(?:[.\-][0-9A-Za-z]{1,10}){0,3})\b", post_text)
     if model_match:
-        candidate = model_match.group(1)
-        # Filter out generic words
-        _GENERIC = {"The", "This", "That", "They", "There", "These", "Their", "When",
-                    "What", "With", "From", "Just", "Here", "Been", "Have"}
-        if candidate not in _GENERIC and len(candidate) >= 3:
-            # If the topic name contains this word, use the full topic name (cleaner)
-            if candidate.lower() in (topic_name or "").lower():
-                return (topic_name or candidate)[:32]
-            # Use extracted name only if it looks like a real product/model name
-            if re.search(r"[0-9.\-]", candidate) or candidate.isupper():
-                return candidate[:32]
-    # Fall back to topic name (trimmed)
-    clean = re.sub(r"^(AI\s+|Tech\s+|Weekly[:\s]+|Breaking[:\s]+)", "", topic_name or "", flags=re.I).strip()
-    return clean[:32] or (topic_name or "AI Update")[:32]
+        cand = model_match.group(1)
+        if len(cand) >= 3 and cand.upper() not in {"THE", "THIS", "THAT", "WHEN", "TECH"}:
+            if re.search(r"[0-9.\-]", cand) or cand.isupper():
+                return cand[:32]
+
+    # Priority 3: Clean topic name
+    clean = re.sub(r"^(AI\s+|Tech\s+|Weekly[:\s]+|Breaking[:\s]+|Topic[:\s]+)", "", topic_name or "", flags=re.I).strip()
+    if len(clean) > 4:
+        return clean.title()[:32]
+    
+    return (topic_name or "Production Insight")[:32]
+
 
 
 def _extract_visual_title(post_text, fallback_title):
@@ -2787,25 +2790,44 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
     lines = (post_text or "").splitlines()
     sections = []
 
-    # Pass 1: look for explicit numbered items (1️⃣ or 1. or 1)
+    # Pass 1: look for explicit key-takeaway bolding (**Takeaway**)
     for line in lines:
         stripped = line.strip()
-        m = re.match(
-            r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$",
-            stripped
-        )
+        # Prefer bolded headers if they exist
+        m = re.match(r"^\*\*(.+?)\*\*", stripped)
         if m:
-            label = m.group(1).strip()
-            label = re.sub(r"\s*[—:–]\s*.*$", "", label).strip(" .")
-            label = re.sub(r"\*+", "", label).strip()
-            if len(label) > 4:
+            label = m.group(1).strip(" .*:")
+            if 5 <= len(label) <= 60:
                 sections.append({
                     "id": len(sections) + 1,
-                    "label": label[:42],
+                    "label": label[:120],
                     "desc": "",
                 })
+
         if len(sections) >= 6:
             break
+
+    # Pass 2: look for explicit numbered items (1️⃣ or 1.)
+    # BUT EXCLUDE them if we already have sections (to avoid redundancy)
+    if not sections:
+        for line in lines:
+            stripped = line.strip()
+            # Match number emoji or "1. " style
+            m = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$", stripped)
+            if m:
+                label = m.group(1).strip()
+                label = re.sub(r"\s*[—:–]\s*.*$", "", label).strip(" .")
+                label = re.sub(r"\*+", "", label).strip()
+                if len(label) > 6:
+                    sections.append({
+                        "id": len(sections) + 1,
+                        "label": label[:120],
+                        "desc": "",
+                    })
+
+            if len(sections) >= 6:
+                break
+
 
     # Pass 2: look for bold-style headers (**text**)
     # Deduplicate — remove sections whose labels are substrings of each other
@@ -2851,7 +2873,7 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
             if len(first_sentence) > 15:
                 sections.append({
                     "id": len(sections) + 1,
-                    "label": first_sentence[:42],
+                    "label": first_sentence[:120],
                     "desc": "",
                 })
                 sentence_count += 1
@@ -2873,6 +2895,7 @@ def _build_viral_poster_structure(post_text, topic_name, mode):
         "subtitle": _get_post_subtitle(mode),
         "sections": sections[:6],
     }
+
 
 
 def _get_post_subtitle(mode):
