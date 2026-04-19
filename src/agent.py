@@ -3022,21 +3022,24 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
         for kw in POSTER_TOPIC_KEYWORDS
     )
 
-    use_viral_poster = (mode in POSTER_MODES) or is_poster_topic
-
+    # We NO LONGER use Viral Poster (Style 23) for news or technical content.
+    # User Request: "I am not liking the diagrams at all" -> Pivot to Professional Engineering charts.
+    use_viral_poster = mode in {"story", "career"}  # Only story/career keep the soft cards
+    
     if use_viral_poster:
-        # For news/trending posts use the topic name as the diagram title —
-        # the first post line is typically a hook sentence, not a good visual headline.
         poster_title = _extract_poster_title(topic["name"], post_text, mode)
         poster_structure = _build_viral_poster_structure(post_text, poster_title, mode)
-        log.info(f"Using Viral Poster for mode={mode}, topic={topic.get('id','')}")
         return poster_title, "Viral Poster", poster_structure
 
-    # News mode that didn't match above — still use viral poster
-    if mode not in {"topic", "story"}:
-        poster_title = _extract_poster_title(topic["name"], post_text, mode)
-        poster_structure = _build_viral_poster_structure(post_text, poster_title, mode)
-        return poster_title, "Viral Poster", poster_structure
+    # ALL TECHNICAL/NEWS/TRENDING modes now use Professional Engineering Charts (Mermaid + Kroki)
+    diagram_title = _extract_poster_title(topic["name"], post_text, mode)
+    diagram_structure = _build_viral_poster_structure(post_text, diagram_title, mode)
+    
+    # Ensure it triggers the Kroki/Internet path
+    diagram_structure["diagram_style"] = "mermaid"
+    diagram_structure["mermaid_code"] = _build_mermaid_code(diagram_title, diagram_structure["sections"])
+    
+    return diagram_title, "Engineering Flow", diagram_structure
 
     # Technical topic posts — use planned diagram type
     diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
