@@ -2973,21 +2973,12 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
                 f'stroke="{accent}" stroke-width="3" stroke-linecap="round"/>')
 
     # ── Header section ───────────────────────────────────────────────────────
-    HDR_H = 190
+    HDR_H = 140
     svg += (f'<rect x="{PAD}" y="{PAD}" width="{W-PAD*2}" height="{HDR_H}" '
             f'rx="18" fill="{rgba(accent, 0.18)}" stroke="none"/>')
     svg += (f'<rect x="{PAD}" y="{PAD+HDR_H-4}" width="{W-PAD*2}" height="4" '
             f'fill="{accent}" opacity="0.6"/>')
 
-    # Subtitle pill
-    pill_txt = subtitle.upper()
-    pill_w = len(pill_txt) * 11 + 44
-    pill_x = PAD + 36
-    svg += (f'<rect x="{pill_x}" y="{PAD+28}" width="{pill_w}" height="32" rx="16" '
-            f'fill="{rgba(accent,0.30)}" stroke="{rgba(accent,0.65)}" stroke-width="1.5"/>')
-    svg += (f'<text x="{pill_x + pill_w//2}" y="{PAD+50}" text-anchor="middle" '
-            f'fill="{light}" font-size="12" font-weight="800" letter-spacing="2.2" '
-            f'font-family="{FONT}">{xe(pill_txt)}</text>')
 
     # Main title — adaptive size + balanced split
     name_len = len(topic_name)
@@ -3042,19 +3033,24 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
                 f'font-size="20" font-weight="900" font-family="{FONT}" '
                 f'class="si" style="{badge_delay}">{sec.get("id", i+1)}</text>')
 
-        # Label
+        # Label (Up to 2 lines, no truncation)
         label = str(sec.get("label", ""))
-        lbl_y = badge_cy - (8 if sec.get("desc") else 0)
-        svg += (f'<text x="{rx+82}" y="{lbl_y}" fill="white" font-size="22" font-weight="800" '
-                f'font-family="{FONT}">{xe(clamp(label, 32))}</text>')
+        label_lines = fit_lines(label, 85, 2)
+        
+        lbl_y_base = badge_cy - (12 if sec.get("desc") else 0)
+        for li, ln in enumerate(label_lines):
+            svg += (f'<text x="{rx+82}" y="{lbl_y_base + li*22}" fill="white" font-size="22" font-weight="800" '
+                    f'font-family="{FONT}">{xe(ln)}</text>')
 
-        # Description (up to 2 lines)
+        # Description (up to 3 lines)
         desc = str(sec.get("desc", ""))
         if desc:
-            desc_lines = fit_lines(desc, 54, 2)
+            desc_lines = fit_lines(desc, 110, 3)
+            desc_y_start = lbl_y_base + (len(label_lines) * 22) + 4
             for li, ln in enumerate(desc_lines):
-                svg += (f'<text x="{rx+82}" y="{lbl_y+20+li*16}" fill="{lighten(col,0.42)}" '
+                svg += (f'<text x="{rx+82}" y="{desc_y_start + li*16}" fill="{lighten(col,0.42)}" '
                         f'font-size="14" font-family="{FONT}">{xe(ln)}</text>')
+
 
         # Subtle separator
         if i < n - 1:
