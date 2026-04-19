@@ -175,7 +175,6 @@ RSS_FEEDS = {
         "https://producthunt.com/feed"
     ]
 }
-}
 
 # ─── DIAGRAM TYPE ROTATION ────────────────────────────────────────────────────
 # Maps topic category keywords to a weighted pool of diagram types.
