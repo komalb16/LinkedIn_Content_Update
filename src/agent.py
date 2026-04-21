@@ -3117,13 +3117,26 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
         return poster_title, "Viral Poster", poster_structure
 
     # ALL TECHNICAL/NEWS/TRENDING modes now use Professional Engineering Charts (Mermaid + Kroki)
+    # Extract subject from the actual post content, not just topic name.
+    # This ensures the diagram matches what was written, not what was planned.
     diagram_title = _extract_poster_title(topic["name"], post_text, mode)
+
+    # Override: if post first line contains a more specific subject, use that
+    first_meaningful_line = ""
+    for line in (post_text or "").splitlines():
+        stripped = line.strip()
+        if stripped and len(stripped) > 20 and not stripped.startswith(("#", "💬", "📌")):
+            first_meaningful_line = re.sub(r"[^\w\s]", " ", stripped)[:60].strip()
+            break
+    if first_meaningful_line and first_meaningful_line.lower() != topic["name"].lower():
+        diagram_title = first_meaningful_line
+
     diagram_structure = _build_viral_poster_structure(post_text, diagram_title, mode, topic=topic)
-    
+
     # Ensure it triggers the Kroki/Internet path
     diagram_structure["diagram_style"] = "mermaid"
     diagram_structure["mermaid_code"] = _build_mermaid_code(diagram_title, diagram_structure["sections"])
-    
+
     return diagram_title, "Engineering Flow", diagram_structure
 
     # Technical topic posts — use planned diagram type
@@ -3647,8 +3660,36 @@ Write a LinkedIn post that:
 
     # ── GENERATE DIAGRAM ──────────────────────────────────────────────────────
     fallback_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
+
+    # ALIGNMENT FIX: Extract the actual subject the post was written about
+    # by scanning for the most specific technical noun phrase in the post.
+    # This prevents diagram_title drifting from what the post actually covers.
+    post_subject_override = None
+    tech_subject_patterns = [
+        r"\b(Kubernetes|Docker|Kafka|RAG|LLM|GraphQL|gRPC|Redis|Postgres|"
+        r"Terraform|Helm|Prometheus|Grafana|Istio|Argo|Flink|Spark|dbt|"
+        r"Pinecone|Weaviate|LangChain|LangGraph|AutoGen|FastAPI|Pydantic|"
+        r"OpenTelemetry|Datadog|New Relic|GitHub Actions|GitLab CI)\b",
+    ]
+    for pattern in tech_subject_patterns:
+        match = re.search(pattern, post_text or "", re.IGNORECASE)
+        if match:
+            post_subject_override = match.group(0)
+            log.info(f"Post subject detected: '{post_subject_override}' — aligning diagram search")
+            break
+
+    # If post is about something different from topic name, override for diagram
+    diagram_topic = dict(topic)
+    if post_subject_override and post_subject_override.lower() not in topic["name"].lower():
+        log.warning(
+            f"Post/topic mismatch detected: topic='{topic['name']}' "
+            f"but post is about '{post_subject_override}'. "
+            f"Aligning diagram to post subject."
+        )
+        diagram_topic["name"] = post_subject_override
+
     diagram_title, diagram_type, diagram_structure = _resolve_visual_metadata(
-        topic, post_text, mode, fallback_diagram_type, structure
+        diagram_topic, post_text, mode, fallback_diagram_type, structure
     )
     visual_issues = _visual_coherence_issues(topic, diagram_type, diagram_structure)
     if visual_issues:
@@ -3713,9 +3754,10 @@ Write a LinkedIn post that:
             log.info(f"Forced style override to {selected_style}")
     
     diagram_path = diagram_gen.save_svg(
-        None, topic["id"], diagram_title, diagram_type,
-        structure=diagram_structure_with_style, post_text=post_text
-    )
+    None, topic["id"], diagram_title, diagram_type,
+    structure=diagram_structure_with_style, post_text=post_text,
+    topic_name_override=diagram_topic["name"]   # ← use post-derived subject
+)
     
     alignment = _diagram_alignment_score(diagram_path, diagram_structure_with_style)
     log.info(f"Diagram/Text alignment score: {alignment:.2f}")

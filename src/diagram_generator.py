@@ -4071,12 +4071,51 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
     # Each search query targets a different angle / platform emphasis
     negative_terms = " -template -slide -powerpoint -marketplace -stock -placeholder"
     base_query = f"{topic_name} {extra_keywords}{query_modifiers}{negative_terms}".strip()
+
+    # Extract the actual subject from post_text (first non-empty, non-emoji line)
+    # This ensures the image search is driven by what the post actually covers,
+    # not just the topic metadata — fixing the post/diagram mismatch bug.
+    post_subject = ""
+    if post_text:
+        for line in post_text.splitlines():
+            stripped = line.strip()
+            # Skip emoji-only lines, hashtags, very short lines
+            if stripped and len(stripped) > 20 and not stripped.startswith("#"):
+                # Remove emojis and punctuation, keep words
+                post_subject = re.sub(r"[^\w\s]", " ", stripped)[:60].strip()
+                break
+
+    # Use post_subject as the primary search term if it's meaningfully different
+    search_subject = post_subject if post_subject else topic_name
+
+    # Also extract named tech terms from post for even better alignment
+    tech_terms = ""
+    if post_text:
+        tech_match = re.search(
+            r"\b(Kubernetes|Docker|Kafka|Redis|PostgreSQL|GraphQL|gRPC|Terraform|"
+            r"Prometheus|Grafana|Istio|LangChain|LangGraph|RAG|LLM|FastAPI|"
+            r"OpenTelemetry|Datadog|GitHub Actions|GitLab CI|Pinecone|Weaviate)\b",
+            post_text, re.IGNORECASE
+        )
+        if tech_match:
+            tech_terms = tech_match.group(0)
+            # If post is about a specific tech not in topic_name, make it the search subject
+            if tech_terms.lower() not in topic_name.lower():
+                log.info(f"Post/topic alignment: using '{tech_terms}' as search subject (topic was '{topic_name}')")
+                search_subject = f"{tech_terms} {search_subject}"[:80]
+
     SEARCH_QUERIES = [
-        f"{base_query} diagram architecture bytebytego",
-        f"{base_query} system design diagram infographic explained",
-        f"{base_query} engineering visual technical breakdown medium dev.to",
-        f"site:bytebytego.com {base_query}",
+        f"{search_subject} diagram architecture bytebytego",
+        f"{search_subject} system design diagram infographic explained",
+        f"{search_subject} engineering visual technical breakdown medium dev.to",
+        f"site:bytebytego.com {search_subject}",
+        f"site:levelup.gitconnected.com {search_subject} diagram",
+        f"site:nikkisiapno.substack.com {search_subject}",
     ]
+
+    # Also add Level Up Coding and Nikki Siapno to SOURCE_PRIORITY
+    SOURCE_PRIORITY["levelup.gitconnected.com"] = 5
+    SOURCE_PRIORITY["nikkisiapno.substack.com"] = 5
 
     def _priority(url: str) -> int:
         url_lower = url.lower()
@@ -4180,6 +4219,7 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
         log.info(f"Selected best internet diagram — score={best_score}, url={best_url}")
     else:
         log.warning("No valid internet diagram found across all platforms.")
+
     return best_bytes, best_url
 
 
@@ -4193,13 +4233,15 @@ class DiagramGenerator:
         Path(OUTPUT_DIR).mkdir(exist_ok=True)
         log.info("Diagram output dir: " + OUTPUT_DIR + "/")
 
-    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None, post_text=""):
+    def save_svg(self, svg_content, topic_id, topic_name="", diagram_type="Architecture Diagram", structure=None, post_text="", topic_name_override=None):
+        # Use post-derived subject for image search if provided
+        search_name = topic_name_override or topic_name
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
 
         # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
         # Fetches real diagrams from ByteByteGo, Medium, Dev.to, etc.
-        img_bytes, img_source_url = _fetch_internet_image(topic_name or topic_id, post_text=post_text)
+        img_bytes, img_source_url = _fetch_internet_image(search_name or topic_id, post_text=post_text)
         if img_bytes:
             png_filename = filename.replace(".svg", ".png")
             # Apply branding
