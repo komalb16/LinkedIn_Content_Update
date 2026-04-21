@@ -1121,10 +1121,14 @@ Requirements:
         log.warning(f"Topic generation failed for {topic.get('id', 'unknown')}, using fallback copy: {e}")
         return _fallback_topic_post(topic, structure=structure)
     # Skip revision pass in dry run — saves one full LLM round-trip (~30s)
-    if not dry_run:
-        issues = _post_quality_issues(topic, post_text, structure, diagram_type)
-        if issues:
-            revision_prompt = (
+    issues = _post_quality_issues(topic, post_text, structure, diagram_type)
+    placeholder_leaked = any(
+        phrase in (post_text or "").lower()
+        for phrase in ["the problem:", "core concept:", "how it works:", 
+                       "best practices:", "common mistakes:", "key takeaway:"]
+    )
+    if not dry_run and (issues or placeholder_leaked):
+        revision_prompt = (
                 prompt
                 + "\nRevision feedback:\n- "
                 + "\n- ".join(issues[:5])

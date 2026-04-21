@@ -3994,7 +3994,7 @@ def _record_rotation(style_idx: int, topic_id: str, topic_name: str, diagram_typ
 #  Internet Search Fallback (Bing Images scraper)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
+def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool = False) -> bytes:
     """
     Search multiple trusted technical platforms for a diagram matching the topic.
     Collects candidates from all sources, scores them by platform + image size,
@@ -4051,12 +4051,25 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
 
     # Domain blacklist: Exclude sites that mostly host generic templates or low-quality previews
     DOMAIN_BLACKLIST = [
-        "slideteam.net", "sketchbubble.com", "powerpointify.com",
-        "slidesalad.com", "slideegg.com", "sketching.com",
-        "presentationgo.com", "slideshare.net", "pinterest.com",
-        "shutterstock.com", "gettyimages.com", "dreamstime.com",
-        "123rf.com", "depositphotos.com", "canva.com",
-    ]
+    # existing entries...
+    "slideteam.net", "sketchbubble.com", "powerpointify.com",
+    "slidesalad.com", "slideegg.com", "sketching.com",
+    "presentationgo.com", "slideshare.net", "pinterest.com",
+    "shutterstock.com", "gettyimages.com", "dreamstime.com",
+    "123rf.com", "depositphotos.com", "canva.com",
+    # NEW — illustration/artwork/photo sites to reject
+    "miro.medium.com",        # Medium hero illustrations, not diagrams
+    "cdn-images-1.medium.com", # Medium article headers
+    "unsplash.com",           # Stock photography
+    "pexels.com",             # Stock photography  
+    "freepik.com",            # Vector illustrations
+    "flaticon.com",           # Icons, not diagrams
+    "storyset.com",           # Story illustrations
+    "undraw.co",              # UI illustrations
+    "artstation.com",         # Digital art
+    "behance.net",            # Design portfolios
+    "dribbble.com",           # Design shots
+]
 
     # --- Disambiguation Logic ---
     topic_lower = topic_name.lower()
@@ -4140,7 +4153,8 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
     # 1. Collect candidates from all queries
     candidates = []   # list of (url, priority)
     seen_urls = set()
-    for query in SEARCH_QUERIES:
+    active_queries = SEARCH_QUERIES[:2] if fast_mode else SEARCH_QUERIES
+    for query in active_queries:
         log.info(f"Searching: {query}")
         for url, pri in _scrape_bing(query):
             url_lower = url.lower()
@@ -4174,7 +4188,8 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
     best_score = (-1, 0)
 
     # Increase candidate pool to find better matches
-    for img_url, priority in candidates[:35]:
+    max_candidates = 12 if fast_mode else 35
+    for img_url, priority in candidates[:max_candidates]:
         relevance = _relevance(img_url)
         combined_score = (relevance * 100) + priority
         try:
@@ -4199,6 +4214,32 @@ def _fetch_internet_image(topic_name: str, post_text: str = "") -> bytes:
                     log.warning(f"Complexity check failed for {img_url[:60]}: {e}")
                     # Allow fallback if check fails but size is good
                 
+                # --- Illustration/Artwork Rejection Filter ---
+# Reject images that look like illustrations rather than technical diagrams.
+# Technical diagrams have: lots of straight lines, text, geometric shapes.
+# Illustrations have: organic shapes, gradients, photographic content.
+                try:
+                    p_img_check = Image.open(io.BytesIO(img_r.content)).convert("RGB")
+                    img_array = list(p_img_check.getdata())
+                    width_c, height_c = p_img_check.size
+                    
+                    # Sample pixels along a grid to check for straight-line structure
+                    # Technical diagrams tend to have many pixels at pure/near-pure colors
+                    # (white backgrounds, solid colored boxes, black text)
+                    total_pixels = len(img_array)
+                    near_white = sum(1 for r,g,b in img_array if r>220 and g>220 and b>220)
+                    near_black = sum(1 for r,g,b in img_array if r<35 and g<35 and b<35)
+                    near_pure  = (near_white + near_black) / max(total_pixels, 1)
+                    
+                    # Technical diagrams: >15% pixels are near-white or near-black
+                    # Illustrations/photos: typically <10% near-white or near-black
+                    if near_pure < 0.10:
+                        log.info(f"Skipping illustration/photo (near_pure={near_pure:.2f}): {img_url[:60]}")
+                        continue
+                        
+                except Exception as e:
+                    log.warning(f"Illustration check failed ({e}), allowing image")
+    # Don't skip on error — allow the image through
                 score = (combined_score, size)
                 if score > best_score:
                     best_score = score
@@ -4241,7 +4282,13 @@ class DiagramGenerator:
 
         # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
         # Fetches real diagrams from ByteByteGo, Medium, Dev.to, etc.
-        img_bytes, img_source_url = _fetch_internet_image(search_name or topic_id, post_text=post_text)
+        # In dry run, limit image search to 2 queries and 10 candidates for speed
+        _dry_run_mode = os.environ.get("DRY_RUN_FAST", "0") == "1"
+        img_bytes, img_source_url = _fetch_internet_image(
+            search_name or topic_id, 
+            post_text=post_text,
+            fast_mode=_dry_run_mode
+        )
         if img_bytes:
             png_filename = filename.replace(".svg", ".png")
             # Apply branding
