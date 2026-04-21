@@ -1134,10 +1134,10 @@ Requirements:
                 + "\n- ".join(issues[:5])
                 + "\nRewrite the post from scratch and fix every issue above."
             )
-            try:
-                post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
-            except Exception as e:
-                log.warning(f"Topic revision failed for {topic.get('id', 'unknown')}, keeping first draft: {e}")
+        try:
+            post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
+        except Exception as e:
+            log.warning(f"Topic revision failed for {topic.get('id', 'unknown')}, keeping first draft: {e}")
     return _cleanup_generated_post(post_text)
 
 
