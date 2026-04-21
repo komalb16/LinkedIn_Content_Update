@@ -4,15 +4,28 @@
   "weekly": {
     "mon": {
       "enabled": true,
-      "time_local": "12:45",
       "time_tz": "America/New_York",
-      "time_utc": "16:45"
+      "time_utc": "13:30"
     },
     "tue": {
       "enabled": true,
       "time_local": "17:00",
       "time_tz": "America/New_York",
-      "time_utc": "21:00"
+      "time_utc": "21:00",
+      "times": [
+        {
+          "time_ist": "09:30",
+          "time_local": "09:30",
+          "time_tz": "America/New_York",
+          "time_utc": "13:30"
+        },
+        {
+          "time_ist": "18:30",
+          "time_local": "18:30",
+          "time_tz": "America/New_York",
+          "time_utc": "22:30"
+        }
+      ]
     },
     "wed": {
       "enabled": true,
@@ -23,9 +36,8 @@
     },
     "thu": {
       "enabled": true,
-      "time_local": "22:30",
       "time_tz": "America/New_York",
-      "time_utc": "02:30"
+      "time_utc": "13:30"
     },
     "fri": {
       "enabled": true,
@@ -36,18 +48,16 @@
     },
     "sat": {
       "enabled": true,
-      "time_local": "10:00",
       "time_tz": "America/New_York",
-      "time_utc": "14:00"
+      "time_utc": "13:30"
     },
     "sun": {
       "enabled": true,
-      "time_local": "10:00",
       "time_tz": "America/New_York",
-      "time_utc": "14:00"
+      "time_utc": "13:30"
     }
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-04-17T21:49:56.441Z"
+  "updated_at": "2026-04-21T16:55:51.643Z"
 }
