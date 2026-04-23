@@ -32,7 +32,21 @@
       "time_ist": "15:30",
       "time_local": "15:30",
       "time_tz": "America/New_York",
-      "time_utc": "19:30"
+      "time_utc": "19:30",
+      "times": [
+        {
+          "time_ist": "15:30",
+          "time_local": "15:30",
+          "time_tz": "America/New_York",
+          "time_utc": "19:30"
+        },
+        {
+          "time_ist": "22:30",
+          "time_local": "22:30",
+          "time_tz": "America/New_York",
+          "time_utc": "02:30"
+        }
+      ]
     },
     "thu": {
       "enabled": true,
@@ -59,5 +73,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-04-21T16:55:51.643Z"
+  "updated_at": "2026-04-22T22:28:42.249Z"
 }
