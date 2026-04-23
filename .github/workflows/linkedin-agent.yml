@@ -7,20 +7,16 @@ permissions:
 run-name: >-
   ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.dry_run == 'true' && 'dry-run' || 'live' }} · ${{ github.event.inputs.post_mode || 'auto' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
 
-# ─── Triggers ───────────────────────────────────────────────────────────────
 on:
-  # Four evenly-spaced triggers every 6h. schedule_checker uses a 6h window,
-  # so the 4 × 6h slots tile perfectly across all 24 hours with no gaps.
-  #
-  # Slot coverage (EDT = UTC-4):
-  #   00:00 UTC → catches  8 PM –  2 AM EDT  (late-night / overnight)
-  #   06:00 UTC → catches  2 AM –  8 AM EDT  (early morning)
-  #   12:00 UTC → catches  8 AM –  2 PM EDT  (morning / midday) ✓
-  #   18:00 UTC → catches  2 PM –  8 PM EDT  (afternoon / evening) ✓
+  # Fires every 3 hours. schedule_checker.py uses a 3-hour LOOKBACK window:
+  # "Did any configured slot pass in the last 3 hours? If yes → post now."
+  # No sleeping inside the job — pure lookback check.
+  # Supports unlimited slots per day. Adding new times to schedule_config.json
+  # requires zero changes here. Cross-midnight slots (e.g. 22:30 UTC) are
+  # handled by checking yesterday's schedule at the 00:00 UTC cron.
   schedule:
-    - cron: "0 */3 * * *"  # Every 3 hours (8 times daily) - 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 UTC
-  
-  # Manual trigger from GitHub UI — with optional inputs
+    - cron: "0 */3 * * *"
+
   workflow_dispatch:
     inputs:
       topic_id:
@@ -28,7 +24,6 @@ on:
         required: false
         default: ""
         type: string
-
       dry_run:
         description: "Dry run (generate but don't post)"
         required: false
@@ -63,26 +58,22 @@ on:
         default: ""
         type: string
 
-# ─── Job ─────────────────────────────────────────────────────────────────────
 jobs:
   post-to-linkedin:
     name: Generate & Post Content
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 25   # Safe — schedule_checker no longer sleeps
 
     steps:
-      # 1. Checkout repository
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      # 2. Set up Python
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
 
-      # 3. Install system dependencies (for SVG → PNG conversion)
       - name: 🔧 Install system deps
         if: github.event.inputs.dry_run != 'true'
         run: |
@@ -91,11 +82,9 @@ jobs:
             libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
             libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
 
-      # 4. Install Python dependencies
       - name: 📦 Install dependencies
         run: pip install -r requirements.txt
 
-      # 4b. Smoke test — catch render bugs before they reach LinkedIn
       - name: 🧪 Smoke test post rendering
         run: |
           python - <<'EOF'
@@ -103,27 +92,22 @@ jobs:
           sys.path.insert(0, "src")
           from agent import _render_linkedin_text
 
-          # Test 1: fenced block (the exact case that broke scheduled runs)
           test1 = "Here is my insight.\n\n```python\nStep 1\nStep 2\nStep 3\n```\n\n💬 Thoughts?\n\n#AI #DevOps"
           result1 = _render_linkedin_text(test1)
           assert "```" not in result1, "FAIL: fenced block not stripped"
           assert "Step 1" in result1, "FAIL: content was lost"
           print("✅ Test 1 passed: fenced block handled correctly")
 
-          # Test 2: plain post (no fences)
           test2 = "Simple post.\n\n💬 Thoughts?\n\n#AI"
           result2 = _render_linkedin_text(test2)
           assert result2 == test2.strip(), "FAIL: plain post was modified"
           print("✅ Test 2 passed: plain post unchanged")
 
-          # Test 3: empty input
           assert _render_linkedin_text("") == "", "FAIL: empty input should return empty"
           print("✅ Test 3 passed: empty input handled")
-
           print("All smoke tests passed.")
           EOF
 
-      # 5. Show run info
       - name: ℹ️ Run Info
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -137,7 +121,6 @@ jobs:
           echo "  Approved  : ${{ github.event.inputs.approved_run_id || 'no' }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-      # 6. Run the agent
       - name: 🚀 Run LinkedIn Agent
         id: run_agent
         working-directory: src
@@ -147,9 +130,6 @@ jobs:
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || vars.TELEGRAM_CHAT_ID }}
-          # Optional: set AUTHOR_NAME as a repo variable (Settings → Variables)
-          # to personalise post signatures and diagram watermarks.
-          # Falls back to your GitHub username automatically if not set.
           AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
           USER_NAME: ${{ vars.USER_NAME || vars.AUTHOR_NAME || github.actor }}
           GH_EVENT_NAME: ${{ github.event_name }}
@@ -162,30 +142,21 @@ jobs:
               --artifact-name "${{ github.event.inputs.approved_artifact_name }}"
           else
             ARGS=""
-
             if [ -n "${{ github.event.inputs.topic_id }}" ]; then
               ARGS="$ARGS --topic ${{ github.event.inputs.topic_id }}"
             fi
-
             if [ -n "${{ github.event.inputs.post_mode }}" ] && [ "${{ github.event.inputs.post_mode }}" != "auto" ]; then
               ARGS="$ARGS --mode ${{ github.event.inputs.post_mode }}"
             fi
-
             if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
               ARGS="$ARGS --dry-run"
             fi
-
             if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
               ARGS="$ARGS --manual"
             fi
-
             python agent.py $ARGS
           fi
 
-      # 7. Bookmark — dashboard reads this step name to identify real posts and extract topic.
-      #    agent.py writes POSTED_TOPIC to GITHUB_OUTPUT immediately after topic selection,
-      #    so this step runs for ALL real posts (including auto-selected topics).
-      #    Heartbeat/skip runs never reach this step, so dashboard can filter them out.
       - name: "✅ Posted · ${{ steps.run_agent.outputs.POSTED_TITLE || steps.run_agent.outputs.POSTED_TOPIC || 'unknown' }}"
         if: steps.run_agent.outputs.POSTED_TOPIC != '' && github.event.inputs.dry_run != 'true'
         run: |
@@ -205,7 +176,6 @@ jobs:
         run: |
           python src/publish_preview_cache.py
 
-      # 8. Upload diagrams as artifacts (always, even on failure)
       - name: 📁 Upload Diagrams
         if: always()
         uses: actions/upload-artifact@v4
@@ -220,7 +190,6 @@ jobs:
             src/agent.log
           retention-days: 30
 
-      # 8. Commit updated history back to repo
       - name: 💾 Save Topic History
         if: success()
         run: |
@@ -236,7 +205,6 @@ jobs:
           git pull --rebase origin main || true
           git push || true
 
-      # 9. Update GitHub Profile README with latest post  (#18)
       - name: 📝 Update GitHub Profile README
         if: success() && github.event.inputs.dry_run != 'true'
         env:
@@ -246,7 +214,6 @@ jobs:
           POST_TOPIC:   ${{ steps.run_agent.outputs.POSTED_TOPIC }}
           POST_DATE:    ${{ steps.run_agent.outputs.POSTED_DATE }}
           LINKEDIN_POST_URL: ${{ steps.run_agent.outputs.POSTED_URL }}
-          # Notification channels (same as used by notifier.py)
           NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL || vars.NOTIFY_EMAIL }}
           NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS || vars.NOTIFY_EMAIL_PASS || secrets.NOTIFY_EMAIL_PASSWORD || vars.NOTIFY_EMAIL_PASSWORD }}
           NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL || vars.NOTIFY_TO_EMAIL }}
@@ -255,16 +222,11 @@ jobs:
         run: |
           python src/update_profile_readme.py || echo "::warning::Profile README update failed (non-fatal)"
 
-      # 10. Check LinkedIn token expiry  (#15)
-
       - name: 🔐 Check Token Expiry
         if: always() && github.event.inputs.dry_run != 'true'
         env:
           LINKEDIN_TOKEN_DATE: ${{ secrets.LINKEDIN_TOKEN_DATE }}
-          # Only the midnight cron (UTC 0-5) sends the daily alert.
-          # Set FORCE_NOTIFY=1 on workflow_dispatch to test notifications manually.
           FORCE_NOTIFY:        ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
-          # Notification channels
           NOTIFY_EMAIL:        ${{ secrets.NOTIFY_EMAIL || vars.NOTIFY_EMAIL }}
           NOTIFY_EMAIL_PASS:   ${{ secrets.NOTIFY_EMAIL_PASS || vars.NOTIFY_EMAIL_PASS || secrets.NOTIFY_EMAIL_PASSWORD || vars.NOTIFY_EMAIL_PASSWORD }}
           NOTIFY_TO_EMAIL:     ${{ secrets.NOTIFY_TO_EMAIL || vars.NOTIFY_TO_EMAIL }}
@@ -273,7 +235,6 @@ jobs:
         run: |
           python src/check_token_expiry.py
 
-      # 11. Notify on failure
       - name: ❌ Notify on Failure
         if: failure()
         env:
@@ -282,7 +243,6 @@ jobs:
         run: |
           echo "::error::LinkedIn Agent failed! Check the logs above."
           echo "::error::Common causes: expired LinkedIn token, API rate limits, SVG parse error"
-          # Send Telegram failure alert if configured
           if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
             MSG="%E2%9D%8C+LinkedIn+Agent+FAILED%0ARun:+${{ github.run_id }}%0ATrigger:+${{ github.event_name }}%0ATopic:+${{ github.event.inputs.topic_id || 'auto' }}%0AMode:+${{ github.event.inputs.post_mode || 'auto' }}%0ALink:+https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
