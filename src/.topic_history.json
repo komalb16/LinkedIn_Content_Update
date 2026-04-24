@@ -899,5 +899,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-24T01:21:10.125014",
+    "topic_id": "microsoft-365",
+    "topic_name": "Microsoft 365",
+    "category": "Engineering",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 80,
+    "ab_variants": []
   }
 ]
