@@ -1121,23 +1121,19 @@ Requirements:
         log.warning(f"Topic generation failed for {topic.get('id', 'unknown')}, using fallback copy: {e}")
         return _fallback_topic_post(topic, structure=structure)
     # Skip revision pass in dry run — saves one full LLM round-trip (~30s)
-    issues = _post_quality_issues(topic, post_text, structure, diagram_type)
-    placeholder_leaked = any(
-        phrase in (post_text or "").lower()
-        for phrase in ["the problem:", "core concept:", "how it works:", 
-                       "best practices:", "common mistakes:", "key takeaway:"]
-    )
-    if not dry_run and (issues or placeholder_leaked):
-        revision_prompt = (
+    if not dry_run:
+        issues = _post_quality_issues(topic, post_text, structure, diagram_type)
+        if issues:
+            revision_prompt = (
                 prompt
                 + "\nRevision feedback:\n- "
                 + "\n- ".join(issues[:5])
                 + "\nRewrite the post from scratch and fix every issue above."
             )
-        try:
-            post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
-        except Exception as e:
-            log.warning(f"Topic revision failed for {topic.get('id', 'unknown')}, keeping first draft: {e}")
+            try:
+                post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
+            except Exception as e:
+                log.warning(f"Topic revision failed for {topic.get('id', 'unknown')}, keeping first draft: {e}")
     return _cleanup_generated_post(post_text)
 
 
@@ -1475,6 +1471,33 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
 
     if any(re.search(pat, cleaned, re.I) for pat in INCIDENT_PATTERNS):
         issues.append("Avoid personal/work incident references; keep examples generic unless the topic explicitly includes a real case study.")
+
+    # Check for naked structural labels leaked into post body
+    # e.g. "Best Practices: Access control" or "Common Mistakes: Human error"
+    naked_label_re = re.compile(
+        r"^(Best Practices|Common Mistakes|The Problem|Core Concept|"
+        r"How It Works|Key Takeaway|Summary|Introduction)\s*:",
+        re.MULTILINE | re.IGNORECASE
+    )
+    if naked_label_re.search(cleaned):
+        issues.append(
+            "Remove naked structural labels like 'Best Practices:' or 'Common Mistakes:' — "
+            "these are prompt scaffolding that leaked into the post. Write the insight directly."
+        )
+
+    # Check for fabricated company incident references not in topic data
+    fabricated_ref = re.search(
+        r"\bas seen in\b.{0,60}\b(breach|incident|outage|hack|leak)\b"
+        r"|\brecent\b.{0,40}\b(breach|incident|outage)\b.{0,20}\blike\b",
+        cleaned, re.IGNORECASE
+    )
+    if fabricated_ref and not any(
+        word in topic_blob for word in ["breach", "incident", "outage", "hack", "leak"]
+    ):
+        issues.append(
+            "Remove fabricated company incident reference not supported by topic data. "
+            "Do not invent real-world breaches or outages unless explicitly provided."
+        )
 
     if re.search(r"\bnext post\b|\bthird post\b|\bpost 2\b|\banother post\b", cleaned, re.I):
         issues.append("Write exactly one post and remove any extra appended drafts.")
@@ -2098,6 +2121,31 @@ def _has_structural_integrity_issues(text):
             blockers.append("Poll options still contain placeholder labels instead of real choices.")
             break
 
+    # 5. Naked structural labels leaked into post body
+    # e.g. "Best Practices: Access control" or "Common Mistakes: Human error"
+    naked_label_pattern = re.compile(
+        r"^(Best Practices|Common Mistakes|The Problem|Core Concept|"
+        r"How It Works|Key Takeaway|Summary|Introduction|Hook)\s*:",
+        re.MULTILINE | re.IGNORECASE
+    )
+    if naked_label_pattern.search(text or ""):
+        blockers.append(
+            "Naked structural label found (e.g. 'Best Practices: ...'). "
+            "These are prompt scaffolding leaking into the post — regenerate."
+        )
+
+    # 6. Fabricated company incident references
+    fabricated_incident = re.search(
+        r"\bas seen in\b.{0,60}\b(breach|incident|outage|hack|leak)\b"
+        r"|\brecent\b.{0,40}\b(breach|incident|outage)\b.{0,20}\blike\b",
+        text or "", re.IGNORECASE
+    )
+    if fabricated_incident:
+        blockers.append(
+            "Fabricated company incident reference detected (e.g. 'as seen in Vercel's breach'). "
+            "Remove unless the topic explicitly provides this case study."
+        )
+
     return blockers
 
 def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
@@ -2420,7 +2468,7 @@ def _score_post_candidate(topic, post_text, structure=None, diagram_type=""):
     word_count = len(re.findall(r"\b\w+\b", text))
     if word_count < 140 or word_count > 340:
         issues.append("Keep the post in the LinkedIn sweet spot: roughly 140 to 340 words.")
-        score -= 6
+        score -= 25  # Hard penalty — short posts reliably fail the quality gate
 
     if structure and structure.get("sections"):
         labels = [s.get("label", "") for s in structure.get("sections", [])]
@@ -2876,8 +2924,8 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
             continue
         if any(tok in line for tok in ("->", "-->", "|>", "[", "]", "{", "}")):
             continue
-        if len(line) >= 12:
-            return line[:54]
+        ##if len(line) >= 12:
+          ##  return line[:54]
     return fallback_title
 
 
@@ -3120,28 +3168,10 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
         poster_structure = _build_viral_poster_structure(post_text, poster_title, mode, topic=topic)
         return poster_title, "Viral Poster", poster_structure
 
-    # ALL TECHNICAL/NEWS/TRENDING modes now use Professional Engineering Charts (Mermaid + Kroki)
-    # Extract subject from the actual post content, not just topic name.
-    # This ensures the diagram matches what was written, not what was planned.
+    # ALL TECHNICAL/NEWS/TRENDING modes now use Professional Engineering Charts
+    # (Mermaid + Kroki). Keep the diagram title anchored to the intended topic,
+    # not the post hook/first line, so the visual title stays stable.
     diagram_title = _extract_poster_title(topic["name"], post_text, mode)
-
-    # Override: if post first line contains a more specific subject, use that
-    first_meaningful_line = ""
-    for line in (post_text or "").splitlines():
-        stripped = line.strip()
-        if stripped and len(stripped) > 20 and not stripped.startswith(("#", "💬", "📌")):
-            first_meaningful_line = re.sub(r"[^\w\s]", " ", stripped)[:60].strip()
-            break
-    if first_meaningful_line and first_meaningful_line.lower() != topic["name"].lower():
-        diagram_title = first_meaningful_line
-
-    diagram_structure = _build_viral_poster_structure(post_text, diagram_title, mode, topic=topic)
-
-    # Ensure it triggers the Kroki/Internet path
-    diagram_structure["diagram_style"] = "mermaid"
-    diagram_structure["mermaid_code"] = _build_mermaid_code(diagram_title, diagram_structure["sections"])
-
-    return diagram_title, "Engineering Flow", diagram_structure
 
     # Technical topic posts — use planned diagram type
     diagram_type = _infer_diagram_type_from_post(post_text, fallback_type)
@@ -3608,6 +3638,11 @@ Write a LinkedIn post that:
             pub_blockers.append(
                 f"Hashtag count is outside the safe publish range (4 to 7)."
             )
+        # Hard structural integrity check — catches naked labels, fabricated incidents, truncated items
+        structural_blockers = _has_structural_integrity_issues(post_text)
+        if structural_blockers:
+            pub_blockers.extend(structural_blockers)
+            log.warning("Structural integrity blockers: " + " | ".join(structural_blockers))
         if pub_blockers:
             log.warning("Publish blockers: " + " | ".join(pub_blockers))
             log.warning("Draft failed quality checks — attempting recovery with fresh topic post.")

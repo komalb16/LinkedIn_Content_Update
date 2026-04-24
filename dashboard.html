@@ -5141,6 +5141,7 @@ async function runNow(options = {}) {
         const d = await r.json();
         const cfg = JSON.parse(atob(d.content));
         schedConfig = { ...schedConfig, ...cfg };
+        normalizeScheduleConfig();
       } catch (e) { /* file may not exist yet, use defaults */ }
       buildDayGrid();
       renderOverrides();
@@ -5148,30 +5149,73 @@ async function runNow(options = {}) {
       updNext();
     }
 
+    function utcTimeToLocal(timeUtc, tz) {
+      try {
+        if (!timeUtc || !tz) return '';
+        const [hh, mm] = String(timeUtc).split(':').map(Number);
+        const ref = new Date(Date.UTC(2026, 0, 15, hh || 0, mm || 0, 0));
+        const parts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: tz,
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }).formatToParts(ref);
+        const h = parts.find(p => p.type === 'hour')?.value || '00';
+        const m = parts.find(p => p.type === 'minute')?.value || '00';
+        return `${h}:${m}`;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function normalizeTimeEntry(entry, tz) {
+      const slot = { ...(entry || {}) };
+      const zone = slot.time_tz || tz || userTZ;
+      const local = slot.time_local || slot.time_ist || utcTimeToLocal(slot.time_utc, zone) || '09:30';
+      slot.time_ist = local;
+      slot.time_local = local;
+      slot.time_tz = zone;
+      slot.time_utc = localTimeToUtc(local, zone);
+      return slot;
+    }
+
+    function normalizeScheduleConfig() {
+      schedConfig.weekly = schedConfig.weekly || {};
+      for (const day of DAYS) {
+        const current = schedConfig.weekly[day] || { enabled: true, time_ist: '09:30' };
+        const zone = current.time_tz || userTZ;
+        const rawTimes = current.times && Array.isArray(current.times) && current.times.length > 0
+          ? current.times
+          : [current];
+        const normalizedTimes = rawTimes.map(entry => normalizeTimeEntry(entry, zone));
+        schedConfig.weekly[day] = {
+          enabled: current.enabled !== false,
+          time_ist: normalizedTimes[0].time_ist,
+          time_local: normalizedTimes[0].time_local,
+          time_tz: normalizedTimes[0].time_tz,
+          time_utc: normalizedTimes[0].time_utc,
+          times: normalizedTimes
+        };
+      }
+    }
+
     // ── SAVE SCHEDULE TO REPO ─────────────────────────────────────────────────────
     async function saveSchedule() {
       const btn = document.getElementById('saveSchedBtn');
       btn.disabled = true; btn.textContent = '💾 Saving...';
       try {
-        // Set time_local and time_tz for DST-aware scheduling
+        normalizeScheduleConfig();
         for (const day of DAYS) {
           if (schedConfig.weekly[day]) {
             const dayCfg = schedConfig.weekly[day];
-            
-            // Support BOTH: new format (times array) and legacy format (single time_ist)
-            if (dayCfg.times && Array.isArray(dayCfg.times) && dayCfg.times.length > 0) {
-              // New format: process each time in the times array
-              dayCfg.times.forEach(timeEntry => {
-                timeEntry.time_local = timeEntry.time_ist;
-                timeEntry.time_tz = userTZ;
-                timeEntry.time_utc = localTimeToUtc(timeEntry.time_ist, userTZ);
-              });
-            } else {
-              // Legacy format: process single time
-              dayCfg.time_local = dayCfg.time_ist;
-              dayCfg.time_tz = userTZ;
-              dayCfg.time_utc = localTimeToUtc(dayCfg.time_ist, userTZ);
-            }
+            dayCfg.enabled = dayCfg.enabled !== false;
+            dayCfg.times = (dayCfg.times && Array.isArray(dayCfg.times) && dayCfg.times.length > 0)
+              ? dayCfg.times.map(entry => normalizeTimeEntry(entry, userTZ))
+              : [normalizeTimeEntry(dayCfg, userTZ)];
+            dayCfg.time_ist = dayCfg.times[0].time_ist;
+            dayCfg.time_local = dayCfg.times[0].time_local;
+            dayCfg.time_tz = userTZ;
+            dayCfg.time_utc = dayCfg.times[0].time_utc;
           }
         }
         schedConfig.updated_at = new Date().toISOString();
