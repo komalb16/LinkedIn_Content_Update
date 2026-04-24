@@ -7,15 +7,15 @@ permissions:
 run-name: >-
   ${{ github.event_name == 'workflow_dispatch' && '🖱️ Manual' || '⏰ Scheduled' }} · ${{ github.event.inputs.dry_run == 'true' && 'dry-run' || 'live' }} · ${{ github.event.inputs.post_mode || 'auto' }} · ${{ github.event.inputs.approved_run_id && format('approved-{0}', github.event.inputs.approved_run_id) || github.event.inputs.topic_id || 'auto' }}
 
+concurrency:
+  group: linkedin-agent-${{ github.event_name == 'schedule' && 'scheduled' || github.run_id }}
+  cancel-in-progress: true
+
 on:
-  # Fires every 3 hours. schedule_checker.py uses a 3-hour LOOKBACK window:
-  # "Did any configured slot pass in the last 3 hours? If yes → post now."
-  # No sleeping inside the job — pure lookback check.
-  # Supports unlimited slots per day. Adding new times to schedule_config.json
-  # requires zero changes here. Cross-midnight slots (e.g. 22:30 UTC) are
-  # handled by checking yesterday's schedule at the 00:00 UTC cron.
+  # Fires hourly. schedule_checker.py sleeps until the next slot when the
+  # scheduled time is within the next hour.
   schedule:
-    - cron: "0 */3 * * *"
+    - cron: "0 * * * *"
 
   workflow_dispatch:
     inputs:
@@ -133,6 +133,8 @@ jobs:
           AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
           USER_NAME: ${{ vars.USER_NAME || vars.AUTHOR_NAME || github.actor }}
           GH_EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE_WINDOW_MINUTES: "59"
+          SCHEDULE_BACKWARD_GRACE_MINUTES: "30"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
@@ -198,6 +200,7 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
             git add src/.topic_history.json || true
           fi
+          git add src/.post_lock.json || true
           git add src/.post_memory.json || true
           git add src/.diagram_memory.json || true
           git add src/.diagram_rotation.json || true

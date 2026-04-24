@@ -1,36 +1,20 @@
 """
-schedule_checker.py  ─  src/schedule_checker.py
-────────────────────────────────────────────────────────────────
-Reads schedule_config.json and decides whether the agent should
-post RIGHT NOW. Called at the start of agent.py.
+schedule_checker.py - src/schedule_checker.py
 
-Design: NO SLEEP
-─────────────────
-The workflow cron fires every 3 hours (0 */3 * * *).
-This checker reads the configured target times and asks:
-  "Did any target time pass within the last 3 hours?"
-If yes → return immediately (agent posts).
-If no  → sys.exit(0) (clean skip).
+Reads schedule_config.json and decides whether the agent should post.
 
-No sleeping = no timeout issues = works for any number of slots.
-Posting precision: within 3 hours of configured time (the cron window).
-If you need tighter precision (e.g. ±30min), switch to a 30min cron
-and set WINDOW_MINUTES=28 in the environment.
-
-Cross-midnight handling:
-  Slots after 21:00 UTC (e.g. 22:30 UTC) are checked by the
-  00:00 UTC cron on the NEXT day. To handle this correctly, the
-  checker also looks back into the previous day's schedule for
-  any uncaught late-night slots.
-
-Supports unlimited posting slots per day via the "times" array.
-Adding new slots requires only a schedule_config.json change.
+Design:
+- The workflow cron fires hourly.
+- If a scheduled slot is within the next forward window, sleep until it.
+- If a scheduled slot passed very recently, post immediately.
+- A per-slot lock prevents the same UTC slot from firing twice.
 """
 
 import json
-import sys
 import os
-from datetime import datetime, timedelta, timezone
+import sys
+import time
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 try:
@@ -48,41 +32,49 @@ try:
         except Exception:
             return "unknown"
 
-    def _local_to_utc_hhmm(hhmm: str, tz_name: str, ref_utc: datetime = None) -> str:
-        """Convert wall-clock HH:MM in tz_name to HH:MM UTC, DST-aware."""
-        ref = ref_utc or datetime.now(timezone.utc)
-        tz = ZoneInfo(tz_name)
-        local_today = ref.astimezone(tz).replace(
-            hour=int(hhmm[:2]), minute=int(hhmm[3:]), second=0, microsecond=0
-        )
-        return local_today.astimezone(timezone.utc).strftime("%H:%M")
-
     HAS_ZONEINFO = True
 except ImportError:
     HAS_ZONEINFO = False
-    def _dst_offset_str(tz_name): return "unknown"
-    def _local_to_utc_hhmm(hhmm, tz_name, ref_utc=None): return hhmm
 
 try:
     from logger import get_logger
+
     _log = get_logger("schedule")
-    def info(msg): _log.info(msg)
-    def warn(msg): _log.warning(msg)
+
+    def info(msg: str) -> None:
+        _log.info(msg)
+
+    def warn(msg: str) -> None:
+        _log.warning(msg)
 except Exception:
-    def info(msg): print(f"[schedule] {msg}")
-    def warn(msg): print(f"[schedule] WARNING: {msg}")
+    def _safe_print(msg: str) -> None:
+        encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+        print(str(msg).encode(encoding, errors="replace").decode(encoding, errors="replace"))
+
+    def info(msg: str) -> None:
+        _safe_print(f"[schedule] {msg}")
+
+    def warn(msg: str) -> None:
+        _safe_print(f"[schedule] WARNING: {msg}")
 
 
 DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+DAY_INDEX = {day: idx for idx, day in enumerate(DAYS)}
+LOCK_FILE = Path(__file__).resolve().parent / ".post_lock.json"
 
-# How far back to look for uncaught slots (should match cron frequency).
-# Default: 3h = 180min (matches "0 */3 * * *" cron).
-# Override via env: SCHEDULE_WINDOW_MINUTES=28 for a 30min cron.
-def _window_minutes() -> int:
+
+def _forward_window_minutes() -> int:
     try:
-        return int(os.environ.get("SCHEDULE_WINDOW_MINUTES", "180"))
+        return int(os.environ.get("SCHEDULE_WINDOW_MINUTES", "59"))
     except Exception:
-        return 180
+        return 59
+
+
+def _backward_grace_minutes() -> int:
+    try:
+        return int(os.environ.get("SCHEDULE_BACKWARD_GRACE_MINUTES", "30"))
+    except Exception:
+        return 30
 
 
 def _find_config() -> Path:
@@ -108,10 +100,10 @@ def load_config() -> dict:
     }
     path = _find_config()
     if not path.exists():
-        warn("schedule_config.json not found — using defaults (09:00 UTC every day)")
+        warn("schedule_config.json not found - using defaults (09:00 UTC every day)")
         return defaults
     try:
-        with open(path) as f:
+        with path.open(encoding="utf-8") as f:
             cfg = json.load(f)
         merged = {**defaults, **cfg}
         for day in DAYS:
@@ -119,200 +111,361 @@ def load_config() -> dict:
                 merged.setdefault("weekly", {})[day] = defaults["weekly"][day]
         return merged
     except Exception as e:
-        warn(f"Could not parse schedule_config.json ({e}) — using defaults")
+        warn(f"Could not parse schedule_config.json ({e}) - using defaults")
         return defaults
 
 
-def _mark_skip():
+def _mark_skip() -> None:
     gho = os.environ.get("GITHUB_OUTPUT", "")
-    if gho:
+    if not gho:
+        return
+    try:
+        with open(gho, "a", encoding="utf-8") as fh:
+            fh.write("SKIP_RUN=true\n")
+    except Exception:
+        pass
+
+
+def _check_and_set_post_lock(matched_dt: datetime) -> bool:
+    """
+    Return True when this exact UTC slot has not been claimed yet.
+    Return False when a previous run already claimed the same slot.
+    """
+    matched_utc = matched_dt.astimezone(timezone.utc)
+    lock_key = matched_utc.strftime("%Y-%m-%d_%H:%M")
+    cutoff = (matched_utc - timedelta(days=2)).strftime("%Y-%m-%d")
+
+    locks: dict[str, str] = {}
+    if LOCK_FILE.exists():
         try:
-            with open(gho, "a") as fh:
-                fh.write("SKIP_RUN=true\n")
+            with LOCK_FILE.open(encoding="utf-8") as f:
+                locks = json.load(f)
         except Exception:
-            pass
+            locks = {}
+
+    locks = {
+        key: value
+        for key, value in locks.items()
+        if isinstance(key, str) and "_" in key and key.split("_", 1)[0] >= cutoff
+    }
+
+    if lock_key in locks:
+        info(f"Lock exists for {lock_key} UTC - already claimed; skipping")
+        return False
+
+    locks[lock_key] = datetime.now(timezone.utc).isoformat()
+    try:
+        with LOCK_FILE.open("w", encoding="utf-8") as f:
+            json.dump(locks, f, indent=2)
+    except Exception as e:
+        warn(f"Could not write post lock: {e}")
+
+    return True
 
 
 def _slot_to_utc_dt(slot: dict, date_utc: datetime) -> datetime | None:
     """
-    Convert a single time slot dict to a UTC datetime on the given date.
-    Returns None if the slot cannot be parsed.
+    Convert a single time slot dict to a UTC datetime on the given UTC date.
     """
-    time_local = slot.get("time_local")
-    time_tz    = slot.get("time_tz", "")
-    time_utc   = slot.get("time_utc")
-    time_ist   = slot.get("time_ist")
-
-    if time_local and time_tz and HAS_ZONEINFO:
-        try:
-            hhmm = _local_to_utc_hhmm(time_local, time_tz, ref_utc=date_utc)
-            h, m = map(int, hhmm.split(":"))
-            result = date_utc.replace(hour=h, minute=m, second=0, microsecond=0)
-            info(f"  DST-aware: {time_local} {time_tz} → {hhmm} UTC ({_dst_offset_str(time_tz)})")
-            return result
-        except Exception as e:
-            warn(f"  DST conversion failed for {time_local} {time_tz}: {e}")
+    time_utc = slot.get("time_utc")
+    time_ist = slot.get("time_ist")
 
     if time_utc:
         try:
             h, m = map(int, time_utc.split(":"))
             return date_utc.replace(hour=h, minute=m, second=0, microsecond=0)
         except Exception:
-            warn(f"  Invalid time_utc format: {time_utc}")
+            warn(f"Invalid time_utc format: {time_utc}")
 
     if time_ist:
-        warn(f"  LEGACY time_ist='{time_ist}' — re-save config for DST support")
+        warn(f"Legacy time_ist='{time_ist}' - re-save config for timezone support")
         try:
             h, m = map(int, time_ist.split(":"))
-            total_min = h * 60 + m - 330  # IST = UTC+5:30
+            total_min = h * 60 + m - 330
             total_min %= 1440
-            return date_utc.replace(hour=total_min // 60, minute=total_min % 60,
-                                    second=0, microsecond=0)
+            return date_utc.replace(
+                hour=total_min // 60,
+                minute=total_min % 60,
+                second=0,
+                microsecond=0,
+            )
         except Exception:
             pass
 
     return None
 
 
-def _get_target_datetimes(day_cfg: dict, date_utc: datetime) -> list[datetime]:
+def _local_date_to_utc_dt(slot: dict, local_date: date, fallback_tz: str = "") -> datetime | None:
     """
-    Return all UTC posting datetimes for a given day config and date.
-    Handles both single-time and multi-time (times array) formats.
+    Convert a local schedule date + local wall clock time into absolute UTC.
     """
-    targets = []
+    time_local = slot.get("time_local")
+    time_tz = slot.get("time_tz") or fallback_tz
 
-    if "times" in day_cfg and isinstance(day_cfg["times"], list) and day_cfg["times"]:
-        info(f"  Multi-slot day: {len(day_cfg['times'])} time(s) configured")
-        for slot in day_cfg["times"]:
-            dt = _slot_to_utc_dt(slot, date_utc)
+    if not (time_local and time_tz and HAS_ZONEINFO):
+        return None
+
+    try:
+        tz = ZoneInfo(time_tz)
+        local_dt = datetime(
+            local_date.year,
+            local_date.month,
+            local_date.day,
+            int(time_local[:2]),
+            int(time_local[3:]),
+            tzinfo=tz,
+        )
+        utc_dt = local_dt.astimezone(timezone.utc)
+        info(
+            f"  Local-day aware: {local_date.isoformat()} {time_local} {time_tz} "
+            f"-> {utc_dt.strftime('%H:%M')} UTC ({_dst_offset_str(time_tz)})"
+        )
+        return utc_dt
+    except Exception as e:
+        warn(f"Local-day conversion failed for {local_date.isoformat()} {time_local} {time_tz}: {e}")
+        return None
+
+
+def _utc_date_to_utc_dt_for_local_day(
+    slot: dict,
+    day_key: str,
+    date_utc: date,
+    fallback_tz: str = "",
+) -> datetime | None:
+    """
+    Convert a stored UTC clock time into absolute UTC, but only when that
+    instant lands on the configured local weekday in the slot timezone.
+    """
+    time_utc = slot.get("time_utc")
+    time_tz = slot.get("time_tz") or fallback_tz
+
+    if not (time_utc and time_tz and HAS_ZONEINFO):
+        return None
+
+    try:
+        h, m = map(int, time_utc.split(":"))
+        utc_dt = datetime(date_utc.year, date_utc.month, date_utc.day, h, m, tzinfo=timezone.utc)
+        local_dt = utc_dt.astimezone(ZoneInfo(time_tz))
+        if local_dt.weekday() != DAY_INDEX[day_key]:
+            return None
+        info(
+            f"  UTC-slot aware: {date_utc.isoformat()} {time_utc} UTC "
+            f"-> {local_dt.strftime('%Y-%m-%d %H:%M')} {time_tz}"
+        )
+        return utc_dt
+    except Exception as e:
+        warn(f"UTC-slot conversion failed for {date_utc.isoformat()} {time_utc} {time_tz}: {e}")
+        return None
+
+
+def _candidate_target_datetimes(
+    day_key: str,
+    day_cfg: dict,
+    now_utc: datetime,
+    window_min: int,
+) -> list[datetime]:
+    """
+    Build absolute UTC datetimes for a schedule day.
+    """
+    window_start = now_utc - timedelta(minutes=window_min)
+    targets: list[datetime] = []
+
+    slots = day_cfg.get("times")
+    slot_list = slots if isinstance(slots, list) and slots else [day_cfg]
+    if isinstance(slots, list) and slots:
+        info(f"  Multi-slot day: {len(slots)} time(s) configured")
+
+    for slot in slot_list:
+        slot_tz = slot.get("time_tz") or day_cfg.get("time_tz") or ""
+
+        if slot.get("time_local") and slot_tz and HAS_ZONEINFO:
+            try:
+                tz = ZoneInfo(slot_tz)
+                candidate_local_dates = {
+                    now_utc.astimezone(tz).date(),
+                    window_start.astimezone(tz).date(),
+                    (now_utc + timedelta(minutes=window_min)).astimezone(tz).date(),
+                }
+                for local_date in sorted(candidate_local_dates):
+                    if local_date.weekday() != DAY_INDEX[day_key]:
+                        continue
+                    dt = _local_date_to_utc_dt(slot, local_date, fallback_tz=slot_tz)
+                    if dt:
+                        targets.append(dt)
+            except Exception as e:
+                warn(f"Could not evaluate local schedule dates for {day_key}: {e}")
+            continue
+
+        if slot.get("time_utc") and slot_tz and HAS_ZONEINFO:
+            candidate_utc_dates = {
+                now_utc.date(),
+                window_start.date(),
+                (now_utc + timedelta(minutes=window_min)).date(),
+            }
+            for candidate_date in sorted(candidate_utc_dates):
+                dt = _utc_date_to_utc_dt_for_local_day(slot, day_key, candidate_date, fallback_tz=slot_tz)
+                if dt:
+                    targets.append(dt)
+            continue
+
+        for ref_date in (
+            now_utc,
+            now_utc - timedelta(days=1),
+            now_utc + timedelta(days=1),
+        ):
+            if DAYS[ref_date.weekday()] != day_key:
+                continue
+            dt = _slot_to_utc_dt(slot, ref_date)
             if dt:
                 targets.append(dt)
-        return targets
 
-    # Single-time format — use top-level fields
-    dt = _slot_to_utc_dt(day_cfg, date_utc)
-    if dt:
-        targets.append(dt)
-    return targets
+    unique: dict[str, datetime] = {}
+    for target in targets:
+        unique[target.isoformat()] = target
+    return list(unique.values())
 
 
-def _find_matching_slot(
+def _find_relevant_slot(
     cfg: dict,
     now_utc: datetime,
     window_min: int,
-) -> tuple[datetime | None, str]:
+) -> tuple[datetime | None, str, str]:
     """
-    Check if any configured slot falls within [now - window_min, now].
-    Also checks yesterday's late slots to handle cross-midnight edge cases
-    (e.g. a 22:30 UTC slot caught by the 00:00 UTC next-day cron).
+    Find the most relevant slot for this run.
 
-    Returns (matched_datetime, day_key) or (None, "").
+    Returns:
+    - (target, day, "recent") for a slot within backward grace
+    - (target, day, "upcoming") for the nearest upcoming slot within window
+    - (None, "", "") when nothing is relevant
     """
-    window = timedelta(minutes=window_min)
-    window_start = now_utc - window
+    backward_grace_min = _backward_grace_minutes()
+    best_recent: tuple[datetime, str] | None = None
+    best_upcoming: tuple[datetime, str] | None = None
 
-    # Check today and yesterday (for cross-midnight slots)
-    dates_to_check = [
-        (now_utc,                   DAYS[now_utc.weekday()]),
-        (now_utc - timedelta(days=1), DAYS[(now_utc.weekday() - 1) % 7]),
-    ]
-
-    for ref_date, day_key in dates_to_check:
+    for day_key in DAYS:
         day_cfg = cfg["weekly"].get(day_key, {})
         if not day_cfg.get("enabled", True):
             continue
 
-        # Skip if this date is in skip_dates
-        date_str = ref_date.strftime("%Y-%m-%d")
-        if date_str in cfg.get("skip_dates", []):
-            continue
-
-        targets = _get_target_datetimes(day_cfg, ref_date)
+        targets = _candidate_target_datetimes(day_key, day_cfg, now_utc, window_min)
 
         for target_dt in targets:
-            # Handle cross-midnight: if target is 22:30 on Tuesday and we're
-            # checking from Wednesday's 00:00, the target_dt will be on Tuesday.
-            # We need to check if it falls in [now - window, now].
-            diff_min = (now_utc - target_dt).total_seconds() / 60
+            slot_tz = day_cfg.get("time_tz") or "UTC"
+            try:
+                local_date_str = (
+                    target_dt.astimezone(ZoneInfo(slot_tz)).strftime("%Y-%m-%d")
+                    if HAS_ZONEINFO else ""
+                )
+            except Exception:
+                local_date_str = ""
+            if local_date_str and local_date_str in cfg.get("skip_dates", []):
+                info(
+                    f"  Skipping {target_dt.strftime('%H:%M')} UTC ({day_key}) "
+                    f"because local date {local_date_str} is skipped"
+                )
+                continue
 
-            if 0 <= diff_min <= window_min:
-                info(f"✅ Match: {target_dt.strftime('%H:%M')} UTC ({day_key}) — {diff_min:.0f}min ago")
-                return target_dt, day_key
-            elif diff_min < 0:
-                info(f"  ⏳ {target_dt.strftime('%H:%M')} UTC ({day_key}) is {abs(diff_min):.0f}min in the future")
+            diff_min = (target_dt - now_utc).total_seconds() / 60
+
+            if -backward_grace_min <= diff_min <= 0:
+                mins_ago = abs(diff_min)
+                info(f"Recent slot: {target_dt.strftime('%H:%M')} UTC ({day_key}) - {mins_ago:.0f}min ago")
+                if best_recent is None or target_dt > best_recent[0]:
+                    best_recent = (target_dt, day_key)
+            elif 0 < diff_min <= window_min:
+                info(f"Upcoming slot: {target_dt.strftime('%H:%M')} UTC ({day_key}) in {diff_min:.0f}min")
+                if best_upcoming is None or target_dt < best_upcoming[0]:
+                    best_upcoming = (target_dt, day_key)
+            elif diff_min < -backward_grace_min:
+                info(
+                    f"  Passed: {target_dt.strftime('%H:%M')} UTC ({day_key}) "
+                    f"{abs(diff_min):.0f}min ago (outside {backward_grace_min}min grace)"
+                )
             else:
-                info(f"  ⏭️  {target_dt.strftime('%H:%M')} UTC ({day_key}) passed {diff_min:.0f}min ago (outside {window_min}min window)")
+                info(
+                    f"  Future: {target_dt.strftime('%H:%M')} UTC ({day_key}) "
+                    f"{diff_min:.0f}min away (outside {window_min}min forward window)"
+                )
 
-    return None, ""
+    if best_recent:
+        return best_recent[0], best_recent[1], "recent"
+    if best_upcoming:
+        return best_upcoming[0], best_upcoming[1], "upcoming"
+    return None, "", ""
 
 
 def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
-    """
-    Called at the start of agent.py. No sleeping — pure window check.
-
-    manual=True / dry_run=True → skip schedule, run immediately.
-    Scheduled (cron) → check if any slot passed in the last WINDOW_MINUTES.
-    If yes → return. If no → sys.exit(0).
-    """
     if not manual and os.environ.get("GH_EVENT_NAME") == "workflow_dispatch":
         manual = True
         info("Manual trigger detected via GH_EVENT_NAME")
 
-    cfg     = load_config()
-    now_utc = datetime.utcnow()
-    today   = now_utc.strftime("%Y-%m-%d")
+    cfg = load_config()
+    now_utc = datetime.now(timezone.utc)
+    today = now_utc.strftime("%Y-%m-%d")
     day_key = DAYS[now_utc.weekday()]
-    window  = _window_minutes()
+    forward_window = _forward_window_minutes()
+    backward_grace = _backward_grace_minutes()
 
     trigger = "MANUAL" if manual else ("DRY-RUN" if dry_run else "SCHEDULED")
-    info(f"Schedule check — {today} ({day_key.upper()}) — {now_utc.strftime('%H:%M')} UTC — trigger: {trigger}")
-    info(f"Lookback window: {window}min (set SCHEDULE_WINDOW_MINUTES to override)")
+    info(f"Schedule check - {today} ({day_key.upper()}) - {now_utc.strftime('%H:%M')} UTC - trigger: {trigger}")
+    info(f"Forward window: {forward_window}min (set SCHEDULE_WINDOW_MINUTES to override)")
+    info(f"Backward grace: {backward_grace}min (set SCHEDULE_BACKWARD_GRACE_MINUTES to override)")
 
-    # ── 1. PAUSE ─────────────────────────────────────────────────────────────
     if cfg["paused"]:
         resume = cfg.get("pause_until")
         if resume and today >= resume:
-            info(f"Pause expired (resume was {resume}) — proceeding")
+            info(f"Pause expired (resume was {resume}) - proceeding")
         else:
-            info(f"⏸️  Paused {f'until {resume}' if resume else 'indefinitely'} — exiting")
+            info(f"Paused {f'until {resume}' if resume else 'indefinitely'} - exiting")
             sys.exit(0)
 
-    # ── 2. FORCE DATE ────────────────────────────────────────────────────────
     is_forced = today in cfg.get("force_dates", [])
     if is_forced:
-        info(f"📌 {today} is a force-run date")
+        info(f"{today} is a force-run date")
 
-    # ── 3. SKIP DATE ─────────────────────────────────────────────────────────
     if today in cfg.get("skip_dates", []) and not is_forced:
-        info(f"🚫 {today} is in skip_dates — exiting")
+        info(f"{today} is in skip_dates - exiting")
         sys.exit(0)
 
-    # ── 4. MANUAL / DRY-RUN: skip time check ─────────────────────────────────
     if dry_run or manual:
-        info(f"Skipping time check ({trigger}) — running immediately")
+        info(f"Skipping schedule check ({trigger}) - running immediately")
         return
 
-    # ── 5. WINDOW CHECK (no sleep) ────────────────────────────────────────────
-    matched_dt, matched_day = _find_matching_slot(cfg, now_utc, window)
+    matched_dt, matched_day, matched_status = _find_relevant_slot(cfg, now_utc, forward_window)
 
     if matched_dt is None:
-        info(f"⏭️  No slots in {window}min lookback window — exiting cleanly")
+        info(f"No slots in the next {forward_window}min or last {backward_grace}min - exiting cleanly")
         _mark_skip()
         sys.exit(0)
 
-    info(f"🚀 Proceeding — matched {matched_dt.strftime('%H:%M')} UTC ({matched_day})")
+    if matched_status == "upcoming":
+        sleep_secs = max(0, int((matched_dt - now_utc).total_seconds()))
+        if sleep_secs > 0:
+            info(f"Sleeping {sleep_secs}s until {matched_dt.strftime('%H:%M')} UTC ({matched_day})")
+            time.sleep(sleep_secs)
+    else:
+        mins_ago = int((datetime.now(timezone.utc) - matched_dt).total_seconds() // 60)
+        info(
+            f"Proceeding immediately - matched recent slot "
+            f"{matched_dt.strftime('%H:%M')} UTC ({matched_day}), {mins_ago}min ago"
+        )
+
+    if not _check_and_set_post_lock(matched_dt):
+        _mark_skip()
+        sys.exit(0)
+
+    info(f"Proceeding - matched {matched_dt.strftime('%H:%M')} UTC ({matched_day})")
 
 
-# ─── Diagnostic ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    cfg     = load_config()
-    now_utc = datetime.utcnow()
-    today   = now_utc.strftime("%Y-%m-%d")
+    cfg = load_config()
+    now_utc = datetime.now(timezone.utc)
+    today = now_utc.strftime("%Y-%m-%d")
     day_key = DAYS[now_utc.weekday()]
-    window  = _window_minutes()
+    forward_window = _forward_window_minutes()
 
     print("\n" + "=" * 55)
-    print("  schedule_checker.py — diagnostic")
+    print("  schedule_checker.py - diagnostic")
     print("=" * 55)
     print(f"  Now (UTC):      {now_utc.strftime('%Y-%m-%d %H:%M')}")
     print(f"  Day:            {day_key.upper()}")
@@ -320,8 +473,12 @@ if __name__ == "__main__":
     print(f"  Pause until:    {cfg.get('pause_until') or '(none)'}")
     print(f"  Skip today:     {today in cfg.get('skip_dates', [])}")
     print(f"  Force today:    {today in cfg.get('force_dates', [])}")
-    print(f"  Window:         {window}min lookback")
+    print(f"  Forward window: {forward_window}min")
+    print(f"  Backward grace: {_backward_grace_minutes()}min")
     print("=" * 55)
 
-    matched_dt, matched_day = _find_matching_slot(cfg, now_utc, window)
-    print(f"\n  → Would post NOW: {'YES ✅  (' + matched_dt.strftime('%H:%M') + ' UTC slot)' if matched_dt else 'NO ⏭️'}\n")
+    matched_dt, matched_day, matched_status = _find_relevant_slot(cfg, now_utc, forward_window)
+    if matched_dt:
+        print(f"\n  -> Relevant slot: YES ({matched_dt.strftime('%H:%M')} UTC, {matched_day}, {matched_status})\n")
+    else:
+        print("\n  -> Relevant slot: NO\n")
