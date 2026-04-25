@@ -12,8 +12,11 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  # Fires hourly. schedule_checker.py sleeps until the next slot when the
-  # scheduled time is within the next hour.
+  # Fires every hour. schedule_checker.py uses a 55-min LOOKBACK window:
+  # "Did any configured slot pass in the last 55 min? If yes → post."
+  # No sleeping inside the job — pure lookback + slot lock.
+  # 55 min < 60 min cron interval, so two consecutive crons can never
+  # both match the same slot. The slot lock is a second line of defence.
   schedule:
     - cron: "0 * * * *"
 
@@ -47,6 +50,14 @@ on:
           - "tools_news"
           - "tech_news"
           - "layoff_news"
+      skip_schedule:
+        description: "Skip schedule check and post immediately (use carefully — bypasses time guard)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
       approved_run_id:
         description: "Approved preview run ID (posts exact preview artifact)"
         required: false
@@ -62,7 +73,9 @@ jobs:
   post-to-linkedin:
     name: Generate & Post Content
     runs-on: ubuntu-latest
-    timeout-minutes: 25   # Safe — schedule_checker no longer sleeps
+    # No sleeping in the job, so 15 min is plenty for a normal post run.
+    # (The old 25 min timeout was killing sleep-based runs before they woke up.)
+    timeout-minutes: 15
 
     steps:
       - name: 📥 Checkout
@@ -113,12 +126,13 @@ jobs:
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "  LinkedIn Agent — © ${{ vars.AUTHOR_NAME || github.actor }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  Run time  : $(date '+%Y-%m-%d %H:%M %Z')"
-          echo "  Trigger   : ${{ github.event_name }}"
-          echo "  Topic     : ${{ github.event.inputs.topic_id || 'auto' }}"
-          echo "  Post mode : ${{ github.event.inputs.post_mode || 'auto' }}"
-          echo "  Dry run   : ${{ github.event.inputs.dry_run || 'false' }}"
-          echo "  Approved  : ${{ github.event.inputs.approved_run_id || 'no' }}"
+          echo "  Run time     : $(date '+%Y-%m-%d %H:%M %Z')"
+          echo "  Trigger      : ${{ github.event_name }}"
+          echo "  Topic        : ${{ github.event.inputs.topic_id || 'auto' }}"
+          echo "  Post mode    : ${{ github.event.inputs.post_mode || 'auto' }}"
+          echo "  Dry run      : ${{ github.event.inputs.dry_run || 'false' }}"
+          echo "  Skip schedule: ${{ github.event.inputs.skip_schedule || 'false' }}"
+          echo "  Approved     : ${{ github.event.inputs.approved_run_id || 'no' }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
       - name: 🚀 Run LinkedIn Agent
@@ -133,8 +147,9 @@ jobs:
           AUTHOR_NAME: ${{ vars.AUTHOR_NAME || github.actor }}
           USER_NAME: ${{ vars.USER_NAME || vars.AUTHOR_NAME || github.actor }}
           GH_EVENT_NAME: ${{ github.event_name }}
-          SCHEDULE_WINDOW_MINUTES: "59"
-          SCHEDULE_BACKWARD_GRACE_MINUTES: "30"
+          # 55 min window < 60 min cron interval — prevents double-posting.
+          # Two consecutive hourly crons can never both match the same slot.
+          SCHEDULE_WINDOW_MINUTES: "55"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
@@ -153,7 +168,10 @@ jobs:
             if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
               ARGS="$ARGS --dry-run"
             fi
-            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # --manual only when explicitly requested via skip_schedule=true.
+            # workflow_dispatch alone does NOT bypass the schedule — this
+            # prevents accidental double-posts from stray "Run workflow" clicks.
+            if [ "${{ github.event.inputs.skip_schedule }}" = "true" ]; then
               ARGS="$ARGS --manual"
             fi
             python agent.py $ARGS
