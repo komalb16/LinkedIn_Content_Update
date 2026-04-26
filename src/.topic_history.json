@@ -909,5 +909,30 @@
     "status": "success",
     "quality_score": 80,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-04-26T22:43:25.043775",
+    "topic_id": "trend-domain-security-risks",
+    "topic_name": "Securing Domain Transfers",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 70,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 70,
+        "raw_score": 70,
+        "similarity": 0.0212,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 59,
+        "raw_score": 59,
+        "similarity": 0.0576,
+        "penalty": 0
+      }
+    ]
   }
 ]
