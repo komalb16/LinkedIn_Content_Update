@@ -168,8 +168,9 @@ RSS_FEEDS = {
         "https://www.theverge.com/rss/index.xml"
     ],
     "layoffs": [
-        "https://news.google.com/rss/search?q=tech+layoffs&hl=en-US&gl=US&ceid=US:en",
-        "https://layoffs.fyi/feed/"
+        "https://news.google.com/rss/search?q=tech+layoffs+OR+Microsoft+workforce+OR+Google+buyouts&hl=en-US&gl=US&ceid=US:en",
+        "https://layoffs.fyi/feed/",
+        "https://hnrss.org/frontpage?q=layoff|severance|exit"
     ],
     "tools": [
         "https://hnrss.org/newest?q=Show+HN",
@@ -2906,6 +2907,11 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         "i'm", "i am", "here's", "the fact that", "this led me", "nobody talks",
         "our ", "today", "in today's", "let's", "three years ago",
     )
+    blocked_title_patterns = (
+        r"^(?:the problem|core concept|how it works|best practices|common mistakes|key takeaway|summary|introduction|hook)$",
+        r"^\d+$",
+        r"^\d+[%\)]?$",
+    )
     in_fence = False
     for raw_line in (post_text or "").splitlines():
         line = raw_line.strip()
@@ -2924,8 +2930,12 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
             continue
         if any(tok in line for tok in ("->", "-->", "|>", "[", "]", "{", "}")):
             continue
-        ##if len(line) >= 12:
-          ##  return line[:54]
+        if any(re.match(pat, line.strip(), re.I) for pat in blocked_title_patterns):
+            continue
+        if re.match(r"^[\d\s.:()%/-]+$", line):
+            continue
+        if len(line) >= 12:
+            return line[:54]
     return fallback_title
 
 
@@ -3024,9 +3034,18 @@ def _build_viral_poster_structure(post_text, topic_name, mode, topic=None):
         bm = re.match(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s)\s*(.+)$", line.strip())
         if bm: post_bullets.append(bm.group(1).lower().strip())
 
+    scaffold_labels = {
+        "the problem", "core concept", "how it works", "best practices",
+        "common mistakes", "key takeaway", "summary", "introduction", "hook"
+    }
+
     def is_too_redundant(cand):
         c = cand.lower().strip()
         if not c: return True
+        if c in scaffold_labels:
+            return True
+        if re.fullmatch(r"\d+[%\)]?", c):
+            return True
         # If it's in the HOOK, it's redundant nonsense for a diagram
         if c in hook_text or (len(c) > 20 and hook_text.find(c) != -1):
             return True
@@ -3098,7 +3117,15 @@ Return exactly 4 punchy items, each 3-5 words max. One per line. No numbers.
     final_sections = []
     seen = set()
     for sec in sections:
-        norm = sec["label"].lower()
+        label = re.sub(r"^(?:[1-9]\uFE0F\u20E3|[1-9][\.\)]|[1-9]\s+)\s*", "", sec["label"]).strip()
+        label = re.sub(r"\s+", " ", label)
+        if not label:
+            continue
+        lowered = label.lower()
+        if lowered in scaffold_labels or re.fullmatch(r"\d+[%\)]?", lowered):
+            continue
+        sec["label"] = label
+        norm = lowered
         if norm not in seen:
             seen.add(norm)
             final_sections.append(sec)
@@ -3392,7 +3419,7 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
         articles = fetch_rss_news("layoffs", 5)
         layoff_articles = [a for a in articles if any(
             w in a["title"].lower()
-            for w in ["layoff", "laid off", "cut", "job", "workforce", "redundan", "downsize"]
+            for w in ["layoff", "laid off", "cut", "job", "workforce", "redundan", "downsize", "voluntary exit", "retirement", "buyout", "severance"]
         )]
         if layoff_articles:
             news_text = "\n".join([

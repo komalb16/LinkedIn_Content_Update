@@ -92,6 +92,10 @@ KEYWORDS = {
         # Metrics/Milestones
         "billion", "million", "valuation", "round", "series a", "series b",
         "ipo", "milestone", "growth", "expansion", "enterprise",
+        
+        # Workforce/Industry Events
+        "layoff", "laid off", "voluntary exit", "retirement", "buyout", 
+        "severance", "headcount", "workforce", "reduction", "restructure",
     },
     
     "personal_story": {
@@ -321,7 +325,7 @@ class TrendingTopicDetectorEnhanced:
         """Fetch industry news topics from Google News RSS."""
         try:
             # Google News RSS for AI and Tech
-            url = "https://news.google.com/rss/search?q=AI+Machine+Learning+Technology&hl=en-US&gl=US&ceid=US:en"
+            url = "https://news.google.com/rss/search?q=AI+Machine+Learning+OR+Big+Tech+Layoffs+OR+Tech+Economy&hl=en-US&gl=US&ceid=US:en"
             res = requests.get(url, timeout=10)
             if res.status_code != 200: return 0
             

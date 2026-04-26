@@ -12,11 +12,20 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  # Fires every hour. schedule_checker.py uses a 55-min LOOKBACK window:
-  # "Did any configured slot pass in the last 55 min? If yes → post."
-  # No sleeping inside the job — pure lookback + slot lock.
-  # 55 min < 60 min cron interval, so two consecutive crons can never
-  # both match the same slot. The slot lock is a second line of defence.
+  # Fires every hour at :00 UTC.  IMPORTANT: GitHub Actions crons are NOT
+  # precise — they can be delayed 10-40+ min during peak hours. Do NOT
+  # configure post slots at exactly :00 (e.g. 13:00) because the cron meant
+  # to fire at 13:00 may arrive at 13:40, which would look like a "skipped" run.
+  #
+  # schedule_checker.py uses a two-sided window:
+  #   LOOKBACK  = 55 min  → catches crons that fire UP TO 55 min AFTER the slot
+  #   LOOKAHEAD = 20 min  → catches crons that fire UP TO 20 min BEFORE the slot
+  #
+  # Combined (-20 min … +55 min) the system tolerates even a 40-min-late cron.
+  # Example — slot at 17:45 EST (21:45 UTC):
+  #   21:00 cron (fires at ~21:38) → 21:45 is 7 min in future → early-claim ✅
+  #   22:00 cron (fires at ~22:40) → 21:45 is 55 min ago     → lock held ✅
+  # The slot lock (.post_lock.json) is a second line of defence against double-posts.
   schedule:
     - cron: "0 * * * *"
 

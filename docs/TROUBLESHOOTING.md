@@ -213,6 +213,41 @@ tail -f logs/agent.log
 
 ---
 
+### ⏰ "Cron is scheduled at :00 but ran at :30 or :40"
+
+**Cause:** This is **expected GitHub Actions behaviour**. GitHub does not guarantee crons fire at the exact configured minute. The `0 * * * *` cron triggers at the start of each hour, but GitHub queues it behind other runners and it can be delivered **10–40+ minutes late** — especially during peak hours (evenings, weekends).
+
+```
+Your schedule:  0 * * * *   (fires every hour at :00)
+What you see:  22:00 cron arrives at 22:40 UTC  ← totally normal
+```
+
+**This does NOT mean posts are missed.** The schedule checker uses two windows that together cover the full range:
+
+| Window | Size | Handles |
+|--------|------|---------|
+| **Lookback** | 55 min | Cron fires UP TO 55 min after a slot |
+| **Lookahead** | 20 min | Cron fires UP TO 20 min before a slot |
+
+**Real example from your 17:45 EST (21:45 UTC) slot:**
+```
+21:00 cron  → delayed to 21:38 UTC → "21:45 is 7 min in future" → early-claim ✅
+22:00 cron  → delayed to 22:40 UTC → "21:45 is 55 min ago"      → lock already held ✅
+```
+
+**Best practices to prevent missed posts:**
+1. **Never schedule slots at exactly :00** (e.g. avoid 13:00, 14:00 UTC) — if the cron is late those slots fall outside the lookback window
+2. **Use :15–:45 minute slots** (e.g. 09:30, 13:45, 18:15) — these give the hourly cron plenty of room on both sides
+3. **Slots must be at least 60 min apart** to avoid two consecutive crons both matching
+
+**Override the windows if needed** (GitHub Actions env vars):
+```yaml
+SCHEDULE_WINDOW_MINUTES: "55"     # default: 55 min lookback
+SCHEDULE_LOOKAHEAD_MINUTES: "20"  # default: 20 min lookahead
+```
+
+---
+
 ### ❌ "Diagram generation failed"
 
 **Cause:** SVG to PNG conversion failed

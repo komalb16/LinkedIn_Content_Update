@@ -86,6 +86,7 @@ DAY_INDEX = {day: idx for idx, day in enumerate(DAYS)}
 LOCK_FILE = Path(__file__).resolve().parent / ".post_lock.json"
 
 _DEFAULT_WINDOW_MINUTES = 55
+_DEFAULT_LOOKAHEAD_MINUTES = 20  # claim slots up to 20 min early
 
 
 def _window_minutes() -> int:
@@ -93,6 +94,17 @@ def _window_minutes() -> int:
         return int(os.environ.get("SCHEDULE_WINDOW_MINUTES", str(_DEFAULT_WINDOW_MINUTES)))
     except Exception:
         return _DEFAULT_WINDOW_MINUTES
+
+
+def _lookahead_minutes() -> int:
+    """How many minutes AHEAD of a scheduled slot the cron is allowed to claim it.
+    Covers the case where GitHub Actions fires the cron a few minutes early.
+    Must stay well below 60 so two consecutive hourly crons can't both claim the same slot.
+    """
+    try:
+        return int(os.environ.get("SCHEDULE_LOOKAHEAD_MINUTES", str(_DEFAULT_LOOKAHEAD_MINUTES)))
+    except Exception:
+        return _DEFAULT_LOOKAHEAD_MINUTES
 
 
 def _find_config() -> Path:
@@ -290,11 +302,15 @@ def _find_matching_slot(
     cfg: dict,
     now_utc: datetime,
     window_min: int,
+    lookahead_min: int = _DEFAULT_LOOKAHEAD_MINUTES,
 ) -> Tuple[Optional[datetime], str]:
     """
     Check all configured slots across all days.
     Return the most recent slot (closest to now) that falls within
-    [now_utc - window_min, now_utc], or (None, "") if none match.
+    [now_utc - window_min, now_utc + lookahead_min], or (None, "") if none match.
+
+    Lookahead: if a slot is <=lookahead_min minutes in the FUTURE we claim
+    it early. The slot lock prevents a later cron from claiming it again.
     """
     best: Optional[Tuple[datetime, str]] = None
 
@@ -323,14 +339,20 @@ def _find_matching_slot(
                 info(f"  [{day_key}] Skipping {target_dt.strftime('%H:%M')} UTC — {local_date_str} in skip_dates")
                 continue
 
-            diff_min = (now_utc - target_dt).total_seconds() / 60  # positive = past
+            diff_min = (now_utc - target_dt).total_seconds() / 60  # positive = past, negative = future
 
             if 0 <= diff_min <= window_min:
-                info(f"✅ Match: {target_dt.strftime('%H:%M')} UTC ({day_key}) — {diff_min:.0f}min ago")
+                # Slot passed within the lookback window
+                info(f"✅ Match (past): {target_dt.strftime('%H:%M')} UTC ({day_key}) — {diff_min:.0f}min ago")
                 if best is None or target_dt > best[0]:
                     best = (target_dt, day_key)
-            elif diff_min < 0:
-                info(f"  ⏳ [{day_key}] {target_dt.strftime('%H:%M')} UTC is {abs(diff_min):.0f}min in the future")
+            elif -lookahead_min <= diff_min < 0:
+                # Slot is imminent — claim it early so we don't miss it
+                info(f"✅ Match (early claim): {target_dt.strftime('%H:%M')} UTC ({day_key}) — {abs(diff_min):.0f}min in the future (within {lookahead_min}min lookahead)")
+                if best is None or target_dt > best[0]:
+                    best = (target_dt, day_key)
+            elif diff_min < -lookahead_min:
+                info(f"  ⏳ [{day_key}] {target_dt.strftime('%H:%M')} UTC is {abs(diff_min):.0f}min away (beyond {lookahead_min}min lookahead, will match next cron)")
             else:
                 info(f"  ⏭️  [{day_key}] {target_dt.strftime('%H:%M')} UTC passed {diff_min:.0f}min ago (outside {window_min}min window)")
 
@@ -380,11 +402,13 @@ def check_and_wait(dry_run: bool = False, manual: bool = False) -> None:
         info(f"Skipping schedule check ({trigger}) — running immediately")
         return
 
-    # ── 5. LOOKBACK WINDOW CHECK ───────────────────────────────────────────────
-    matched_dt, matched_day = _find_matching_slot(cfg, now_utc, window)
+    # ── 5. LOOKBACK + LOOKAHEAD WINDOW CHECK ──────────────────────────────────
+    lookahead = _lookahead_minutes()
+    info(f"Lookback window: {window}min | Lookahead: {lookahead}min (override via SCHEDULE_WINDOW_MINUTES / SCHEDULE_LOOKAHEAD_MINUTES)")
+    matched_dt, matched_day = _find_matching_slot(cfg, now_utc, window, lookahead)
 
     if matched_dt is None:
-        info(f"⏭️  No slots in {window}min lookback window — exiting cleanly")
+        info(f"No slots in window (lookback={window}min, lookahead={lookahead}min) — exiting cleanly")
         _mark_skip()
         sys.exit(0)
 
@@ -428,7 +452,7 @@ if __name__ == "__main__":
         except Exception:
             pass
 
-    matched_dt, matched_day = _find_matching_slot(cfg, now_utc, window)
+    matched_dt, matched_day = _find_matching_slot(cfg, now_utc, window, _lookahead_minutes())
     if matched_dt:
         key = matched_dt.astimezone(timezone.utc).strftime("%Y-%m-%d_%H:%M")
         locks = {}
@@ -456,6 +480,6 @@ def _find_relevant_slot(
     now_utc: datetime,
     window_min: int,
 ) -> "Tuple[Optional[datetime], str, str]":
-    dt, day = _find_matching_slot(cfg, now_utc, window_min)
+    dt, day = _find_matching_slot(cfg, now_utc, window_min, _lookahead_minutes())
     status = "recent" if dt is not None else ""
     return dt, day, status

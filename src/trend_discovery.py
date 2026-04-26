@@ -16,6 +16,8 @@ RELEVANT_KEYWORDS = [
     "monitoring", "security", "vector", "embedding", "inference",
     "training", "fine-tuning", "agentic", "transformer", "cuda", "gpu",
     "pytorch", "tensorflow", "mcp", "anthropic", "openai", "mistral",
+    "layoff", "severance", "workforce", "hiring", "job", "career",
+    "microsoft", "google", "amazon", "meta", "nvidia", "acquisition",
 ]
 
 BLACKLISTED_KEYWORDS = [

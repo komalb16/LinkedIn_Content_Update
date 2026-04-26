@@ -4039,6 +4039,9 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
     SOURCE_PRIORITY = {
         "bytebytego.com":       5,
         "blog.bytebytego":      4,
+        "algomaster.io":        5,
+        "designgurus.io":       5,
+        "designgurus.substack": 5,
         "substack.com":         4,
         "medium.com":           3,
         "dev.to":               3,
@@ -4118,12 +4121,15 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                 search_subject = f"{tech_terms} {search_subject}"[:80]
 
     SEARCH_QUERIES = [
-        f"{search_subject} diagram architecture bytebytego",
-        f"{search_subject} system design diagram infographic explained",
-        f"{search_subject} engineering visual technical breakdown medium dev.to",
-        f"site:bytebytego.com {search_subject}",
-        f"site:levelup.gitconnected.com {search_subject} diagram",
-        f"site:nikkisiapno.substack.com {search_subject}",
+        f"{search_subject} system design diagram algomaster",
+        f"{search_subject} architecture breakdown designgurus",
+        f"{search_subject} engineering visual bytebytego",
+        f"site:algomaster.io {search_subject}",
+        f"site:designgurus.io {search_subject} system design",
+        f"site:designgurus.substack.com {search_subject} diagram",
+        f"site:blog.bytebytego.com {search_subject}",
+        f"site:bytebytego.com {search_subject} architecture",
+        f"site:nikkisiapno.substack.com {search_subject} visual",
     ]
 
     # Also add Level Up Coding and Nikki Siapno to SOURCE_PRIORITY
@@ -4281,8 +4287,8 @@ class DiagramGenerator:
         filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
 
         # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
-        # Fetches real diagrams from ByteByteGo, Medium, Dev.to, etc.
-        # In dry run, limit image search to 2 queries and 10 candidates for speed
+        # Fetches real diagrams from elite sources: ByteByteGo, AlgoMaster, DesignGurus, etc.
+        # This provides high-fidelity, production-grade engineering visuals.
         _dry_run_mode = os.environ.get("DRY_RUN_FAST", "0") == "1"
         img_bytes, img_source_url = _fetch_internet_image(
             search_name or topic_id, 
@@ -4291,59 +4297,41 @@ class DiagramGenerator:
         )
         if img_bytes:
             png_filename = filename.replace(".svg", ".png")
-            # Apply branding
             try:
                 from PIL import Image, ImageDraw, ImageFont
                 img = Image.open(io.BytesIO(img_bytes)).convert("RGBA")
-                # Normalize transparent images onto a white background
                 bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
                 img = Image.alpha_composite(bg, img).convert("RGB")
-
                 draw = ImageDraw.Draw(img)
                 width, height = img.size
-
                 title_text = (topic_name or "Technical Architecture").strip()
                 font_size = max(16, int(width * 0.045))
                 try:
                     font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", font_size)
                 except Exception:
-                    try:
-                        font = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", font_size)
-                    except Exception:
-                        font = ImageFont.load_default()
+                    font = ImageFont.load_default()
 
                 left, top, right, bottom = draw.textbbox((0, 0), title_text, font=font)
                 tw, th = right - left, bottom - top
                 tx = (width - tw) // 2
                 ty = max(10, int(height * 0.05))
-
-                # Semi-transparent dark banner so title is always readable
                 draw.rectangle([0, 0, width, ty + th + 20], fill=(15, 23, 42, 220))
                 draw.text((tx, ty), title_text, font=font, fill=(56, 189, 248))
 
-                # --- Attribution footer bar (proper IP practice) ---
-                # We keep the source's logo intact and add a footer strip below the image
-                # so the source gets credit and Komal is credited as curator.
                 footer_h = max(36, int(height * 0.06))
                 footer_img = Image.new("RGB", (width, height + footer_h), (15, 23, 42))
                 footer_img.paste(img, (0, 0))
                 draw2 = ImageDraw.Draw(footer_img)
-
                 foot_font_size = max(11, int(width * 0.022))
                 try:
-                    foot_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", foot_font_size)
                     foot_font_bold = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", foot_font_size)
+                    foot_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", foot_font_size)
                 except Exception:
                     foot_font = foot_font_bold = ImageFont.load_default()
 
-                # Left side: "Curated by Komal Batra"
-                curator_text = "✦  Curated by Komal Batra"
-                draw2.text(
-                    (int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
-                    curator_text, font=foot_font_bold, fill=(56, 189, 248)
-                )
-
-                # Right side: "Source: [domain]" — extract domain from the downloaded URL
+                draw2.text((int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
+                           "✦  Curated by Komal Batra", font=foot_font_bold, fill=(56, 189, 248))
+                
                 try:
                     from urllib.parse import urlparse
                     source_domain = urlparse(img_source_url).netloc.replace("www.", "")
@@ -4351,23 +4339,84 @@ class DiagramGenerator:
                     source_domain = "internet"
                 source_text = f"Source: {source_domain}"
                 sb = draw2.textbbox((0, 0), source_text, font=foot_font)
-                sw = sb[2] - sb[0]
-                draw2.text(
-                    (width - sw - int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
-                    source_text, font=foot_font, fill=(148, 163, 184)
-                )
+                draw2.text((width - (sb[2]-sb[0]) - int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
+                           source_text, font=foot_font, fill=(148, 163, 184))
 
                 footer_img.save(png_filename)
-                log.info(f"Internet diagram saved with attribution footer: {png_filename} (Topic: {title_text})")
-
+                log.info(f"Internet diagram saved with attribution footer: {png_filename}")
+                return png_filename
             except Exception as e:
-                log.warning(f"Branding failed for internet image ({e}), saving raw.")
                 with open(png_filename, "wb") as f:
                     f.write(img_bytes)
-
-            return png_filename
+                return png_filename
 
         log.warning("Internet image search returned nothing — falling back to local SVG generation.")
+
+        # --- Kroki / Local SVG Generation (FALLBACK) ---
+        _dry_run_mode = os.environ.get("DRY_RUN_FAST", "0") == "1"
+        img_bytes, img_source_url = _fetch_internet_image(
+            search_name or topic_id, 
+            post_text=post_text,
+            fast_mode=_dry_run_mode
+        )
+        if img_bytes:
+            png_filename = filename.replace(".svg", ".png")
+            try:
+                from PIL import Image, ImageDraw, ImageFont
+                img = Image.open(io.BytesIO(img_bytes)).convert("RGBA")
+                bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
+                img = Image.alpha_composite(bg, img).convert("RGB")
+                draw = ImageDraw.Draw(img)
+                width, height = img.size
+                title_text = (topic_name or "Technical Architecture").strip()
+                font_size = max(16, int(width * 0.045))
+                try:
+                    font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", font_size)
+                except Exception:
+                    font = ImageFont.load_default()
+
+                left, top, right, bottom = draw.textbbox((0, 0), title_text, font=font)
+                tw, th = right - left, bottom - top
+                tx = (width - tw) // 2
+                ty = max(10, int(height * 0.05))
+                draw.rectangle([0, 0, width, ty + th + 20], fill=(15, 23, 42, 220))
+                draw.text((tx, ty), title_text, font=font, fill=(56, 189, 248))
+
+                footer_h = max(36, int(height * 0.06))
+                footer_img = Image.new("RGB", (width, height + footer_h), (15, 23, 42))
+                footer_img.paste(img, (0, 0))
+                draw2 = ImageDraw.Draw(footer_img)
+                foot_font_size = max(11, int(width * 0.022))
+                try:
+                    foot_font_bold = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", foot_font_size)
+                    foot_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", foot_font_size)
+                except Exception:
+                    foot_font = foot_font_bold = ImageFont.load_default()
+
+                draw2.text((int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
+                           "✦  Curated by Komal Batra", font=foot_font_bold, fill=(56, 189, 248))
+                
+                try:
+                    from urllib.parse import urlparse
+                    source_domain = urlparse(img_source_url).netloc.replace("www.", "")
+                except Exception:
+                    source_domain = "internet"
+                source_text = f"Source: {source_domain}"
+                sb = draw2.textbbox((0, 0), source_text, font=foot_font)
+                draw2.text((width - (sb[2]-sb[0]) - int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
+                           source_text, font=foot_font, fill=(148, 163, 184))
+
+                footer_img.save(png_filename)
+                return png_filename
+            except Exception as e:
+                with open(png_filename, "wb") as f:
+                    f.write(img_bytes)
+                return png_filename
+
+        log.warning("No internet image found — final fallback to the best generated SVG.")
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(best_svg)
+        return filename
 
 
         # --- Kroki Internet Rendering Fallback ---

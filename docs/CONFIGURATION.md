@@ -375,12 +375,17 @@ Check:
 3. LINKEDIN_PERSON_URN correct format: urn:li:person:XXXXXXX
 ```
 
-### ❌ "Schedule not running"
+### ❌ "Schedule not running" / "Post was skipped"
 ```
 Check:
-1. Cron expression valid (use https://crontab.guru)
-2. Timezone correct in schedule_config.json
-3. enabled: true at top level
+1. Slot time is NOT at exactly :00 minutes — GitHub crons can be 10-40 min late,
+   which pushes an :00 slot outside the 55-min lookback window.
+   ✅ Use :15–:45 minute slots (e.g. 09:30, 13:45, 18:15 EST)
+2. Cron expression valid (use https://crontab.guru)
+3. Timezone correct in schedule_config.json (use time_tz: "America/New_York")
+4. enabled: true at top level of schedule_config.json
+5. Check GitHub Actions run logs → schedule_checker output explains why each
+   slot was matched or skipped (look for "Lookback window" and "Lookahead" lines)
 ```
 
 ### ❌ "No topics showing up"
