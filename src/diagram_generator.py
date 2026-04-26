@@ -4305,18 +4305,25 @@ class DiagramGenerator:
                 draw = ImageDraw.Draw(img)
                 width, height = img.size
                 title_text = (topic_name or "Technical Architecture").strip()
-                font_size = max(16, int(width * 0.045))
+                # BUMPED: Significantly larger font for better legibility (from 0.045 to 0.065)
+                font_size = max(24, int(width * 0.065))
                 try:
+                    # Prefer Segoe UI Bold for a premium Windows look
                     font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", font_size)
                 except Exception:
-                    font = ImageFont.load_default()
+                    try:
+                         # Fallback to Arial Bold if Segoe isn't available
+                         font = ImageFont.truetype("C:\\Windows\\Fonts\\arialbd.ttf", font_size)
+                    except Exception:
+                         font = ImageFont.load_default()
 
                 left, top, right, bottom = draw.textbbox((0, 0), title_text, font=font)
                 tw, th = right - left, bottom - top
                 tx = (width - tw) // 2
-                ty = max(10, int(height * 0.05))
-                draw.rectangle([0, 0, width, ty + th + 20], fill=(15, 23, 42, 220))
-                draw.text((tx, ty), title_text, font=font, fill=(56, 189, 248))
+                # Increase vertical padding for a more spacious, premium feel
+                ty = max(15, int(height * 0.04)) 
+                draw.rectangle([0, 0, width, ty + th + 30], fill=(15, 23, 42, 235)) # Darker, taller bar
+                draw.text((tx, ty), title_text, font=font, fill=(56, 189, 248)) # Cyan text
 
                 footer_h = max(36, int(height * 0.06))
                 footer_img = Image.new("RGB", (width, height + footer_h), (15, 23, 42))
