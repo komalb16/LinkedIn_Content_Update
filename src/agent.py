@@ -3593,8 +3593,7 @@ Format the output as a LinkedIn post followed by a [SLIDES] section.
         
         # Parse slides and generate bundle
         slides_config = _extract_carousel_slides(slides_text, topic)
-        from diagram_generator import generate_carousel_bundle
-        carousel_paths = generate_carousel_bundle(topic["id"], topic["name"], slides_config)
+        carousel_paths = diagram_gen.generate_carousel_bundle(topic["id"], topic["name"], slides_config)
         log.info(f"Carousel bundle ready: {len(carousel_paths)} images generated.")
         
         # Track for the first comment
