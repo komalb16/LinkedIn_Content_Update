@@ -4559,23 +4559,40 @@ async function runNow(options = {}) {
     let allRuns = [];   // all fetched agent runs
     let runFilter = '30d';
 
+    // Fetch ALL pages of completed workflow runs (pagination)
+    async function fetchAllCompletedRuns() {
+      const runs = [];
+      let page = 1;
+      const MAX_PAGES = 20; // safety cap — 20 pages × 100 = 2000 runs
+      while (page <= MAX_PAGES) {
+        const r = await gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100&status=completed&page=' + page);
+        if (!r.ok) break;
+        const d = await r.json();
+        const batch = d.workflow_runs || [];
+        runs.push(...batch);
+        // GitHub returns fewer than per_page items on the last page
+        if (batch.length < 100) break;
+        page++;
+      }
+      return runs;
+    }
+
     async function loadRuns() {
       document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">🔄</div><span>Loading...</span></div>';
       try {
-        // Workflow-specific endpoint — excludes pages/deploy runs automatically
-        const [rc, ri, rq] = await Promise.all([
-          gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100&status=completed'),
+        // Fetch ALL completed runs (paginated) + active runs in parallel
+        const [completedRuns, ri, rq] = await Promise.all([
+          fetchAllCompletedRuns(),
           gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=10&status=in_progress'),
           gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=10&status=queued'),
         ]);
-        const dc = rc.ok ? await rc.json() : { workflow_runs: [] };
         const di = ri.ok ? await ri.json() : { workflow_runs: [] };
         const dq = rq.ok ? await rq.json() : { workflow_runs: [] };
         const seen = new Set();
-        allRuns = [...(di.workflow_runs || []), ...(dq.workflow_runs || []), ...(dc.workflow_runs || [])]
+        allRuns = [...(di.workflow_runs || []), ...(dq.workflow_runs || []), ...completedRuns]
           .filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; })
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        enrichRunTopics(allRuns.slice(0, 120)).then(() => applyRunFilter());
+        enrichRunTopics(allRuns.slice(0, 200)).then(() => applyRunFilter());
         applyRunFilter();
       } catch (e) {
         document.getElementById('runsList').innerHTML = '<div class="run-empty"><div class="run-empty-ico">❌</div><span>Could not load runs: ' + e.message + '</span></div>';
@@ -5035,22 +5052,22 @@ async function runNow(options = {}) {
     async function loadStats() {
       try {
         let runs = allRuns;
+        // If allRuns hasn't been loaded yet, fetch all pages now
         if (!runs.length) {
-          const [rc, ri, rq] = await Promise.all([
-            gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=100&status=completed'),
+          const [completedRuns, ri, rq] = await Promise.all([
+            fetchAllCompletedRuns(),
             gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=10&status=in_progress'),
             gh('/repos/' + REPO + '/actions/workflows/' + WF + '/runs?per_page=10&status=queued'),
           ]);
-          const dc = rc.ok ? await rc.json() : { workflow_runs: [] };
           const di = ri.ok ? await ri.json() : { workflow_runs: [] };
           const dq = rq.ok ? await rq.json() : { workflow_runs: [] };
           const seen = new Set();
-          runs = [...(di.workflow_runs || []), ...(dq.workflow_runs || []), ...(dc.workflow_runs || [])]
+          runs = [...(di.workflow_runs || []), ...(dq.workflow_runs || []), ...completedRuns]
             .filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; })
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         }
 
-        await enrichRunTopics(runs.slice(0, 120));
+        await enrichRunTopics(runs.slice(0, 200));
 
         // Match the run-history definition of a real LinkedIn post.
         const postRuns = runs.filter(r => !isSkippedRun(r));
@@ -5059,8 +5076,16 @@ async function runNow(options = {}) {
           new Date(getRunPostedAt(b)) - new Date(getRunPostedAt(a))
         );
 
-        // This-week posts: current calendar week in the selected dashboard timezone.
+        // Posts this month (current calendar month in selected timezone)
         const now = tzNow();
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        thisMonthStart.setHours(0, 0, 0, 0);
+        const thisMonth = postedRuns.filter(r => {
+          const createdLocal = new Date(new Date(getRunPostedAt(r)).toLocaleString('en-US', { timeZone: userTZ }));
+          return createdLocal >= thisMonthStart;
+        });
+
+        // This-week posts: current calendar week in the selected dashboard timezone.
         const dayOfWeek = now.getDay();
         const daysSinceMon = (dayOfWeek + 6) % 7;
         const weekStart = new Date(now);
@@ -5071,8 +5096,17 @@ async function runNow(options = {}) {
           return createdLocal >= weekStart;
         });
 
+        // s1 = Total Posts (all time)
         document.getElementById('s1').textContent = postedRuns.length;
-        document.getElementById('s2').textContent = postedRuns.length;
+        // s2 = Posts Live this month
+        document.getElementById('s2').textContent = thisMonth.length;
+
+        // Update the "Posts Live" subtitle to say this month
+        const s2sub = document.querySelector('#s2')?.closest('.stat')?.querySelector('.ssub');
+        if (s2sub) {
+          const monthName = now.toLocaleDateString('en-US', { month: 'long' });
+          s2sub.textContent = 'posted in ' + monthName;
+        }
 
         const weekLabel = document.getElementById('s3week');
         if (weekLabel) {
