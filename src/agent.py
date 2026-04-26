@@ -427,7 +427,7 @@ game-changer, leverage, revolutionize, supercharge, holistic, transformative
 - For non-comparison topics, avoid forcing vendor-vs-vendor comparisons
 - Do NOT add copyright, signature, author name, or current month/year
 - CRITICAL: No structural placeholders like "(Option A)" or "[Step 1]" in your final output.
-- PERSONAL ACCURACY: Do NOT invent personal life events or family details (e.g., becoming a parent, weddings, moving house, personal childhood memories) unless they are explicitly provided in the topic prompt. Keep the professional 'Staff Engineer' persona grounded strictly in the provided content.
+- PERSONAL ACCURACY: Do NOT invent personal life events or family details (e.g., becoming a parent, weddings, moving house, personal childhood memories) unless they are explicitly provided in the topic prompt. Keep the professional 'Technical Lead' persona grounded strictly in the provided content.
 - NEGATIVE CONSTRAINT: Never output generic structural labels like "The Problem", "Core Concept", "How It Works", or "Key Takeaway" as standalone headers or narrative transitions. Just dive into the technical insight directly. Avoid saying "The problem is" or "The core concept is" - be more specific and authoritative.
 - ZERO TOLERANCE: Never use ASCII art, box-drawing characters (┌, ┐, └, ┘, │, ─), or manual table boundaries (+---+) in the post text. If you need a comparison, use a simple 'Left -> Right' text format.
 """
@@ -437,7 +437,8 @@ game-changer, leverage, revolutionize, supercharge, holistic, transformative
 
 
 NEWS_SYSTEM = """\
-You are Komal Batra — a Staff Engineer reacting to breaking tech news on LinkedIn.
+You are Komal Batra — a Technical Leader at Microsoft specializing in Cloud, AI, and System Architecture.
+You design high-scale systems and provide deep technical synthesis of industry news.
 You have opinions. You pick a side. You back it with specifics.
 
 RULES:
@@ -3416,32 +3417,40 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
             mode = "topic"
 
     elif mode == "layoff_news":
-        articles = fetch_rss_news("layoffs", 5)
+        # SYNTHESIS MODE: Aggregating multiple sources for deeper analysis
+        articles = fetch_rss_news("layoffs", 10) # Fetch more to find the best signal
         layoff_articles = [a for a in articles if any(
             w in a["title"].lower()
             for w in ["layoff", "laid off", "cut", "job", "workforce", "redundan", "downsize", "voluntary exit", "retirement", "buyout", "severance"]
-        )]
+        )][:5] # Synthesize top 5
+        
         if layoff_articles:
             news_text = "\n".join([
-                f"- {a['title']}: {a['description'][:200]}"
-                for a in layoff_articles[:3]
+                f"- {a['title']}: {a['description'][:300]}"
+                for a in layoff_articles
             ])
             hook   = random.choice(HOOK_STYLES)
             tone   = random.choice(TONE_VARIATIONS)
             length = random.choice(LENGTH_VARIATIONS)
-            prompt = f"""Latest tech industry layoff news:
+            
+            # ADVANCED SYNTHESIS PROMPT
+            prompt = f"""TECHNICAL NEWS AGGREGATION:
 {news_text}
 
-Hook: {hook}
-Voice: {tone}
-Length: {length}
+Analyze the above industry signals and write a high-authority LinkedIn post.
+GOAL: Don't just report news; synthesize it into an industry trend.
 
-Write a LinkedIn post that:
-- Leads with your honest reaction — not a neutral summary
-- Breaks down what this actually signals about the industry
-- Gives one piece of actionable advice for engineers affected
-- Is empathetic but analytical — not motivational-poster language
-- Does NOT mention the current month or year
+Structure:
+1. Hook: {hook} (Address the human side of tech)
+2. The Pulse: What connects these specific events? (e.g. shifts from growth to efficiency, or specific vertical tremors)
+3. The Engineering Take: How should Staff/Senior engineers read these signals for their own career roadmap?
+4. Actionable Insight: One specific thing an engineer can do TODAY to stay ahead of this trend.
+
+Voice/Tone: {tone} (Analytical, weathered, engineering-leader perspective)
+Constraints:
+- No mentions of months/years
+- No 'congratulations' or 'my thoughts go out to' placeholders
+- Professional but direct
 """
             post_text = call_ai(prompt, NEWS_SYSTEM)
         if not post_text:
@@ -3931,6 +3940,25 @@ Write a LinkedIn post that:
         write_github_output("POSTED_URL",   result.get("post_url", ""))
         write_github_summary(topic["name"], mode, publish_text, dry_run=False, score_card=score_card)
         _remember_post(topic, publish_text)
+        
+        # --- NEXT-GEN: Analytics & First Comment ---
+        try:
+            from analytics_engine import record_post_metadata
+            record_post_metadata(topic["id"], score_card["score"], mode)
+            
+            # Generate engagement comment
+            comment_prompt = f"""Write a short, engaging first comment for this LinkedIn post about {topic['name']}.
+Goal: Spark a technical debate or provide an 'extra' Pro Tip not in the post.
+Keep it under 3 lines. No hashtags.
+"""
+            first_comment = call_ai(comment_prompt, NEWS_SYSTEM)
+            if first_comment:
+                with open("output_comment.txt", "w", encoding="utf-8") as f:
+                    f.write(first_comment)
+                log.info("💬 First comment generated for engagement.")
+        except Exception as e:
+            log.warning(f"Next-Gen hooks failed (non-fatal): {e}")
+
         topic_mgr.save_run_history({
             "timestamp":  datetime.now().isoformat(),
             "topic_id":   topic["id"],
