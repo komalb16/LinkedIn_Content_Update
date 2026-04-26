@@ -3729,31 +3729,34 @@ Write a LinkedIn post that:
 
     # ALIGNMENT FIX: Extract the actual subject the post was written about
     # by scanning for the most specific technical noun phrase in the post.
-    # This prevents diagram_title drifting from what the post actually covers.
+    # We now include general system design concepts (Domain Transfer, CDC, etc.)
     post_subject_override = None
     tech_subject_patterns = [
+        # Specific Tools/Tech
         r"\b(Kubernetes|Docker|Kafka|RAG|LLM|GraphQL|gRPC|Redis|Postgres|"
         r"Terraform|Helm|Prometheus|Grafana|Istio|Argo|Flink|Spark|dbt|"
         r"Pinecone|Weaviate|LangChain|LangGraph|AutoGen|FastAPI|Pydantic|"
         r"OpenTelemetry|Datadog|New Relic|GitHub Actions|GitLab CI)\b",
+        # General Engineering Concepts (New: catches 'Domain Transfer', etc.)
+        r"\b(Domain Transfer|API Gateway|Load Balanc|Event-Driven|Microservice|"
+        r"CDC|Change Data Capture|Rate Limiting|Circuit Breaker|Database Sharding|"
+        r"Blue-Green|Canary|Observability|Distributed Tracing|Zero Trust)\b",
     ]
     for pattern in tech_subject_patterns:
         match = re.search(pattern, post_text or "", re.IGNORECASE)
         if match:
             post_subject_override = match.group(0)
-            log.info(f"Post subject detected: '{post_subject_override}' — aligning diagram search")
+            log.info(f"🎯 Post subject detected: '{post_subject_override}' — aligning all metadata")
             break
 
-    # If post is about something different from topic name, override for diagram
-    diagram_topic = dict(topic)
+    # If post is about something different from topic name, sync EVERYTHING
     if post_subject_override and post_subject_override.lower() not in topic["name"].lower():
         log.warning(
-            f"Post/topic mismatch detected: topic='{topic['name']}' "
-            f"but post is about '{post_subject_override}'. "
-            f"Aligning diagram to post subject."
+            f"🔄 Topic mismatch: topic='{topic['name']}' -> post='{post_subject_override}'. Syncing metadata."
         )
-        diagram_topic["name"] = post_subject_override
-
+        topic["name"] = post_subject_override  # SYNC GLOBAL TOPIC
+    
+    diagram_topic = dict(topic)
     diagram_title, diagram_type, diagram_structure = _resolve_visual_metadata(
         diagram_topic, post_text, mode, fallback_diagram_type, structure
     )
