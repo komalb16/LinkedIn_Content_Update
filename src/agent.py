@@ -3572,6 +3572,56 @@ Write a LinkedIn post that:
                 f"A/B winner: variant #{candidate_snapshot[0]['index']+1} ({candidate_snapshot[0]['score']}) "
                 f"over #{candidate_snapshot[1]['index']+1} ({candidate_snapshot[1]['score']})"
             )
+    elif mode == "carousel":
+        # ── CAROUSEL MODE: 5-Slide Narrative ──────────────────────────────────────
+        topic = topic_mgr.get_next_topic()
+        carousel_prompt = f"""Write a 5-slide Technical Carousel about {topic['name']}.
+Goal: Tell a high-level architectural story.
+
+Slide 1: The Hook & The 'Big Picture' Problem
+Slide 2: The Traditional Way (and why it fails at Microsoft scale)
+Slide 3: The 'Lead' Insight (The clever architectural shift)
+Slide 4: The Deep Dive (Components & Data Flow)
+Slide 5: The Impact & Final Architect's Tip
+
+For each slide, provide a 'Visual Title' and a 'Visual Description' for the diagram.
+Format the output as a LinkedIn post followed by a [SLIDES] section.
+"""
+        raw_carousel = call_ai(carousel_prompt, NEWS_SYSTEM)
+        post_text = raw_carousel.split("[SLIDES]")[0].strip()
+        slides_text = raw_carousel.split("[SLIDES]")[1].strip() if "[SLIDES]" in raw_carousel else ""
+        
+        # Parse slides and generate bundle
+        slides_config = _extract_carousel_slides(slides_text, topic)
+        from diagram_generator import generate_carousel_bundle
+        carousel_paths = generate_carousel_bundle(topic["id"], topic["name"], slides_config)
+        log.info(f"Carousel bundle ready: {len(carousel_paths)} images generated.")
+        
+        # Track for the first comment
+        with open("output_comment.txt", "w") as f:
+            f.write(f"This is a 5-slide deep dive into {topic['name']}. Swipe through to see the architectural breakdown! 💡")
+    elif mode == "build_log":
+        # ── BUILD LOG MODE: Progress Diary ──────────────────────────────────────
+        from build_tracker import get_recent_milestones
+        milestones = get_recent_milestones()
+        
+        if milestones:
+            ms_text = "\n".join(milestones)
+            prompt = f"""Write a LinkedIn 'Weekly Build Log' as a Technical Lead.
+What we achieved this week in the engineering repository:
+{ms_text}
+
+Goal: Show high-level progress and the 'Why' behind the changes.
+- Focus on how these changes improve the overall system architecture.
+- Keep it honest and engineering-focused (no 'hustle' culture language).
+- End with a question about how other teams handle developmental sprints.
+"""
+            post_text = call_ai(prompt, NEWS_SYSTEM)
+            topic = {"id": "build-log", "name": "Weekly Build Progress", "category": "system"}
+            structure = {"style": 23, "subtitle": "Weekly Sprint Architecture", "sections": milestones[:4]}
+            planned_diagram_type = "Modern Cards"
+        else:
+            mode = "topic"
 
     # ── RESOLVE TOPIC ─────────────────────────────────────────────────────────
     if mode == "topic" or not post_text:
@@ -4018,3 +4068,24 @@ if __name__ == "__main__":
         manual=args.manual,
         forced_mode=args.mode,
     )
+
+def _extract_carousel_slides(slides_text, topic):
+    """Parses AI output into 5 slide configs."""
+    slides = []
+    # Simplified parser: looks for 'Slide X:'
+    lines = slides_text.split("\n")
+    current_slide = None
+    for line in lines:
+        if line.lower().startswith("slide"):
+            if current_slide: slides.append(current_slide)
+            current_slide = {"title": line, "type": "Architecture", "structure": None}
+        elif current_slide and ":" in line:
+            current_slide["title"] = line.split(":", 1)[1].strip()
+    if current_slide: slides.append(current_slide)
+    
+    # Ensure at least 3, max 5
+    return slides[:5] if len(slides) >= 3 else [
+        {"title": f"{topic['name']} - Intro", "type": "Modern Cards"},
+        {"title": "The Architecture", "type": "Architecture"},
+        {"title": "The Trade-offs", "type": "Comparison Table"}
+    ]

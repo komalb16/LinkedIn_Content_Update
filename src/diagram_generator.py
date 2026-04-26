@@ -4482,3 +4482,26 @@ class DiagramGenerator:
             _record_rotation(best_style, topic_id, topic_name, diagram_type)
         
         return filename
+def generate_carousel_bundle(topic_id, topic_name, slides_config):
+    """
+    Generates a sequence of images (slides) for a LinkedIn carousel.
+    slides_config: List of dicts with {title, type, structure}
+    """
+    results = []
+    log.info(f"🎨 Generating {len(slides_config)} slides for carousel bundle...")
+    
+    for i, slide in enumerate(slides_config):
+        slide_filename = f"{OUTPUT_DIR}/carousel_{topic_id}_{i+1}.png"
+        
+        # We reuse the high-fidelity save_svg logic for each slide
+        path = save_svg(
+            slide_filename, 
+            topic_id=f"{topic_id}_s{i+1}", 
+            topic_name=slide['title'], 
+            diagram_type=slide.get('type'), 
+            structure=slide.get('structure')
+        )
+        if path:
+            results.append(path)
+            
+    return results
