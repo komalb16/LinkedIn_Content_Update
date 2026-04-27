@@ -103,10 +103,16 @@ class TestWindowBoundary:
         dt, day = _find_matching_slot(self._cfg(), now, WINDOW)
         assert dt is None
 
-    def test_slot_in_future_no_match(self):
-        now = utc(2026, 4, 22, 13, 29)   # 1 min before
+    def test_slot_well_in_future_no_match(self):
+        now = utc(2026, 4, 22, 13, 4)   # 26 min before (beyond 20min lookahead)
         dt, day = _find_matching_slot(self._cfg(), now, WINDOW)
         assert dt is None
+
+    def test_slot_in_lookahead_matches(self):
+        now = utc(2026, 4, 22, 13, 25)   # 5 min before (within 20min lookahead)
+        dt, day = _find_matching_slot(self._cfg(), now, WINDOW)
+        assert dt == self.slot_utc
+        assert day == "wed"
 
     def test_exactly_at_slot_time_matches(self):
         now = utc(2026, 4, 22, 13, 30)   # 0 min diff
