@@ -4307,18 +4307,21 @@ class DiagramGenerator:
                 # Draw a sleek, high-contrast identification badge in the corner
                 width, height = img.size
                 draw2 = ImageDraw.Draw(img)
-                badge_w, badge_h = int(width * 0.28), int(height * 0.08)
+                badge_w, badge_h = int(width * 0.40), int(height * 0.10)
                 badge_x, badge_y = width - badge_w - 20, 20
                 # Draw glassmorphism-style background
                 draw2.rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], fill=(15, 23, 42, 230))
                 draw2.rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], outline=(56, 189, 248), width=2)
                 
                 try:
-                    b_font_size = max(12, int(badge_h * 0.35))
+                    b_font_size = max(11, int(badge_h * 0.28))
                     b_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", b_font_size)
-                    b_font_small = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", int(b_font_size * 0.8))
+                    b_font_small = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", int(b_font_size * 0.85))
+                    b_font_tiny = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", int(b_font_size * 0.75))
+                    
                     draw2.text((badge_x + 15, badge_y + 10), "KOMAL BATRA", font=b_font, fill=(255, 255, 255))
                     draw2.text((badge_x + 15, badge_y + 10 + b_font_size), "Cloud, AI & System Architecture | Microsoft", font=b_font_small, fill=(56, 189, 248))
+                    draw2.text((badge_x + 15, badge_y + 10 + b_font_size + int(b_font_size * 0.9)), "linkedin.com/komal-batra", font=b_font_tiny, fill=(148, 163, 184))
                 except Exception:
                     pass
 

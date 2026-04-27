@@ -86,7 +86,7 @@ DAY_INDEX = {day: idx for idx, day in enumerate(DAYS)}
 LOCK_FILE = Path(__file__).resolve().parent / ".post_lock.json"
 
 _DEFAULT_WINDOW_MINUTES = 55
-_DEFAULT_LOOKAHEAD_MINUTES = 0   # Strict scheduling: never claim slots before they occur
+_DEFAULT_LOOKAHEAD_MINUTES = 20  # Claim slots up to 20m early to handle early cron triggers
 
 
 def _window_minutes() -> int:
