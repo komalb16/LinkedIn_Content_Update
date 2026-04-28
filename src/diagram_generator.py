@@ -4104,6 +4104,19 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
     # Use post_subject as the primary search term if it's meaningfully different
     search_subject = post_subject if post_subject else topic_name
 
+    # OVERRIDE: if topic_name was already overridden to a specific tech term
+    # (e.g. "LangGraph" instead of "Personal AI Productivity"), use it directly
+    # as the search subject — don't dilute it with the generic topic name.
+    _specific_tech = any(k in topic_name.lower()
+                         for k in ["langgraph", "langchain", "autogen", "kubernetes",
+                                   "docker", "kafka", "rag", "llm", "graphql", "grpc",
+                                   "redis", "terraform", "pinecone", "weaviate",
+                                   "opentelemetry", "datadog", "fastapi", "architecture",
+                                   "mcp", "gemini", "claude", "llama", "mistral"])
+    if _specific_tech and not post_subject:
+        search_subject = topic_name
+        log.info(f"Using specific topic override as search subject: '{search_subject}'")
+
     # Also extract named tech terms from post for even better alignment
     tech_terms = ""
     if post_text:
@@ -4120,7 +4133,15 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                 log.info(f"Post/topic alignment: using '{tech_terms}' as search subject (topic was '{topic_name}')")
                 search_subject = f"{tech_terms} {search_subject}"[:80]
 
-    SEARCH_QUERIES = [
+    # Detect if this is an AI/agent/LLM topic for targeted queries
+    _ai_topic = any(k in (topic_name + " " + search_subject).lower()
+                    for k in ["llm", "rag", "agent", "langchain", "langgraph",
+                               "autogen", "mcp", "mlops", "genai", "agentic",
+                               "embedding", "vector", "fine-tun", "prompt",
+                               "transformer", "copilot", "openai", "claude",
+                               "gemini", "productivity", "automation"])
+
+    _general_queries = [
         f"{search_subject} system design diagram algomaster",
         f"{search_subject} architecture breakdown designgurus",
         f"{search_subject} engineering visual bytebytego",
@@ -4136,21 +4157,29 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         f"site:cameronrwolfe.substack.com {search_subject}",
         f"site:promptingguide.ai {search_subject}",
         f"site:learnbybuilding.ai {search_subject}",
-        f"{search_subject} LLM RAG architecture diagram eugeneyan huyenchip",
+        f"{search_subject} architecture diagram eugeneyan huyenchip",
     ]
+
+    # For AI/agent/LLM topics, prepend highly specific queries first
+    _ai_queries = [
+        f"{search_subject} workflow architecture diagram",
+        f"{search_subject} flow diagram AI engineering",
+        f"site:eugeneyan.com {search_subject}",
+        f"site:huyenchip.com {search_subject}",
+        f"site:learnbybuilding.ai {search_subject}",
+        f"site:promptingguide.ai {search_subject}",
+        f"site:algomaster.io {search_subject} AI agent",
+        f"site:blog.bytebytego.com {search_subject}",
+        f"{search_subject} AI agent architecture diagram algomaster",
+        f"site:towardsdatascience.com {search_subject} architecture",
+        f"site:cameronrwolfe.substack.com {search_subject}",
+    ]
+
+    SEARCH_QUERIES = (_ai_queries + _general_queries) if _ai_topic else _general_queries
 
     # Also add Level Up Coding and Nikki Siapno to SOURCE_PRIORITY
     SOURCE_PRIORITY["levelup.gitconnected.com"] = 5
     SOURCE_PRIORITY["nikkisiapno.substack.com"] = 5
-    SOURCE_PRIORITY["eugeneyan.com"]             = 5   # ML systems, RAG, RecSys — hand-crafted diagrams
-    SOURCE_PRIORITY["huyenchip.com"]             = 5   # LLM architecture, AI engineering (Chip Huyen)
-    SOURCE_PRIORITY["towardsdatascience.com"]    = 4   # ML/AI technical diagrams
-    SOURCE_PRIORITY["cameronrwolfe.substack.com"]= 4   # Deep learning, transformers, LLM internals
-    SOURCE_PRIORITY["newsletter.pragmaticengineer.com"] = 4  # Real-world architecture, distributed systems
-    SOURCE_PRIORITY["promptingguide.ai"]         = 4   # LLM prompting, RAG, agent patterns
-    SOURCE_PRIORITY["llmops.space"]              = 4   # LLMOps, model deployment, evaluation
-    SOURCE_PRIORITY["wandb.ai"]                  = 3   # MLOps, experiment tracking
-    SOURCE_PRIORITY["learnbybuilding.ai"]        = 4   # LLM/RAG/Agent architecture specifically
 
     def _priority(url: str) -> int:
         url_lower = url.lower()
@@ -4318,28 +4347,34 @@ class DiagramGenerator:
                 img = Image.open(io.BytesIO(img_bytes)).convert("RGBA")
                 bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
                 img = Image.alpha_composite(bg, img).convert("RGB")
+
+                # ── Crop dark header/banner baked into source image ────────────
+                # Many scraped sites have a dark header bar as part of the image.
+                # Scan rows from top; crop any band where >60% pixels are near-black.
+                try:
+                    _w, _h = img.size
+                    _crop_top = 0
+                    _pixels = img.load()
+                    for _row in range(int(_h * 0.25)):  # scan top 25% max
+                        _dark = sum(
+                            1 for _col in range(_w)
+                            if _pixels[_col, _row][0] < 50
+                            and _pixels[_col, _row][1] < 50
+                            and _pixels[_col, _row][2] < 50
+                        )
+                        if _dark / max(_w, 1) > 0.60:
+                            _crop_top = _row + 1
+                        elif _crop_top > 0:
+                            break  # first non-dark row after dark band — stop
+                    if _crop_top > 4:
+                        img = img.crop((0, _crop_top, _w, _h))
+                        log.info(f"Cropped dark header band: {_crop_top}px from top")
+                except Exception as _ce:
+                    log.warning(f"Header crop failed (non-fatal): {_ce}")
+
                 draw = ImageDraw.Draw(img)
-                # --- PERSONAL BRANDING BADGE ---
-                # Draw a sleek, high-contrast identification badge in the corner
                 width, height = img.size
                 draw2 = ImageDraw.Draw(img)
-                badge_w, badge_h = int(width * 0.40), int(height * 0.10)
-                badge_x, badge_y = width - badge_w - 20, 20
-                # Draw glassmorphism-style background
-                draw2.rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], fill=(15, 23, 42, 230))
-                draw2.rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], outline=(56, 189, 248), width=2)
-                
-                try:
-                    b_font_size = max(11, int(badge_h * 0.28))
-                    b_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", b_font_size)
-                    b_font_small = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", int(b_font_size * 0.85))
-                    b_font_tiny = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", int(b_font_size * 0.75))
-                    
-                    draw2.text((badge_x + 15, badge_y + 10), "KOMAL BATRA", font=b_font, fill=(255, 255, 255))
-                    draw2.text((badge_x + 15, badge_y + 10 + b_font_size), "Cloud, AI & System Architecture | Microsoft", font=b_font_small, fill=(56, 189, 248))
-                    draw2.text((badge_x + 15, badge_y + 10 + b_font_size + int(b_font_size * 0.9)), "linkedin.com/komal-batra", font=b_font_tiny, fill=(148, 163, 184))
-                except Exception:
-                    pass
 
                 footer_h = max(36, int(height * 0.06))
                  
@@ -4347,11 +4382,30 @@ class DiagramGenerator:
                 footer_img.paste(img, (0, 0))
                 draw2 = ImageDraw.Draw(footer_img)
                 foot_font_size = max(11, int(width * 0.022))
-                try:
-                    foot_font_bold = ImageFont.truetype("C:\\Windows\\Fonts\\segoeuib.ttf", foot_font_size)
-                    foot_font = ImageFont.truetype("C:\\Windows\\Fonts\\segoeui.ttf", foot_font_size)
-                except Exception:
-                    foot_font = foot_font_bold = ImageFont.load_default()
+                # Try system fonts in order: Linux (GitHub Actions) first, then Windows fallback
+                foot_font = foot_font_bold = None
+                _font_candidates = [
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+                    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                    "C:\\Windows\\Fonts\\segoeuib.ttf",
+                    "C:\\Windows\\Fonts\\segoeui.ttf",
+                ]
+                for _fp in _font_candidates:
+                    try:
+                        if foot_font_bold is None:
+                            foot_font_bold = ImageFont.truetype(_fp, foot_font_size)
+                        elif foot_font is None:
+                            foot_font = ImageFont.truetype(_fp, foot_font_size)
+                        if foot_font_bold and foot_font:
+                            break
+                    except Exception:
+                        continue
+                if not foot_font_bold:
+                    foot_font_bold = ImageFont.load_default()
+                if not foot_font:
+                    foot_font = foot_font_bold
 
                 draw2.text((int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
                            "✦  Curated by Komal Batra", font=foot_font_bold, fill=(56, 189, 248))

@@ -263,21 +263,6 @@ HOOK_STYLES = [
         "Then show how it looks now. Let the contrast do the work. "
         "No fluff — just the delta and why it matters for engineers today."
     ),
-    (
-        "Start with a specific number or ratio that reveals a gap: "
-        "'X% of teams do Y, but only Z% actually measure it.' "
-        "Then explain what the measuring looks like and why it changes outcomes."
-    ),
-    (
-        "Open with a decision you watched a team get wrong — not your team, "
-        "a pattern you have seen repeatedly. Describe the decision in one sentence. "
-        "Then walk through what the better decision looks like and why it is not obvious."
-    ),
-    (
-        "Start with one concrete tool, framework, or API that most engineers "
-        "underuse or misuse. Name it in the first sentence. "
-        "Then show the right mental model with a specific example."
-    ),
 ]
 
 # ─── TONE VARIATIONS ──────────────────────────────────────────────────────────
@@ -288,8 +273,6 @@ TONE_VARIATIONS = [
     "Staff engineer mentoring someone — patient, uses analogies, skips nothing important, zero condescension.",
     "Engineer who tried four approaches and finally found one that works — specific, quietly confident.",
     "The person at the conference who gives the best hallway talk — opinionated, concrete examples, no slides needed.",
-    "AI engineer who has shipped three RAG systems and learned what works — no hype, just the parts that actually matter in production.",
-    "Tech lead doing a Friday retrospective — honest about what broke, specific about what changes Monday, no blame.",
 ]
 
 # ─── FORMAT VARIATIONS ────────────────────────────────────────────────────────
@@ -402,49 +385,6 @@ Optimise the platform when platform is the bottleneck.
 💬 Where are you on this? Still on managed? Full K8s? Somewhere in between?
 
 #Kubernetes #DevOps #PlatformEngineering #CloudNative #SoftwareArchitecture""",
-
-    """\
-The difference between a junior and a senior engineer isn't the code.
-
-It's knowing when NOT to write it.
-
-I've reviewed 400+ PRs in the last two years. Here's what separates the engineers who grow fast:
-
-1️⃣ They ask "what problem does this solve?" before touching the keyboard.
-2️⃣ They delete more code than they add — and treat that as progress.
-3️⃣ They write the test before the implementation when they're uncertain.
-4️⃣ They flag the architectural decision, not just the syntax error.
-5️⃣ They document the "why" — anyone can read the "what."
-
-The engineers who plateau early write clever code.
-The ones who compound write obvious code that lasts.
-
-💬 What's the one habit that changed how you write code?
-
-#SoftwareEngineering #CareerGrowth #CodeReview #EngineeringCulture #TechLeadership""",
-
-    """RAG without evaluation is just vibes-based AI.
-
-I see teams ship RAG systems that "feel good" in demos.
-Six weeks later: hallucinations in production, users losing trust, leadership asking questions.
-
-The problem is not the retrieval. It's that nobody measured it.
-
-Here's the evaluation stack that actually matters:
-
-Context Precision — are the retrieved chunks relevant to the query?
-Context Recall — did we miss important chunks?
-Answer Groundedness — is every claim in the answer supported by the context?
-Answer Relevance — does the answer actually address what was asked?
-
-Tools that make this concrete: RAGAS, TruLens, DeepEval.
-Set baselines before you ship. Run evals on every config change.
-
-"It worked in the demo" is not a metric.
-
-💬 What's your RAG evaluation setup? Flying blind or fully instrumented?
-
-#RAG #LLM #AIEngineering #GenerativeAI #MLOps #Evaluation""",
 ]
 
 
@@ -1174,10 +1114,6 @@ Requirements:
 - The hook must be the very first line — no warming up, no preamble
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
-- For AI/LLM/RAG/Agent topics: name the specific architectural decision or trade-off, not just the concept. "Use RAG" is weak. "Use RAG when your data changes faster than you can fine-tune" is strong.
-- For AI topics: include at least one concrete failure mode or anti-pattern — what breaks and why
-- The closing question must invite a genuine opinion or experience, not just "what do you think?" — make it specific enough that readers have an actual answer
-- Hashtags must be specific to the post content — never use generic tags like #Technology or #Innovation alone
 """
     try:
         post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
@@ -3790,26 +3726,54 @@ Write a LinkedIn post that:
     # ── GENERATE DIAGRAM ──────────────────────────────────────────────────────
     fallback_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
 
-    # ALIGNMENT FIX: Extract the actual subject the post was written about
-    # by scanning for the most specific technical noun phrase in the post.
-    # This prevents diagram_title drifting from what the post actually covers.
+    # ALIGNMENT FIX: Extract the actual subject the post was written about.
+    # Priority 1: known tech tools/frameworks (most specific)
+    # Priority 2: company/product names from news posts (e.g. "Railway", "Anthropic")
+    # Priority 3: first meaningful noun phrase from the post hook
+    # This prevents diagram searches drifting from what the post actually covers.
     post_subject_override = None
+
+    # Priority 1: specific tech tools
     tech_subject_patterns = [
-        r"\b(Kubernetes|Docker|Kafka|RAG|LLM|GraphQL|gRPC|Redis|Postgres|"
+        r"\b(Kubernetes|Docker|Kafka|RAG|LLM|GraphQL|gRPC|Redis|PostgreSQL|"
         r"Terraform|Helm|Prometheus|Grafana|Istio|Argo|Flink|Spark|dbt|"
         r"Pinecone|Weaviate|LangChain|LangGraph|AutoGen|FastAPI|Pydantic|"
-        r"OpenTelemetry|Datadog|New Relic|GitHub Actions|GitLab CI)\b",
+        r"OpenTelemetry|Datadog|New Relic|GitHub Actions|GitLab CI|"
+        r"GPT-[\d.]+|Claude|Gemini|Llama|Mistral|Cohere|"
+        r"Azure OpenAI|Azure AI|AWS Bedrock|Google Vertex)\b",
     ]
     for pattern in tech_subject_patterns:
         match = re.search(pattern, post_text or "", re.IGNORECASE)
         if match:
             post_subject_override = match.group(0)
-            log.info(f"Post subject detected: '{post_subject_override}' — aligning diagram search")
+            log.info(f"Post subject detected (tech): '{post_subject_override}' — aligning diagram search")
             break
 
-    # If post is about something different from topic name, override for diagram
+    # Priority 2: for news posts, extract company/product name from the first 2 sentences
+    # News posts often mention a company that IS the subject (e.g. "Railway just raised $100M")
+    if not post_subject_override and mode in ("ai_news", "tech_news", "tools_news", "layoff_news", "trending"):
+        first_sentences = " ".join((post_text or "").splitlines()[:4])
+        # Match capitalized proper nouns that appear before action verbs (raised, launched, released, acquired)
+        company_match = re.search(
+            r"\b([A-Z][a-zA-Z]{2,}(?:\s[A-Z][a-zA-Z]+)?)\s+(?:just|has|have|is|are|was|were|"
+            r"raised|secured|launched|released|acquired|announced|closed|signed|partnered|built|open-sourced)",
+            first_sentences
+        )
+        if company_match:
+            candidate = company_match.group(1)
+            # Skip generic words that happen to be capitalized
+            skip_words = {"The", "This", "That", "These", "Those", "What", "When", "Where",
+                         "Here", "There", "Most", "Many", "Some", "Every", "Each", "Just"}
+            if candidate not in skip_words and len(candidate) > 2:
+                post_subject_override = candidate + " architecture"
+                log.info(f"Post subject detected (news company): '{post_subject_override}' — aligning diagram search")
+
+    # Priority 3: fall back to topic name (existing behaviour)
+    # diagram_topic["name"] stays as-is
+
+    # If post is about something meaningfully different from the topic name, override
     diagram_topic = dict(topic)
-    if post_subject_override and post_subject_override.lower() not in topic["name"].lower():
+    if post_subject_override and post_subject_override.lower().split()[0] not in topic["name"].lower():
         log.warning(
             f"Post/topic mismatch detected: topic='{topic['name']}' "
             f"but post is about '{post_subject_override}'. "
