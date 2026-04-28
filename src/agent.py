@@ -3768,10 +3768,29 @@ Write a LinkedIn post that:
                 post_subject_override = candidate + " architecture"
                 log.info(f"Post subject detected (news company): '{post_subject_override}' — aligning diagram search")
 
-    # Priority 3: fall back to topic name (existing behaviour)
-    # diagram_topic["name"] stays as-is
+    # Priority 3: extract subject from the first meaningful technical noun phrase in the post
+    if not post_subject_override:
+        for line in (post_text or "").splitlines()[:6]:
+            stripped = line.strip()
+            # Skip short lines, hashtag lines, emoji-only lines
+            if len(stripped) < 20 or stripped.startswith("#"):
+                continue
+            # Look for a capitalized technical term (2-3 words, no common verbs)
+            m = re.search(
+                r"\b((?:[A-Z][a-z]+\s+){0,2}(?:Architecture|Pipeline|System|Pattern|"
+                r"Framework|Model|Agent|Layer|Stack|Protocol|Design|Flow|"
+                r"Retrieval|Embedding|Inference|Training|Deployment|"
+                r"RAG|LLM|NLP|ML|AI|API|CI|CD)s?)\b",
+                stripped
+            )
+            if m:
+                candidate = m.group(1).strip()
+                # Reject single generic words
+                if len(candidate.split()) >= 2 or candidate.upper() == candidate:
+                    post_subject_override = candidate
+                    log.info(f"Post subject detected (noun phrase): '{post_subject_override}'")
+                    break
 
-    # If post is about something meaningfully different from the topic name, override
     diagram_topic = dict(topic)
     if post_subject_override and post_subject_override.lower().split()[0] not in topic["name"].lower():
         log.warning(
@@ -3790,6 +3809,7 @@ Write a LinkedIn post that:
         diagram_type = fallback_diagram_type
         diagram_structure = topic_mgr.get_diagram_structure(topic)
     log.info(f"Visual metadata: title='{diagram_title}', type='{diagram_type}'")
+
     
     # ── SELECT DIAGRAM STYLE USING SMART ROTATION ──────────────────────────────
     # NEW: Use smart rotation to cycle through all 23 available diagram styles
@@ -3847,10 +3867,10 @@ Write a LinkedIn post that:
             log.info(f"Forced style override to {selected_style}")
     
     diagram_path = diagram_gen.save_svg(
-    None, topic["id"], diagram_title, diagram_type,
-    structure=diagram_structure_with_style, post_text=post_text,
-    topic_name_override=diagram_topic["name"]   # ← use post-derived subject
-)
+        None, topic["id"], diagram_title, diagram_type,
+        structure=diagram_structure_with_style, post_text=post_text,
+        topic_name_override=diagram_topic["name"]   # ← use post-derived subject
+    )
     
     alignment = _diagram_alignment_score(diagram_path, diagram_structure_with_style)
     log.info(f"Diagram/Text alignment score: {alignment:.2f}")
@@ -3881,7 +3901,7 @@ Write a LinkedIn post that:
     log.info("Diagram saved: " + diagram_path)
 
     if dry_run:
-        title_line = f"📌 {topic['name']}\n\n"
+        title_line = f"📌 {diagram_title}\n\n"
         full_post_text = (
             title_line + post_text
             if not post_text.strip().startswith("📌")
@@ -3891,7 +3911,7 @@ Write a LinkedIn post that:
         publish_text = _render_linkedin_text(full_post_text)
         publish_text = _normalize_hashtags(publish_text)  # Fix: strip any leaked hashtag# tokens
         with open("output_post_" + topic["id"] + ".txt", "w", encoding="utf-8") as f:
-                f.write(publish_text)
+            f.write(publish_text)
             
         # NEW: Log post to engagement tracker even in dry run
         post_id = _log_post_generated(topic, publish_text, selected_style, mode)
@@ -3926,7 +3946,7 @@ Write a LinkedIn post that:
         return
 
     # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
-    title_line = f"📌 {topic['name']}\n\n"
+    title_line = f"📌 {diagram_title}\n\n"
     full_post_text = (
         title_line + post_text
         if not post_text.strip().startswith("📌")
@@ -3990,6 +4010,7 @@ Write a LinkedIn post that:
             "status":     "failed",
         })
         sys.exit(1)
+
 
 
 if __name__ == "__main__":

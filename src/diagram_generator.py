@@ -4335,8 +4335,31 @@ class DiagramGenerator:
         # Fetches real diagrams from elite sources: ByteByteGo, AlgoMaster, DesignGurus, etc.
         # This provides high-fidelity, production-grade engineering visuals.
         _dry_run_mode = os.environ.get("DRY_RUN_FAST", "0") == "1"
+        # AFTER — extract the actual technical subject from post_text first
+        _effective_search_name = search_name or topic_id
+        if post_text:
+            # Walk the first 8 lines looking for a line that names a specific tech concept
+            for _line in post_text.splitlines()[:8]:
+                _l = _line.strip()
+                if len(_l) < 15 or _l.startswith("#"):
+                    continue
+                # Find capitalized tech noun (avoids grabbing generic opener sentences)
+                _m = re.search(
+                    r"\b((?:[A-Z][a-z]+\s+){0,2}(?:Architecture|Pipeline|System|Pattern|"
+                    r"Framework|Protocol|RAG|LLM|NLP|Agent|Inference|Retrieval|"
+                    r"Embedding|CI/CD|DevOps|Kubernetes|Docker|Kafka|GraphQL|gRPC)s?)\b",
+                    _l
+                )
+                if _m:
+                    _candidate = _m.group(1).strip()
+                    # Only override if it adds specificity not already in search_name
+                    if _candidate.lower() not in (_effective_search_name or "").lower():
+                        _effective_search_name = f"{_candidate} {_effective_search_name}"[:80]
+                        log.info(f"Search subject refined from post content: '{_effective_search_name}'")
+                    break
+
         img_bytes, img_source_url = _fetch_internet_image(
-            search_name or topic_id, 
+            _effective_search_name,
             post_text=post_text,
             fast_mode=_dry_run_mode
         )
@@ -4377,7 +4400,7 @@ class DiagramGenerator:
                 draw2 = ImageDraw.Draw(img)
 
                 footer_h = max(36, int(height * 0.06))
-                 
+                         
                 footer_img = Image.new("RGB", (width, height + footer_h), (15, 23, 42))
                 footer_img.paste(img, (0, 0))
                 draw2 = ImageDraw.Draw(footer_img)
@@ -4409,7 +4432,7 @@ class DiagramGenerator:
 
                 draw2.text((int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
                            "✦  Curated by Komal Batra", font=foot_font_bold, fill=(56, 189, 248))
-                
+                        
                 try:
                     from urllib.parse import urlparse
                     source_domain = urlparse(img_source_url).netloc.replace("www.", "")
@@ -4432,14 +4455,14 @@ class DiagramGenerator:
 
         # --- Kroki / Local SVG Generation (FALLBACK) ---
 
-
         # --- Kroki Internet Rendering Fallback ---
-        
+            
         # Check for existing diagram (SVG, PNG, or GIF)
         existing_svg = f"{OUTPUT_DIR}/{topic_id}.svg"
         existing_png = f"{OUTPUT_DIR}/{topic_id}.png"
         existing_gif = f"{OUTPUT_DIR}/{topic_id}.gif"
-        
+
+    
         allow_reuse = not structure and not (diagram_type or "").strip()
 
         use_existing = False
@@ -4458,7 +4481,7 @@ class DiagramGenerator:
             log.info(f"Using existing PNG diagram: {filename.replace('.svg', '.png')}")
             # Note: This will be handled in linkedin_poster if needed
             use_existing = True
-        
+            
         if not use_existing:
             try:
                 candidate_count = int(os.environ.get("DIAGRAM_CANDIDATES", "3"))
@@ -4474,6 +4497,7 @@ class DiagramGenerator:
             recent_topic_signatures = {e.get("signature", "") for e in topic_memory if e.get("signature")}
             recent_styles = [e.get("style") for e in memory[-8:] if isinstance(e.get("style"), int)]
             recent_style_set = set(recent_styles)
+
             scored_candidates = []
             for style_idx in candidate_styles:
                 svg_candidate = make_diagram(
@@ -4524,6 +4548,7 @@ class DiagramGenerator:
                     append_images=frames[1:],
                     duration=gif_bundle["duration_ms"],
                     loop=0,
+
                     optimize=False,
                     disposal=2,
                 )
@@ -4555,6 +4580,7 @@ class DiagramGenerator:
             _record_rotation(best_style, topic_id, topic_name, diagram_type)
         
         return filename
+
 
     def generate_carousel_bundle(self, topic_id, topic_name, slides_config):
         """
