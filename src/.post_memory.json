@@ -257,5 +257,12 @@
     "topic_name": "P2P File Sharing",
     "category": "topic",
     "text": "\ud83d\udccc P2P File Sharing\n\nProduction just broke due to a faulty file sharing protocol \ud83d\udea8.\n\n1\ufe0f\u20e3 Files were not synced\n\n2\ufe0f\u20e3 Users were left offline\nTo avoid this, you need a reliable cross-platform file sharing system \ud83d\udcc1.\n\nHere's how the system operates:\n\nYou have four main operating lanes: Inputs, Tools, Control, and Scale \ud83d\udcc8.\n\n\ud83d\udcac Which lane do you focus on when implementing a peer-to-peer file sharing protocol?\n\n#FileSharing #PeerToPeer #SystemDesign #ReliabilityEngineering #ProductionReady \ud83d\udcbb\ud83d\udd0d\ud83d\udcca\ud83d\udc4d"
+  },
+  {
+    "timestamp": "2026-04-28T21:07:32.171614",
+    "topic_id": "kubernetes-mastery",
+    "topic_name": "Kubernetes Deep Dive",
+    "category": "topic",
+    "text": "\ud83d\udccc Kubernetes Deep Dive\n\nI'm still trying to wrap my head around the fact that Railway just secured $100 million to take on AWS with its AI-native cloud infrastructure. Just a few years ago, the idea of a cloud platform challenging the likes of AWS seemed like a distant dream. Fast forward to today, and we have Railway, a San Francisco-based company that has quietly amassed two million developers without spending a dime on marketing.\n\nWhat's even more impressive is that Railway is focusing on AI-native cloud infrastructure, which I believe is the future of cloud computing. With this funding, Railway can further develop its platform to provide more advanced AI capabilities to its users. For example,\n\nAI-native cloud infrastructure\n\n- Automated code optimization\n- Predictive scaling\n- Enhanced security\nThis is a game-changer for engineers like myself who are looking for more efficient and effective ways to build and deploy applications. I'm convinced that Railway's approach will pay off in the long run, and I'm eager to see how they will use this funding to drive innovation.\n\nThe fact that Railway has been able to attract two million developers without marketing speaks to the strength of its product. I believe that Railway's focus on AI-native cloud infrastructure will continue to pay off, and I'm excited to see how they will compete with AWS in the future.\n\n\ud83d\udcac Can Railway's AI-native cloud infrastructure really challenge the dominance of AWS?\n\n#AIcloud #CloudInfrastructure #AWS #Railway #AIfuture #CloudComputing"
   }
 ]
