@@ -158,7 +158,7 @@ jobs:
           GH_EVENT_NAME: ${{ github.event_name }}
           # 55 min window < 60 min cron interval — prevents double-posting.
           # Two consecutive hourly crons can never both match the same slot.
-          SCHEDULE_WINDOW_MINUTES: "55"
+          SCHEDULE_WINDOW_MINUTES: "119"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
