@@ -106,6 +106,16 @@ INCIDENT_PATTERNS = [
     r"\bdebugging\b.*\bproduction\b",
     r"\bi\s+just\s+spent\s+\d+\s*(?:hours?|hrs?)\b",
     r"\blast night\b.*\b(prod|incident|outage|issue)\b",
+    # Fabricated personal story openers the LLM generates
+    r"\ba few years? ago[,\s]+i\s+worked\b",
+    r"\bi\s+(?:once\s+)?worked on\b.*\b(?:project|system|team|codebase)\b",
+    r"\bi\s+clicked on\b.*\b(?:log|message|error|alert|button)\b",
+    r"\bi\s+(?:was\s+)?debugging\b.*\b(?:project|service|system|pipeline)\b",
+    r"\bwe\s+(?:once\s+)?built\b.*\b(?:system|platform|service|pipeline)\b",
+    r"\bmy\s+team\s+(?:once\s+)?(?:spent|built|shipped|struggled)\b",
+    r"\bi\s+(?:once\s+)?spent\s+(?:hours?|days?|weeks?)\b.*\b(?:debug|fix|investigat)\b",
+    r"\bwe\s+(?:were\s+)?(?:woken|paged|alerted)\b",
+    r"\bat\s+(?:my\s+)?(?:previous\s+)?(?:company|job|employer|startup)\b",
 ]
 
 # ─── ENGAGEMENT IMPROVEMENTS ──────────────────────────────────────────────────
@@ -1692,8 +1702,33 @@ def _strip_work_incident_hook(text, topic_name=""):
         f"Most teams blame the model first, but in {topic_name or 'LLM systems'} "
         "the bigger failures usually come from architecture decisions. 🧠"
     )
-    lines[0] = safe_hook
-    return "\n".join(lines).strip()
+    # Find the end of the opening incident paragraph (first blank line or
+    # the first line that starts a new section — numbered item, emoji bullet,
+    # hashtag, or a line that is clearly not part of the story opening).
+    incident_end = 1  # at minimum replace just line 0
+    for i in range(1, min(len(lines), 8)):
+        ln = lines[i].strip()
+        # Stop at blank line (paragraph break)
+        if not ln:
+            incident_end = i
+            break
+        # Stop at numbered items, emoji bullets, or hashtags — these are
+        # content sections, not part of the opening anecdote.
+        if re.match(r"^(?:[1-9][\.\)]|[1-9]\uFE0F\u20E3|#\w|💬|📌)", ln):
+            incident_end = i
+            break
+        # If the line still contains an incident pattern, keep extending
+        if any(re.search(pat, ln, re.I) for pat in INCIDENT_PATTERNS):
+            incident_end = i + 1
+        else:
+            # First line with no incident signal — stop here
+            incident_end = i
+            break
+    else:
+        incident_end = min(len(lines), 8)
+
+    replaced = [safe_hook] + lines[incident_end:]
+    return "\n".join(replaced).strip()
 
 
 def _align_poll_with_structure(text, structure=None, diagram_type=""):
@@ -2091,7 +2126,7 @@ def _has_structural_integrity_issues(text):
                 blockers.append("Truncated numbered items remain in the final post.")
                 break
 
-    # 3. Numbered sequence restart (e.g. 1, 2, 1)
+    # 3. Numbered sequence restart (e.g. 1, 2, 1) or gap (e.g. 1, 3 skips 2)
     num_items = []
     for i, line in enumerate(lines):
         m = _NUM_ITEM_RE.match(line.strip())
@@ -2108,6 +2143,14 @@ def _has_structural_integrity_issues(text):
                     seq_str = ", ".join(str(x) for x in seq) + ", " + str(n)
                     blockers.append(
                         f"Numbered list sequence is incomplete or skips items: {seq_str}"
+                    )
+                    break
+                if seq and n > seq[-1] + 1:
+                    # Gap detected — e.g. goes 1, 3 (missing 2)
+                    missing = list(range(seq[-1] + 1, n))
+                    seq_str = ", ".join(str(x) for x in seq) + f", [missing {','.join(str(x) for x in missing)}], {n}"
+                    blockers.append(
+                        f"Numbered list has a gap (missing item{'s' if len(missing) > 1 else ''}): {seq_str}"
                     )
                     break
                 seq.append(n)
@@ -3768,6 +3811,11 @@ Write a LinkedIn post that:
                 post_subject_override = candidate + " architecture"
                 log.info(f"Post subject detected (news company): '{post_subject_override}' — aligning diagram search")
 
+    # Priority 3: fall back to topic name (existing behaviour)
+    # diagram_topic["name"] stays as-is
+
+    # If post is about something meaningfully different from the topic name, override
+    # AFTER
     # Priority 3: extract subject from the first meaningful technical noun phrase in the post
     if not post_subject_override:
         for line in (post_text or "").splitlines()[:6]:
@@ -3901,7 +3949,7 @@ Write a LinkedIn post that:
     log.info("Diagram saved: " + diagram_path)
 
     if dry_run:
-        title_line = f"📌 {diagram_topic['name']}\n\n"
+        title_line = f"📌 {diagram_title}\n\n"
         full_post_text = (
             title_line + post_text
             if not post_text.strip().startswith("📌")
@@ -3946,7 +3994,7 @@ Write a LinkedIn post that:
         return
 
     # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
-    title_line = f"📌 {diagram_topic['name']}\n\n"
+    title_line = f"📌 {topic['name']}\n\n"
     full_post_text = (
         title_line + post_text
         if not post_text.strip().startswith("📌")

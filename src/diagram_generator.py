@@ -4395,17 +4395,21 @@ class DiagramGenerator:
                 except Exception as _ce:
                     log.warning(f"Header crop failed (non-fatal): {_ce}")
 
-                draw = ImageDraw.Draw(img)
                 width, height = img.size
-                draw2 = ImageDraw.Draw(img)
 
-                footer_h = max(36, int(height * 0.06))
-                         
+                # ── Footer strip ───────────────────────────────────────────
+                # Minimum 52px so text is never cramped; scale up for large images
+                footer_h = max(52, int(height * 0.07))
+                foot_font_size = max(14, int(width * 0.026))
+
                 footer_img = Image.new("RGB", (width, height + footer_h), (15, 23, 42))
                 footer_img.paste(img, (0, 0))
                 draw2 = ImageDraw.Draw(footer_img)
-                foot_font_size = max(11, int(width * 0.022))
-                # Try system fonts in order: Linux (GitHub Actions) first, then Windows fallback
+
+                # Separator line between diagram and footer
+                draw2.line([(0, height), (width, height)], fill=(56, 189, 248), width=2)
+
+                # Load font — try system fonts in order (Linux first, then Windows)
                 foot_font = foot_font_bold = None
                 _font_candidates = [
                     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -4430,9 +4434,19 @@ class DiagramGenerator:
                 if not foot_font:
                     foot_font = foot_font_bold
 
-                draw2.text((int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
-                           "✦  Curated by Komal Batra", font=foot_font_bold, fill=(56, 189, 248))
-                        
+                # Precise vertical centering using textbbox
+                left_text = "KB  Curated by Komal Batra"
+                lb = draw2.textbbox((0, 0), left_text, font=foot_font_bold)
+                left_text_h = lb[3] - lb[1]
+                left_y = height + (footer_h - left_text_h) // 2
+
+                draw2.text(
+                    (int(width * 0.03), left_y),
+                    left_text,
+                    font=foot_font_bold,
+                    fill=(56, 189, 248),
+                )
+
                 try:
                     from urllib.parse import urlparse
                     source_domain = urlparse(img_source_url).netloc.replace("www.", "")
@@ -4440,8 +4454,15 @@ class DiagramGenerator:
                     source_domain = "internet"
                 source_text = f"Source: {source_domain}"
                 sb = draw2.textbbox((0, 0), source_text, font=foot_font)
-                draw2.text((width - (sb[2]-sb[0]) - int(width * 0.03), height + footer_h // 2 - foot_font_size // 2),
-                           source_text, font=foot_font, fill=(148, 163, 184))
+                source_text_w = sb[2] - sb[0]
+                source_text_h = sb[3] - sb[1]
+                source_y = height + (footer_h - source_text_h) // 2
+                draw2.text(
+                    (width - source_text_w - int(width * 0.03), source_y),
+                    source_text,
+                    font=foot_font,
+                    fill=(148, 163, 184),
+                )
 
                 footer_img.save(png_filename)
                 log.info(f"Internet diagram saved with attribution footer: {png_filename}")
