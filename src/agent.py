@@ -168,9 +168,8 @@ RSS_FEEDS = {
         "https://www.theverge.com/rss/index.xml"
     ],
     "layoffs": [
-        "https://news.google.com/rss/search?q=tech+layoffs+OR+Microsoft+workforce+OR+Google+buyouts&hl=en-US&gl=US&ceid=US:en",
-        "https://layoffs.fyi/feed/",
-        "https://hnrss.org/frontpage?q=layoff|severance|exit"
+        "https://news.google.com/rss/search?q=tech+layoffs&hl=en-US&gl=US&ceid=US:en",
+        "https://layoffs.fyi/feed/"
     ],
     "tools": [
         "https://hnrss.org/newest?q=Show+HN",
@@ -264,6 +263,21 @@ HOOK_STYLES = [
         "Then show how it looks now. Let the contrast do the work. "
         "No fluff — just the delta and why it matters for engineers today."
     ),
+    (
+        "Start with a specific number or ratio that reveals a gap: "
+        "'X% of teams do Y, but only Z% actually measure it.' "
+        "Then explain what the measuring looks like and why it changes outcomes."
+    ),
+    (
+        "Open with a decision you watched a team get wrong — not your team, "
+        "a pattern you have seen repeatedly. Describe the decision in one sentence. "
+        "Then walk through what the better decision looks like and why it is not obvious."
+    ),
+    (
+        "Start with one concrete tool, framework, or API that most engineers "
+        "underuse or misuse. Name it in the first sentence. "
+        "Then show the right mental model with a specific example."
+    ),
 ]
 
 # ─── TONE VARIATIONS ──────────────────────────────────────────────────────────
@@ -274,6 +288,8 @@ TONE_VARIATIONS = [
     "Staff engineer mentoring someone — patient, uses analogies, skips nothing important, zero condescension.",
     "Engineer who tried four approaches and finally found one that works — specific, quietly confident.",
     "The person at the conference who gives the best hallway talk — opinionated, concrete examples, no slides needed.",
+    "AI engineer who has shipped three RAG systems and learned what works — no hype, just the parts that actually matter in production.",
+    "Tech lead doing a Friday retrospective — honest about what broke, specific about what changes Monday, no blame.",
 ]
 
 # ─── FORMAT VARIATIONS ────────────────────────────────────────────────────────
@@ -386,6 +402,49 @@ Optimise the platform when platform is the bottleneck.
 💬 Where are you on this? Still on managed? Full K8s? Somewhere in between?
 
 #Kubernetes #DevOps #PlatformEngineering #CloudNative #SoftwareArchitecture""",
+
+    """\
+The difference between a junior and a senior engineer isn't the code.
+
+It's knowing when NOT to write it.
+
+I've reviewed 400+ PRs in the last two years. Here's what separates the engineers who grow fast:
+
+1️⃣ They ask "what problem does this solve?" before touching the keyboard.
+2️⃣ They delete more code than they add — and treat that as progress.
+3️⃣ They write the test before the implementation when they're uncertain.
+4️⃣ They flag the architectural decision, not just the syntax error.
+5️⃣ They document the "why" — anyone can read the "what."
+
+The engineers who plateau early write clever code.
+The ones who compound write obvious code that lasts.
+
+💬 What's the one habit that changed how you write code?
+
+#SoftwareEngineering #CareerGrowth #CodeReview #EngineeringCulture #TechLeadership""",
+
+    """RAG without evaluation is just vibes-based AI.
+
+I see teams ship RAG systems that "feel good" in demos.
+Six weeks later: hallucinations in production, users losing trust, leadership asking questions.
+
+The problem is not the retrieval. It's that nobody measured it.
+
+Here's the evaluation stack that actually matters:
+
+Context Precision — are the retrieved chunks relevant to the query?
+Context Recall — did we miss important chunks?
+Answer Groundedness — is every claim in the answer supported by the context?
+Answer Relevance — does the answer actually address what was asked?
+
+Tools that make this concrete: RAGAS, TruLens, DeepEval.
+Set baselines before you ship. Run evals on every config change.
+
+"It worked in the demo" is not a metric.
+
+💬 What's your RAG evaluation setup? Flying blind or fully instrumented?
+
+#RAG #LLM #AIEngineering #GenerativeAI #MLOps #Evaluation""",
 ]
 
 
@@ -427,7 +486,7 @@ game-changer, leverage, revolutionize, supercharge, holistic, transformative
 - For non-comparison topics, avoid forcing vendor-vs-vendor comparisons
 - Do NOT add copyright, signature, author name, or current month/year
 - CRITICAL: No structural placeholders like "(Option A)" or "[Step 1]" in your final output.
-- PERSONAL ACCURACY: Do NOT invent personal life events or family details (e.g., becoming a parent, weddings, moving house, personal childhood memories) unless they are explicitly provided in the topic prompt. Keep the professional 'Technical Lead' persona grounded strictly in the provided content.
+- PERSONAL ACCURACY: Do NOT invent personal life events or family details (e.g., becoming a parent, weddings, moving house, personal childhood memories) unless they are explicitly provided in the topic prompt. Keep the professional 'Staff Engineer' persona grounded strictly in the provided content.
 - NEGATIVE CONSTRAINT: Never output generic structural labels like "The Problem", "Core Concept", "How It Works", or "Key Takeaway" as standalone headers or narrative transitions. Just dive into the technical insight directly. Avoid saying "The problem is" or "The core concept is" - be more specific and authoritative.
 - ZERO TOLERANCE: Never use ASCII art, box-drawing characters (┌, ┐, └, ┘, │, ─), or manual table boundaries (+---+) in the post text. If you need a comparison, use a simple 'Left -> Right' text format.
 """
@@ -437,8 +496,7 @@ game-changer, leverage, revolutionize, supercharge, holistic, transformative
 
 
 NEWS_SYSTEM = """\
-You are Komal Batra — a Technical Leader at Microsoft specializing in Cloud, AI, and System Architecture.
-You design high-scale systems and provide deep technical synthesis of industry news.
+You are Komal Batra — a Staff Engineer reacting to breaking tech news on LinkedIn.
 You have opinions. You pick a side. You back it with specifics.
 
 RULES:
@@ -1116,6 +1174,10 @@ Requirements:
 - The hook must be the very first line — no warming up, no preamble
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
+- For AI/LLM/RAG/Agent topics: name the specific architectural decision or trade-off, not just the concept. "Use RAG" is weak. "Use RAG when your data changes faster than you can fine-tune" is strong.
+- For AI topics: include at least one concrete failure mode or anti-pattern — what breaks and why
+- The closing question must invite a genuine opinion or experience, not just "what do you think?" — make it specific enough that readers have an actual answer
+- Hashtags must be specific to the post content — never use generic tags like #Technology or #Innovation alone
 """
     try:
         post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
@@ -3417,40 +3479,32 @@ def run_agent(manual_topic_id=None, dry_run=False, force_news=None, manual=False
             mode = "topic"
 
     elif mode == "layoff_news":
-        # SYNTHESIS MODE: Aggregating multiple sources for deeper analysis
-        articles = fetch_rss_news("layoffs", 10) # Fetch more to find the best signal
+        articles = fetch_rss_news("layoffs", 5)
         layoff_articles = [a for a in articles if any(
             w in a["title"].lower()
-            for w in ["layoff", "laid off", "cut", "job", "workforce", "redundan", "downsize", "voluntary exit", "retirement", "buyout", "severance"]
-        )][:5] # Synthesize top 5
-        
+            for w in ["layoff", "laid off", "cut", "job", "workforce", "redundan", "downsize"]
+        )]
         if layoff_articles:
             news_text = "\n".join([
-                f"- {a['title']}: {a['description'][:300]}"
-                for a in layoff_articles
+                f"- {a['title']}: {a['description'][:200]}"
+                for a in layoff_articles[:3]
             ])
             hook   = random.choice(HOOK_STYLES)
             tone   = random.choice(TONE_VARIATIONS)
             length = random.choice(LENGTH_VARIATIONS)
-            
-            # ADVANCED SYNTHESIS PROMPT
-            prompt = f"""TECHNICAL NEWS AGGREGATION:
+            prompt = f"""Latest tech industry layoff news:
 {news_text}
 
-Analyze the above industry signals and write a high-authority LinkedIn post.
-GOAL: Don't just report news; synthesize it into an industry trend.
+Hook: {hook}
+Voice: {tone}
+Length: {length}
 
-Structure:
-1. Hook: {hook} (Address the human side of tech)
-2. The Pulse: What connects these specific events? (e.g. shifts from growth to efficiency, or specific vertical tremors)
-3. The Engineering Take: How should Staff/Senior engineers read these signals for their own career roadmap?
-4. Actionable Insight: One specific thing an engineer can do TODAY to stay ahead of this trend.
-
-Voice/Tone: {tone} (Analytical, weathered, engineering-leader perspective)
-Constraints:
-- No mentions of months/years
-- No 'congratulations' or 'my thoughts go out to' placeholders
-- Professional but direct
+Write a LinkedIn post that:
+- Leads with your honest reaction — not a neutral summary
+- Breaks down what this actually signals about the industry
+- Gives one piece of actionable advice for engineers affected
+- Is empathetic but analytical — not motivational-poster language
+- Does NOT mention the current month or year
 """
             post_text = call_ai(prompt, NEWS_SYSTEM)
         if not post_text:
@@ -3572,55 +3626,6 @@ Write a LinkedIn post that:
                 f"A/B winner: variant #{candidate_snapshot[0]['index']+1} ({candidate_snapshot[0]['score']}) "
                 f"over #{candidate_snapshot[1]['index']+1} ({candidate_snapshot[1]['score']})"
             )
-    elif mode == "carousel":
-        # ── CAROUSEL MODE: 5-Slide Narrative ──────────────────────────────────────
-        topic = topic_mgr.get_next_topic()
-        carousel_prompt = f"""Write a 5-slide Technical Carousel about {topic['name']}.
-Goal: Tell a high-level architectural story.
-
-Slide 1: The Hook & The 'Big Picture' Problem
-Slide 2: The Traditional Way (and why it fails at Microsoft scale)
-Slide 3: The 'Lead' Insight (The clever architectural shift)
-Slide 4: The Deep Dive (Components & Data Flow)
-Slide 5: The Impact & Final Architect's Tip
-
-For each slide, provide a 'Visual Title' and a 'Visual Description' for the diagram.
-Format the output as a LinkedIn post followed by a [SLIDES] section.
-"""
-        raw_carousel = call_ai(carousel_prompt, NEWS_SYSTEM)
-        post_text = raw_carousel.split("[SLIDES]")[0].strip()
-        slides_text = raw_carousel.split("[SLIDES]")[1].strip() if "[SLIDES]" in raw_carousel else ""
-        
-        # Parse slides and generate bundle
-        slides_config = _extract_carousel_slides(slides_text, topic)
-        carousel_paths = diagram_gen.generate_carousel_bundle(topic["id"], topic["name"], slides_config)
-        log.info(f"Carousel bundle ready: {len(carousel_paths)} images generated.")
-        
-        # Track for the first comment
-        with open("output_comment.txt", "w") as f:
-            f.write(f"This is a 5-slide deep dive into {topic['name']}. Swipe through to see the architectural breakdown! 💡")
-    elif mode == "build_log":
-        # ── BUILD LOG MODE: Progress Diary ──────────────────────────────────────
-        from build_tracker import get_recent_milestones
-        milestones = get_recent_milestones()
-        
-        if milestones:
-            ms_text = "\n".join(milestones)
-            prompt = f"""Write a LinkedIn 'Weekly Build Log' as a Technical Lead.
-What we achieved this week in the engineering repository:
-{ms_text}
-
-Goal: Show high-level progress and the 'Why' behind the changes.
-- Focus on how these changes improve the overall system architecture.
-- Keep it honest and engineering-focused (no 'hustle' culture language).
-- End with a question about how other teams handle developmental sprints.
-"""
-            post_text = call_ai(prompt, NEWS_SYSTEM)
-            topic = {"id": "build-log", "name": "Weekly Build Progress", "category": "system"}
-            structure = {"style": 23, "subtitle": "Weekly Sprint Architecture", "sections": milestones[:4]}
-            planned_diagram_type = "Modern Cards"
-        else:
-            mode = "topic"
 
     # ── RESOLVE TOPIC ─────────────────────────────────────────────────────────
     if mode == "topic" or not post_text:
@@ -3787,34 +3792,31 @@ Goal: Show high-level progress and the 'Why' behind the changes.
 
     # ALIGNMENT FIX: Extract the actual subject the post was written about
     # by scanning for the most specific technical noun phrase in the post.
-    # We now include general system design concepts (Domain Transfer, CDC, etc.)
+    # This prevents diagram_title drifting from what the post actually covers.
     post_subject_override = None
     tech_subject_patterns = [
-        # Specific Tools/Tech
         r"\b(Kubernetes|Docker|Kafka|RAG|LLM|GraphQL|gRPC|Redis|Postgres|"
         r"Terraform|Helm|Prometheus|Grafana|Istio|Argo|Flink|Spark|dbt|"
         r"Pinecone|Weaviate|LangChain|LangGraph|AutoGen|FastAPI|Pydantic|"
         r"OpenTelemetry|Datadog|New Relic|GitHub Actions|GitLab CI)\b",
-        # General Engineering Concepts (New: catches 'Domain Transfer', etc.)
-        r"\b(Domain Transfer|API Gateway|Load Balanc|Event-Driven|Microservice|"
-        r"CDC|Change Data Capture|Rate Limiting|Circuit Breaker|Database Sharding|"
-        r"Blue-Green|Canary|Observability|Distributed Tracing|Zero Trust)\b",
     ]
     for pattern in tech_subject_patterns:
         match = re.search(pattern, post_text or "", re.IGNORECASE)
         if match:
             post_subject_override = match.group(0)
-            log.info(f"🎯 Post subject detected: '{post_subject_override}' — aligning all metadata")
+            log.info(f"Post subject detected: '{post_subject_override}' — aligning diagram search")
             break
 
-    # If post is about something different from topic name, sync EVERYTHING
+    # If post is about something different from topic name, override for diagram
+    diagram_topic = dict(topic)
     if post_subject_override and post_subject_override.lower() not in topic["name"].lower():
         log.warning(
-            f"🔄 Topic mismatch: topic='{topic['name']}' -> post='{post_subject_override}'. Syncing metadata."
+            f"Post/topic mismatch detected: topic='{topic['name']}' "
+            f"but post is about '{post_subject_override}'. "
+            f"Aligning diagram to post subject."
         )
-        topic["name"] = post_subject_override  # SYNC GLOBAL TOPIC
-    
-    diagram_topic = dict(topic)
+        diagram_topic["name"] = post_subject_override
+
     diagram_title, diagram_type, diagram_structure = _resolve_visual_metadata(
         diagram_topic, post_text, mode, fallback_diagram_type, structure
     )
@@ -3989,25 +3991,6 @@ Goal: Show high-level progress and the 'Why' behind the changes.
         write_github_output("POSTED_URL",   result.get("post_url", ""))
         write_github_summary(topic["name"], mode, publish_text, dry_run=False, score_card=score_card)
         _remember_post(topic, publish_text)
-        
-        # --- NEXT-GEN: Analytics & First Comment ---
-        try:
-            from analytics_engine import record_post_metadata
-            record_post_metadata(topic["id"], score_card["score"], mode)
-            
-            # Generate engagement comment
-            comment_prompt = f"""Write a short, engaging first comment for this LinkedIn post about {topic['name']}.
-Goal: Spark a technical debate or provide an 'extra' Pro Tip not in the post.
-Keep it under 3 lines. No hashtags.
-"""
-            first_comment = call_ai(comment_prompt, NEWS_SYSTEM)
-            if first_comment:
-                with open("output_comment.txt", "w", encoding="utf-8") as f:
-                    f.write(first_comment)
-                log.info("💬 First comment generated for engagement.")
-        except Exception as e:
-            log.warning(f"Next-Gen hooks failed (non-fatal): {e}")
-
         topic_mgr.save_run_history({
             "timestamp":  datetime.now().isoformat(),
             "topic_id":   topic["id"],
@@ -4067,24 +4050,3 @@ if __name__ == "__main__":
         manual=args.manual,
         forced_mode=args.mode,
     )
-
-def _extract_carousel_slides(slides_text, topic):
-    """Parses AI output into 5 slide configs."""
-    slides = []
-    # Simplified parser: looks for 'Slide X:'
-    lines = slides_text.split("\n")
-    current_slide = None
-    for line in lines:
-        if line.lower().startswith("slide"):
-            if current_slide: slides.append(current_slide)
-            current_slide = {"title": line, "type": "Architecture", "structure": None}
-        elif current_slide and ":" in line:
-            current_slide["title"] = line.split(":", 1)[1].strip()
-    if current_slide: slides.append(current_slide)
-    
-    # Ensure at least 3, max 5
-    return slides[:5] if len(slides) >= 3 else [
-        {"title": f"{topic['name']} - Intro", "type": "Modern Cards"},
-        {"title": "The Architecture", "type": "Architecture"},
-        {"title": "The Trade-offs", "type": "Comparison Table"}
-    ]

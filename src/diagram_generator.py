@@ -4130,11 +4130,27 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         f"site:blog.bytebytego.com {search_subject}",
         f"site:bytebytego.com {search_subject} architecture",
         f"site:nikkisiapno.substack.com {search_subject} visual",
+        f"site:eugeneyan.com {search_subject} diagram",
+        f"site:huyenchip.com {search_subject} architecture",
+        f"site:towardsdatascience.com {search_subject} diagram architecture",
+        f"site:cameronrwolfe.substack.com {search_subject}",
+        f"site:promptingguide.ai {search_subject}",
+        f"site:learnbybuilding.ai {search_subject}",
+        f"{search_subject} LLM RAG architecture diagram eugeneyan huyenchip",
     ]
 
     # Also add Level Up Coding and Nikki Siapno to SOURCE_PRIORITY
     SOURCE_PRIORITY["levelup.gitconnected.com"] = 5
     SOURCE_PRIORITY["nikkisiapno.substack.com"] = 5
+    SOURCE_PRIORITY["eugeneyan.com"]             = 5   # ML systems, RAG, RecSys — hand-crafted diagrams
+    SOURCE_PRIORITY["huyenchip.com"]             = 5   # LLM architecture, AI engineering (Chip Huyen)
+    SOURCE_PRIORITY["towardsdatascience.com"]    = 4   # ML/AI technical diagrams
+    SOURCE_PRIORITY["cameronrwolfe.substack.com"]= 4   # Deep learning, transformers, LLM internals
+    SOURCE_PRIORITY["newsletter.pragmaticengineer.com"] = 4  # Real-world architecture, distributed systems
+    SOURCE_PRIORITY["promptingguide.ai"]         = 4   # LLM prompting, RAG, agent patterns
+    SOURCE_PRIORITY["llmops.space"]              = 4   # LLMOps, model deployment, evaluation
+    SOURCE_PRIORITY["wandb.ai"]                  = 3   # MLOps, experiment tracking
+    SOURCE_PRIORITY["learnbybuilding.ai"]        = 4   # LLM/RAG/Agent architecture specifically
 
     def _priority(url: str) -> int:
         url_lower = url.lower()

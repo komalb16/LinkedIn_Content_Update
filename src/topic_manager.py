@@ -203,7 +203,7 @@ TOPICS = [
     {
         "id": "ml-algorithms",
         "name": "Machine Learning Algorithms",
-        "category": "Data Science",
+        "category": "AI",
         "prompt": "The taxonomy of Machine Learning algorithms every data scientist must know: Supervised, Unsupervised, and Reinforcement Learning.",
         "angle": "A structured breakdown of when to use which ML algorithm to solve real-world problems.",
         "diagram_subject": "Machine Learning Algorithms taxonomy tree: supervised, unsupervised, reinforcement",
@@ -223,7 +223,7 @@ TOPICS = [
     {
         "id": "rag-stack",
         "name": "Open Source RAG Stack",
-        "category": "AI Tools",
+        "category": "AI",
         "prompt": "This stack brings together powerful tools to transform raw data into context-rich intelligence. It integrates ingestion pipelines, embeddings, retrieval, and vector databases into one cohesive system.",
         "angle": "How to layer components with LLM frameworks and models to enable scalable, trustworthy, and production-ready AI applications.",
         "diagram_subject": "Open Source RAG Stack ecosystem map: ingest, retrieval, embeddings, vector db, llm frameworks, llm, frontend",
@@ -233,7 +233,7 @@ TOPICS = [
     {
         "id": "ai-skills-map",
         "name": "AI Skills & Technologies Map",
-        "category": "AI Learning",
+        "category": "AI",
         "prompt": "A comprehensive map of AI skills and technologies: Agentic AI, Generative AI, Deep Learning, Machine Learning, NLP, AI Ethics, Computer Vision, Robotics.",
         "angle": "Navigating the AI ecosystem: which skills to learn and which technologies to adopt for different subfields of AI.",
         "diagram_subject": "AI Skills mapping: honeycomb layout of domains connecting to specific skill and tech stacks",
@@ -243,7 +243,7 @@ TOPICS = [
     {
         "id": "llm-vs-agentic",
         "name": "LLM vs Generative AI vs AI Agents Agentic AI",
-        "category": "AI Workflows",
+        "category": "AI",
         "prompt": "The execution differences between standard LLMs, Generative AI models, basic AI Agents, and fully autonomous Agentic AI flows.",
         "angle": "Understanding the pipeline execution shifts from simple token prediction to complex autonomous reasoning and monitoring.",
         "diagram_subject": "Parallel execution pipelines comparing LLM sequences vs Agentic AI flows",
@@ -253,7 +253,7 @@ TOPICS = [
     {
         "id": "genai-roadmap",
         "name": "Generative AI Learning Roadmap",
-        "category": "AI Learning",
+        "category": "AI",
         "prompt": "Generative AI Learning Roadmap (Step-by-Step Guide): Start with Basics, Master Core Concepts, Foundation Models, Dev Stack, Model Training, AI Agents, Vision Models, Keep Learning.",
         "angle": "A step-by-step roadmap to guide a developer's journey from basics to building autonomous agentic systems.",
         "diagram_subject": "Winding step-by-step roadmap from 1 to 8 covering the GenAI journey",
@@ -263,7 +263,7 @@ TOPICS = [
     {
         "id": "agentic-ai-decision-tree",
         "name": "Agentic AI Decision Tree",
-        "category": "AI Strategy",
+        "category": "AI",
         "prompt": "When should you use agents, when is RAG enough, and when should you avoid both in favor of traditional software or ML?",
         "angle": "The hard part is not building agents. It is deciding when you do not need them.",
         "diagram_subject": "Decision tree for choosing code vs ML vs RAG vs single-agent vs multi-agent architecture",
@@ -273,7 +273,7 @@ TOPICS = [
     {
         "id": "enterprise-agentic-strategy",
         "name": "Enterprise Agentic AI Strategy",
-        "category": "AI Strategy",
+        "category": "AI",
         "prompt": "What actually creates a moat in enterprise agentic AI: identity, distribution, developer capture, data graph, bundling, and infrastructure control.",
         "angle": "Why the winners in enterprise AI may be decided by layers of distribution and control, not by raw model quality alone.",
         "diagram_subject": "7-layer enterprise agentic AI strategy stack",
@@ -283,7 +283,7 @@ TOPICS = [
     {
         "id": "ai-evals-guardrails",
         "name": "AI Evals and Guardrails",
-        "category": "AI Reliability",
+        "category": "AI",
         "prompt": "Why most teams confuse prompt quality with system quality, and why evals, red-teaming, guardrails, and regression checks are the real foundation of production AI.",
         "angle": "Signal vs noise in AI reliability: what actually reduces hallucinations and failures in production.",
         "diagram_subject": "Signal vs noise in AI evals, guardrails, and production reliability",
@@ -293,7 +293,7 @@ TOPICS = [
     {
         "id": "ai-observability",
         "name": "AI Observability",
-        "category": "AI Reliability",
+        "category": "AI",
         "prompt": "AI observability in production: tracing prompts, retrieval paths, tool calls, latency, token spend, and failure modes across agent workflows.",
         "angle": "If you cannot observe prompts, context, tool use, and user outcomes, you are flying blind in production AI.",
         "diagram_subject": "AI observability stack: prompts, traces, retrieval, tools, latency, feedback, and alerts",
@@ -313,7 +313,7 @@ TOPICS = [
     {
         "id": "vector-databases",
         "name": "Vector Databases and Retrieval",
-        "category": "AI Data",
+        "category": "AI",
         "prompt": "Vector databases in AI systems: embeddings, indexing, filtering, hybrid search, reranking, and when vector search is the wrong abstraction.",
         "angle": "How to compare Pinecone, Weaviate, pgvector, OpenSearch, and hybrid retrieval choices without falling for hype.",
         "diagram_subject": "Vector database comparison across indexing, filtering, hybrid search, scale, and fit",
@@ -323,7 +323,7 @@ TOPICS = [
     {
         "id": "ai-search-discovery",
         "name": "AI Search and Discovery",
-        "category": "AI Strategy",
+        "category": "AI",
         "prompt": "How AI assistants discover businesses and professionals from public web signals, and what this changes for personal branding and B2B discovery.",
         "angle": "AI search is not classic SEO. It rewards clarity, structure, and consistent evidence over keyword stuffing.",
         "diagram_subject": "Signal map: profile clarity, proof of work, consistency, and discoverability outcomes",
@@ -343,7 +343,7 @@ TOPICS = [
     {
         "id": "ai-governance-playbook",
         "name": "AI Governance Playbook",
-        "category": "AI Reliability",
+        "category": "AI",
         "prompt": "A practical governance playbook for production AI: risk tiers, approvals, model inventory, and policy enforcement.",
         "angle": "Governance should accelerate adoption by reducing ambiguity, not slow teams with vague compliance theater.",
         "diagram_subject": "Governance layers: policy, controls, oversight, incident response, and reporting",
@@ -353,7 +353,7 @@ TOPICS = [
     {
         "id": "rag-evaluation-framework",
         "name": "RAG Evaluation Framework",
-        "category": "AI Reliability",
+        "category": "AI",
         "prompt": "How to evaluate RAG systems beyond latency: groundedness, context precision, citation quality, and failure patterns.",
         "angle": "If you only track speed, you will ship fast hallucinations.",
         "diagram_subject": "Evaluation map from query quality to retrieval quality to answer quality",
@@ -373,7 +373,7 @@ TOPICS = [
     {
         "id": "finops-for-ai",
         "name": "FinOps for AI Systems",
-        "category": "AI Strategy",
+        "category": "AI",
         "prompt": "How teams control AI cost without killing product quality: routing, caching, batching, and model tiering.",
         "angle": "AI cost optimization is a product architecture problem, not just a finance dashboard problem.",
         "diagram_subject": "Cost-control flow: request routing, caching, fallback models, and budget alerts",
@@ -383,7 +383,7 @@ TOPICS = [
     {
         "id": "model-context-protocol",
         "name": "Model Context Protocol",
-        "category": "AI Protocols",
+        "category": "AI",
         "prompt": "Model Context Protocol (MCP): why it matters, how hosts, clients, and servers connect, and what it changes for tool-using AI systems.",
         "angle": "MCP is not another wrapper. It is the interface layer that could standardize how AI systems discover and use tools.",
         "diagram_subject": "Lane map of MCP hosts, protocol flow, tool servers, auth, and responses",
@@ -393,7 +393,7 @@ TOPICS = [
     {
         "id": "microsoft-ai-ecosystem",
         "name": "Microsoft AI Ecosystem Map",
-        "category": "AI Strategy",
+        "category": "AI",
         "prompt": "A practical map of Microsoft's AI ecosystem: foundation models, agent frameworks, developer tools, security/governance controls, and cloud runtime.",
         "angle": "Most teams use one tool and miss the stack-level leverage. The real win is understanding how the layers connect.",
         "diagram_subject": "Layered Microsoft AI stack from models to apps, governance, and infrastructure",
@@ -403,7 +403,7 @@ TOPICS = [
     {
         "id": "microsoft-agent-stack",
         "name": "Microsoft Agent Stack",
-        "category": "AI Agents",
+        "category": "AI",
         "prompt": "How Microsoft agent building blocks fit together: Agent Framework, Semantic Kernel, AutoGen, Copilot Studio, Entra Agent ID, and runtime/integration services.",
         "angle": "Stop treating agents as a single tool choice. Design the full stack: identity, orchestration, tools, memory, and governance.",
         "diagram_subject": "Agent platform layers: orchestration, tools, identity, runtime, and governance",
@@ -1067,21 +1067,32 @@ class TopicManager:
         prioritized = [t for t in available if t["category"] not in recent_categories]
         pool = prioritized if prioritized else available
 
-        category_supply = Counter(t["category"] for t in self.topics)
+        # Target category mix — AI-dominant to match your content strategy.
+        # These weights override the auto-derived supply ratio so you always
+        # get mostly AI/LLM/RAG/Agentic content regardless of topic count.
+        CATEGORY_TARGET_WEIGHTS = {
+            "AI":          0.65,   # LLM, RAG, Agents, MCP, MLOps, AI Strategy etc.
+            "Engineering": 0.15,   # System design, API, microservices
+            "Cloud":       0.08,   # AWS, K8s, Docker
+            "Security":    0.07,   # Zero trust, DevSecOps, Responsible AI
+            "Data":        0.05,   # Kafka, Lakehouse, Data architecture
+        }
+        # Any category not in the table gets a small default weight
+        DEFAULT_WEIGHT = 0.02
+
         category_history = Counter()
         recent_window = self.history[-24:]
         for h in recent_window:
             category = self._resolve_history_category(h, topic_by_id)
-            if category in category_supply:
+            if category:
                 category_history[category] += 1
 
-        total_supply = max(1, sum(category_supply.values()))
         total_history = max(1, sum(category_history.values()))
 
         def category_gap(cat):
-            target_share = category_supply[cat] / total_supply
-            actual_share = category_history[cat] / total_history
-            return actual_share - target_share
+            target = CATEGORY_TARGET_WEIGHTS.get(cat, DEFAULT_WEIGHT)
+            actual = category_history[cat] / total_history
+            return actual - target   # positive = overrepresented, negative = underrepresented
 
         eligible_categories = {t["category"] for t in pool}
         min_gap = min(category_gap(cat) for cat in eligible_categories)
