@@ -3901,7 +3901,7 @@ Write a LinkedIn post that:
     log.info("Diagram saved: " + diagram_path)
 
     if dry_run:
-        title_line = f"📌 {diagram_title}\n\n"
+        title_line = f"📌 {diagram_topic['name']}\n\n"
         full_post_text = (
             title_line + post_text
             if not post_text.strip().startswith("📌")
@@ -3946,7 +3946,7 @@ Write a LinkedIn post that:
         return
 
     # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
-    title_line = f"📌 {diagram_title}\n\n"
+    title_line = f"📌 {diagram_topic['name']}\n\n"
     full_post_text = (
         title_line + post_text
         if not post_text.strip().startswith("📌")
