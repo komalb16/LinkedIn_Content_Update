@@ -934,5 +934,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-28T23:59:06.124182",
+    "topic_id": "trend-vintage-models",
+    "topic_name": "Lessons from Vintage AI",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 74,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 74,
+        "raw_score": 74,
+        "similarity": 0.0348,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 71,
+        "raw_score": 71,
+        "similarity": 0.0649,
+        "penalty": 0
+      }
+    ]
   }
 ]
