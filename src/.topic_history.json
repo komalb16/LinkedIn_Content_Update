@@ -959,5 +959,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-29T20:13:36.589895",
+    "topic_id": "azure",
+    "topic_name": "Azure",
+    "category": "Cloud",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 39,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 47,
+        "raw_score": 47,
+        "similarity": 0.0263,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 37,
+        "raw_score": 37,
+        "similarity": 0.08,
+        "penalty": 0
+      }
+    ]
   }
 ]
