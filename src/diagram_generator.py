@@ -4052,26 +4052,28 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         "highscalability.com":  3,
     }
 
-    # Domain blacklist: Exclude sites that mostly host generic templates or low-quality previews
+    # Domain blacklist: Exclude sites that host low-quality, generic, or
+    # non-technical images (slides, stock photos, presentations, illustrations).
     DOMAIN_BLACKLIST = [
-    # existing entries...
+    # Slide/template marketplaces
     "slideteam.net", "sketchbubble.com", "powerpointify.com",
     "slidesalad.com", "slideegg.com", "sketching.com",
-    "presentationgo.com", "slideshare.net", "pinterest.com",
+    "presentationgo.com", "slideshare.net", "slideserve.com",
+    "slideplayer.com", "slideplayer.info",
+    # Academic/university lecture slides (source of broken diagram bug)
+    ".edu/",
+    "academia.edu", "researchgate.net", "semanticscholar.org",
+    "ocw.mit.edu", "courses.cs",
+    # Stock photo / illustration sites
     "shutterstock.com", "gettyimages.com", "dreamstime.com",
-    "123rf.com", "depositphotos.com", "canva.com",
-    # NEW — illustration/artwork/photo sites to reject
-    "miro.medium.com",        # Medium hero illustrations, not diagrams
-    "cdn-images-1.medium.com", # Medium article headers
-    "unsplash.com",           # Stock photography
-    "pexels.com",             # Stock photography  
-    "freepik.com",            # Vector illustrations
-    "flaticon.com",           # Icons, not diagrams
-    "storyset.com",           # Story illustrations
-    "undraw.co",              # UI illustrations
-    "artstation.com",         # Digital art
-    "behance.net",            # Design portfolios
-    "dribbble.com",           # Design shots
+    "123rf.com", "depositphotos.com", "istockphoto.com",
+    "unsplash.com", "pexels.com", "pixabay.com",
+    "freepik.com", "flaticon.com", "storyset.com",
+    "undraw.co", "artstation.com", "behance.net", "dribbble.com",
+    # Generic diagram/template sites
+    "canva.com", "smartdraw.com", "pinterest.com",
+    # Medium CDN (article headers, not diagrams)
+    "miro.medium.com", "cdn-images-1.medium.com",
 ]
 
     # --- Disambiguation Logic ---
@@ -4216,7 +4218,19 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                 seen_urls.add(url)
                 candidates.append((url, pri))
 
-    # 2. Sort by priority descending (high-quality sources first), then try to download
+    # 2. Reject URLs that look like lecture slides or presentations by filename/path pattern
+    def _looks_like_slide(url: str) -> bool:
+        u = url.lower()
+        slide_signals = [
+            "lecture", "/slides/", "slide_", "_slide", ".pptx", "ppt/",
+            "chapter", "lec-", "lec_", "module", "unit-", "unit_",
+            "week-", "week_", "tutorial", "failuremodes", "failure-modes",
+        ]
+        return any(s in u for s in slide_signals)
+
+    candidates = [(url, pri) for url, pri in candidates if not _looks_like_slide(url)]
+
+    # 3. Sort by priority descending (high-quality sources first), then try to download
     candidates.sort(key=lambda x: x[1], reverse=True)
     log.info(f"Gathered {len(candidates)} image candidates across all platforms.")
 

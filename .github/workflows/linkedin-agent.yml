@@ -127,6 +127,13 @@ jobs:
 
           assert _render_linkedin_text("") == "", "FAIL: empty input should return empty"
           print("✅ Test 3 passed: empty input handled")
+
+          test4 = "My post.\n\nCol A | Col B | Col C\nFoo | Bar | Win\nBaz | Qux | Win\n\n💬 Thoughts?\n\n#AI"
+          result4 = _render_linkedin_text(test4)
+          assert "|" not in result4, "FAIL: pipe table not stripped"
+          assert "Foo" in result4, "FAIL: table content was lost"
+          print("✅ Test 4 passed: pipe table converted to list")
+
           print("All smoke tests passed.")
           EOF
 

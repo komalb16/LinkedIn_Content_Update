@@ -273,6 +273,21 @@ HOOK_STYLES = [
         "Then show how it looks now. Let the contrast do the work. "
         "No fluff — just the delta and why it matters for engineers today."
     ),
+    (
+        "Start with a specific number or ratio that reveals a gap: "
+        "'X% of teams do Y, but only Z% actually measure it.' "
+        "Then explain what measuring looks like and why it changes outcomes."
+    ),
+    (
+        "Open with a decision you watched a team get wrong repeatedly — not your team. "
+        "Describe the decision in one sentence. "
+        "Then walk through what the better decision looks like and why it is not obvious."
+    ),
+    (
+        "Start with one concrete tool, framework, or API that most engineers "
+        "underuse or misuse. Name it in the first sentence. "
+        "Then show the right mental model with a specific example."
+    ),
 ]
 
 # ─── TONE VARIATIONS ──────────────────────────────────────────────────────────
@@ -283,6 +298,8 @@ TONE_VARIATIONS = [
     "Staff engineer mentoring someone — patient, uses analogies, skips nothing important, zero condescension.",
     "Engineer who tried four approaches and finally found one that works — specific, quietly confident.",
     "The person at the conference who gives the best hallway talk — opinionated, concrete examples, no slides needed.",
+    "AI engineer who has shipped three RAG systems and learned what works — no hype, just the parts that actually matter in production.",
+    "Tech lead doing a Friday retrospective — honest about what broke, specific about what changes Monday, no blame.",
 ]
 
 # ─── FORMAT VARIATIONS ────────────────────────────────────────────────────────
@@ -395,6 +412,30 @@ Optimise the platform when platform is the bottleneck.
 💬 Where are you on this? Still on managed? Full K8s? Somewhere in between?
 
 #Kubernetes #DevOps #PlatformEngineering #CloudNative #SoftwareArchitecture""",
+
+    """\
+RAG without evaluation is just vibes-based AI.
+
+I see teams ship RAG systems that "feel good" in demos.
+Six weeks later: hallucinations in production, users losing trust, leadership asking questions.
+
+The problem is not the retrieval. It's that nobody measured it.
+
+Here's the evaluation stack that actually matters:
+
+Context Precision — are the retrieved chunks relevant to the query?
+Context Recall — did we miss important chunks?
+Answer Groundedness — is every claim in the answer supported by the context?
+Answer Relevance — does the answer actually address what was asked?
+
+Tools that make this concrete: RAGAS, TruLens, DeepEval.
+Set baselines before you ship. Run evals on every config change.
+
+"It worked in the demo" is not a metric.
+
+💬 What's your RAG evaluation setup? Flying blind or fully instrumented?
+
+#RAG #LLM #AIEngineering #GenerativeAI #MLOps #Evaluation""",
 ]
 
 
@@ -427,7 +468,9 @@ HARD RULES — no exceptions:
 - No filler openers: "In today's...", "As we navigate...", "It's no secret..."
 - No banned words: robust, crucial, delve, landscape, testament, realm, \
 ever-evolving, foster, tapestry, seamless, synergy, paradigm, unprecedented, \
-game-changer, leverage, revolutionize, supercharge, holistic, transformative
+game-changer, leverage, revolutionize, supercharge, holistic, transformative, \
+groundbreaking, cutting-edge, innovative, harness, unleash, empower, elevate, \
+reimagine, reshape, redefine, spearhead, unlock potential, thought leader
 - Always lead with a punchy hook.
 - Ensure technical depth: name specific tools, metrics (e.g. 500ms, 10k QPS), or trade-offs.
 - ALWAYS end with 💬 + a genuine question + blank line + 5 to 7 hashtags
@@ -439,6 +482,10 @@ game-changer, leverage, revolutionize, supercharge, holistic, transformative
 - PERSONAL ACCURACY: Do NOT invent personal life events or family details (e.g., becoming a parent, weddings, moving house, personal childhood memories) unless they are explicitly provided in the topic prompt. Keep the professional 'Staff Engineer' persona grounded strictly in the provided content.
 - NEGATIVE CONSTRAINT: Never output generic structural labels like "The Problem", "Core Concept", "How It Works", or "Key Takeaway" as standalone headers or narrative transitions. Just dive into the technical insight directly. Avoid saying "The problem is" or "The core concept is" - be more specific and authoritative.
 - ZERO TOLERANCE: Never use ASCII art, box-drawing characters (┌, ┐, └, ┘, │, ─), or manual table boundaries (+---+) in the post text. If you need a comparison, use a simple 'Left -> Right' text format.
+- ABSOLUTE BAN: Never use pipe characters (|) anywhere in the post body. LinkedIn does not render markdown tables — they appear as broken plain text. Use numbered lists or prose instead.
+- ABSOLUTE BAN: Never fabricate a "recent Slack message", "DM I received", "tweet I saw", or any invented social media conversation as a hook. Use general observations or questions instead.
+- ABSOLUTE BAN: Never repeat the same sentence structure more than twice in a row (e.g. "Most people X — Production systems actually Y"). Vary your structure.
+- CONTENT ACCURACY: Write exactly about the topic given. Do not rename it, invent a different topic, or drift into adjacent topics not specified.
 """
 
 
@@ -463,6 +510,8 @@ RULES:
 - Never mention the current month or year.
 - Do NOT add copyright or signature.
 - ZERO TOLERANCE: Never use ASCII art or box-drawing characters (+---+ or |---|) in the text.
+- ABSOLUTE BAN: Never use pipe characters (|) to create tables. LinkedIn does not render markdown.
+- ABSOLUTE BAN: Never fabricate a "recent Slack message", "DM", or invented quote as your hook.
 """
 
 STORY_THEMES = [
@@ -1124,6 +1173,10 @@ Requirements:
 - The hook must be the very first line — no warming up, no preamble
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
+- For AI/LLM/RAG/Agent topics: name the specific architectural decision or trade-off, not just the concept. "Use RAG" is weak. "Use RAG when your data changes faster than you can fine-tune" is strong.
+- For AI topics: include at least one concrete failure mode or anti-pattern — what breaks and why.
+- The closing question must invite a genuine opinion — make it specific enough that readers have an actual answer, not just "what do you think?"
+- Hashtags must be specific to the post content — never use generic tags like #Technology or #Innovation alone.
 """
     try:
         post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
@@ -2253,6 +2306,30 @@ def _render_linkedin_text(post_text):
 
         # Remove inline code ticks
         text = re.sub(r"`([^`\n]+)`", r"\1", text)
+
+        # ── Strip markdown pipe tables ─────────────────────────────────────────
+        # LinkedIn renders | as plain text — tables look broken.
+        # Convert pipe-table rows to numbered list items.
+        _raw = text.split("\n")
+        _out = []
+        _trows = []
+        for _line in _raw:
+            _s = _line.strip()
+            if _s.count("|") >= 2:
+                _cells = [c.strip() for c in _s.split("|") if c.strip()]
+                if len(_cells) >= 2:
+                    if all(set(c) <= set("-: ") for c in _cells):
+                        continue
+                    _trows.append(" → ".join(_cells))
+                    continue
+            if _trows:
+                _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
+                _out.append("")
+                _trows = []
+            _out.append(_line)
+        if _trows:
+            _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
+        text = "\n".join(_out)
 
         # Restore visual block content (no surrounding backticks)
         for i, visual_content in enumerate(visual_blocks):
