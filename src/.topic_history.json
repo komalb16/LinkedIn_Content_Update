@@ -1009,5 +1009,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-30T14:06:22.922786",
+    "topic_id": "ai-agents-2026",
+    "topic_name": "AI Agents 2026",
+    "category": "AI",
+    "mode": "tools_news",
+    "status": "success",
+    "quality_score": 73,
+    "ab_variants": []
   }
 ]
