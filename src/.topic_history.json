@@ -984,5 +984,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-30T03:57:16.925655",
+    "topic_id": "trend-copy-fail-pitfalls",
+    "topic_name": "Copy Fail Lessons",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 73,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 73,
+        "raw_score": 73,
+        "similarity": 0.0588,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 61,
+        "raw_score": 61,
+        "similarity": 0.0397,
+        "penalty": 0
+      }
+    ]
   }
 ]
