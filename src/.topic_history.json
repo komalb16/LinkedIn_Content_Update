@@ -1019,5 +1019,30 @@
     "status": "success",
     "quality_score": 73,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-05-02T13:20:11.843585",
+    "topic_id": "story-llm-agent-realization",
+    "topic_name": "AI Agent Interaction",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 72,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 72,
+        "raw_score": 72,
+        "similarity": 0.0274,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 56,
+        "raw_score": 56,
+        "similarity": 0.0743,
+        "penalty": 0
+      }
+    ]
   }
 ]
