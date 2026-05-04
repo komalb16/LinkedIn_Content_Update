@@ -1104,5 +1104,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-04T14:10:41.066998",
+    "topic_id": "trend-deep-claude-loop",
+    "topic_name": "Optimizing Code Agents",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 80,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 80,
+        "raw_score": 80,
+        "similarity": 0.0275,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 49,
+        "raw_score": 49,
+        "similarity": 0.0444,
+        "penalty": 0
+      }
+    ]
   }
 ]
