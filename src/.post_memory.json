@@ -383,5 +383,12 @@
     "topic_name": "LLM Architecture",
     "category": "topic",
     "text": "\ud83d\udccc LLM Architecture\n\n80% of LLMs rely on transformers, but few engineers truly grasp the internal architecture \ud83e\udd16. I was wrong about the importance of attention mechanisms until I dug deeper \ud83d\udcda. The key to understanding LLMs like GPT-4, Gemini, and Claude lies in their unique combinations of tokenisation, embedding, attention, feed-forward, and output layers \ud83d\udcca.\n\nThe difference between these models often comes down to their attention mechanisms and how they handle multi-head self-attention \ud83e\udd14. A common failure mode is underestimating the impact of tokenisation on downstream performance \ud83d\udcc9.\n\n\ud83d\udcac What's the most critical component in an LLM's internal architecture to you?\n\n#LLM #Transformers #AttentionMechanisms #AIEngineering #LanguageModels"
+  },
+  {
+    "timestamp": "2026-05-06T20:26:52.184437",
+    "topic_id": "cicd-pipelines",
+    "topic_name": "CI/CD Best Practices",
+    "category": "topic",
+    "text": "\ud83d\udccc CI/CD Best Practices\n\n\ud83d\udcbb Modern CI/CD pipelines have transformed from brittle behemoths to slick assembly lines. Gone are the days of manual deployments and hours-long build times.\n\n1\ufe0f\u20e3 Most people test one environment at\nMost people test one environment at a time, waiting for approvals.\n\n2\ufe0f\u20e3 They run security scans sequentially\nThey run security scans sequentially, delaying deployments.\n\n3\ufe0f\u20e3 Environments are cloned manually\nEnvironments are cloned manually, introducing inconsistencies.\n\n4\ufe0f\u20e3 Rollbacks are costly and often result\nRollbacks are costly and often result in lost work.\n\n5\ufe0f\u20e3 Engineers spend more time dealing\nEngineers spend more time dealing with deployment issues.\n\nDeployments break, causing hours of frustration.\n\nCode Commit |-->| (pre-commit hooks, linting)\n\nCI Build    |-->| (tests, SAST scan in parallel)\n\nImage Build |-->| (Docker multi-\n\nSecurity Scan|-->| (Trivy CVE, Snyk SCA, SBOM)\n\nStage Deploy|-->| (Helm upgrade, smoke tests)\n\nProduction  |-->| (Blue/green, canary, feature flags)\n\nWhat's the most painful aspect of your CI/CD pipeline? Is it the test failures? Deployment delays? Something else?\n\n\ud83d\udcac Cast your vote by choosing one of the following options:\n\n#CI #InfrastructureAsCode #DeploymentBestPractices #ContinuousDelivery #DistributedSystems #EngineeringLife"
   }
 ]

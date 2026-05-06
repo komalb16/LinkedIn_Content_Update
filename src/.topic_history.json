@@ -1139,5 +1139,30 @@
     "status": "success",
     "quality_score": 61,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-05-06T20:26:52.185638",
+    "topic_id": "cicd-pipelines",
+    "topic_name": "CI/CD Best Practices",
+    "category": "DevOps",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 60,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 60,
+        "raw_score": 60,
+        "similarity": 0.0104,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 47,
+        "raw_score": 47,
+        "similarity": 0.0224,
+        "penalty": 0
+      }
+    ]
   }
 ]
