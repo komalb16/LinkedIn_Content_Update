@@ -397,5 +397,12 @@
     "topic_name": "AI Model Deployment",
     "category": "topic",
     "text": "\ud83d\udccc AI Model Deployment\n\nEngineering Myth: \"Just ship it\" is enough for AI model deployment.\n\nReality: Explicit user consent and transparent model updates are key.\n\n1\ufe0f\u20e3 Users need to trust AI-driven decisions\n\nModel Training \ud83d\udd04  ->  Model Deployment \ud83d\udcc8  ->  User Feedback \ud83d\udd04  ->  Model Update \ud83d\udd04\n\n1\ufe0f\u20e3 Transparency in AI model updates\n\n**Best Practices**\n\n**Common Mistakes**\n\n2\ufe0f\u20e3 Regularly evaluate and update models\n\nPoll: Which is most important for AI model deployment?\na) Transparency in model updates\nb) User consent for model evaluation\nc) Model documentation\nd) Regular A/B testing\ne) Clear explanations for model-driven decisions\nf) Implementing feature toggles\n\n\ud83d\udcac What's your experience with AI model deployment in production?\n\n#SoftwareArchitecture #SystemDesign #ScaleEngineering #DistributedSystems"
+  },
+  {
+    "timestamp": "2026-05-07T14:22:27.186426",
+    "topic_id": "system-design",
+    "topic_name": "System Design Fundamentals",
+    "category": "topic",
+    "text": "I used to think system design interviews were about recalling fancy architectures \ud83e\udd14.\n\nBut it turns out, building real systems requires a different mindset \ud83d\udca1.\n\nHere are key principles to master:\n\n3\ufe0f\u20e3 Load balancing is crucial\n\nEntry Layer \u2014 chips\nService Layer \u2014 columns\nReliability Layer \u2014 obs\nNow, I approach system design with a focus on trade-offs \ud83d\udcc8.\nWhen designing a system, consider the Entry Layer, Service Layer, Data Layer, and Reliability Layer \ud83d\udcca.\n\n\ud83d\udcac What's the most important system design principle you've learned from a failed project?"
   }
 ]

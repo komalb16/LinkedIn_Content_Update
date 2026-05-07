@@ -1189,5 +1189,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-07T14:22:27.187580",
+    "topic_id": "system-design",
+    "topic_name": "System Design Fundamentals",
+    "category": "Engineering",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 57,
+    "ab_variants": []
   }
 ]
