@@ -23,7 +23,6 @@ import re
 import io
 import json
 import base64
-import requests
 import zlib
 import requests
 from datetime import datetime
@@ -156,6 +155,25 @@ def fit_lines(text, max_chars, max_lines):
             last = (last[: max(0, max_chars - 3)] + "...") if max_chars > 3 else "..."
     lines[-1] = last
     return lines
+
+
+def _infer_image_extension(image_bytes, image_url=""):
+    header = image_bytes[:64].lstrip() if image_bytes else b""
+    if header.startswith(b"<svg") or header.startswith(b"<?xml") or b"<svg" in header.lower():
+        return ".svg"
+    if header.startswith(b"\x89PNG\r\n\x1a\n"):
+        return ".png"
+    if header[:3] == b"\xff\xd8\xff":
+        return ".jpg"
+    if header.startswith((b"GIF87a", b"GIF89a")):
+        return ".gif"
+    if header.startswith(b"RIFF") and b"WEBP" in header[:16]:
+        return ".webp"
+
+    guessed_from_url = os.path.splitext((image_url or "").split("?", 1)[0])[1].lower()
+    if guessed_from_url in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}:
+        return guessed_from_url
+    return ".img"
 
 
 def _animated_dot_path(path_d, dot_colors=("#2563EB", "#DC2626"), dot_radius=3.2, duration=3.2, begin=0.0):
@@ -4035,46 +4053,72 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                 if len(picked) >= 2: break
             extra_keywords = " ".join(picked)
 
-    # Source-priority mapping: a substring of the domain -> score
-    SOURCE_PRIORITY = {
-        "bytebytego.com":       5,
-        "blog.bytebytego":      4,
-        "algomaster.io":        5,
-        "designgurus.io":       5,
-        "designgurus.substack": 5,
-        "substack.com":         4,
-        "medium.com":           3,
-        "dev.to":               3,
-        "geeksforgeeks.org":    2,
-        "educba.com":           2,
-        "dzone.com":            2,
-        "martinfowler.com":     3,
-        "highscalability.com":  3,
+    APPROVED_SOURCES = {
+        "bytebytego.com": 5,
+        "blog.bytebytego.com": 5,
+        "algomaster.io": 5,
+        "designgurus.io": 5,
+        "designgurus.substack.com": 5,
+        "nikkisiapno.substack.com": 5,
+        "eugeneyan.com": 5,
+        "huyenchip.com": 5,
+        "learnbybuilding.ai": 4,
+        "promptingguide.ai": 4,
+        "cameronrwolfe.substack.com": 4,
+        "newsletter.pragmaticengineer.com": 4,
+        "llmops.space": 4,
+        "towardsdatascience.com": 4,
+        "levelup.gitconnected.com": 4,
+        "martinfowler.com": 4,
+        "highscalability.com": 4,
+        "newsletter.systemdesign.one": 4,
+        "systemdesign.one": 4,
+        "kavya.io": 4,
+        "architecture-weekly.com": 4,
+        "dev.to": 3,
+        "medium.com": 3,
+        "substack.com": 3,
+        "dzone.com": 3,
+        "wandb.ai": 3,
+        "neptune.ai": 3,
+        "mlops.community": 3,
+        "geeksforgeeks.org": 2,
+        "educba.com": 2,
+        "javatpoint.com": 2,
+        "docs.aws.amazon.com": 2,
+        "cloud.google.com": 2,
+        "learn.microsoft.com": 2,
+        "kubernetes.io": 2,
+        "docs.docker.com": 2,
+        "github.blog": 4,
+        "openai.com/research": 4,
+        "research.google": 4,
+        "ai.meta.com": 4,
+        "blog.langchain.dev": 4,
+        "blog.llamaindex.ai": 4,
+        "mlflow.org": 3,
+        "docs.ray.io": 3,
+        "huggingface.co/blog": 4,
+        "newsletter.ruder.io": 4,
+        "lilianweng.github.io": 5,
+        "colah.github.io": 5,
+        "lethain.com": 4,
+        "staffeng.com": 3,
+        "infoq.com": 3,
+        "architecturenotes.co": 4,
+        "blog.quastor.org": 4,
+        "tigerbeetle.com/blog": 3,
+        "brooker.co.za": 3,
+        "aws.amazon.com/blogs": 3,
+        "techblog.netflix.com": 4,
+        "engineering.fb.com": 4,
+        "engineering.linkedin.com": 4,
+        "eng.uber.com": 4,
+        "doordash.engineering": 3,
+        "shopify.engineering": 3,
+        "discord.com/blog": 3,
     }
-
-    # Domain blacklist: Exclude sites that host low-quality, generic, or
-    # non-technical images (slides, stock photos, presentations, illustrations).
-    DOMAIN_BLACKLIST = [
-    # Slide/template marketplaces
-    "slideteam.net", "sketchbubble.com", "powerpointify.com",
-    "slidesalad.com", "slideegg.com", "sketching.com",
-    "presentationgo.com", "slideshare.net", "slideserve.com",
-    "slideplayer.com", "slideplayer.info",
-    # Academic/university lecture slides (source of broken diagram bug)
-    ".edu/",
-    "academia.edu", "researchgate.net", "semanticscholar.org",
-    "ocw.mit.edu", "courses.cs",
-    # Stock photo / illustration sites
-    "shutterstock.com", "gettyimages.com", "dreamstime.com",
-    "123rf.com", "depositphotos.com", "istockphoto.com",
-    "unsplash.com", "pexels.com", "pixabay.com",
-    "freepik.com", "flaticon.com", "storyset.com",
-    "undraw.co", "artstation.com", "behance.net", "dribbble.com",
-    # Generic diagram/template sites
-    "canva.com", "smartdraw.com", "pinterest.com",
-    # Medium CDN (article headers, not diagrams)
-    "miro.medium.com", "cdn-images-1.medium.com",
-]
+    SOURCE_PRIORITY = APPROVED_SOURCES
 
     # --- Disambiguation Logic ---
     topic_lower = topic_name.lower()
@@ -4179,10 +4223,6 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
 
     SEARCH_QUERIES = (_ai_queries + _general_queries) if _ai_topic else _general_queries
 
-    # Also add Level Up Coding and Nikki Siapno to SOURCE_PRIORITY
-    SOURCE_PRIORITY["levelup.gitconnected.com"] = 5
-    SOURCE_PRIORITY["nikkisiapno.substack.com"] = 5
-
     def _priority(url: str) -> int:
         url_lower = url.lower()
         for domain, score in SOURCE_PRIORITY.items():
@@ -4203,6 +4243,10 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         except Exception:
             return []
 
+    def _is_approved(url: str) -> bool:
+        url_lower = url.lower()
+        return any(domain in url_lower for domain in APPROVED_SOURCES)
+
     # 1. Collect candidates from all queries
     candidates = []   # list of (url, priority)
     seen_urls = set()
@@ -4210,25 +4254,34 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
     for query in active_queries:
         log.info(f"Searching: {query}")
         for url, pri in _scrape_bing(query):
-            url_lower = url.lower()
-            if any(domain in url_lower for domain in DOMAIN_BLACKLIST):
-                log.info(f"Skipping blacklisted candidate: {url[:60]}...")
+            if not _is_approved(url):
                 continue
             if url not in seen_urls:
                 seen_urls.add(url)
                 candidates.append((url, pri))
+                log.info(f"Approved candidate: {url[:80]} (priority={pri})")
 
-    # 2. Reject URLs that look like lecture slides or presentations by filename/path pattern
-    def _looks_like_slide(url: str) -> bool:
-        u = url.lower()
-        slide_signals = [
-            "lecture", "/slides/", "slide_", "_slide", ".pptx", "ppt/",
-            "chapter", "lec-", "lec_", "module", "unit-", "unit_",
-            "week-", "week_", "tutorial", "failuremodes", "failure-modes",
+    if not candidates and not fast_mode:
+        log.warning("No whitelisted candidates from primary queries; running broader fallback queries")
+        fallback_queries = [
+            f"{topic_name} architecture diagram site:bytebytego.com OR site:algomaster.io OR site:designgurus.io",
+            f"{topic_name} system design site:eugeneyan.com OR site:huyenchip.com OR site:towardsdatascience.com",
+            f"{topic_name} engineering diagram site:medium.com OR site:dev.to OR site:substack.com",
+            f"{topic_name} technical diagram site:martinfowler.com OR site:highscalability.com",
         ]
-        return any(s in u for s in slide_signals)
+        for query in fallback_queries:
+            log.info(f"Fallback search: {query}")
+            for url, pri in _scrape_bing(query):
+                if not _is_approved(url):
+                    continue
+                if url not in seen_urls:
+                    seen_urls.add(url)
+                    candidates.append((url, pri))
+            if candidates:
+                log.info(f"Fallback search found {len(candidates)} candidates")
+                break
 
-    candidates = [(url, pri) for url, pri in candidates if not _looks_like_slide(url)]
+    log.info(f"Whitelisted candidates total: {len(candidates)}")
 
     # 3. Sort by priority descending (high-quality sources first), then try to download
     candidates.sort(key=lambda x: x[1], reverse=True)
@@ -4343,7 +4396,12 @@ class DiagramGenerator:
         # Use post-derived subject for image search if provided
         search_name = topic_name_override or topic_name
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
+        requested_output = svg_content.strip() if isinstance(svg_content, str) else ""
+        if requested_output:
+            requested_root, requested_ext = os.path.splitext(requested_output)
+            filename = (requested_root or requested_output) + ".svg"
+        else:
+            filename = f"{OUTPUT_DIR}/{topic_id}_{ts}.svg"
 
         # --- DYNAMIC INTERNET SEARCH (PRIMARY — runs for ALL topics) ---
         # Fetches real diagrams from elite sources: ByteByteGo, AlgoMaster, DesignGurus, etc.
@@ -4448,43 +4506,48 @@ class DiagramGenerator:
                 if not foot_font:
                     foot_font = foot_font_bold
 
-                # Precise vertical centering using textbbox
-                left_text = "KB  Curated by Komal Batra"
-                lb = draw2.textbbox((0, 0), left_text, font=foot_font_bold)
-                left_text_h = lb[3] - lb[1]
-                left_y = height + (footer_h - left_text_h) // 2
-
-                draw2.text(
-                    (int(width * 0.03), left_y),
-                    left_text,
-                    font=foot_font_bold,
+                author_name = os.environ.get("AUTHOR_NAME", "Komal Batra")
+                footer_text = f"© {author_name}"
+                tb = draw2.textbbox((0, 0), footer_text, font=foot_font_bold)
+                text_h = tb[3] - tb[1]
+                text_x = int(width * 0.03)
+                circle_r = text_h // 2 + 2
+                circle_cx = text_x + circle_r
+                circle_cy = height + footer_h // 2
+                draw2.ellipse(
+                    [circle_cx - circle_r, circle_cy - circle_r,
+                     circle_cx + circle_r, circle_cy + circle_r],
                     fill=(56, 189, 248),
                 )
-
-                try:
-                    from urllib.parse import urlparse
-                    source_domain = urlparse(img_source_url).netloc.replace("www.", "")
-                except Exception:
-                    source_domain = "internet"
-                source_text = f"Source: {source_domain}"
-                sb = draw2.textbbox((0, 0), source_text, font=foot_font)
-                source_text_w = sb[2] - sb[0]
-                source_text_h = sb[3] - sb[1]
-                source_y = height + (footer_h - source_text_h) // 2
+                copy_bb = draw2.textbbox((0, 0), "©", font=foot_font_bold)
+                copy_w = copy_bb[2] - copy_bb[0]
+                copy_h = copy_bb[3] - copy_bb[1]
                 draw2.text(
-                    (width - source_text_w - int(width * 0.03), source_y),
-                    source_text,
-                    font=foot_font,
-                    fill=(148, 163, 184),
+                    (circle_cx - copy_w // 2, circle_cy - copy_h // 2),
+                    "©",
+                    font=foot_font_bold,
+                    fill=(15, 23, 42),
+                )
+                name_x = circle_cx + circle_r + 8
+                name_bb = draw2.textbbox((0, 0), author_name, font=foot_font_bold)
+                name_h = name_bb[3] - name_bb[1]
+                draw2.text(
+                    (name_x, height + (footer_h - name_h) // 2),
+                    author_name,
+                    font=foot_font_bold,
+                    fill=(255, 255, 255),
                 )
 
                 footer_img.save(png_filename)
                 log.info(f"Internet diagram saved with attribution footer: {png_filename}")
                 return png_filename
             except Exception as e:
-                with open(png_filename, "wb") as f:
+                raw_ext = _infer_image_extension(img_bytes, img_source_url)
+                raw_filename = filename.replace(".svg", raw_ext)
+                with open(raw_filename, "wb") as f:
                     f.write(img_bytes)
-                return png_filename
+                log.warning(f"Saved raw internet image without PNG footer due to processing error: {e}")
+                return raw_filename
 
         log.warning("Internet image search returned nothing — falling back to local SVG generation.")
 
@@ -4511,10 +4574,9 @@ class DiagramGenerator:
             log.info(f"Using existing SVG diagram: {filename}")
             use_existing = True
         elif allow_reuse and os.path.exists(existing_png) and random.random() < 0.5:  # 50% chance to use existing PNG
-            # For PNG, copy and treat as SVG (will be converted later)
-            shutil.copy(existing_png, filename.replace('.svg', '.png'))
-            log.info(f"Using existing PNG diagram: {filename.replace('.svg', '.png')}")
-            # Note: This will be handled in linkedin_poster if needed
+            png_copy = filename.replace('.svg', '.png')
+            shutil.copy(existing_png, png_copy)
+            log.info(f"Using existing PNG diagram: {png_copy}")
             use_existing = True
             
         if not use_existing:
@@ -4614,6 +4676,10 @@ class DiagramGenerator:
             _save_diagram_memory(memory)
             _record_rotation(best_style, topic_id, topic_name, diagram_type)
         
+        if use_existing and filename.endswith(".svg") and not os.path.exists(filename):
+            png_filename = filename.replace(".svg", ".png")
+            if os.path.exists(png_filename):
+                return png_filename
         return filename
 
 

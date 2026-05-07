@@ -338,9 +338,9 @@ FORMAT_VARIATIONS = [
 
 # ─── LENGTH VARIATIONS ────────────────────────────────────────────────────────
 LENGTH_VARIATIONS = [
-    "Keep it tight: 150 to 200 words. Every sentence must earn its place.",
-    "Medium length: 220 to 280 words. Enough to teach, not enough to bore.",
-    "Full breakdown: 280 to 340 words. Go deep on the most interesting section.",
+    "200 to 220 words exactly. Every sentence earns its place. Cut anything that doesn't add.",
+    "220 to 250 words. Tight and complete. Teach one thing well, then stop.",
+    "200 to 240 words. Short paragraphs, white space, maximum punch per line.",
 ]
 
 # ─── VOICE CALIBRATION EXAMPLES ───────────────────────────────────────────────
@@ -1295,8 +1295,6 @@ def _cleanup_generated_post(text):
         text = "\n".join(ln for ln in new_lines if ln or not ln.isspace()).strip()
 
 
-    return text
-
     # Collapse accidental repeated title/header lines at the top.
     split_lines = text.splitlines()
     if len(split_lines) >= 2 and split_lines[0].strip() == split_lines[1].strip():
@@ -1380,6 +1378,39 @@ def _cleanup_generated_post(text):
         cleaned_lines.append(ln)
     text = "\n".join(cleaned_lines)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
+
+    MAX_WORDS = 280
+    _all_lines = text.splitlines()
+    _hash_start = len(_all_lines)
+    for _i in range(len(_all_lines) - 1, -1, -1):
+        if "#" in _all_lines[_i] or "ðŸ’¬" in _all_lines[_i]:
+            _hash_start = _i
+        elif _all_lines[_i].strip() == "" and _hash_start < len(_all_lines):
+            break
+    _body_lines = _all_lines[:_hash_start]
+    _tail_lines = _all_lines[_hash_start:]
+    _word_count = len(" ".join(_body_lines).split())
+    if _word_count > MAX_WORDS:
+        _hook = _body_lines[:2]
+        _middle = _body_lines[2:]
+        _budget = MAX_WORDS - len(" ".join(_hook).split()) - len(" ".join(_tail_lines).split())
+        _trimmed = []
+        _running = 0
+        for _ln in _middle:
+            _wc = len(_ln.split())
+            if _running + _wc > _budget:
+                break
+            _trimmed.append(_ln)
+            _running += _wc
+        text = "\n".join(_hook + _trimmed + [""] + _tail_lines).strip()
+        log.info(f"Post trimmed from {_word_count} to {len(text.split())} words")
+
+    _first_line = text.splitlines()[0] if text.splitlines() else ""
+    if len(_first_line) > 210:
+        log.warning(
+            f"Hook exceeds 210-char LinkedIn cutoff ({len(_first_line)} chars): "
+            f"{_first_line[:80]}..."
+        )
 
     return text
 
