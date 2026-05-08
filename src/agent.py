@@ -2377,6 +2377,28 @@ def _render_linkedin_text(post_text):
         # Remove inline code ticks
         text = re.sub(r"`([^`\n]+)`", r"\1", text)
 
+        # LinkedIn renders pipe tables as raw text, so flatten them into readable lines.
+        _raw = text.split("\n")
+        _out = []
+        _trows = []
+        for _line in _raw:
+            _s = _line.strip()
+            if _s.count("|") >= 2:
+                _cells = [c.strip() for c in _s.split("|") if c.strip()]
+                if len(_cells) >= 2:
+                    if all(set(c) <= set("-: ") for c in _cells):
+                        continue
+                    _trows.append(" -> ".join(_cells))
+                    continue
+            if _trows:
+                _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
+                _out.append("")
+                _trows = []
+            _out.append(_line)
+        if _trows:
+            _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
+        text = "\n".join(_out)
+
         # Restore visual block content (no surrounding backticks)
         for i, visual_content in enumerate(visual_blocks):
             placeholder = f"[VISUAL_BLOCK_{i}]"
