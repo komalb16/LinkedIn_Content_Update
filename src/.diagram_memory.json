@@ -432,5 +432,12 @@
     "style": 19,
     "signature": "8cfd3b5eb8541c1205ab750a8d7683f7",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-05-08T17:47:56.920020",
+    "topic_id": "trend-cloudflare-layoffs",
+    "style": 0,
+    "signature": "105b0e32adf332d158fafcce8f631f02",
+    "duplicate_avoided": true
   }
 ]

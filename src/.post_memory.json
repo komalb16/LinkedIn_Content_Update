@@ -404,5 +404,12 @@
     "topic_name": "System Design Fundamentals",
     "category": "topic",
     "text": "I used to think system design interviews were about recalling fancy architectures \ud83e\udd14.\n\nBut it turns out, building real systems requires a different mindset \ud83d\udca1.\n\nHere are key principles to master:\n\n3\ufe0f\u20e3 Load balancing is crucial\n\nEntry Layer \u2014 chips\nService Layer \u2014 columns\nReliability Layer \u2014 obs\nNow, I approach system design with a focus on trade-offs \ud83d\udcc8.\nWhen designing a system, consider the Entry Layer, Service Layer, Data Layer, and Reliability Layer \ud83d\udcca.\n\n\ud83d\udcac What's the most important system design principle you've learned from a failed project?"
+  },
+  {
+    "timestamp": "2026-05-08T17:47:56.926782",
+    "topic_id": "trend-cloudflare-layoffs",
+    "topic_name": "Rightsize Your Team",
+    "category": "topic",
+    "text": "\ud83d\udccc But reality is, load balancing and prioritizing critic\n\nI used to think downsizing engineering teams wouldn't affect productivity \ud83e\udd14.\n\nBut reality is, load balancing and prioritizing critical workflows are crucial \ud83d\udd0d.\n\nHere's what I know now:\n\nWhen restructuring, focus on load balancing and critical workflows \ud83d\udcc8.\n\nWhat's the most important aspect of company restructuring to you?\na) The Problem\nb) Core Concept\nc) How It Works\nd) Best Practices\ne) Common Mistakes\nf) Key Takeaway\n\n#EngineeringProductivity #CompanyRestructuring #LoadBalancing #WorkflowPrioritization #TeamManagement #ProductivityHacks \ud83d\ude80\ud83d\udcbb\ud83d\udcca"
   }
 ]
