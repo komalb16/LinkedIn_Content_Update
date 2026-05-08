@@ -439,5 +439,12 @@
     "style": 0,
     "signature": "105b0e32adf332d158fafcce8f631f02",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-05-08T17:49:11.772667",
+    "topic_id": "trend-staffing-cuts",
+    "style": 1,
+    "signature": "b0a1c7255831f8085e48f5eaa8ff7dc5",
+    "duplicate_avoided": true
   }
 ]
