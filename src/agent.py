@@ -3055,6 +3055,97 @@ def _clean_entity_name(name):
     return cleaned[:28]
 
 
+_GENERIC_VISUAL_PHRASES = {
+    "the problem",
+    "core concept",
+    "how it works",
+    "best practices",
+    "common mistakes",
+    "key takeaway",
+    "summary",
+    "introduction",
+    "hook",
+    "the fundamental idea",
+}
+
+
+def _normalize_visual_phrase(text):
+    cleaned = re.sub(r"[^\w\s]", " ", (text or "").lower())
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
+
+def _is_generic_visual_phrase(text):
+    normalized = _normalize_visual_phrase(text)
+    if not normalized:
+        return True
+    if normalized in _GENERIC_VISUAL_PHRASES:
+        return True
+    return any(
+        normalized == phrase
+        or normalized.startswith(phrase + " ")
+        or normalized.startswith(phrase + " is ")
+        or normalized.startswith(phrase + " are ")
+        for phrase in _GENERIC_VISUAL_PHRASES
+    )
+
+
+def _visual_topic_stub(topic_name):
+    words = re.findall(r"[A-Za-z0-9&.+/\-]+", topic_name or "")
+    return " ".join(words[:4]).strip() or "Engineering"
+
+
+def _sanitize_visual_title(title, fallback_title):
+    candidate = re.sub(r"\s+", " ", (title or "")).strip(" .:-")
+    if (
+        not candidate
+        or len(candidate) < 8
+        or _is_generic_visual_phrase(candidate)
+        or re.fullmatch(r"\d+[%\)]?", candidate)
+    ):
+        return (fallback_title or "Production Insight")[:54]
+    return candidate[:54]
+
+
+def _replacement_visual_label(label, topic_stub):
+    normalized = _normalize_visual_phrase(label)
+    replacements = {
+        "the problem": f"{topic_stub} context",
+        "core concept": f"{topic_stub} principle",
+        "how it works": f"{topic_stub} flow",
+        "best practices": f"{topic_stub} priorities",
+        "common mistakes": f"{topic_stub} risks",
+        "key takeaway": f"{topic_stub} outcome",
+        "the fundamental idea": f"{topic_stub} focus",
+        "summary": f"{topic_stub} summary",
+        "introduction": f"{topic_stub} overview",
+        "hook": f"{topic_stub} signal",
+    }
+    for phrase, replacement in replacements.items():
+        if normalized == phrase or normalized.startswith(phrase + " "):
+            return replacement[:42]
+    return ""
+
+
+def _sanitize_visual_structure(structure, topic_name):
+    if not isinstance(structure, dict):
+        return structure
+    cleaned = copy.deepcopy(structure)
+    topic_stub = _visual_topic_stub(topic_name)
+
+    for sec in cleaned.get("sections", []) or []:
+        label = re.sub(r"\s+", " ", str(sec.get("label", "")).strip())
+        if _is_generic_visual_phrase(label):
+            sec["label"] = _replacement_visual_label(label, topic_stub)
+
+    for row in cleaned.get("rows", []) or []:
+        label = re.sub(r"\s+", " ", str(row.get("label", "")).strip())
+        if _is_generic_visual_phrase(label):
+            row["label"] = _replacement_visual_label(label, topic_stub)
+
+    return cleaned
+
+
 def _extract_comparison_entities(post_text, fallback_entities=None):
     text = post_text or ""
     patterns = [
@@ -3094,11 +3185,6 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         "i'm", "i am", "here's", "the fact that", "this led me", "nobody talks",
         "our ", "today", "in today's", "let's", "three years ago",
     )
-    blocked_title_patterns = (
-        r"^(?:the problem|core concept|how it works|best practices|common mistakes|key takeaway|summary|introduction|hook)$",
-        r"^\d+$",
-        r"^\d+[%\)]?$",
-    )
     in_fence = False
     for raw_line in (post_text or "").splitlines():
         line = raw_line.strip()
@@ -3117,13 +3203,13 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
             continue
         if any(tok in line for tok in ("->", "-->", "|>", "[", "]", "{", "}")):
             continue
-        if any(re.match(pat, line.strip(), re.I) for pat in blocked_title_patterns):
+        if _is_generic_visual_phrase(line):
             continue
         if re.match(r"^[\d\s.:()%/-]+$", line):
             continue
         if len(line) >= 12:
-            return line[:54]
-    return fallback_title
+            return _sanitize_visual_title(line, fallback_title)
+    return _sanitize_visual_title(fallback_title, fallback_title)
 
 
 def _build_comparison_structure_from_post(post_text, title, fallback_entities=None):
@@ -3404,6 +3490,8 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
         diagram_structure = _build_comparison_structure_from_post(
             post_text, diagram_title, fallback_entities=fallback_entities
         )
+    diagram_title = _sanitize_visual_title(diagram_title, topic["name"])
+    diagram_structure = _sanitize_visual_structure(diagram_structure, diagram_title or topic["name"])
     return diagram_title, diagram_type, diagram_structure
 
 # ─── POST MODE ────────────────────────────────────────────────────────────────
