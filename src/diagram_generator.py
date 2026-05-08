@@ -4506,7 +4506,7 @@ class DiagramGenerator:
                 if not foot_font:
                     foot_font = foot_font_bold
 
-                author_name = os.environ.get("AUTHOR_NAME", "Komal Batra")
+                author_name = _COPYRIGHT_NAME
                 footer_text = f"© {author_name}"
                 tb = draw2.textbbox((0, 0), footer_text, font=foot_font_bold)
                 text_h = tb[3] - tb[1]

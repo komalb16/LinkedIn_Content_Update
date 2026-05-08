@@ -273,21 +273,6 @@ HOOK_STYLES = [
         "Then show how it looks now. Let the contrast do the work. "
         "No fluff — just the delta and why it matters for engineers today."
     ),
-    (
-        "Start with a specific number or ratio that reveals a gap: "
-        "'X% of teams do Y, but only Z% actually measure it.' "
-        "Then explain what measuring looks like and why it changes outcomes."
-    ),
-    (
-        "Open with a decision you watched a team get wrong repeatedly — not your team. "
-        "Describe the decision in one sentence. "
-        "Then walk through what the better decision looks like and why it is not obvious."
-    ),
-    (
-        "Start with one concrete tool, framework, or API that most engineers "
-        "underuse or misuse. Name it in the first sentence. "
-        "Then show the right mental model with a specific example."
-    ),
 ]
 
 # ─── TONE VARIATIONS ──────────────────────────────────────────────────────────
@@ -298,8 +283,6 @@ TONE_VARIATIONS = [
     "Staff engineer mentoring someone — patient, uses analogies, skips nothing important, zero condescension.",
     "Engineer who tried four approaches and finally found one that works — specific, quietly confident.",
     "The person at the conference who gives the best hallway talk — opinionated, concrete examples, no slides needed.",
-    "AI engineer who has shipped three RAG systems and learned what works — no hype, just the parts that actually matter in production.",
-    "Tech lead doing a Friday retrospective — honest about what broke, specific about what changes Monday, no blame.",
 ]
 
 # ─── FORMAT VARIATIONS ────────────────────────────────────────────────────────
@@ -337,6 +320,8 @@ FORMAT_VARIATIONS = [
 ]
 
 # ─── LENGTH VARIATIONS ────────────────────────────────────────────────────────
+# Target: 200-250 words. Research shows this is the viral sweet spot on LinkedIn.
+# Shorter than essays (which lose readers), longer than one-liners (which lack depth).
 LENGTH_VARIATIONS = [
     "200 to 220 words exactly. Every sentence earns its place. Cut anything that doesn't add.",
     "220 to 250 words. Tight and complete. Teach one thing well, then stop.",
@@ -414,28 +399,56 @@ Optimise the platform when platform is the bottleneck.
 #Kubernetes #DevOps #PlatformEngineering #CloudNative #SoftwareArchitecture""",
 
     """\
-RAG without evaluation is just vibes-based AI.
+Your embedding model is not the bottleneck.
 
-I see teams ship RAG systems that "feel good" in demos.
-Six weeks later: hallucinations in production, users losing trust, leadership asking questions.
+Your chunking strategy is.
 
-The problem is not the retrieval. It's that nobody measured it.
+I see teams swap out ada-002 for text-embedding-3-large and wonder why recall barely moves.
+The model contributes maybe 15% of retrieval quality.
+Chunk size, overlap, and metadata filtering contribute the rest.
 
-Here's the evaluation stack that actually matters:
+What actually moves the needle:
 
-Context Precision — are the retrieved chunks relevant to the query?
-Context Recall — did we miss important chunks?
-Answer Groundedness — is every claim in the answer supported by the context?
-Answer Relevance — does the answer actually address what was asked?
+Chunk at semantic boundaries, not at fixed token counts.
+Overlap by 20% so context doesn't break mid-thought.
+Store metadata (source, date, section) and filter before you retrieve.
+Rerank after retrieval — a cross-encoder fixes what cosine similarity misses.
 
-Tools that make this concrete: RAGAS, TruLens, DeepEval.
+I've seen a 40% improvement in answer relevance just from fixing chunking.
+Zero model changes.
+
+The expensive part of RAG is not the embedding.
+It's the three weeks you spend chasing the wrong variable.
+
+💬 What's your chunking strategy — fixed tokens, semantic, or something else? What moved your numbers most?
+
+#RAG #LLM #AIEngineering #VectorSearch #GenerativeAI""",
+
+    """\
+3 of the last 5 AI projects I reviewed failed at the same step.
+
+Not the model. Not the data pipeline. Evaluation.
+
+They shipped with vibes-based testing: "it feels right in the demo."
+Six weeks later: hallucinations in production, users losing trust, a post-mortem.
+
+The eval stack that would have caught it:
+
+Context Precision — are retrieved chunks actually relevant?
+Answer Groundedness — is every claim supported by retrieved context?
+Answer Relevance — does the output address what was asked?
+
+Tools: RAGAS for automated metrics. DeepEval for regression testing.
 Set baselines before you ship. Run evals on every config change.
+
+One team I worked with cut hallucination rate by 60% in two weeks.
+They didn't change the model. They added measurement.
 
 "It worked in the demo" is not a metric.
 
-💬 What's your RAG evaluation setup? Flying blind or fully instrumented?
+💬 What's your RAG eval setup — RAGAS, DeepEval, TruLens, or something homegrown?
 
-#RAG #LLM #AIEngineering #GenerativeAI #MLOps #Evaluation""",
+#RAG #LLMOps #AIEngineering #GenerativeAI #MLOps""",
 ]
 
 
@@ -455,37 +468,55 @@ Study this example. Match its energy, rhythm, and specificity exactly:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 WHY THAT EXAMPLE WORKS — internalize this before writing:
-- The hook is a specific claim or moment, never a generic statement
-- Sentences are short. Some are one line. Paragraph breaks create rhythm.
+- The hook is a specific claim or moment, never a generic statement — it fits in 210 characters
+- Sentences are short. Some are one line. Paragraph breaks create rhythm and dwell time.
 - Every section names ONE concrete thing: a tool, a metric, a pattern, a number
 - There is a real opinion — not "it depends" or "both have merits"
-- The question at the end is genuine, something the writer actually wants to know
+- The closing question forces a specific answer — not just a thumbs up. Comments beat likes 15:1.
 - It sounds like a person wrote it at a desk, not a template engine
+- Total length: 200-250 words. Not an essay. Not a tweet. A punchy technical take.
 
 HARD RULES — no exceptions:
 - Use "I" and "you" freely — first person is encouraged
 - Never start two consecutive sentences with the same word
-- No filler openers: "In today's...", "As we navigate...", "It's no secret..."
-- No banned words: robust, crucial, delve, landscape, testament, realm, \
-ever-evolving, foster, tapestry, seamless, synergy, paradigm, unprecedented, \
-game-changer, leverage, revolutionize, supercharge, holistic, transformative, \
-groundbreaking, cutting-edge, innovative, harness, unleash, empower, elevate, \
-reimagine, reshape, redefine, spearhead, unlock potential, thought leader
-- Always lead with a punchy hook.
-- Ensure technical depth: name specific tools, metrics (e.g. 500ms, 10k QPS), or trade-offs.
-- ALWAYS end with 💬 + a genuine question + blank line + 5 to 7 hashtags
-- Include exactly ONE fenced visual block that matches the planned diagram type
-- If planned type is "Comparison Table", use a simple `left -> right` format
-- For non-comparison topics, avoid forcing vendor-vs-vendor comparisons
+- No filler openers: "In today's...", "As we navigate...", "It's no secret...", "It's no surprise..."
+- No banned words: robust, crucial, delve, landscape, testament, realm, ever-evolving, foster, tapestry, seamless, synergy, paradigm, unprecedented, game-changer, leverage, revolutionize, supercharge, holistic, transformative, groundbreaking, cutting-edge, innovative, harness, unleash, empower, elevate, reimagine, reshape, redefine, spearhead, unlock potential, thought leader
+
+HOOK ENGINEERING (the hook is 70% of the post's reach):
+- The FIRST LINE must fit in 210 characters — this is what appears before LinkedIn's "See more" cutoff
+- Line 1 must do ONE of: state a surprising specific number, make a contrarian claim, name a concrete failure, or open mid-scene
+- GOOD: "We deleted 40,000 lines of our RAG pipeline last quarter. Retrieval got better."
+- GOOD: "Your embedding model is not the bottleneck. Your chunking strategy is."
+- GOOD: "3 of the last 5 AI projects I reviewed failed at the same step — evaluation."
+- BAD: "AI is changing everything." / "Here's what I learned about LLMs." / "RAG is important."
+- Line 2 must deepen the curiosity gap so readers click "See more"
+- NEVER warm up — the first word must be the sharpest
+
+DWELL TIME (LinkedIn rewards posts readers spend 15+ seconds on):
+- Use deliberate single-sentence line breaks to create micro-pauses
+- Vary rhythm: one-liner → 2-sentence paragraph → one-liner
+- Each section should reveal something the reader didn't know before
+
+COMMENT-FORCING CTA (comments weighted 15x more than likes by the algorithm):
+- The closing 💬 question must require a specific substantive answer
+- GOOD: "What's your retrieval layer — pure vector, hybrid, or graph? And what broke first?"
+- GOOD: "Which eval framework in production — RAGAS, DeepEval, or homegrown?"
+- BAD: "What do you think?" / "Have you tried this?" / "Thoughts?"
+- The question must make engineers want to share their specific stack or war story
+
+FORMATTING:
+- Ensure technical depth: name specific tools, metrics (e.g. 500ms, 10k QPS), or trade-offs
+- ALWAYS end with 💬 + specific question + blank line + 5 to 7 hashtags
+- Include exactly ONE fenced visual block matching the planned diagram type
+- If planned type is "Comparison Table", use simple `left -> right` format
 - Do NOT add copyright, signature, author name, or current month/year
-- CRITICAL: No structural placeholders like "(Option A)" or "[Step 1]" in your final output.
-- PERSONAL ACCURACY: Do NOT invent personal life events or family details (e.g., becoming a parent, weddings, moving house, personal childhood memories) unless they are explicitly provided in the topic prompt. Keep the professional 'Staff Engineer' persona grounded strictly in the provided content.
-- NEGATIVE CONSTRAINT: Never output generic structural labels like "The Problem", "Core Concept", "How It Works", or "Key Takeaway" as standalone headers or narrative transitions. Just dive into the technical insight directly. Avoid saying "The problem is" or "The core concept is" - be more specific and authoritative.
-- ZERO TOLERANCE: Never use ASCII art, box-drawing characters (┌, ┐, └, ┘, │, ─), or manual table boundaries (+---+) in the post text. If you need a comparison, use a simple 'Left -> Right' text format.
-- ABSOLUTE BAN: Never use pipe characters (|) anywhere in the post body. LinkedIn does not render markdown tables — they appear as broken plain text. Use numbered lists or prose instead.
-- ABSOLUTE BAN: Never fabricate a "recent Slack message", "DM I received", "tweet I saw", or any invented social media conversation as a hook. Use general observations or questions instead.
-- ABSOLUTE BAN: Never repeat the same sentence structure more than twice in a row (e.g. "Most people X — Production systems actually Y"). Vary your structure.
-- CONTENT ACCURACY: Write exactly about the topic given. Do not rename it, invent a different topic, or drift into adjacent topics not specified.
+- CRITICAL: No structural placeholders like "(Option A)" or "[Step 1]" in final output
+- PERSONAL ACCURACY: Do NOT invent personal life events or family details unless explicitly provided
+- NEGATIVE CONSTRAINT: Never use generic headers like "The Problem", "Core Concept", "How It Works", or "Key Takeaway" — dive directly into the technical insight
+- ZERO TOLERANCE: Never use ASCII art, box-drawing chars (┌┐└┘│─), pipe tables (|), or +---+ boundaries
+- ABSOLUTE BAN: Never fabricate a "recent Slack message", "DM I received", or invented social quote as hook
+- ABSOLUTE BAN: Never repeat the same sentence structure more than twice in a row
+- CONTENT ACCURACY: Write exactly about the given topic — do not rename it or drift to adjacent topics
 """
 
 
@@ -497,21 +528,21 @@ You are Komal Batra — a Staff Engineer reacting to breaking tech news on Linke
 You have opinions. You pick a side. You back it with specifics.
 
 RULES:
-- Lead with your honest reaction, not a summary of the news
+- The FIRST LINE is your reaction — not a summary. Must be under 210 characters (before "See more")
+- It must create immediate tension or curiosity: a strong claim, a number, a contradiction
 - Use "I" freely — this is a personal take, not a press release
 - One strong opinion, defended with specifics — not a both-sides take
-- Include one ``` fenced visual block with 3-5 lines max. No ASCII art or visual arrows inside or outside the block.
-- End with 💬 + a sharp question + 5 to 7 hashtags.
-- 180 to 260 words — reactions should be tight.
-- No banned words: robust, crucial, delve, landscape, seamless, synergy,
-  paradigm, unprecedented, game-changer, revolutionize, supercharge,
-  thrilled, excited, disruptor, democratize.
+- Include one ``` fenced visual block with 3-5 lines max. No ASCII art or pipes.
+- End with 💬 + a question specific enough that engineers share their actual stack or experience
+- 180 to 220 words — tight. Every line must earn its place.
+- No banned words: robust, crucial, delve, landscape, seamless, synergy, paradigm,
+  unprecedented, game-changer, revolutionize, supercharge, thrilled, excited,
+  disruptor, democratize, cutting-edge, groundbreaking, innovative.
+- ABSOLUTE BAN: Never use pipe characters (|) to create tables.
+- ABSOLUTE BAN: Never fabricate a "recent Slack message" or invented quote as your hook.
 - CRITICAL: No structural placeholders like "[Option A]" or "(Step 1)".
 - Never mention the current month or year.
 - Do NOT add copyright or signature.
-- ZERO TOLERANCE: Never use ASCII art or box-drawing characters (+---+ or |---|) in the text.
-- ABSOLUTE BAN: Never use pipe characters (|) to create tables. LinkedIn does not render markdown.
-- ABSOLUTE BAN: Never fabricate a "recent Slack message", "DM", or invented quote as your hook.
 """
 
 STORY_THEMES = [
@@ -580,7 +611,9 @@ REQUIRED STRUCTURE — follow this exactly:
 
 6. 💬 + specific question + 4-7 hashtags.
 
-FORMAT: 160-220 words. One ``` fenced block showing 3-5 action steps.
+FORMAT: 180-220 words. One ``` fenced block showing 3-5 action steps.
+The first line must be under 210 characters and hook immediately — a specific scene, not a belief.
+The closing question must be specific enough that readers share their own stack or experience.
 Do NOT mention the current month or year.
 """
 
@@ -1173,10 +1206,6 @@ Requirements:
 - The hook must be the very first line — no warming up, no preamble
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
-- For AI/LLM/RAG/Agent topics: name the specific architectural decision or trade-off, not just the concept. "Use RAG" is weak. "Use RAG when your data changes faster than you can fine-tune" is strong.
-- For AI topics: include at least one concrete failure mode or anti-pattern — what breaks and why.
-- The closing question must invite a genuine opinion — make it specific enough that readers have an actual answer, not just "what do you think?"
-- Hashtags must be specific to the post content — never use generic tags like #Technology or #Innovation alone.
 """
     try:
         post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
@@ -1295,6 +1324,8 @@ def _cleanup_generated_post(text):
         text = "\n".join(ln for ln in new_lines if ln or not ln.isspace()).strip()
 
 
+    return text
+
     # Collapse accidental repeated title/header lines at the top.
     split_lines = text.splitlines()
     if len(split_lines) >= 2 and split_lines[0].strip() == split_lines[1].strip():
@@ -1379,11 +1410,16 @@ def _cleanup_generated_post(text):
     text = "\n".join(cleaned_lines)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
 
+    # ── Word count enforcer ───────────────────────────────────────────────────
+    # If the post exceeds 280 words (our 250-word target + 12% buffer),
+    # trim the body while preserving the hook (first 2 lines) and the
+    # hashtag/CTA block at the end. This is a last-resort backstop.
     MAX_WORDS = 280
     _all_lines = text.splitlines()
+    # Locate hashtag block start (last paragraph containing #tags)
     _hash_start = len(_all_lines)
     for _i in range(len(_all_lines) - 1, -1, -1):
-        if "#" in _all_lines[_i] or "ðŸ’¬" in _all_lines[_i]:
+        if "#" in _all_lines[_i] or "💬" in _all_lines[_i]:
             _hash_start = _i
         elif _all_lines[_i].strip() == "" and _hash_start < len(_all_lines):
             break
@@ -1391,6 +1427,7 @@ def _cleanup_generated_post(text):
     _tail_lines = _all_lines[_hash_start:]
     _word_count = len(" ".join(_body_lines).split())
     if _word_count > MAX_WORDS:
+        # Keep first 2 lines (hook) and trim body from the middle
         _hook = _body_lines[:2]
         _middle = _body_lines[2:]
         _budget = MAX_WORDS - len(" ".join(_hook).split()) - len(" ".join(_tail_lines).split())
@@ -1403,8 +1440,10 @@ def _cleanup_generated_post(text):
             _trimmed.append(_ln)
             _running += _wc
         text = "\n".join(_hook + _trimmed + [""] + _tail_lines).strip()
-        log.info(f"Post trimmed from {_word_count} to {len(text.split())} words")
+        log.info(f"Post trimmed from {_word_count} → {len(text.split())} words")
 
+    # ── Hook length check ─────────────────────────────────────────────────────
+    # Warn if the first line exceeds 210 chars (LinkedIn "See more" cutoff)
     _first_line = text.splitlines()[0] if text.splitlines() else ""
     if len(_first_line) > 210:
         log.warning(
@@ -2337,30 +2376,6 @@ def _render_linkedin_text(post_text):
 
         # Remove inline code ticks
         text = re.sub(r"`([^`\n]+)`", r"\1", text)
-
-        # ── Strip markdown pipe tables ─────────────────────────────────────────
-        # LinkedIn renders | as plain text — tables look broken.
-        # Convert pipe-table rows to numbered list items.
-        _raw = text.split("\n")
-        _out = []
-        _trows = []
-        for _line in _raw:
-            _s = _line.strip()
-            if _s.count("|") >= 2:
-                _cells = [c.strip() for c in _s.split("|") if c.strip()]
-                if len(_cells) >= 2:
-                    if all(set(c) <= set("-: ") for c in _cells):
-                        continue
-                    _trows.append(" → ".join(_cells))
-                    continue
-            if _trows:
-                _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
-                _out.append("")
-                _trows = []
-            _out.append(_line)
-        if _trows:
-            _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
-        text = "\n".join(_out)
 
         # Restore visual block content (no surrounding backticks)
         for i, visual_content in enumerate(visual_blocks):
