@@ -425,5 +425,12 @@
     "topic_name": "Docker Mastery",
     "category": "topic",
     "text": "\ud83d\udccc Docker Mastery\n\nNobody talks about the 20% of Docker knowledge that covers 80% of daily use \ud83e\udd14.\n\nMost engineers use Docker without understanding its internals \u2014 they just know it works \ud83d\udce6.\n\u2014\nI was wrong to assume that multi-stage builds were a nicety, not a necessity \ud83d\udea8.\n\nDocker Client \u2014 sends API requests\nDocker Host \u2014 builds layers, caches images\nDocker Hub \u2014 registry for sharing\nMost people only know how to push images to Docker Hub \ud83d\udcc8.\nBut understanding the Docker Client, Host, and Hub is key to optimizing your workflow \ud83d\ude80.\n\n\ud83d\udcac What's your primary Docker interaction \u2014 Client, Host, or Hub?\n\n#Docker #Containerization #ScaleEngineering #CloudComputing #Security"
+  },
+  {
+    "timestamp": "2026-05-09T15:57:01.918362",
+    "topic_id": "llm-architecture",
+    "topic_name": "LLM Architecture",
+    "category": "topic",
+    "text": "\ud83d\udccc LLM Architecture\n\nI was wrong about Large Language Models - I thought the magic happened in the training data, but it's actually the internal architecture that makes them tick \ud83e\udd16.\n\nThe transformer architecture is the backbone of LLMs, with its attention mechanisms and feed-forward layers working together to generate human-like text \ud83d\udcac.\n\nI've come to realize that understanding these components is crucial for building on top of LLMs \ud83d\udcda. The attention mechanism, in particular, allows the model to focus on specific parts of the input sequence and weigh their importance \u2696\ufe0f.\n\nSo, what's the most important component of an LLM's internal architecture?\n\n\ud83d\udcac Which one do you think is key: Tokenisation, Embedding, Attention, Feed-Forward, or Output Layer?\n\n#LLM #Transformer #AttentionMechanism #NLP #AIEngineering \ud83d\ude80\ud83d\udcbb\ud83d\udd0d"
   }
 ]

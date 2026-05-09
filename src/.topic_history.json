@@ -1209,5 +1209,15 @@
     "status": "success",
     "quality_score": 71,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-05-09T15:57:01.919358",
+    "topic_id": "llm-architecture",
+    "topic_name": "LLM Architecture",
+    "category": "AI",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 73,
+    "ab_variants": []
   }
 ]

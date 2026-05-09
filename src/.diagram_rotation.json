@@ -1,10 +1,7 @@
-[
-  {
-    "timestamp": "2026-05-09T13:45:17.640672",
-    "style_idx": 15,
-    "style_name": "Vertical Timeline",
-    "topic_id": "docker-cheatsheet",
-    "topic_name": "Most engineers use Docker without understanding its in",
-    "diagram_type": "Flow Chart"
-  }
-]
+{
+  "rotation_index": 17,
+  "style_history": [
+    15,
+    17
+  ]
+}
