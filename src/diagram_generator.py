@@ -4283,7 +4283,22 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
 
     log.info(f"Whitelisted candidates total: {len(candidates)}")
 
-    # 3. Sort by priority descending (high-quality sources first), then try to download
+    # 3. Reject URLs matching lecture-slide or stock-photo patterns
+    def _bad_url(url: str) -> bool:
+        u = url.lower()
+        bad = [
+            "lecture", "/slides/", "slide_", "_slide", ".pptx", "ppt/",
+            "chapter", "lec-", "lec_", "module", "unit-", "unit_",
+            "week-", "week_", "tutorial", "failuremodes", "failure-modes",
+            "/photo/", "/photos/", "stock-photo", "stock_photo",
+            "-portrait", "-headshot", "-person-", "-woman-", "-man-",
+            "cdn-website.com",
+        ]
+        return any(s in u for s in bad)
+
+    candidates = [(url, pri) for url, pri in candidates if not _bad_url(url)]
+
+    # 4. Sort by priority descending (high-quality sources first), then try to download
     candidates.sort(key=lambda x: x[1], reverse=True)
     log.info(f"Gathered {len(candidates)} image candidates across all platforms.")
 
@@ -4298,8 +4313,8 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         matches = sum(1 for kw in topic_keywords if kw in url_lower)
         return min(matches, 3)
 
-    # 3. Download candidates; score = (relevance * 100 + source_priority, size)
-    #    This ENSURES that a relevant diagram from a general site (score 101+) 
+    # 4. Download candidates; score = (relevance * 100 + source_priority, size)
+    #    This ENSURES that a relevant diagram from a general site (score 101+)
     #    always beats an irrelevant ByteByteGo poster (score 5).
     best_bytes = None
     best_url = ""
@@ -4317,7 +4332,25 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                 size = len(img_r.content)
                 if size < 12_000:
                     continue  # Skip tiny icons
-                
+
+                # --- Person/Photo Rejection ---
+                # Reject images with high skin-tone pixel ratio (photos of people)
+                try:
+                    _ph = Image.open(io.BytesIO(img_r.content)).convert("RGB")
+                    _ph.thumbnail((80, 80))
+                    _px = list(_ph.getdata())
+                    _skin = sum(
+                        1 for r, g, b in _px
+                        if r > 80 and g > 50 and b > 30
+                        and r > g > b and r - b > 20
+                        and r < 240 and g < 200
+                    )
+                    if _skin / max(len(_px), 1) > 0.22:
+                        log.info(f"Rejecting person photo (skin={_skin/len(_px):.2f}): {img_url[:60]}")
+                        continue
+                except Exception:
+                    pass
+
                 # --- Complexity Filter ---
                 # Check color variance to avoid flat icons (like the red castle issue)
                 try:

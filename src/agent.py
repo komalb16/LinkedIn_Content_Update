@@ -1142,7 +1142,13 @@ def generate_topic_post(topic, structure=None, diagram_type="", dry_run=False):
     hook   = random.choice(HOOK_STYLES)
     tone   = random.choice(TONE_VARIATIONS)
     fmt    = random.choice(FORMAT_VARIATIONS)
-    length = random.choice(LENGTH_VARIATIONS)
+    n_sections = len((structure or {}).get("sections") or (structure or {}).get("rows") or [])
+    if n_sections >= 6:
+        length = "250 to 300 words. The diagram has many sections — cover each one concisely but completely."
+    elif n_sections >= 4:
+        length = "220 to 270 words. Cover each diagram section with at least one concrete sentence."
+    else:
+        length = random.choice(LENGTH_VARIATIONS)
     template_instruction = _build_post_template_instructions(diagram_type, structure)
 
     if structure and structure.get("sections"):
@@ -1153,10 +1159,19 @@ def generate_topic_post(topic, structure=None, diagram_type="", dry_run=False):
             for s in sections
         )
         structure_block = f"""
-The diagram has exactly {n} sections — cover them in this order:
+DIAGRAM CONTENT — your post MUST walk through every section below.
+The reader sees this exact diagram next to your post.
+Every section must be mentioned and briefly explained.
+
+The diagram has {n} sections:
 {section_list}
 
-Match each label word-for-word. End with a poll listing all {n} options."""
+REQUIREMENTS:
+- Dedicate 1-2 sentences to EACH section — explain what it means and why it matters
+- Use the exact section label names so post and diagram reinforce each other
+- DO NOT just list section names — explain each one with a concrete insight
+- The post should feel like a guided walkthrough of the diagram
+- End with 💬 + a specific comment-forcing question (not a poll)"""
     elif structure and structure.get("rows"):
         rows = structure["rows"]
         n = len(rows)
@@ -1165,10 +1180,15 @@ Match each label word-for-word. End with a poll listing all {n} options."""
             for idx, row in enumerate(rows)
         )
         structure_block = f"""
-The diagram has exactly {n} rows — cover them in this order:
+DIAGRAM CONTENT — your post MUST reference every row below.
+The reader sees this diagram next to your post — make them complement each other.
+
+The diagram has {n} rows:
 {row_list}
 
-Match the row labels closely so the text and image stay coherent."""
+REQUIREMENTS:
+- Reference each row label explicitly and explain WHY it matters
+- The post should feel like a guided walkthrough of the diagram"""
     else:
         structure_block = ""
 
@@ -2399,10 +2419,12 @@ def _render_linkedin_text(post_text):
             _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
         text = "\n".join(_out)
 
-        # Restore visual block content (no surrounding backticks)
-        for i, visual_content in enumerate(visual_blocks):
+        # Remove visual block placeholders from post text entirely.
+        # Visual block content = diagram metadata (component labels) — must NOT
+        # appear in the post body (causes "Entry Layer — chips" style leakage).
+        for i in range(len(visual_blocks)):
             placeholder = f"[VISUAL_BLOCK_{i}]"
-            text = text.replace(placeholder, visual_content)
+            text = text.replace(placeholder, "")
 
         text = re.sub(r"\n{3,}", "\n\n", text).strip()
         return text
@@ -3208,7 +3230,10 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         if re.match(r"^[\d\s.:()%/-]+$", line):
             continue
         if len(line) >= 12:
-            return _sanitize_visual_title(line, fallback_title)
+            # Do NOT use the post hook as diagram title — produces truncated
+            # titles like "80% of teams attempt to integrate voice AI, but only 2".
+            # Fall through to fallback_title (the topic name) instead.
+            break
     return _sanitize_visual_title(fallback_title, fallback_title)
 
 
@@ -4180,6 +4205,47 @@ Write a LinkedIn post that:
         log.warning(msg + " Continuing due to dry-run or non-strict mode.")
 
     log.info("Diagram saved: " + diagram_path)
+
+    # ── DIAGRAM-AWARE POST ALIGNMENT PASS ────────────────────────────────────
+    # After diagram is generated, verify the post covers its key sections.
+    # If less than 50% of sections are mentioned, rewrite to align them.
+    try:
+        _dsections = []
+        if diagram_structure_with_style.get("sections"):
+            _dsections = [s.get("label","") for s in diagram_structure_with_style["sections"] if s.get("label")]
+        elif diagram_structure_with_style.get("rows"):
+            _dsections = [r.get("label","") for r in diagram_structure_with_style["rows"] if r.get("label")]
+        if _dsections and len(_dsections) >= 3:
+            _mentioned = sum(1 for s in _dsections if s.lower() in post_text.lower())
+            _cov = _mentioned / len(_dsections)
+            log.info(f"Diagram coverage: {_mentioned}/{len(_dsections)} sections ({_cov:.0%})")
+            if _cov < 0.5:
+                log.warning(f"Low diagram coverage ({_cov:.0%}) — running alignment pass")
+                _slist = "\n".join(f"  - {s}" for s in _dsections)
+                _tmin = max(220, len(_dsections)*35)
+                _tmax = max(280, len(_dsections)*45)
+                _ap = f"""This post appears next to a diagram with these sections:
+{_slist}
+
+Only {_mentioned}/{len(_dsections)} sections mentioned. Rewrite so every section is covered:
+- Keep the hook (first 2 lines) and hashtags unchanged
+- Add 1-2 sentences per section explaining what it means and why it matters
+- Use the exact section names so post and diagram reinforce each other
+- Target {_tmin}–{_tmax} words
+
+Current post:
+{post_text}"""
+                try:
+                    _al = _cleanup_generated_post(call_ai(_ap, _build_post_system()))
+                    if _al and len(_al) > 100:
+                        _new = sum(1 for s in _dsections if s.lower() in _al.lower())
+                        if _new > _mentioned:
+                            log.info(f"Alignment: {_mentioned}→{_new}/{len(_dsections)} sections")
+                            post_text = _al
+                except Exception as _ae:
+                    log.warning(f"Alignment pass failed (non-fatal): {_ae}")
+    except Exception as _e:
+        log.warning(f"Diagram alignment check failed (non-fatal): {_e}")
 
     if dry_run:
         title_line = f"📌 {diagram_title}\n\n"
