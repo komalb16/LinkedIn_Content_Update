@@ -2470,12 +2470,10 @@ def _render_linkedin_text(post_text):
             _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
         text = "\n".join(_out)
 
-        # Remove visual block placeholders from post text entirely.
-        # Visual block content = diagram metadata (component labels) — must NOT
-        # appear in the post body (causes "Entry Layer — chips" style leakage).
+        # Restore visual block content (code blocks without backticks) to preserve the content.
         for i in range(len(visual_blocks)):
             placeholder = f"[VISUAL_BLOCK_{i}]"
-            text = text.replace(placeholder, "")
+            text = text.replace(placeholder, visual_blocks[i])
 
         text = re.sub(r"\n{3,}", "\n\n", text).strip()
         return text
