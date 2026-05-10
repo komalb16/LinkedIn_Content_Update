@@ -6,5 +6,13 @@
     "topic_id": "trend-local-ai-norm",
     "topic_name": "Centralized AI architecture vs Cloud",
     "diagram_type": "Comparison Table"
+  },
+  {
+    "timestamp": "2026-05-10T21:52:40.079096",
+    "style_idx": 23,
+    "style_name": "Info-Frame Card",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "From Architecture",
+    "diagram_type": "Viral Poster"
   }
 ]

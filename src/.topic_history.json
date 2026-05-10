@@ -1244,5 +1244,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-10T21:52:45.775238",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 62,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 62,
+        "raw_score": 62,
+        "similarity": 0.0615,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 49,
+        "raw_score": 49,
+        "similarity": 0.0959,
+        "penalty": 0
+      }
+    ]
   }
 ]
