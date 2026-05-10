@@ -1219,5 +1219,30 @@
     "status": "success",
     "quality_score": 73,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-05-10T20:53:43.760903",
+    "topic_id": "trend-chatgpt-pro",
+    "topic_name": "ChatGPT Pro Lessons",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0511,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 72,
+        "raw_score": 72,
+        "similarity": 0.0294,
+        "penalty": 0
+      }
+    ]
   }
 ]
