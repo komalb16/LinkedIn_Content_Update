@@ -1,10 +1,10 @@
 [
   {
-    "timestamp": "2026-05-10T21:19:59.645261",
+    "timestamp": "2026-05-10T21:21:08.253854",
     "style_idx": 0,
     "style_name": "Vertical Flow",
-    "topic_id": "trend-ai-deployment-strategies",
-    "topic_name": "Local AI Adoption",
-    "diagram_type": "Modern Cards"
+    "topic_id": "trend-local-ai-norm",
+    "topic_name": "Centralized AI architecture vs Cloud",
+    "diagram_type": "Comparison Table"
   }
 ]

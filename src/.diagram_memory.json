@@ -481,5 +481,12 @@
     "style": 0,
     "signature": "47531f159686b4b993acdccf8a636e7b",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-05-10T21:21:08.250464",
+    "topic_id": "trend-local-ai-norm",
+    "style": 0,
+    "signature": "986df4337093fc8e72e77f5b8548a7b5",
+    "duplicate_avoided": true
   }
 ]
