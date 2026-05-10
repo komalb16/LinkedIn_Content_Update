@@ -848,9 +848,20 @@ def generate_news_post(news_type="ai"):
 
     log.info("Fetched " + str(len(articles)) + " news articles")
 
-    hook   = random.choice(HOOK_STYLES)
-    tone   = random.choice(TONE_VARIATIONS)
+    hook = random.choice(HOOK_STYLES)
+    tone = random.choice(TONE_VARIATIONS)
     length = random.choice(LENGTH_VARIATIONS)
+    selected_titles = [a.get("title", "") for a in articles[:3] if a.get("title")]
+
+    anchor_terms = []
+    for title in selected_titles:
+        for token in re.findall(r"\b[A-Z][A-Za-z0-9.\-]{2,}\b", title):
+            if token.lower() not in {"the", "and", "with", "from", "into"} and token not in anchor_terms:
+                anchor_terms.append(token)
+            if len(anchor_terms) >= 8:
+                break
+        if len(anchor_terms) >= 8:
+            break
 
     prompt = f"""Latest {news_type} tech news:
 {news_text}
@@ -859,14 +870,54 @@ Story archetype (hook): {hook}
 Voice: {tone}
 Length: {length}
 
-Pick the most technically interesting story. Write a LinkedIn post that:
+Pick the single most technically interesting story. Write a LinkedIn post that:
 - Starts with your personal reaction — not a neutral summary
-- Mentions the actual company, product, or number from the news
+- Mentions the actual company, product, model, or number from the chosen story
 - Includes one ``` fenced visual block that supports the argument
 - Takes a real position — not "time will tell"
+- Focuses on ONE article only; do not blend multiple stories together
+- Names the company, product, or model in the first 2 lines
+- Explains why this specific update matters to engineers building systems now
+- Avoids evergreen 101 explainers like "what LLMs are" or "how transformers work"
+- Does not read like a tutorial, textbook summary, or generic thought piece
+- Uses at least one concrete noun from the news titles when relevant: {", ".join(anchor_terms[:6]) if anchor_terms else "company, product, or model name"}
 """
+    def _needs_news_revision(text):
+        cleaned = _cleanup_generated_post(text or "")
+        lowered = cleaned.lower()
+        generic_signals = [
+            "i was wrong about",
+            "the backbone of",
+            "i've come to realize",
+            "what's the most important component",
+            "understanding these components",
+            "generate human-like text",
+        ]
+        if any(sig in lowered for sig in generic_signals):
+            return True
+        if news_type == "ai":
+            if anchor_terms and not any(term.lower() in lowered for term in anchor_terms[:5]):
+                return True
+            if not re.search(r"\b(OpenAI|Anthropic|Google|Meta|Microsoft|NVIDIA|Mistral|Claude|GPT|Gemini|Llama)\b", cleaned, re.I):
+                return True
+        return False
+
     try:
-        return _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
+        draft = _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
+        if _needs_news_revision(draft):
+            revision_prompt = prompt + """
+
+Revision feedback:
+- The draft reads too generic or too educational.
+- Anchor the post to one real story from the news list above.
+- Name the company, product, or model in the opening lines.
+- Remove textbook-style explanations and replace them with an opinionated engineering take.
+- Keep the discussion current, specific, and tied to what changed in the article.
+
+Rewrite from scratch.
+"""
+            draft = _cleanup_generated_post(call_ai(revision_prompt, NEWS_SYSTEM))
+        return draft
     except Exception as e:
         log.warning(f"News generation failed ({news_type}), falling back to topic mode: {e}")
         return None
