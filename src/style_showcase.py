@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-style_showcase.py — Generate samples of all 23 diagram styles for your posts
+style_showcase.py — Generate samples of all 31 diagram styles for your posts
 
 Use this to:
-1. See all 23 styles in action
+1. See all 31 styles in action
 2. Decide which styles work best for your content
 3. Choose styles for specific topics
 4. Design better posts using style variety
@@ -14,7 +14,7 @@ import sys
 from diagram_generator import STYLES, make_diagram, get_pal
 
 def generate_showcase():
-    """Generate one diagram in each of the 23 styles."""
+    """Generate one diagram in each of the 31 styles."""
     
     output_dir = "diagrams/style_showcase"
     os.makedirs(output_dir, exist_ok=True)
@@ -28,7 +28,7 @@ def generate_showcase():
     ]
     
     print("=" * 70)
-    print("DIAGRAM STYLE SHOWCASE - Generating all 23 styles")
+    print("DIAGRAM STYLE SHOWCASE - Generating all 31 styles")
     print("=" * 70)
     
     for idx, style_fn in enumerate(STYLES):
@@ -70,7 +70,7 @@ def generate_showcase():
     print("1. Open HTML file to view all styles side-by-side")
     print("2. Choose your favorite styles")
     print("3. Use 'style_override' parameter in make_diagram() for specific topics")
-    print("4. Or edit trending_topics.py to enable all 23 styles for trending posts")
+    print("4. Or edit trending_topics.py to enable all 31 styles for trending posts")
     print("=" * 70)
 
 
@@ -83,7 +83,7 @@ def generate_html_showcase():
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Diagram Style Showcase - 23 Styles</title>
+    <title>Diagram Style Showcase - 31 Styles</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 20px; }
         h1 { text-align: center; color: #333; }
@@ -95,7 +95,7 @@ def generate_html_showcase():
     </style>
 </head>
 <body>
-    <h1>📊 All 23 Diagram Styles for LinkedIn Posts</h1>
+    <h1>📊 All 31 Diagram Styles for LinkedIn Posts</h1>
     <p style="text-align: center; color: #666;">
         Click any diagram to see its full SVG. Use these for variety in your posts!
     </p>

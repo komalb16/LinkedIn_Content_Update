@@ -430,6 +430,28 @@ TOPICS = [
         "diagram_type": "Architecture Diagram",
         "emoji": "🧱",
     },
+    {
+        "id": "ai-hype-cycle",
+        "name": "The AI Agent Hype Cycle",
+        "category": "AI",
+        "prompt": "Where we actually are in the AI agent hype cycle — from the Innovation Trigger of autonomous reasoning to the Plateau of Productivity where they actually solve business problems.",
+        "angle": "Stop listening to the hyper-optimists and the doomers. Here is the realistic maturity curve of agentic AI.",
+        "diagram_subject": "AI Hype Cycle curve with 5 stages",
+        "diagram_type": "Hype Cycle",
+        "emoji": "📈",
+        "fallback_copy": "The AI Agent Hype Cycle is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMost teams are stuck in the Peak of Inflated Expectations, thinking agents can replace entire departments overnight. They can't.\n\nReal maturity happens when we move into the Slope of Enlightenment, building specific, tool-using agents for scoped workflows.\n\n1\ufe0f\u20e3 Innovation Trigger: Autonomous reasoning starts to scale\n2\ufe0f\u20e3 Peak: \"AGI is here\" viral demos\n3\ufe0f\u20e3 Trough: Discovery that reliability != chat\n4\ufe0f\u20e3 Slope: LangGraph & state machines in production\n5\ufe0f\u20e3 Plateau: Standardized agentic architecture\n\nThe gap between those who ship and those who complain is how fast they navigate this curve.\n\n\U0001f4ac Where are you on the curve? 1\ufe0f\u20e3 2\ufe0f\u20e3 3\ufe0f\u20e3 4\ufe0f\u20e3 5\ufe0f\u20e3",
+    },
+    {
+        "id": "ai-adoption-ladder",
+        "name": "The AI Adoption Ladder",
+        "category": "AI",
+        "prompt": "The 5 levels of AI adoption in the enterprise — from manual tasks and copilot assistance to fully autonomous agentic platforms.",
+        "angle": "Most companies are stuck at Level 2. Here is how you move up the ladder to true platform leverage.",
+        "diagram_subject": "Vertical ladder of AI adoption tiers",
+        "diagram_type": "Leverage Ladder",
+        "emoji": "🪜",
+        "fallback_copy": "There's a hidden cost to staying at the bottom of the AI Adoption Ladder. \ud83d\udcc8\n\nMost engineers treat AI as a better Google. That's Tier 1. It saves minutes, not hours.\n\nTo get true leverage, you have to climb. The gap between Tier 1 and Tier 5 isn't linear — it's exponential.\n\nTier 1: Manual / Legacy \u2192 1:1 human time to output\nTier 2: Copilot Assisted \u2192 Individual speed boost\nTier 3: Workflow Automation \u2192 Team-wide scaling\nTier 4: Custom AI Agents \u2192 Autonomous goal execution\nTier 5: Enterprise Platform \u2192 Unified intelligence layer\n\nEvery step you climb multiplies your impact. The best time to start climbing was 6 months ago. The second best time is today.\n\n\U0001f4ac Which tier are you building at this week?",
+    },
 ]
 
 # ─── DIAGRAM STRUCTURES ───────────────────────────────────────────────────────
@@ -876,6 +898,26 @@ DIAGRAM_STRUCTURES = {
             {"id":5,"label":"Govern",     "desc":"Budget alerts, quotas, and ownership"},
         ],
     },
+    "ai-hype-cycle": {
+        "style": 28, "subtitle": "Where we are in the AI cycle",
+        "sections": [
+            {"id": 1, "label": "Innovation Trigger", "desc": "Agentic reasoning & multi-modal scaling"},
+            {"id": 2, "label": "Peak of Expectations", "desc": "Universal autonomous agents by EOY"},
+            {"id": 3, "label": "Trough of Disillusionment", "desc": "Realizing agent reliability != chat"},
+            {"id": 4, "label": "Slope of Enlightenment", "desc": "LangGraph & state machines in production"},
+            {"id": 5, "label": "Plateau of Productivity", "desc": "Standardized tool-use & agent workflows"},
+        ]
+    },
+    "ai-adoption-ladder": {
+        "style": 29, "subtitle": "From manual tasks to platform leverage",
+        "sections": [
+            {"id": 1, "label": "Manual / Legacy", "desc": "1:1 human time to output ratio"},
+            {"id": 2, "label": "Copilot Assisted", "desc": "Individual productivity boost"},
+            {"id": 3, "label": "Workflow Automation", "desc": "Repeatable team sequences"},
+            {"id": 4, "label": "Custom AI Agents", "desc": "Domain-specific autonomous tools"},
+            {"id": 5, "label": "Enterprise Platform", "desc": "Unified intelligence layer"},
+        ]
+    },
 }
 
 DEFAULT_STRUCTURE = {
@@ -900,6 +942,9 @@ INFERRED_DIAGRAM_TYPES = [
     (("mcp", "a2a", "protocol", "agentic", "agent workflow", "orchestration"), "Lane Map"),
     (("roadmap", "journey", "learning path"), "Winding Roadmap"),
     (("compare", "vs", "versus", "comparison"), "Comparison Table"),
+    (("hype", "hype cycle", "maturity"), "Hype Cycle"),
+    (("ladder", "levels", "maturity ladder", "leverage"), "Leverage Ladder"),
+    (("framework", "acronym", "create", "steps"), "Acronym Framework"),
 ]
 
 TOPIC_ANCHOR_STOPWORDS = {

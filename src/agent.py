@@ -273,6 +273,32 @@ HOOK_STYLES = [
         "Then show how it looks now. Let the contrast do the work. "
         "No fluff — just the delta and why it matters for engineers today."
     ),
+    (
+        "Open with a levels/ladder structure: 'Almost everyone falls into one of N levels.' "
+        "Then name each level with a colored emoji indicator. "
+        "This makes readers immediately self-identify and drives comments."
+    ),
+    (
+        "Open mid-scene with a concrete goal and outcome: "
+        "'Goal: [specific task]. The agent: → did X → did Y → did Z. Zero human steps.' "
+        "Then zoom out to the principle. Reality first, theory second."
+    ),
+    (
+        "Open with a hype/cycle pattern: state where most people think we are, "
+        "then show the actual curve with emoji stage markers. "
+        "End with the uncomfortable truth about what separates winners from complainers."
+    ),
+    (
+        "Open with a 'Compound Interest' or 'Invisible Gap' hook. "
+        "Explain how a small difference today becomes an insurmountable gap over 12 months. "
+        "Use Month 1, Month 3, Month 6, Month 12 as markers. "
+        "Conclude with a simple 1-2-3 call to action."
+    ),
+    (
+        "Start with 'Everyone is talking about X. Almost nobody is explaining it correctly.' "
+        "Follow with a simple definition, then a 4-step loop (Perceive/Plan/Act/Learn). "
+        "Give a concrete 'Goal -> Agent actions' example to make it real."
+    ),
 ]
 
 # ─── TONE VARIATIONS ──────────────────────────────────────────────────────────
@@ -283,6 +309,8 @@ TONE_VARIATIONS = [
     "Staff engineer mentoring someone — patient, uses analogies, skips nothing important, zero condescension.",
     "Engineer who tried four approaches and finally found one that works — specific, quietly confident.",
     "The person at the conference who gives the best hallway talk — opinionated, concrete examples, no slides needed.",
+    "AI engineer who has shipped three RAG systems — no hype, just what actually works in production.",
+    "Tech strategist watching the industry cycle — sees patterns across companies, calls things early, backs it with data.",
 ]
 
 # ─── FORMAT VARIATIONS ────────────────────────────────────────────────────────
@@ -315,6 +343,43 @@ FORMAT_VARIATIONS = [
         "instruction": (
             "Each section: Myth → Reality. State the wrong belief, then the correction. "
             "Keep it tight — one myth per concept, no more. This is not a lecture."
+        ),
+    },
+    {
+        "name": "levels_ladder",
+        "instruction": (
+            "Structure as a progression of levels (Level 1 through Level 4 or 5). "
+            "Each level: one emoji color indicator (🔴🟡🟢🔵🟣), a label, "
+            "one sentence describing the behavior, one sentence on the consequence. "
+            "End with: 'Which level are you?' — this forces self-identification and comments. "
+            "This format gets 3-5x comments vs standard posts."
+        ),
+    },
+    {
+        "name": "hype_cycle",
+        "instruction": (
+            "Structure around a curve or cycle — each stage gets an emoji and 2-3 lines. "
+            "Then break the pattern: 'Right now? We are at [X].' "
+            "End with a truth nobody wants to say, then a forward-looking question. "
+            "Works especially well for AI trends, tech adoption, career patterns."
+        ),
+    },
+    {
+        "name": "step_loop",
+        "instruction": (
+            "Explain a system or process as a numbered loop that repeats. "
+            "Each step: bold label (e.g. 'Step 1: PERCEIVE') then 1-2 sentences of what happens. "
+            "Then one concrete real-world example showing the loop in action with specific outcomes. "
+            "End with: what this means for the reader's work right now."
+        ),
+    },
+    {
+        "name": "concrete_example_first",
+        "instruction": (
+            "Lead with a specific real-world example or scenario — not an abstraction. "
+            "Make the reader see it happening: 'Goal: X. The agent: → does A → does B → does C.' "
+            "Then zoom out to the principle. This is the reverse of how most people write — "
+            "it hooks with reality, then earns the theory."
         ),
     },
 ]
@@ -394,9 +459,75 @@ They have a complexity budget problem.
 Build the simplest thing that lets your engineers ship.
 Optimise the platform when platform is the bottleneck.
 
-💬 Where are you on this? Still on managed? Full K8s? Somewhere in between?
+#Kubernetes #DevOps #EngineeringManagement #SoftwareArchitecture #CloudNative""",
 
-#Kubernetes #DevOps #PlatformEngineering #CloudNative #SoftwareArchitecture""",
+    """\
+There's a cost to not learning AI.
+
+Nobody talks about it because it's invisible — at first.
+
+But compound it over 12 months and the gap becomes terrifying.
+
+Here's what's actually happening:
+
+Month 1: AI user is 20% faster than you. Not noticeable.
+Month 3: They're producing twice your output with the same hours.
+Month 6: They've built workflows, automations, agents. They're not just faster — they're doing work you can't even conceive of.
+Month 12: Their results look like they have a team of 10. You're still doing it manually.
+
+The gap isn't linear. It's exponential.
+
+Because every hour they save, they reinvest into learning more AI.
+Every workflow they build multiplies their next one.
+
+This isn't fear-mongering. It's just compound interest — applied to skills.
+
+The good news: the gap is closeable right now.
+
+You need to do three things this week:
+1. Pick one repetitive task you do every day
+2. Spend 30 minutes prompting AI to do it instead
+3. Refine it until it's better than your manual version
+
+The best time to start was 6 months ago. The second best time is today.
+
+💬 What's one task you could hand to AI this week? 👇
+
+#AI #Productivity #FutureOfWork #CareerGrowth #Upskilling #GrowthMindset #Innovation""",
+
+    """\
+Everyone is talking about AI agents.
+Almost nobody is explaining them correctly.
+
+Here's the simplest explanation I've found:
+An AI agent is an AI that can take actions in the world — not just answer questions.
+
+A regular AI (like ChatGPT): You ask → It answers → Done.
+
+An AI agent: You set a goal → It figures out the steps → It takes those steps → It checks the result → It adapts → It keeps going until the goal is done.
+
+The 4-step loop that runs inside every agent:
+
+1️⃣ PERCEIVE: It reads its environment — emails, files, APIs, databases.
+2️⃣ PLAN: It breaks your goal into sub-tasks and orders them.
+3️⃣ ACT: It actually does things — sends emails, writes code, searches.
+4️⃣ LEARN: It checks if it worked, adjusts, and loops again.
+
+Real example:
+Goal: "Find me the 5 best candidates and draft outreach emails."
+
+The agent:
+→ Searches LinkedIn
+→ Scores fit
+→ Drafts 5 personalised emails
+→ Drops them in your drafts folder
+
+The companies who build agent-first workflows in 2025 will look like they have superpowers by 2026.
+
+Are you building with agents yet? 👇
+
+#AIAgents #ArtificialIntelligence #Automation #FutureOfWork #TechTrends #Productivity""",
+
 
     """\
 Your embedding model is not the bottleneck.
@@ -449,6 +580,73 @@ They didn't change the model. They added measurement.
 💬 What's your RAG eval setup — RAGAS, DeepEval, TruLens, or something homegrown?
 
 #RAG #LLMOps #AIEngineering #GenerativeAI #MLOps""",
+
+    """\
+Everyone is talking about AI agents.
+Almost nobody is explaining them correctly.
+
+An AI agent is not a chatbot. It is an AI that takes actions in the world.
+
+Regular AI: you ask → it answers → done.
+AI agent: you set a goal → it plans the steps → takes those steps → checks the result → adapts → loops until done.
+
+The 4-step loop inside every agent:
+
+Step 1: PERCEIVE — reads its environment (emails, files, APIs, databases)
+Step 2: PLAN — breaks your goal into sub-tasks, figures out the order
+Step 3: ACT — does things (sends emails, writes code, searches the web, books meetings)
+Step 4: LEARN — checks if it worked, adjusts plan, loops again
+
+Real example:
+Goal: "Find the 5 best candidates for this role and draft outreach emails."
+→ Reads the job description
+→ Searches LinkedIn and databases
+→ Scores candidates by fit
+→ Drafts 5 personalised emails
+→ Drops them in your drafts folder
+
+You review. You send. The agent did 4 hours of work.
+
+We are at the very beginning of the agent era.
+
+💬 Are you building with agents yet — or still evaluating?
+
+#AIAgents #ArtificialIntelligence #Automation #FutureOfWork #LLM""",
+
+    """\
+I've watched hundreds of engineers interact with AI tools over the past 2 years.
+
+Almost everyone falls into one of 5 levels.
+
+🔴 Level 1 — The Avoider
+"AI is just hype. I'll wait it out."
+Still doing everything manually. Falling behind without realising it.
+
+🟡 Level 2 — The Experimenter
+Tried ChatGPT once. Got a weird answer. Concluded: "not ready yet."
+Uses it maybe once a month.
+
+🟢 Level 3 — The Daily User
+AI saves 5–10 hours per week. Has a few go-to prompts.
+Still thinks of it as just a tool.
+
+🔵 Level 4 — The Builder
+Builds custom workflows, automations, agents.
+10x output with the same headcount.
+
+🟣 Level 5 — The AI-Native Thinker
+Doesn't just use AI. Redesigns everything around it.
+These are the people defining the next 10 years.
+
+The jump from Level 1 → 3 is easy. Anyone can do it this week.
+The jump from Level 3 → 5 requires changing how you think, not just which tools you use.
+
+Most companies are at Level 2.
+Most winners will be at Level 4–5.
+
+💬 Which level are you? Be honest.
+
+#AI #FutureOfWork #Productivity #AITools #CareerGrowth""",
 ]
 
 
@@ -783,6 +981,8 @@ def _fallback_visual_block(structure=None):
 
 
 def _fallback_topic_post(topic, structure=None):
+    if topic.get("fallback_copy"):
+        return topic["fallback_copy"]
     title = topic.get("name", "Engineering Topic")
     angle = topic.get("angle", "practical production insights")
     visual = _fallback_visual_block(structure)
@@ -1153,6 +1353,21 @@ def _build_post_template_instructions(diagram_type, structure=None):
             "Write this as a staged journey. "
             "Each section should feel like the next step in capability, not just a list item."
         ),
+        "Hype Cycle": (
+            "Write this as a maturity curve. Start with the early innovation, "
+            "address the unrealistic peak, the inevitable trough, and finally the plateau of productivity. "
+            "Focus on the shift from sentiment/hype to real utility."
+        ),
+        "Leverage Ladder": (
+            "Write this as a vertical progression of tiers. "
+            "Explain how each tier offers more leverage than the last, moving from manual tasks "
+            "to automated agents and enterprise platforms. Focus on exponential impact."
+        ),
+        "Acronym Framework": (
+            "Write this as a structured framework based on the provided acronym. "
+            "Each letter must represent a core principle or action step. "
+            "Keep it punchy and authoritative."
+        ),
     }
     return templates.get(diagram_type, "")
 
@@ -1168,9 +1383,10 @@ def _build_visual_block_instruction(diagram_type):
             "Include one ``` fenced grouped-layer block with 3 headings: "
             "Foundation | Build/Orchestrate | Govern/Operate. Keep each layer concise."
         )
-    if diagram_type in {"Decision Tree", "Winding Roadmap", "Flow Chart", "Lane Map"}:
+    if diagram_type in {"Decision Tree", "Winding Roadmap", "Flow Chart", "Lane Map", "Hype Cycle", "Leverage Ladder", "Acronym Framework"}:
         return (
-            "Include one ``` fenced flow block using plain ASCII connectors like `->` or `|`."
+            "Include one ``` fenced visual block using plain ASCII connectors like `->`, `|`, or a vertical ladder `[ ]`. "
+            "Ensure the labels in the block EXACTLY match the diagram sections provided."
         )
     return (
         "Include one ``` fenced visual block (outline, framework, or mini-map) "
@@ -2851,7 +3067,7 @@ def _check_topic_diversity(topic, days=7):
 
 # ─── SMART DIAGRAM ROTATION ───────────────────────────────────────────────────
 
-ALL_DIAGRAM_STYLES = list(range(8)) + list(range(8, 16)) + [17, 18, 19, 20, 22, 23]
+ALL_DIAGRAM_STYLES = [0, 1, 3, 4, 5, 6, 7] + list(range(8, 16)) + [17, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30]
 
 def _load_diagram_rotation_state():
     """Load diagram rotation state to track style usage."""
@@ -3104,8 +3320,11 @@ def _extract_poster_title(topic_name: str, post_text: str, mode: str) -> str:
             m = re.search(r"(\w+)\s+" + re.escape(kw), post_text, re.I)
             if m:
                 actor = m.group(1).title()
-                # Blacklist generic descriptors
-                if actor.upper() not in {"MOST", "THE", "OUR", "THIS", "STAFF", "YOUR", "RELIABLE"}:
+                # Blacklist generic descriptors and prepositions
+                if actor.upper() not in {
+                    "MOST", "THE", "OUR", "THIS", "STAFF", "YOUR", "RELIABLE",
+                    "FROM", "HOW", "WHEN", "WHY", "WITH", "ABOUT", "EVERY"
+                }:
                     return f"{actor} {kw}"[:32]
             
             # If no good actor, try to see if topic_name has a better word
@@ -3372,6 +3591,12 @@ def _infer_diagram_type_from_post(post_text, fallback_type):
         return "Lane Map"
     if "comparison" in text or ("|" in text and "---" in text) or " vs " in text:
         return "Comparison Table"
+    if "hype cycle" in text or "expectations" in text:
+        return "Hype Cycle"
+    if "ladder" in text or "leverage" in text or "level" in text:
+        return "Leverage Ladder"
+    if "framework" in text or "acronym" in text:
+        return "Acronym Framework"
     if "timeline" in text or "roadmap" in text:
         return "Timeline"
     if fallback_type in strong_editorial:
@@ -3466,18 +3691,21 @@ def _build_viral_poster_structure(post_text, topic_name, mode, topic=None):
 
     # Final fallback if still empty — call AI to extract 4 technical keywords from the post
     if len(sections) < 3:
-        log.info("No bullets found. Calling AI for elite content extraction...")
-        extraction_prompt = f"""Identify 4 technical stages, components, or key architectural concepts discussed in this LinkedIn post.
+        try:
+            log.info("No bullets found. Calling AI for elite content extraction...")
+            extraction_prompt = f"""Identify 4 technical stages, components, or key architectural concepts discussed in this LinkedIn post.
 Post Text: {post_text[:1000]}
 
 Return exactly 4 punchy items, each 3-5 words max. One per line. No numbers.
 """
-        raw_items = call_ai(extraction_prompt, "You are a Technical Diagram Specialist.")
-        if raw_items:
-            for line in raw_items.splitlines()[:5]:
-                label = clean_label(line.strip())
-                if len(label) > 4:
-                    sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
+            raw_items = call_ai(extraction_prompt, "You are a Technical Diagram Specialist.")
+            if raw_items:
+                for line in raw_items.splitlines()[:5]:
+                    label = clean_label(line.strip())
+                    if len(label) > 4:
+                        sections.append({"id": len(sections) + 1, "label": label, "desc": ""})
+        except Exception as e:
+            log.warning(f"AI extraction failed (non-fatal): {e}. Falling back to default sections.")
     
     # Second fallback if AI somehow fails — use topic-related tags
     if len(sections) < 3:
@@ -4213,6 +4441,10 @@ Write a LinkedIn post that:
         "Maturity Model":   27,
         "Radial":           27,
         "Progress Rings":   27,
+        "Hype Cycle":       28,
+        "Leverage Ladder":  29,
+        "Acronym Framework": 30,
+        "Architecture Diagram": 0,
     }
     intentional_style = INTENTIONAL_STYLE_MAP.get(diagram_type)
 

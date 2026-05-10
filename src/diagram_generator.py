@@ -237,8 +237,8 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
     foot_bdr  = "#E2E8F0" if not dark else rgba(accent, 0.30)
     foot_txt  = "#64748B" if not dark else "#94A3B8"
     HDR_H     = 66   # header height
-
     bg_rect = f'<rect width="{W}" height="{H}" fill="url(#BG)"/>'
+
     # Subtle grid pattern on light bg; dot-grid on dark
     if not dark:
         dot_pat = (f'<pattern id="bg_pat" width="28" height="28" patternUnits="userSpaceOnUse">'
@@ -251,12 +251,7 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
                    f'</pattern>'
                    f'<rect width="{W}" height="{H}" fill="url(#bg_pat)"/>')
 
-    pill_w  = len(subtitle) * 7 + 28
     title_c = clamp(title, 52)
-
-    # KB initials circle (right side of header)
-    kb_cx = W - 26
-    kb_cy = HDR_H // 2
 
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:{FONT};overflow:hidden">
 <defs>
@@ -279,8 +274,6 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
 <rect x="0" y="0" width="{W}" height="{HDR_H}" fill="url(#HG)" filter="url(#hdr_sh)"/>
 <rect x="0" y="{HDR_H-2}" width="{W}" height="3" fill="{accent}" opacity="0.8"/>
 <text x="{W // 2}" y="{HDR_H // 2 + 10}" text-anchor="middle" fill="white" font-size="24" font-weight="900" letter-spacing="-0.4" font-family="{FONT}">{xe(title_c)}</text>
-<circle cx="{kb_cx}" cy="{kb_cy}" r="18" fill="{rgba(accent,0.30)}" stroke="{rgba(accent,0.70)}" stroke-width="1.5"/>
-<text x="{kb_cx}" y="{kb_cy+5}" text-anchor="middle" fill="white" font-size="10" font-weight="900" letter-spacing="0.5" font-family="{FONT}">KB</text>
 
 {inner_svg}
 <rect x="0" y="{H-32}" width="{W}" height="32" fill="{foot_bg}"/>
@@ -3590,6 +3583,196 @@ def _style_radial_rings(topic_id, topic_name, C, structure=None):
     return _wrap(svg, W, H, topic_name, "Maturity Model", accent, bg_dark2, bg_dark, dark=True)
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 28 — HYPE CYCLE
+#  Signature curve showing the Peak of Expectations and Trough of Disillusionment.
+#  5 labels placed along the curve: Trigger, Peak, Trough, Slope, Plateau.
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_hype_cycle(topic_id, topic_name, C, structure=None):
+    W, H = 1000, 680
+    accent = C[0]
+    bg_top = lighten(accent, 0.94)
+    bg_bot = lighten(accent, 0.98)
+    
+    stages = []
+    if structure and structure.get("sections"):
+        stages = structure["sections"][:5]
+    else:
+        stages = [
+            {"label": "Innovation Trigger", "desc": "First breakthrough"},
+            {"label": "Peak of Expectations", "desc": "Maximum hype level"},
+            {"label": "Trough of Disillusionment", "desc": "Interest wanes"},
+            {"label": "Slope of Enlightenment", "desc": "Practical use cases"},
+            {"label": "Plateau of Productivity", "desc": "Broad adoption"},
+        ]
+    
+    # Pad to 5 stages if necessary
+    while len(stages) < 5:
+        stages.append({"label": f"Stage {len(stages)+1}", "desc": ""})
+    
+    # Signature Hype Cycle Curve (M 100,550 ... )
+    # Points along the path for markers:
+    # 1. Trigger: (120, 520)
+    # 2. Peak:    (280, 150)
+    # 3. Trough:  (480, 500)
+    # 4. Slope:   (680, 320)
+    # 5. Plateau: (880, 240)
+    path_d = "M 100,550 C 180,550 220,150 280,150 C 350,150 420,500 480,500 C 550,500 620,320 680,320 C 780,320 850,240 920,240"
+    marker_pts = [(120, 520), (280, 150), (480, 500), (680, 320), (880, 240)]
+    
+    svg = ""
+    # Axis
+    svg += f'<line x1="80" y1="550" x2="940" y2="550" stroke="#CBD5E1" stroke-width="2"/>'
+    svg += f'<line x1="100" y1="570" x2="100" y2="100" stroke="#CBD5E1" stroke-width="2"/>'
+    svg += f'<text x="940" y="575" text-anchor="end" fill="#94A3B8" font-size="12" font-weight="700">TIME</text>'
+    svg += f'<text x="90" y="110" text-anchor="start" fill="#94A3B8" font-size="12" font-weight="700" transform="rotate(-90, 90, 110)">EXPECTATIONS</text>'
+
+    # Main Curve
+    svg += f'<path d="{path_d}" fill="none" stroke="{rgba(accent, 0.15)}" stroke-width="12" stroke-linecap="round"/>'
+    svg += f'<path d="{path_d}" fill="none" stroke="{accent}" stroke-width="4" stroke-linecap="round" class="flow"/>'
+
+    for i, (px, py) in enumerate(marker_pts):
+        col = C[i % len(C)]
+        sec = stages[i]
+        delay = f"animation-delay:{i*0.12:.2f}s"
+        
+        # Marker point
+        svg += f'<circle cx="{px}" cy="{py}" r="8" fill="white" stroke="{col}" stroke-width="3" class="si" style="{delay}"/>'
+        svg += f'<circle cx="{px}" cy="{py}" r="16" fill="{rgba(col, 0.15)}" class="pu" style="{delay}"/>'
+        
+        # Label card
+        lx, ly = px, py - 40
+        if i == 0: lx += 70; ly += 20
+        if i == 2: lx += 0; ly += 85
+        if i == 4: lx -= 70; ly += 10
+        
+        svg += f'<rect x="{lx-80}" y="{ly-20}" width="160" height="40" rx="8" fill="white" stroke="{rgba(col, 0.2)}" stroke-width="1" class="fi" style="{delay}"/>'
+        svg += f'<rect x="{lx-80}" y="{ly-20}" width="4" height="40" rx="2" fill="{col}"/>'
+        svg += f'<text x="{lx-70}" y="{ly-2}" fill="{darken(col, 0.2)}" font-size="12" font-weight="800">{xe(clamp(sec["label"], 22))}</text>'
+        svg += f'<text x="{lx-70}" y="{ly+12}" fill="#64748B" font-size="9">{xe(clamp(sec["desc"], 32))}</text>'
+
+    return _wrap(svg, W, H, topic_name, structure.get("subtitle", "Hype Cycle") if structure else "Hype Cycle", accent, bg_top, bg_bot)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 29 — LEVERAGE LADDER
+#  Vertical blocks that get wider as they rise, showing growth/leverage tiers.
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_leverage_ladder(topic_id, topic_name, C, structure=None):
+    W, H = 900, 680
+    accent = C[0]
+    bg_top = "#0F172A"
+    bg_bot = "#1E293B"
+    
+    sections = []
+    if structure and structure.get("sections"):
+        sections = structure["sections"][:6]
+    else:
+        sections = [
+            {"label": "Manual Tasks", "desc": "1:1 output, linear time"},
+            {"label": "Standardization", "desc": "Repeatable processes"},
+            {"label": "Automation", "desc": "Scaling without head-count"},
+            {"label": "AI Augmentation", "desc": "Human + AI superpower"},
+            {"label": "Autonomous Agents", "desc": "Goal-driven execution"},
+            {"label": "Platform Leverage", "desc": "Compound skill interest"},
+        ]
+    
+    n = len(sections)
+    pad_y = 100
+    avail_h = H - pad_y - 80
+    row_h = avail_h // n
+    
+    svg = ""
+    svg += f'<rect width="{W}" height="{H}" fill="{bg_top}"/>'
+    svg += (f'<pattern id="laddergrid" width="40" height="40" patternUnits="userSpaceOnUse">'
+            f'<circle cx="1" cy="1" r="0.8" fill="{rgba(accent, 0.1)}"/>'
+            f'</pattern><rect width="{W}" height="{H}" fill="url(#laddergrid)"/>')
+    
+    for i, sec in enumerate(sections):
+        # We draw from bottom to top
+        idx = n - 1 - i
+        col = C[idx % len(C)]
+        y = pad_y + i * row_h
+        
+        # Width increases as we go UP (inverse of i)
+        leverage_ratio = (n - i) / n
+        rw = 300 + (W - 450) * leverage_ratio
+        rx = (W - rw) // 2
+        
+        delay = f"animation-delay:{i*0.1:.2f}s"
+        
+        # Bar with glow
+        svg += f'<rect x="{rx+4}" y="{y+4}" width="{rw}" height="{row_h-15}" rx="12" fill="{rgba(col, 0.1)}"/>'
+        svg += f'<rect x="{rx}" y="{y}" width="{rw}" height="{row_h-15}" rx="12" fill="{darken(col, 0.6)}" stroke="{col}" stroke-width="2" class="fi" style="{delay}"/>'
+        
+        # Level Badge
+        svg += f'<circle cx="{rx+30}" cy="{y+(row_h-15)//2}" r="18" fill="{col}"/>'
+        svg += f'<text x="{rx+30}" y="{y+(row_h-15)//2+5}" text-anchor="middle" fill="white" font-size="14" font-weight="900">{n-i}</text>'
+        
+        # Content
+        svg += f'<text x="{rx+60}" y="{y+(row_h-15)//2-2}" fill="white" font-size="16" font-weight="800">{xe(clamp(sec["label"], 45))}</text>'
+        svg += f'<text x="{rx+60}" y="{y+(row_h-15)//2+16}" fill="{lighten(col, 0.5)}" font-size="11">{xe(clamp(sec["desc"], 70))}</text>'
+        
+        # Leverage Label on the right
+        svg += f'<text x="{rx+rw-20}" y="{y+(row_h-15)//2+6}" text-anchor="end" fill="{rgba(col, 0.4)}" font-size="10" font-weight="900" letter-spacing="1">TIER {n-i}</text>'
+
+    return _wrap(svg, W, H, topic_name, structure.get("subtitle", "The Leverage Ladder") if structure else "The Leverage Ladder", accent, bg_top, bg_bot, dark=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  STYLE 30 — ACRONYM FRAMEWORK
+#  Bold vertical letters on the left (e.g. C-R-E-A-T-E) with descriptions.
+# ══════════════════════════════════════════════════════════════════════════════
+def _style_acronym_framework(topic_id, topic_name, C, structure=None):
+    W, H = 960, 720
+    accent = C[0]
+    bg_top = lighten(accent, 0.95)
+    bg_bot = lighten(accent, 0.98)
+    
+    sections = []
+    if structure and structure.get("sections"):
+        sections = structure["sections"][:8]
+    else:
+        sections = [
+            {"id": "C", "label": "Context", "desc": "Setting the stage for the AI"},
+            {"id": "R", "label": "Role", "desc": "Assigning a specific persona"},
+            {"id": "E", "label": "Evidence", "desc": "Providing examples and data"},
+            {"id": "A", "label": "Action", "desc": "Defining exactly what to do"},
+            {"id": "T", "label": "Task", "desc": "Breaking down the objective"},
+            {"id": "E", "label": "Evaluate", "desc": "Checking the output quality"},
+        ]
+    
+    n = len(sections)
+    pad_y = 90
+    avail_h = H - pad_y - 60
+    row_h = avail_h // n
+    
+    svg = ""
+    # Side bar
+    svg += f'<rect x="0" y="0" width="120" height="{H}" fill="{darken(accent, 0.5)}"/>'
+    svg += f'<rect x="115" y="0" width="5" height="{H}" fill="{accent}"/>'
+    
+    for i, sec in enumerate(sections):
+        col = C[i % len(C)]
+        y = pad_y + i * row_h
+        delay = f"animation-delay:{i*0.08:.2f}s"
+        letter = str(sec.get("id", "•"))[0].upper()
+        
+        # Big Letter in the bar
+        svg += f'<text x="60" y="{y + row_h//2 + 25}" text-anchor="middle" fill="white" font-size="80" font-weight="900" opacity="0.9" class="si" style="{delay}">{xe(letter)}</text>'
+        
+        # Card on the right
+        cx = 150
+        cw = W - cx - 50
+        svg += f'<rect x="{cx}" y="{y+10}" width="{cw}" height="{row_h-20}" rx="12" fill="white" stroke="{rgba(col, 0.15)}" stroke-width="1.2" class="fi" style="{delay}"/>'
+        svg += f'<rect x="{cx}" y="{y+10}" width="6" height="{row_h-20}" rx="3" fill="{col}"/>'
+        
+        svg += f'<text x="{cx+30}" y="{y + row_h//2 + 5}" fill="{darken(col, 0.2)}" font-size="24" font-weight="800">{xe(clamp(sec["label"], 40))}</text>'
+        svg += f'<text x="{cx+30}" y="{y + row_h//2 + 35}" fill="#64748B" font-size="14">{xe(clamp(sec["desc"], 80))}</text>'
+
+    return _wrap(svg, W, H, topic_name, structure.get("subtitle", "Framework") if structure else "Framework", accent, bg_top, bg_bot)
+
+
 STYLES = [
     _style_vertical_flow,        # 0  — numbered pipeline steps
     _style_mind_map,             # 1  — radial hub + branches
@@ -3619,6 +3802,9 @@ STYLES = [
     _style_iceberg,              # 25 — iceberg: visible vs hidden depth
     _style_dashboard,            # 26 — dashboard KPI metrics cards
     _style_radial_rings,         # 27 — radial progress rings / maturity model
+    _style_hype_cycle,           # 28 — Hype Cycle curve
+    _style_leverage_ladder,      # 29 — Vertical growth/leverage ladder
+    _style_acronym_framework,    # 30 — Bold acronym framework
 ]
 
 TOPIC_STYLE_OVERRIDES = {
@@ -3689,6 +3875,9 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "comparison": 5,
     "cheat sheet": 4,
     "cheatsheet": 4,
+    "architecture diagram": 0,
+    "architecture": 0,
+    "system design": 0,
     "taxonomy tree": 9,
     "tree": 9,
     "conceptual layers": 2,
@@ -3722,6 +3911,11 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "radial": 27,
     "maturity model": 27,
     "progress rings": 27,
+    "hype cycle": 28,
+    "ladder": 29,
+    "leverage ladder": 29,
+    "framework": 30,
+    "acronym": 30,
 }
 
 STYLE_FAMILIES_BY_TYPE = {
@@ -3751,6 +3945,9 @@ STYLE_FAMILIES_BY_TYPE = {
     "knowledge card": [23, 24, 7],
     "viral poster": [23, 24, 7],
     "poster": [23, 24],
+    "hype cycle": [28, 17, 3],
+    "leverage ladder": [29, 2, 10],
+    "framework": [30, 7, 24],
 }
 
 _SCORE_STOPWORDS = {
@@ -3949,7 +4146,7 @@ def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "", structu
 
 
 def _style_supports_motion(style_idx: int) -> bool:
-    return style_idx in {0, 3, 6, 8, 21}
+    return style_idx in {0, 3, 6, 8, 21, 28}
 
 
 def _render_gif(topic_name: str, topic_id: str, diagram_type: str = "", structure: dict = None,
@@ -4032,7 +4229,7 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         'User-Agent': (
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
             'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/119.0.0.0 Safari/537.36'
+            'Chrome/124.0.0.0 Safari/537.36'
         )
     }
 
@@ -4062,6 +4259,7 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         "nikkisiapno.substack.com": 5,
         "eugeneyan.com": 5,
         "huyenchip.com": 5,
+        "substackcdn.com": 4, # Common for technical blogs
         "learnbybuilding.ai": 4,
         "promptingguide.ai": 4,
         "cameronrwolfe.substack.com": 4,
@@ -4148,20 +4346,30 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                 break
 
     # Use post_subject as the primary search term if it's meaningfully different
-    search_subject = post_subject if post_subject else topic_name
+    # Use topic_name as the primary search term (it's the refined technical subject)
+    search_subject = topic_name
 
-    # OVERRIDE: if topic_name was already overridden to a specific tech term
-    # (e.g. "LangGraph" instead of "Personal AI Productivity"), use it directly
-    # as the search subject — don't dilute it with the generic topic name.
+    # Only use post_subject if topic_name is generic and post_subject contains tech terms
+    if post_subject and len(topic_name.split()) > 4:
+        # Check if post_subject contains high-value technical keywords
+        _tech_in_post = any(k in post_subject.lower() for k in [
+            "architecture", "pipeline", "system", "model", "agent", "rag", "llm",
+            "deployment", "scaling", "latency", "optimization", "infrastructure"
+        ])
+        if _tech_in_post:
+            search_subject = post_subject
+            log.info(f"Using post content as search subject (technical): '{search_subject}'")
+
+    # OVERRIDE: if topic_name contains specific high-value tech terms, use it directly
     _specific_tech = any(k in topic_name.lower()
                          for k in ["langgraph", "langchain", "autogen", "kubernetes",
                                    "docker", "kafka", "rag", "llm", "graphql", "grpc",
                                    "redis", "terraform", "pinecone", "weaviate",
                                    "opentelemetry", "datadog", "fastapi", "architecture",
-                                   "mcp", "gemini", "claude", "llama", "mistral"])
-    if _specific_tech and not post_subject:
+                                   "mcp", "gemini", "claude", "llama", "mistral", "strategy"])
+    if _specific_tech:
         search_subject = topic_name
-        log.info(f"Using specific topic override as search subject: '{search_subject}'")
+        log.info(f"Locked specific tech search subject: '{search_subject}'")
 
     # Also extract named tech terms from post for even better alignment
     tech_terms = ""
@@ -4236,7 +4444,7 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         try:
             r = requests.get(search_url, headers=HEADERS, timeout=10)
             raw_urls = re.findall(
-                r'murl&quot;:&quot;(https://[^&]*?(?:\.png|\.jpg|\.jpeg))&quot;',
+                r'murl&quot;:&quot;(https://[^&]*?(?:\.png|\.jpg|\.jpeg|\.webp|\.svg))&quot;',
                 r.text, re.IGNORECASE
             )
             return [(u, _priority(u)) for u in raw_urls]
@@ -4306,12 +4514,20 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
     topic_keywords = set(
         w.lower() for w in re.split(r'\W+', topic_name) if len(w) >= 3
     )
+    # Add high-value tech terms from post_text if available
+    post_keywords = set()
+    if post_text:
+        post_keywords = set(
+            w.lower() for w in re.split(r'\W+', post_text)
+            if len(w) >= 5 and w.lower() not in topic_keywords
+        )
 
     def _relevance(url: str) -> int:
-        """Score 0-3: how many topic keywords appear in the image URL/filename."""
+        """Score 0-5: how many keywords from topic/post appear in the image URL."""
         url_lower = url.lower()
-        matches = sum(1 for kw in topic_keywords if kw in url_lower)
-        return min(matches, 3)
+        topic_matches = sum(2 for kw in topic_keywords if kw in url_lower)
+        post_matches = sum(1 for kw in post_keywords if kw in url_lower)
+        return min(topic_matches + post_matches, 5)
 
     # 4. Download candidates; score = (relevance * 100 + source_priority, size)
     #    This ENSURES that a relevant diagram from a general site (score 101+)
