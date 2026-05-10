@@ -3256,6 +3256,18 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         "i'm", "i am", "here's", "the fact that", "this led me", "nobody talks",
         "our ", "today", "in today's", "let's", "three years ago",
     )
+    
+    # Only extract candidate titles from post for diagram types that benefit from custom titles
+    # Most technical diagrams should use the topic name as title for consistency
+    extract_candidate_titles = {
+        "Viral Poster", "poster", "Flow Chart", "Story", "Narrative",
+        "Overview", "System Design", "Journey Map", "Process Map"
+    }
+    
+    if diagram_type not in extract_candidate_titles:
+        # For most technical diagrams, use the topic name directly
+        return _sanitize_visual_title(fallback_title, fallback_title)
+    
     in_fence = False
     candidate = None
     for raw_line in (post_text or "").splitlines():
