@@ -3259,6 +3259,7 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         "our ", "today", "in today's", "let's", "three years ago",
     )
     in_fence = False
+    candidate = None
     for raw_line in (post_text or "").splitlines():
         line = raw_line.strip()
         if line.startswith("```"):
@@ -3281,10 +3282,10 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         if re.match(r"^[\d\s.:()%/-]+$", line):
             continue
         if len(line) >= 12:
-            # Do NOT use the post hook as diagram title — produces truncated
-            # titles like "80% of teams attempt to integrate voice AI, but only 2".
-            # Fall through to fallback_title (the topic name) instead.
+            candidate = line
             break
+    if candidate:
+        return _sanitize_visual_title(candidate, fallback_title)
     return _sanitize_visual_title(fallback_title, fallback_title)
 
 
