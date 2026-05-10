@@ -151,11 +151,17 @@
           "time_local": "18:30",
           "time_tz": "America/New_York",
           "time_utc": "22:30"
+        },
+        {
+          "time_ist": "15:45",
+          "time_local": "15:45",
+          "time_tz": "America/New_York",
+          "time_utc": "19:45"
         }
       ]
     }
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-05-09T14:45:11.496Z"
+  "updated_at": "2026-05-10T14:30:57.897Z"
 }
