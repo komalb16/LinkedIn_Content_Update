@@ -2470,10 +2470,38 @@ def _render_linkedin_text(post_text):
             _out.extend(f"{i+1}. {r}" for i, r in enumerate(_trows))
         text = "\n".join(_out)
 
-        # Restore visual block content (code blocks without backticks) to preserve the content.
-        for i in range(len(visual_blocks)):
+        # Restore visual block content without fences, filtering bare metadata labels.
+        # "Step 1 / Step 2" = readable → keep. "Speech Rec" / "chips" = bare
+        # diagram label fragments → filter to prevent post body leakage.
+        def _is_readable_line(line: str) -> bool:
+            """Keep readable post content, filter bare diagram label fragments."""
+            s = line.strip()
+            if not s:
+                return True
+            # Always keep lines with connectors or structure
+            if any(c in s for c in ("—", "->", "→", ":")):
+                return True
+            # Keep lines starting with digits (Step 1, Phase 2, numbered lists)
+            if s[0].isdigit():
+                return True
+            # Keep lines with 3+ words (full phrases/sentences)
+            if len(s.split()) >= 3:
+                return True
+            # Keep "Word Number" patterns: "Step 1", "Phase 2", "Layer 3"
+            parts = s.split()
+            if len(parts) == 2 and (parts[0].isalpha() and parts[1].isdigit()):
+                return True
+            # Reject short bare labels: "obs", "chips", "Speech Rec"
+            if len(s) <= 15 and len(s.split()) <= 2:
+                return False
+            return True
+
+        for i, visual_content in enumerate(visual_blocks):
             placeholder = f"[VISUAL_BLOCK_{i}]"
-            text = text.replace(placeholder, visual_blocks[i])
+            filtered = "\n".join(
+                l for l in visual_content.splitlines() if _is_readable_line(l)
+            ).strip()
+            text = text.replace(placeholder, filtered)
 
         text = re.sub(r"\n{3,}", "\n\n", text).strip()
         return text
@@ -3252,17 +3280,11 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
     if fallback_title and diagram_type in title_like_fallbacks:
         return fallback_title[:54]
 
-    # Only extract from post for Flow Chart diagrams
-    if diagram_type != "Flow Chart":
-        return _sanitize_visual_title(fallback_title, fallback_title)
-
     weak_openers = (
         "i'm", "i am", "here's", "the fact that", "this led me", "nobody talks",
         "our ", "today", "in today's", "let's", "three years ago",
     )
-    
     in_fence = False
-    candidate = None
     for raw_line in (post_text or "").splitlines():
         line = raw_line.strip()
         if line.startswith("```"):
@@ -3285,10 +3307,10 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         if re.match(r"^[\d\s.:()%/-]+$", line):
             continue
         if len(line) >= 12:
-            candidate = line
+            # Do NOT use the post hook as diagram title — produces truncated
+            # titles like "80% of teams attempt to integrate voice AI, but only 2".
+            # Fall through to fallback_title (the topic name) instead.
             break
-    if candidate:
-        return _sanitize_visual_title(candidate, fallback_title)
     return _sanitize_visual_title(fallback_title, fallback_title)
 
 
