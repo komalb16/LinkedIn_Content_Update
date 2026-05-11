@@ -6,5 +6,13 @@
     "topic_id": "llm-architecture",
     "topic_name": "LLM Architecture",
     "diagram_type": "Architecture Diagram"
+  },
+  {
+    "timestamp": "2026-05-11T21:07:59.986882",
+    "style_idx": 29,
+    "style_name": "Style 29",
+    "topic_id": "trend-qr-code-auth",
+    "topic_name": "Secure Auth Flows",
+    "diagram_type": "Leverage Ladder"
   }
 ]

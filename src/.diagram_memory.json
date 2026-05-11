@@ -502,5 +502,12 @@
     "style": 2,
     "signature": "1e0e6a984c37f5c6bd3b1253cc219317",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-05-11T21:07:59.983637",
+    "topic_id": "trend-qr-code-auth",
+    "style": 29,
+    "signature": "195a0b01396bfc98ba0a1049b708a576",
+    "duplicate_avoided": true
   }
 ]
