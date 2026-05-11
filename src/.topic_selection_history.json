@@ -22,5 +22,69 @@
     "category": "Engineering",
     "mode": "topic",
     "dry_run": true
+  },
+  {
+    "timestamp": "2026-05-10T18:20:25.810952",
+    "topic_id": "agentic-ai",
+    "topic_name": "Agentic AI",
+    "category": "AI",
+    "mode": "topic",
+    "dry_run": true
+  },
+  {
+    "timestamp": "2026-05-10T18:27:17.855589",
+    "topic_id": "agentic-ai",
+    "topic_name": "Agentic AI",
+    "category": "AI",
+    "mode": "topic",
+    "dry_run": true
+  },
+  {
+    "timestamp": "2026-05-10T18:56:57.875495",
+    "topic_id": "ai-hype-cycle",
+    "topic_name": "The AI Agent Hype Cycle",
+    "category": "AI",
+    "mode": "topic",
+    "dry_run": true
+  },
+  {
+    "timestamp": "2026-05-10T18:58:30.802603",
+    "topic_id": "ai-hype-cycle",
+    "topic_name": "The AI Agent Hype Cycle",
+    "category": "AI",
+    "mode": "topic",
+    "dry_run": true
+  },
+  {
+    "timestamp": "2026-05-10T18:59:03.552180",
+    "topic_id": "ai-adoption-ladder",
+    "topic_name": "The AI Adoption Ladder",
+    "category": "AI",
+    "mode": "topic",
+    "dry_run": true
+  },
+  {
+    "timestamp": "2026-05-10T19:00:06.661658",
+    "topic_id": "ai-adoption-ladder",
+    "topic_name": "The AI Adoption Ladder",
+    "category": "AI",
+    "mode": "topic",
+    "dry_run": true
+  },
+  {
+    "timestamp": "2026-05-10T19:02:38.302264",
+    "topic_id": "llm-architecture",
+    "topic_name": "LLM Architecture",
+    "category": "AI",
+    "mode": "topic",
+    "dry_run": true
+  },
+  {
+    "timestamp": "2026-05-10T19:13:08.084106",
+    "topic_id": "kubernetes-mastery",
+    "topic_name": "Kubernetes Deep Dive",
+    "category": "Cloud",
+    "mode": "topic",
+    "dry_run": true
   }
 ]

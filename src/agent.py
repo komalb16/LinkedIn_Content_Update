@@ -647,6 +647,25 @@ Most winners will be at Level 4–5.
 💬 Which level are you? Be honest.
 
 #AI #FutureOfWork #Productivity #AITools #CareerGrowth""",
+
+    """RAG without evaluation is just vibes-based AI.
+
+I see teams ship RAG systems that feel good in demos.
+Six weeks later: hallucinations in production, users losing trust.
+
+Context Precision — are retrieved chunks relevant?
+Context Recall — did we miss important chunks?
+Answer Groundedness — is every claim supported by context?
+Answer Relevance — does the output address what was asked?
+
+Tools: RAGAS for automated metrics. DeepEval for regression testing.
+Set baselines before you ship. Run evals on every config change.
+
+"It worked in the demo" is not a metric.
+
+💬 What is your RAG eval setup — RAGAS, DeepEval, or homegrown?
+
+#RAG #LLMOps #AIEngineering #GenerativeAI #MLOps""",
 ]
 
 
