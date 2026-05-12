@@ -1279,5 +1279,15 @@
     "status": "success",
     "quality_score": 98,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-05-12T22:14:43.524927",
+    "topic_id": "data-evolution",
+    "topic_name": "Data Architecture Evolution",
+    "category": "Data",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 84,
+    "ab_variants": []
   }
 ]
