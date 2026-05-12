@@ -36,6 +36,24 @@
           "time_local": "18:30",
           "time_tz": "America/New_York",
           "time_utc": "22:30"
+        },
+        {
+          "time_ist": "19:30",
+          "time_local": "19:30",
+          "time_tz": "America/New_York",
+          "time_utc": "23:30"
+        },
+        {
+          "time_ist": "20:30",
+          "time_local": "20:30",
+          "time_tz": "America/New_York",
+          "time_utc": "00:30"
+        },
+        {
+          "time_ist": "21:30",
+          "time_local": "21:30",
+          "time_tz": "America/New_York",
+          "time_utc": "01:30"
         }
       ]
     },
@@ -163,5 +181,5 @@
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-05-10T14:30:57.897Z"
+  "updated_at": "2026-05-12T22:36:23.388Z"
 }
