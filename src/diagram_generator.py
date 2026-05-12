@@ -3835,6 +3835,18 @@ TOPIC_STYLE_OVERRIDES = {
     "ai-skills-map":     12,   # honeycomb map
     "llm-vs-agentic":    13,   # parallel pipelines
     "genai-roadmap":     23,   # viral poster — high engagement
+    # Data / architecture topics → layered flow or data evolution
+    "data-architecture": 10,  # layered flow — shows tiers clearly
+    "data-lakehouse":    10,  # layered flow
+    "data-lake":         10,  # layered flow
+    "data-warehouse":    10,  # layered flow
+    "data-evolution":    8,   # data evolution style
+    "data-mesh":         10,  # layered flow
+    # Hype cycle / adoption
+    "hype-cycle":        28,  # hype cycle S-curve
+    "ai-hype":           28,
+    "ai-adoption":       28,
+    "technology-adoption": 28,
     "enterprise-ai":     20,   # dark column flow
     "kubernetes":        20,   # dark column flow — k8s layers
     # ── Career / Skills / Learning (also matches custom topic names) ─────────
@@ -3882,6 +3894,14 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "tree": 9,
     "conceptual layers": 2,
     "layers": 2,
+    "data layers": 10,
+    "data tiers": 10,
+    "tiered architecture": 10,
+    "3-tier": 10,
+    "leverage ladder": 29,
+    "maturity ladder": 29,
+    "adoption ladder": 29,
+    "hype cycle": 28,
     "ecosystem tree": 11,
     "ecosystem": 11,
     "honeycomb map": 12,
@@ -3987,16 +4007,9 @@ def _pick_style_from_metadata(topic_id: str, topic_name: str, diagram_type: str 
 
 
 def _maybe_variation_style(base_style_idx: int, topic_id: str, topic_name: str, source: str) -> int:
-    if source not in {"topic_id", "topic_name"}:
-        return base_style_idx
-
-    digest = hashlib.md5(f"{topic_id}|{topic_name}".encode("utf-8")).hexdigest()
-    if int(digest[:2], 16) % 10 >= 3:
-        return base_style_idx
-
-    candidate = int(digest[2:6], 16) % len(STYLES)
-    return candidate if candidate != base_style_idx else base_style_idx
-
+    # DISABLED: random variation caused diagram/post mismatches.
+    # e.g. posts using the word "level" getting a maturity ladder regardless of topic.
+    return base_style_idx
 
 def _extract_scoring_keywords(topic_name: str, diagram_type: str = "", structure: dict = None):
     raw = [topic_name or "", diagram_type or ""]
