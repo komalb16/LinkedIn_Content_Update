@@ -3802,8 +3802,7 @@ STYLES = [
     _style_iceberg,              # 25 — iceberg: visible vs hidden depth
     _style_dashboard,            # 26 — dashboard KPI metrics cards
     _style_radial_rings,         # 27 — radial progress rings / maturity model
-    _style_hype_cycle,           # 28 — hype cycle S-curve
-    _style_levels_ladder,        # 29 — five-level adoption ladder — Hype Cycle curve
+    _style_hype_cycle,           # 28 — Hype Cycle curve
     _style_leverage_ladder,      # 29 — Vertical growth/leverage ladder
     _style_acronym_framework,    # 30 — Bold acronym framework
 ]
@@ -3836,12 +3835,6 @@ TOPIC_STYLE_OVERRIDES = {
     "ai-skills-map":     12,   # honeycomb map
     "llm-vs-agentic":    13,   # parallel pipelines
     "genai-roadmap":     23,   # viral poster — high engagement
-    "hype-cycle":        28,   # hype cycle S-curve
-    "ai-hype":           28,   # hype cycle S-curve
-    "ai-adoption":       28,   # hype cycle / adoption curve
-    "technology-adoption": 28, # hype cycle curve
-    "maturity-model":    27,   # radial rings maturity
-    "ai-levels":         29,   # levels ladder (if style 29 exists)
     "enterprise-ai":     20,   # dark column flow
     "kubernetes":        20,   # dark column flow — k8s layers
     # ── Career / Skills / Learning (also matches custom topic names) ─────────
@@ -3994,9 +3987,15 @@ def _pick_style_from_metadata(topic_id: str, topic_name: str, diagram_type: str 
 
 
 def _maybe_variation_style(base_style_idx: int, topic_id: str, topic_name: str, source: str) -> int:
-    # DISABLED: random variation caused diagram/post mismatches
-    # (e.g. "Secure Auth Flows" getting a maturity ladder diagram).
-    return base_style_idx
+    if source not in {"topic_id", "topic_name"}:
+        return base_style_idx
+
+    digest = hashlib.md5(f"{topic_id}|{topic_name}".encode("utf-8")).hexdigest()
+    if int(digest[:2], 16) % 10 >= 3:
+        return base_style_idx
+
+    candidate = int(digest[2:6], 16) % len(STYLES)
+    return candidate if candidate != base_style_idx else base_style_idx
 
 
 def _extract_scoring_keywords(topic_name: str, diagram_type: str = "", structure: dict = None):
@@ -4114,41 +4113,6 @@ def _pick_candidate_styles(topic_id: str, topic_name: str, diagram_type: str = "
             break
     return deduped
 
-
-
-def _style_levels_ladder(topic_id: str, topic_name: str, C, structure=None) -> str:
-    """5-level adoption ladder with progressively wider colored bars."""
-    levels = []
-    if structure and structure.get("sections"):
-        levels = [(s.get("label",""), s.get("desc","")) for s in structure["sections"][:5]]
-    if len(levels) < 5:
-        levels = [
-            ("Level 1 — The Avoider", "Still doing everything manually."),
-            ("Level 2 — The Experimenter", "Tries it occasionally, mixed results."),
-            ("Level 3 — The Daily User", "Saves 5-10 hours per week."),
-            ("Level 4 — The Builder", "Builds workflows and agents."),
-            ("Level 5 — The AI-Native", "Redesigns everything around AI."),
-        ]
-    colors = ["#E24B4A","#BA7517","#1D9E75","#185FA5","#534AB7"]
-    bar_h, gap = 52, 12
-    total_h = len(levels) * (bar_h + gap) + 80
-    lines = [
-        f'<svg width="100%" viewBox="0 0 680 {total_h}" role="img">',
-        f'<title>{topic_name}</title>',
-        f'<desc>A five-level maturity ladder.</desc>',
-        f'<text class="th" x="340" y="28" text-anchor="middle">{topic_name}</text>',
-    ]
-    for i, ((label, desc), color) in enumerate(zip(levels, colors)):
-        y = 44 + i * (bar_h + gap)
-        bar_w = 200 + i * 80
-        lines += [
-            f'<rect x="40" y="{y}" width="{bar_w}" height="{bar_h}" rx="6" fill="{color}" opacity="0.12" stroke="{color}" stroke-width="1"/>',
-            f'<rect x="40" y="{y}" width="6" height="{bar_h}" rx="3" fill="{color}"/>',
-            f'<text class="th" x="58" y="{y+20}" fill="{color}">{label}</text>',
-            f'<text class="ts" x="58" y="{y+38}" opacity="0.65">{desc[:55]}</text>',
-        ]
-    lines.append('</svg>')
-    return "\n".join(lines)
 
 def make_diagram(topic_name: str, topic_id: str, diagram_type: str = "", structure: dict = None, style_override: int = None) -> str:
     C = get_pal(topic_id, topic_name)
@@ -4286,7 +4250,6 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                 if len(picked) >= 2: break
             extra_keywords = " ".join(picked)
 
-    # ── WHITELIST-ONLY model ── Only these domains pass _is_approved(). Everything else rejected.
     APPROVED_SOURCES = {
         "bytebytego.com": 5,
         "blog.bytebytego.com": 5,
