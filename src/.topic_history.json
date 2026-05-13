@@ -1289,5 +1289,30 @@
     "status": "success",
     "quality_score": 84,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-05-13T00:03:56.619539",
+    "topic_id": "trend-googlebook-tech",
+    "topic_name": "Googlebook Use Cases",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 98,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 98,
+        "raw_score": 98,
+        "similarity": 0.0574,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0352,
+        "penalty": 0
+      }
+    ]
   }
 ]
