@@ -715,6 +715,8 @@ FORMATTING:
 - ABSOLUTE BAN: Never fabricate a "recent Slack message", "DM I received", or invented social quote as hook
 - ABSOLUTE BAN: Never repeat the same sentence structure more than twice in a row
 - CONTENT ACCURACY: Write exactly about the given topic — do not rename it or drift to adjacent topics
+- NO INVENTED PRODUCTS: Never invent fictional product names (e.g. "Googlebook", "Databook"). If a topic name seems unfamiliar, use the generic concept (e.g. "distributed database") rather than fabricating a product name.
+- NO META-COMMENTARY: Never start with "Here's the rewritten post", "Here's the updated version", or any preamble. Output only the post text, starting directly with the hook.
 """
 
 
@@ -1697,6 +1699,22 @@ def _cleanup_generated_post(text):
     text = "\n".join(cleaned_lines)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
 
+    # ── Strip LLM meta-commentary ────────────────────────────────────────────
+    # The LLM sometimes prepends "Here's the rewritten post:" or similar.
+    # Strip any such line from the top of the output.
+    _meta_patterns = [
+        "here's the rewritten", "here is the rewritten",
+        "here's the updated", "here is the updated",
+        "rewritten post", "here's the post", "here is the post",
+        "sections included", "with all", "as requested",
+    ]
+    _text_lines = text.splitlines()
+    for _mi, _ml in enumerate(_text_lines[:3]):  # only check first 3 lines
+        if any(p in _ml.strip().lower() for p in _meta_patterns):
+            text = "\n".join(_text_lines[_mi + 1:]).strip()
+            log.info(f"Stripped meta-commentary: '{_ml.strip()[:60]}'")
+            break
+
     # ── Word count enforcer ───────────────────────────────────────────────────
     # If the post exceeds 280 words (our 250-word target + 12% buffer),
     # trim the body while preserving the hook (first 2 lines) and the
@@ -2661,6 +2679,12 @@ def _render_linkedin_text(post_text):
         text = re.sub(r"```[a-z]*", "", text)
         text = re.sub(r"```", "", text)
 
+        # Remove bold/italic markdown — LinkedIn doesn't render it
+        text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)   # **bold** → bold
+        text = re.sub(r"\*([^*\n]+)\*", r"\1", text)       # *italic* → italic
+        text = re.sub(r"__([^_]+)__", r"\1", text)             # __bold__ → bold
+        text = re.sub(r"_([^_\n]+)_", r"\1", text)            # _italic_ → italic
+
         # Remove inline code ticks
         text = re.sub(r"`([^`\n]+)`", r"\1", text)
 
@@ -3593,15 +3617,15 @@ def _infer_diagram_type_from_post(post_text, fallback_type):
         return "Comparison Table"
     if "hype cycle" in text or "expectations" in text:
         return "Hype Cycle"
-    # "level" alone is too broad — posts about data tiers, OSI layers, skill levels etc.
-    # all use the word "level". Require explicit maturity/ladder signals.
+    # "level" alone is too broad — data tiers, OSI layers, skill levels all use it.
+    # Only infer Leverage Ladder when maturity/adoption vocabulary is present.
     _ladder_signals = (
-        "ai maturity" in text or
         "leverage ladder" in text or
         "adoption ladder" in text or
+        "ai maturity" in text or
         ("level" in text and "maturity" in text) or
-        ("level" in text and any(x in text for x in ["ai-native", "avoider", "experimenter", "builder"])) or
-        "leverage" in text
+        ("level" in text and any(x in text for x in ["ai-native", "avoider", "experimenter"]))
+        or "leverage" in text
     )
     if _ladder_signals:
         return "Leverage Ladder"
@@ -4546,17 +4570,34 @@ Write a LinkedIn post that:
                 _ap = f"""This post appears next to a diagram with these sections:
 {_slist}
 
-Only {_mentioned}/{len(_dsections)} sections mentioned. Rewrite so every section is covered:
-- Keep the hook (first 2 lines) and hashtags unchanged
-- Add 1-2 sentences per section explaining what it means and why it matters
-- Use the exact section names so post and diagram reinforce each other
-- Target {_tmin}–{_tmax} words
+Only {_mentioned}/{len(_dsections)} sections mentioned.
+
+REWRITE RULES — follow exactly:
+- Output ONLY the final post text. No preamble, no "Here's the rewritten post", no meta-commentary.
+- Start directly with the hook (first line of the post).
+- Keep the hook (first 2 lines) and hashtags unchanged.
+- Add 1-2 sentences per section explaining what it means and why it matters.
+- Use the exact section names so post and diagram reinforce each other.
+- Target {_tmin}–{_tmax} words.
+- Do NOT invent products, tools, or metrics not in the original post.
+- Do NOT use **bold** markdown — LinkedIn does not render it.
+- Output only the post. Nothing else.
 
 Current post:
 {post_text}"""
                 try:
                     _al = _cleanup_generated_post(call_ai(_ap, _build_post_system()))
                     if _al and len(_al) > 100:
+                        # Strip any leaked meta-commentary ("Here's the rewritten post..." etc.)
+                        _al_lines = _al.splitlines()
+                        for _skip_i, _skip_l in enumerate(_al_lines):
+                            _sl = _skip_l.strip().lower()
+                            if any(x in _sl for x in ["here's the rewritten", "here is the rewritten",
+                                                        "rewritten post", "sections included",
+                                                        "here's the updated", "here is the updated"]):
+                                _al = "\n".join(_al_lines[_skip_i + 1:]).strip()
+                                log.info("Stripped meta-commentary from alignment pass output")
+                                break
                         _new = sum(1 for s in _dsections if s.lower() in _al.lower())
                         if _new > _mentioned:
                             log.info(f"Alignment: {_mentioned}→{_new}/{len(_dsections)} sections")
