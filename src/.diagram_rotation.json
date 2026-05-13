@@ -30,5 +30,13 @@
     "topic_id": "trend-googlebook-tech",
     "topic_name": "RAG",
     "diagram_type": "Leverage Ladder"
+  },
+  {
+    "timestamp": "2026-05-13T20:50:31.891007",
+    "style_idx": 23,
+    "style_name": "Info-Frame Card",
+    "topic_id": "story-personal-ai-daily-life",
+    "topic_name": "Agent System",
+    "diagram_type": "Viral Poster"
   }
 ]
