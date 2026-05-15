@@ -3834,19 +3834,11 @@ TOPIC_STYLE_OVERRIDES = {
     "rag-stack":         11,   # ecosystem tree
     "ai-skills-map":     12,   # honeycomb map
     "llm-vs-agentic":    13,   # parallel pipelines
-    "genai-roadmap":     23,   # viral poster — high engagement
-    # Data / architecture topics → layered flow or data evolution
-    "data-architecture": 10,  # layered flow — shows tiers clearly
-    "data-lakehouse":    10,  # layered flow
-    "data-lake":         10,  # layered flow
-    "data-warehouse":    10,  # layered flow
-    "data-evolution":    8,   # data evolution style
-    "data-mesh":         10,  # layered flow
-    # Hype cycle / adoption
-    "hype-cycle":        28,  # hype cycle S-curve
-    "ai-hype":           28,
-    "ai-adoption":       28,
-    "technology-adoption": 28,
+    "genai-roadmap":     23,
+    "data-architecture": 10,
+    "data-lakehouse":    10,
+    "hype-cycle":        28,
+    "ai-adoption":       28,   # viral poster — high engagement
     "enterprise-ai":     20,   # dark column flow
     "kubernetes":        20,   # dark column flow — k8s layers
     # ── Career / Skills / Learning (also matches custom topic names) ─────────
@@ -3894,14 +3886,6 @@ DIAGRAM_TYPE_STYLE_MAP = {
     "tree": 9,
     "conceptual layers": 2,
     "layers": 2,
-    "data layers": 10,
-    "data tiers": 10,
-    "tiered architecture": 10,
-    "3-tier": 10,
-    "leverage ladder": 29,
-    "maturity ladder": 29,
-    "adoption ladder": 29,
-    "hype cycle": 28,
     "ecosystem tree": 11,
     "ecosystem": 11,
     "honeycomb map": 12,
@@ -4006,9 +3990,8 @@ def _pick_style_from_metadata(topic_id: str, topic_name: str, diagram_type: str 
     return 7, "default"
 
 
-def _maybe_variation_style(base_style_idx: int, topic_id: str, topic_name: str, source: str) -> int:
-    # DISABLED: random variation caused diagram/post mismatches.
-    # e.g. posts using the word "level" getting a maturity ladder regardless of topic.
+def _maybe_variation_style(base_style_idx, topic_id, topic_name, source):
+    # DISABLED: caused mismatches
     return base_style_idx
 
 def _extract_scoring_keywords(topic_name: str, diagram_type: str = "", structure: dict = None):
@@ -4464,45 +4447,91 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         except Exception:
             return []
 
-    def _is_approved(url: str) -> bool:
-        url_lower = url.lower()
-        return any(domain in url_lower for domain in APPROVED_SOURCES)
+    # Blacklist: reject URLs from known bad categories
+    DOMAIN_BLACKLIST = [
+        # ── Slide/presentation marketplaces ──
+        "slideteam.net", "sketchbubble.com", "powerpointify.com",
+        "slidesalad.com", "slideegg.com", "presentationgo.com",
+        "slideshare.net", "slideserve.com", "slideplayer.com",
+        "slidegeeks.com", "fppt.com", "24slides.com",
+        "beautiful.ai", "slidemodel.com", "hislide.io",
+        # ── Stock photo / illustration ──
+        "shutterstock.com", "gettyimages.com", "dreamstime.com",
+        "123rf.com", "depositphotos.com", "istockphoto.com",
+        "unsplash.com", "pexels.com", "pixabay.com",
+        "freepik.com", "flaticon.com", "vecteezy.com",
+        "vectorstock.com", "stock.adobe.com", "alamy.com",
+        "bigstockphoto.com", "clipart-library.com",
+        # ── Generic diagram tools (not technical content) ──
+        "canva.com", "lucidchart.com", "creately.com",
+        "smartdraw.com", "gliffy.com", "cacoo.com",
+        "visme.co", "piktochart.com", "infogram.com",
+        "easel.ly", "venngage.com",
+        # ── Social / portfolio / design ──
+        "pinterest.com", "dribbble.com", "behance.net",
+        "artstation.com", "deviantart.com", "imgur.com",
+        # ── Website builder CDNs ──
+        "cdn-website.com", "wixstatic.com", "squarespace-cdn.com",
+        "weebly.com", "webflow.io", "webflowusercontent.com",
+        # ── Low-quality explainer / quiz sites ──
+        "chegg.com", "coursehero.com", "quizlet.com",
+        "brainly.com", "scribd.com", "academia.edu",
+        "guru99.com", "simplilearn.com", "intellipaat.com",
+        "mindmajix.com", "edureka.co",
+        # ── News/media (photos not diagrams) ──
+        "techcrunch.com", "wired.com", "theverge.com",
+        "businessinsider.com", "forbes.com",
+    ]
 
-    # 1. Collect candidates from all queries
-    candidates = []   # list of (url, priority)
+    def _is_blacklisted(url: str) -> bool:
+        u = url.lower()
+        if any(d in u for d in DOMAIN_BLACKLIST):
+            return True
+        bad_patterns = [
+            # Academic/lecture patterns
+            "lecture", "/slides/", ".pptx", "ppt/",
+            "chapter", "lec-", "module-", "week-",
+            # Photo patterns
+            "/photo/", "/photos/", "stock-photo", "stock_photo",
+            "-portrait", "-headshot", "-person-", "-woman-", "-man-",
+            # Low-quality patterns
+            "infographic", "clip-art", "clipart", "vector-art",
+        ]
+        return any(p in u for p in bad_patterns)
+
+    # Collect candidates — accept anything not blacklisted
+    # SOURCE_PRIORITY scoring rewards trusted sites, blacklist rejects garbage
+    candidates = []
     seen_urls = set()
     active_queries = SEARCH_QUERIES[:2] if fast_mode else SEARCH_QUERIES
     for query in active_queries:
         log.info(f"Searching: {query}")
         for url, pri in _scrape_bing(query):
-            if not _is_approved(url):
+            if _is_blacklisted(url):
                 continue
             if url not in seen_urls:
                 seen_urls.add(url)
                 candidates.append((url, pri))
-                log.info(f"Approved candidate: {url[:80]} (priority={pri})")
 
     if not candidates and not fast_mode:
-        log.warning("No whitelisted candidates from primary queries; running broader fallback queries")
+        log.warning("No candidates from primary queries — running fallback queries")
         fallback_queries = [
-            f"{topic_name} architecture diagram site:bytebytego.com OR site:algomaster.io OR site:designgurus.io",
-            f"{topic_name} system design site:eugeneyan.com OR site:huyenchip.com OR site:towardsdatascience.com",
-            f"{topic_name} engineering diagram site:medium.com OR site:dev.to OR site:substack.com",
-            f"{topic_name} technical diagram site:martinfowler.com OR site:highscalability.com",
+            f"{topic_name} architecture diagram site:bytebytego.com OR site:algomaster.io",
+            f"{topic_name} system design site:eugeneyan.com OR site:huyenchip.com",
+            f"{topic_name} diagram site:medium.com OR site:dev.to OR site:substack.com",
         ]
         for query in fallback_queries:
             log.info(f"Fallback search: {query}")
             for url, pri in _scrape_bing(query):
-                if not _is_approved(url):
-                    continue
-                if url not in seen_urls:
-                    seen_urls.add(url)
-                    candidates.append((url, pri))
+                if not _is_blacklisted(url):
+                    if url not in seen_urls:
+                        seen_urls.add(url)
+                        candidates.append((url, pri))
             if candidates:
-                log.info(f"Fallback search found {len(candidates)} candidates")
+                log.info(f"Fallback found {len(candidates)} candidates")
                 break
 
-    log.info(f"Whitelisted candidates total: {len(candidates)}")
+    log.info(f"Candidates after blacklist filter: {len(candidates)}")
 
     # 3. Reject URLs matching lecture-slide or stock-photo patterns
     def _bad_url(url: str) -> bool:
