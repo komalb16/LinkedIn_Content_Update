@@ -530,5 +530,12 @@
     "style": 23,
     "signature": "225b41e742c2beaac37a6cce7f119012",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-05-16T14:33:10.934243",
+    "topic_id": "trend-ai-psychosis-check",
+    "style": 0,
+    "signature": "584e3175e8deb4661e090ea3145d0294",
+    "duplicate_avoided": true
   }
 ]

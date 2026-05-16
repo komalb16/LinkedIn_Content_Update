@@ -1,14 +1,10 @@
-{
-  "rotation_index": 1,
-  "style_history": [
-    2,
-    29,
-    29,
-    29,
-    23,
-    27,
-    28,
-    30,
-    0
-  ]
-}
+[
+  {
+    "timestamp": "2026-05-16T14:33:10.937695",
+    "style_idx": 0,
+    "style_name": "Vertical Flow",
+    "topic_id": "trend-ai-psychosis-check",
+    "topic_name": "AI Implementation Pitfalls",
+    "diagram_type": "Flow Chart"
+  }
+]
