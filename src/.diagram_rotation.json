@@ -1,18 +1,10 @@
 [
   {
-    "timestamp": "2026-05-16T14:34:49.533542",
-    "style_idx": 1,
-    "style_name": "Mind Map",
-    "topic_id": "trend-ai-psycho-diag",
-    "topic_name": "Avoiding AI Hype",
-    "diagram_type": "Modern Cards"
-  },
-  {
-    "timestamp": "2026-05-16T14:59:53.774200",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "platform-engineering-ai",
-    "topic_name": "Professional Architecture",
-    "diagram_type": "Viral Poster"
+    "timestamp": "2026-05-16T19:18:34.411733",
+    "style_idx": 0,
+    "style_name": "Vertical Flow",
+    "topic_id": "trend-react-alternatives",
+    "topic_name": "Python HTMX Wins vs React",
+    "diagram_type": "Comparison Table"
   }
 ]

@@ -1389,5 +1389,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-16T19:18:40.892724",
+    "topic_id": "trend-react-alternatives",
+    "topic_name": "Python HTMX Wins",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 98,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 98,
+        "raw_score": 98,
+        "similarity": 0.0721,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 71,
+        "raw_score": 71,
+        "similarity": 0.0632,
+        "penalty": 0
+      }
+    ]
   }
 ]
