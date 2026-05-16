@@ -565,5 +565,19 @@
     "style": 0,
     "signature": "8328d0f5af6308dd1ff3d85684c48577",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-05-16T20:32:59.281176",
+    "topic_id": "trend-react-alternative",
+    "style": 0,
+    "signature": "3e52445d33ee46ef6fbedcac99ea3104",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-05-16T20:49:43.503886",
+    "topic_id": "trend-ctf-format-break",
+    "style": 1,
+    "signature": "d7fb4590cd48251faac5b3823f92ca35",
+    "duplicate_avoided": true
   }
 ]
