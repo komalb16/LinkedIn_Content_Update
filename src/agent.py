@@ -1501,10 +1501,10 @@ Length target: {length}
 {structure_block}
 
 Requirements:
-- Do not invent personal incidents, team stories, tool names, or metrics that were not explicitly provided in the topic
-- Do not mention your own workplace incidents (debugging sessions, outages, production fires, internal team events)
-- If the topic does not include a concrete metric, use qualitative language instead of numbers
-- If the topic does not include named tools, keep examples generic instead of dropping in brand names
+- Use specific real tool names relevant to the topic (Kubernetes, Docker, Redis, etc.)
+- Use realistic but illustrative metrics to make points concrete (e.g. "reduced latency by 40%")
+- Write from Komal's perspective as a Staff Engineer who has seen this in production
+- Include one specific failure scenario or hard-won lesson that engineers will recognise
 - Use 4 to 10 relevant emojis naturally across hook, bullets, and CTA (not spammy)
 - Include exactly one fenced visual block that matches the planned diagram type
 - Keep the fenced visual block concise (3 to 6 lines); avoid large ASCII box art
@@ -3467,24 +3467,33 @@ def _sanitize_visual_title(title, fallback_title):
 
 
 def _replacement_visual_label(label, topic_stub):
+    """
+    Replace generic visual labels with meaningful, topic-specific ones.
+    Instead of 'AI Implementation Pitfalls context', use 'Why It Matters'.
+    """
     normalized = _normalize_visual_phrase(label)
     replacements = {
-        "the problem": f"{topic_stub} context",
-        "core concept": f"{topic_stub} principle",
-        "how it works": f"{topic_stub} flow",
-        "best practices": f"{topic_stub} priorities",
-        "common mistakes": f"{topic_stub} risks",
-        "key takeaway": f"{topic_stub} outcome",
-        "the fundamental idea": f"{topic_stub} focus",
-        "summary": f"{topic_stub} summary",
-        "introduction": f"{topic_stub} overview",
-        "hook": f"{topic_stub} signal",
+        "the problem":          "Why It Matters",
+        "core concept":         "The Core Idea",
+        "how it works":         "How It Works",
+        "best practices":       "What Works",
+        "common mistakes":      "What Goes Wrong",
+        "key takeaway":         "The Takeaway",
+        "the fundamental idea": "The Core Idea",
+        "summary":              "Key Insight",
+        "introduction":         "Overview",
+        "hook":                 "The Signal",
+        "context":              "Why Now",
+        "principle":            "The Rule",
+        "flow":                 "The Process",
+        "priorities":           "What Matters",
+        "risks":                "Watch Out",
+        "outcome":              "The Result",
     }
     for phrase, replacement in replacements.items():
         if normalized == phrase or normalized.startswith(phrase + " "):
             return replacement[:42]
     return ""
-
 
 def _sanitize_visual_structure(structure, topic_name):
     if not isinstance(structure, dict):
