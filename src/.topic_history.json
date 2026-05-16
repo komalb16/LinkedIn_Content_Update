@@ -1339,5 +1339,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-16T13:39:34.192173",
+    "topic_id": "devsecops",
+    "topic_name": "DevSecOps Practices",
+    "category": "Security",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 74,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 21,
+        "raw_score": 21,
+        "similarity": 0.0719,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 19,
+        "raw_score": 19,
+        "similarity": 0.0444,
+        "penalty": 0
+      }
+    ]
   }
 ]
