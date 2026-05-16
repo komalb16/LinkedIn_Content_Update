@@ -4623,28 +4623,25 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                     # Allow fallback if check fails but size is good
                 
                 # --- Illustration/Artwork Rejection Filter ---
-# Reject images that look like illustrations rather than technical diagrams.
-# Technical diagrams have: lots of straight lines, text, geometric shapes.
-# Illustrations have: organic shapes, gradients, photographic content.
+                # Technical diagrams almost always have a solid background color
+                # Photos and complex illustrations are noisy and lack a single dominant color.
                 try:
                     p_img_check = Image.open(io.BytesIO(img_r.content)).convert("RGB")
-                    img_array = list(p_img_check.getdata())
-                    width_c, height_c = p_img_check.size
+                    p_img_check.thumbnail((150, 150))
                     
-                    # Sample pixels along a grid to check for straight-line structure
-                    # Technical diagrams tend to have many pixels at pure/near-pure colors
-                    # (white backgrounds, solid colored boxes, black text)
-                    total_pixels = len(img_array)
-                    near_white = sum(1 for r,g,b in img_array if r>220 and g>220 and b>220)
-                    near_black = sum(1 for r,g,b in img_array if r<35 and g<35 and b<35)
-                    near_pure  = (near_white + near_black) / max(total_pixels, 1)
+                    q = p_img_check.quantize(colors=32)
+                    q_pixels = list(q.getdata())
+                    q_counts = {}
+                    for px in q_pixels:
+                        q_counts[px] = q_counts.get(px, 0) + 1
                     
-                    # Technical diagrams: >15% pixels are near-white or near-black
-                    # Illustrations/photos: typically <10% near-white or near-black
-                    if near_pure < 0.10:
-                        log.info(f"Skipping illustration/photo (near_pure={near_pure:.2f}): {img_url[:60]}")
+                    max_count = max(q_counts.values()) if q_counts else 0
+                    dom_ratio = max_count / max(len(q_pixels), 1)
+                    
+                    # Photos typically have dom_ratio < 0.10. Diagrams usually > 0.30.
+                    if dom_ratio < 0.15:
+                        log.info(f"Skipping photo/illustration (dom_ratio={dom_ratio:.2f}): {img_url[:60]}")
                         continue
-                        
                 except Exception as e:
                     log.warning(f"Illustration check failed ({e}), allowing image")
     # Don't skip on error — allow the image through
