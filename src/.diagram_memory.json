@@ -537,5 +537,12 @@
     "style": 0,
     "signature": "584e3175e8deb4661e090ea3145d0294",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-05-16T14:34:49.530379",
+    "topic_id": "trend-ai-psycho-diag",
+    "style": 1,
+    "signature": "a8cbbd4bf52097d8b6fa451444d14254",
+    "duplicate_avoided": true
   }
 ]
