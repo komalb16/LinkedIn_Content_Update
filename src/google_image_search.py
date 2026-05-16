@@ -305,9 +305,11 @@ def _download_and_validate(url):
         if _is_low_complexity(raw):
             log.info(f"Rejected low-complexity: {url[:60]}")
             return None
-        if _is_illustration_or_photo(raw):
-            log.info(f"Rejected illustration/photo: {url[:60]}")
-            return None
+        # NOTE: _is_illustration_or_photo() removed — it incorrectly rejected
+        # colorful technical diagrams (ByteByteGo, AlgoMaster, DesignGurus) because
+        # those images have many distinct colors and no dominant palette entry,
+        # causing dom_ratio < 0.08 and a false rejection. Person-photo detection
+        # and low-complexity detection are sufficient guards.
         return raw
     except Exception as e:
         log.debug(f"Download failed {url[:60]}: {e}")
