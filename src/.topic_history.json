@@ -1364,5 +1364,30 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-16T14:59:59.101642",
+    "topic_id": "platform-engineering-ai",
+    "topic_name": "Platform Engineering for AI Teams",
+    "category": "Engineering",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 17,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 70,
+        "raw_score": 70,
+        "similarity": 0.0556,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 47,
+        "raw_score": 47,
+        "similarity": 0.0342,
+        "penalty": 0
+      }
+    ]
   }
 ]
