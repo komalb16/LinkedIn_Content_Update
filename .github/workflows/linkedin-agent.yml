@@ -144,7 +144,19 @@ jobs:
           echo "  Approved     : ${{ github.event.inputs.approved_run_id || 'no' }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-      - name: 🚀 Run LinkedIn Agent
+      - name: � Debug: Check environment variables
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+        run: |
+          echo "Checking if SERPAPI_KEY is set..."
+          if [ -z "$SERPAPI_KEY" ]; then
+            echo "⚠️  SERPAPI_KEY is EMPTY or NOT SET"
+            echo "   Please verify the secret value in GitHub Settings → Secrets"
+          else
+            echo "✅ SERPAPI_KEY is set (first 10 chars: ${SERPAPI_KEY:0:10}...)"
+          fi
+
+      - name: �🚀 Run LinkedIn Agent
         id: run_agent
         working-directory: src
         env:
@@ -158,9 +170,10 @@ jobs:
           GH_EVENT_NAME: ${{ github.event_name }}
           # 55 min window < 60 min cron interval — prevents double-posting.
           # Two consecutive hourly crons can never both match the same slot.
-          SCHEDULE_WINDOW_MINUTES: "119"
+          SCHEDULE_WINDOW_MINUTES: "55"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: |
           if [ -n "${{ github.event.inputs.approved_run_id }}" ] && [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
             python post_approved_preview.py \

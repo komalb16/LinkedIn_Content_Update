@@ -37,6 +37,12 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 SERPAPI_URL = "https://serpapi.com/search"
 
+# Debug: log if SERPAPI_KEY is set on module load
+if SERPAPI_KEY:
+    log.info(f"SERPAPI_KEY loaded successfully (first 10 chars: {SERPAPI_KEY[:10]}...)")
+else:
+    log.warning("SERPAPI_KEY not found in environment — Internet image search will be disabled")
+
 MIN_IMAGE_BYTES = 25_000
 MAX_QUERIES     = 4
 

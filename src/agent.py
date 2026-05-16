@@ -11,6 +11,13 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not installed, proceed without it
+
 # Add src directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
