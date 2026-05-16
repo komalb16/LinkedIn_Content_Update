@@ -1,14 +1,10 @@
-{
-  "rotation_index": 1,
-  "style_history": [
-    2,
-    29,
-    29,
-    29,
-    23,
-    27,
-    28,
-    30,
-    0
-  ]
-}
+[
+  {
+    "timestamp": "2026-05-16T19:18:34.411733",
+    "style_idx": 0,
+    "style_name": "Vertical Flow",
+    "topic_id": "trend-react-alternatives",
+    "topic_name": "Python HTMX Wins vs React",
+    "diagram_type": "Comparison Table"
+  }
+]
