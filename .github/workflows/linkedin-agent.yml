@@ -144,19 +144,19 @@ jobs:
           echo "  Approved     : ${{ github.event.inputs.approved_run_id || 'no' }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-      - name: � Debug: Check environment variables
+      - name: "Debug: Check environment variables"
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: |
           echo "Checking if SERPAPI_KEY is set..."
           if [ -z "$SERPAPI_KEY" ]; then
-            echo "⚠️  SERPAPI_KEY is EMPTY or NOT SET"
-            echo "   Please verify the secret value in GitHub Settings → Secrets"
+            echo "WARNING SERPAPI_KEY is EMPTY or NOT SET"
+            echo "   Please verify the secret value in GitHub Settings Secrets"
           else
-            echo "✅ SERPAPI_KEY is set (first 10 chars: ${SERPAPI_KEY:0:10}...)"
+            echo "OK SERPAPI_KEY is set (first 10 chars: ${SERPAPI_KEY:0:10}...)"
           fi
 
-      - name: �🚀 Run LinkedIn Agent
+      - name: "🚀 Run LinkedIn Agent"
         id: run_agent
         working-directory: src
         env:
