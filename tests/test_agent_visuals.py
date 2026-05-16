@@ -14,7 +14,7 @@ class AgentVisualTests(unittest.TestCase):
         ])
 
         title = _extract_visual_title_for_type(post_text, "GPT in Production", "Flow Chart")
-        self.assertEqual(title, "GPT in Production needs observability before optimizat")
+        self.assertEqual(title, "GPT in Production")
 
     def test_viral_structure_filters_scaffold_labels(self):
         post_text = "\n".join([

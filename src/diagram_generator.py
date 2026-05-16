@@ -3836,7 +3836,6 @@ TOPIC_STYLE_OVERRIDES = {
     "llm-vs-agentic":    13,   # parallel pipelines
     "genai-roadmap":     23,
     "data-architecture": 10,
-    "data-lakehouse":    10,
     "hype-cycle":        28,
     "ai-adoption":       28,   # viral poster — high engagement
     "enterprise-ai":     20,   # dark column flow
