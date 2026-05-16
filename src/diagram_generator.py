@@ -4467,7 +4467,7 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
         "visme.co", "piktochart.com", "infogram.com",
         "easel.ly", "venngage.com",
         # ── Social / portfolio / design ──
-        "pinterest.com", "dribbble.com", "behance.net",
+        "pinterest.com", "pinimg.com", "dribbble.com", "behance.net",
         "artstation.com", "deviantart.com", "imgur.com",
         # ── Website builder CDNs ──
         "cdn-website.com", "wixstatic.com", "squarespace-cdn.com",
