@@ -109,29 +109,28 @@ URL_BLACKLIST_PATTERNS = [
 # ── Query builder ─────────────────────────────────────────────────────────────
 
 def _build_queries(topic_name, post_text=""):
-    tech_term = ""
-    if post_text:
-        m = re.search(
-            r"\b(Kubernetes|Docker|Kafka|Redis|PostgreSQL|GraphQL|gRPC|"
-            r"Terraform|Prometheus|Grafana|Istio|LangChain|LangGraph|RAG|"
-            r"LLM|FastAPI|OpenTelemetry|Datadog|Pinecone|Weaviate|"
-            r"GitHub Actions|GitLab CI|MLflow|Hugging Face)\b",
-            post_text, re.IGNORECASE
-        )
-        if m:
-            tech_term = m.group(0)
+    # Map abstract topics to concrete searchable terms
+    TOPIC_MAP = {
+        "ai hype":           "AI adoption ROI diagram",
+        "pitfall":           "AI integration architecture diagram",
+        "python htmx":       "Python web framework comparison diagram",
+        "secure data":       "data security architecture diagram",
+        "implementation":    "system implementation architecture",
+    }
+    topic_lower = topic_name.lower()
+    mapped = None
+    for key, val in TOPIC_MAP.items():
+        if key in topic_lower:
+            mapped = val
+            break
 
-    subject = (
-        f"{tech_term} {topic_name}".strip()
-        if tech_term and tech_term.lower() not in topic_name.lower()
-        else topic_name
-    )
+    subject = mapped or f"{topic_name} architecture diagram"
 
     return [
-        f"{subject} architecture diagram",
-        f"{subject} system design diagram",
-        f"{subject} engineering diagram",
-        f"{topic_name} technical diagram infographic",
+        f"{subject} site:medium.com OR site:dev.to OR site:towardsdatascience.com",
+        f"{topic_name} system design diagram",
+        f"{subject}",
+        f"{topic_name} technical infographic engineering",
     ][:MAX_QUERIES]
 
 # ── SerpApi call ──────────────────────────────────────────────────────────────
@@ -219,7 +218,7 @@ def _is_illustration_or_photo(image_bytes):
         for px in pixels:
             counts[px] = counts.get(px, 0) + 1
         dom_ratio = max(counts.values()) / max(len(pixels), 1)
-        return dom_ratio < 0.15
+        return dom_ratio < 0.08
     except Exception:
         return False
 
