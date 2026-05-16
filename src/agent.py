@@ -26,7 +26,7 @@ DIAGRAM_ROTATION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "llama-3.3-70b-versatile"
-MODEL_FALLBACK = "llama-3.1-8b-instant"  # Faster, higher rate limits for 429 fallback
+MODEL_FALLBACK = "llama3-70b-8192"  # Faster, higher rate limits for 429 fallback
 
 USER_NAME = os.environ.get("USER_NAME", os.environ.get("AUTHOR_NAME", "Komal Batra"))
 

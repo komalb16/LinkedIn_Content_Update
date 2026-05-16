@@ -4,188 +4,57 @@
   "weekly": {
     "mon": {
       "enabled": true,
-      "time_ist": "08:30",
-      "time_local": "08:30",
-      "time_tz": "America/New_York",
-      "time_utc": "12:30",
       "times": [
-        {
-          "enabled": true,
-          "time_tz": "America/New_York",
-          "time_utc": "12:30",
-          "time_ist": "08:30",
-          "time_local": "08:30"
-        }
+        {"time_utc": "12:30", "time_tz": "America/New_York", "time_local": "08:30"},
+        {"time_utc": "22:30", "time_tz": "America/New_York", "time_local": "18:30"}
       ]
     },
     "tue": {
       "enabled": true,
-      "time_ist": "09:30",
-      "time_local": "09:30",
-      "time_tz": "America/New_York",
-      "time_utc": "13:30",
       "times": [
-        {
-          "time_ist": "09:30",
-          "time_local": "09:30",
-          "time_tz": "America/New_York",
-          "time_utc": "13:30"
-        },
-        {
-          "time_ist": "18:30",
-          "time_local": "18:30",
-          "time_tz": "America/New_York",
-          "time_utc": "22:30"
-        },
-        {
-          "time_ist": "19:30",
-          "time_local": "19:30",
-          "time_tz": "America/New_York",
-          "time_utc": "23:30"
-        },
-        {
-          "time_ist": "20:30",
-          "time_local": "20:30",
-          "time_tz": "America/New_York",
-          "time_utc": "00:30"
-        },
-        {
-          "time_ist": "21:30",
-          "time_local": "21:30",
-          "time_tz": "America/New_York",
-          "time_utc": "01:30"
-        }
+        {"time_utc": "13:30", "time_tz": "America/New_York", "time_local": "09:30"},
+        {"time_utc": "23:30", "time_tz": "America/New_York", "time_local": "19:30"}
       ]
     },
     "wed": {
       "enabled": true,
-      "time_ist": "15:30",
-      "time_local": "15:30",
-      "time_tz": "America/New_York",
-      "time_utc": "19:30",
       "times": [
-        {
-          "time_ist": "15:30",
-          "time_local": "15:30",
-          "time_tz": "America/New_York",
-          "time_utc": "19:30"
-        },
-        {
-          "time_ist": "22:30",
-          "time_local": "22:30",
-          "time_tz": "America/New_York",
-          "time_utc": "02:30"
-        }
+        {"time_utc": "13:30", "time_tz": "America/New_York", "time_local": "09:30"},
+        {"time_utc": "23:30", "time_tz": "America/New_York", "time_local": "19:30"}
       ]
     },
     "thu": {
       "enabled": true,
-      "time_ist": "08:30",
-      "time_local": "08:30",
-      "time_tz": "America/New_York",
-      "time_utc": "12:30",
       "times": [
-        {
-          "enabled": true,
-          "time_tz": "America/New_York",
-          "time_utc": "12:30",
-          "time_ist": "08:30",
-          "time_local": "08:30"
-        }
+        {"time_utc": "12:30", "time_tz": "America/New_York", "time_local": "08:30"},
+        {"time_utc": "22:30", "time_tz": "America/New_York", "time_local": "18:30"}
       ]
     },
     "fri": {
       "enabled": true,
-      "time_ist": "20:30",
-      "time_local": "20:30",
-      "time_tz": "America/New_York",
-      "time_utc": "00:30",
       "times": [
-        {
-          "enabled": true,
-          "time_ist": "20:30",
-          "time_local": "20:30",
-          "time_tz": "America/New_York",
-          "time_utc": "00:30"
-        }
+        {"time_utc": "13:30", "time_tz": "America/New_York", "time_local": "09:30"},
+        {"time_utc": "22:30", "time_tz": "America/New_York", "time_local": "18:30"}
       ]
     },
     "sat": {
       "enabled": true,
-      "time_ist": "08:30",
-      "time_local": "08:30",
-      "time_tz": "America/New_York",
-      "time_utc": "12:30",
       "times": [
-        {
-          "enabled": true,
-          "time_tz": "America/New_York",
-          "time_utc": "12:30",
-          "time_ist": "08:30",
-          "time_local": "08:30"
-        },
-        {
-          "time_ist": "12:00",
-          "time_local": "12:00",
-          "time_tz": "America/New_York",
-          "time_utc": "16:00"
-        },
-        {
-          "time_ist": "15:15",
-          "time_local": "15:15",
-          "time_tz": "America/New_York",
-          "time_utc": "19:15"
-        },
-        {
-          "time_ist": "18:45",
-          "time_local": "18:45",
-          "time_tz": "America/New_York",
-          "time_utc": "22:45"
-        },
-        {
-          "time_ist": "19:45",
-          "time_local": "19:45",
-          "time_tz": "America/New_York",
-          "time_utc": "23:45"
-        }
+        {"time_utc": "14:30", "time_tz": "America/New_York", "time_local": "10:30"},
+        {"time_utc": "19:00", "time_tz": "America/New_York", "time_local": "15:00"},
+        {"time_utc": "23:30", "time_tz": "America/New_York", "time_local": "19:30"}
       ]
     },
     "sun": {
       "enabled": true,
-      "time_ist": "08:30",
-      "time_local": "08:30",
-      "time_tz": "America/New_York",
-      "time_utc": "12:30",
       "times": [
-        {
-          "enabled": true,
-          "time_tz": "America/New_York",
-          "time_utc": "12:30",
-          "time_ist": "08:30",
-          "time_local": "08:30"
-        },
-        {
-          "time_ist": "17:45",
-          "time_local": "17:45",
-          "time_tz": "America/New_York",
-          "time_utc": "21:45"
-        },
-        {
-          "time_ist": "18:30",
-          "time_local": "18:30",
-          "time_tz": "America/New_York",
-          "time_utc": "22:30"
-        },
-        {
-          "time_ist": "15:45",
-          "time_local": "15:45",
-          "time_tz": "America/New_York",
-          "time_utc": "19:45"
-        }
+        {"time_utc": "14:30", "time_tz": "America/New_York", "time_local": "10:30"},
+        {"time_utc": "19:00", "time_tz": "America/New_York", "time_local": "15:00"},
+        {"time_utc": "22:30", "time_tz": "America/New_York", "time_local": "18:30"}
       ]
     }
   },
   "skip_dates": [],
   "force_dates": [],
-  "updated_at": "2026-05-16T03:35:45.638Z"
+  "updated_at": "2026-05-16T00:00:00.000Z"
 }

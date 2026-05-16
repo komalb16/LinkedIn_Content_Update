@@ -28,6 +28,8 @@ import requests
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageStat
+from branded_footer import add_branded_footer
+from google_image_search import fetch_diagram_image, add_attribution_footer
 try:
     _DIAGRAM_AUTHOR = os.environ.get("USER_NAME") or os.environ.get("AUTHOR_NAME") or "Komal Batra"
 except Exception:
@@ -4623,25 +4625,28 @@ def _fetch_internet_image(topic_name: str, post_text: str = "", fast_mode: bool 
                     # Allow fallback if check fails but size is good
                 
                 # --- Illustration/Artwork Rejection Filter ---
-                # Technical diagrams almost always have a solid background color
-                # Photos and complex illustrations are noisy and lack a single dominant color.
+# Reject images that look like illustrations rather than technical diagrams.
+# Technical diagrams have: lots of straight lines, text, geometric shapes.
+# Illustrations have: organic shapes, gradients, photographic content.
                 try:
                     p_img_check = Image.open(io.BytesIO(img_r.content)).convert("RGB")
-                    p_img_check.thumbnail((150, 150))
+                    img_array = list(p_img_check.getdata())
+                    width_c, height_c = p_img_check.size
                     
-                    q = p_img_check.quantize(colors=32)
-                    q_pixels = list(q.getdata())
-                    q_counts = {}
-                    for px in q_pixels:
-                        q_counts[px] = q_counts.get(px, 0) + 1
+                    # Sample pixels along a grid to check for straight-line structure
+                    # Technical diagrams tend to have many pixels at pure/near-pure colors
+                    # (white backgrounds, solid colored boxes, black text)
+                    total_pixels = len(img_array)
+                    near_white = sum(1 for r,g,b in img_array if r>220 and g>220 and b>220)
+                    near_black = sum(1 for r,g,b in img_array if r<35 and g<35 and b<35)
+                    near_pure  = (near_white + near_black) / max(total_pixels, 1)
                     
-                    max_count = max(q_counts.values()) if q_counts else 0
-                    dom_ratio = max_count / max(len(q_pixels), 1)
-                    
-                    # Photos typically have dom_ratio < 0.10. Diagrams usually > 0.30.
-                    if dom_ratio < 0.15:
-                        log.info(f"Skipping photo/illustration (dom_ratio={dom_ratio:.2f}): {img_url[:60]}")
+                    # Technical diagrams: >15% pixels are near-white or near-black
+                    # Illustrations/photos: typically <10% near-white or near-black
+                    if near_pure < 0.10:
+                        log.info(f"Skipping illustration/photo (near_pure={near_pure:.2f}): {img_url[:60]}")
                         continue
+                        
                 except Exception as e:
                     log.warning(f"Illustration check failed ({e}), allowing image")
     # Don't skip on error — allow the image through
@@ -4717,10 +4722,10 @@ class DiagramGenerator:
                         log.info(f"Search subject refined from post content: '{_effective_search_name}'")
                     break
 
-        img_bytes, img_source_url = _fetch_internet_image(
+        img_bytes, img_source_url = fetch_diagram_image(
             _effective_search_name,
             post_text=post_text,
-            fast_mode=_dry_run_mode
+            
         )
         if img_bytes:
             png_filename = filename.replace(".svg", ".png")
@@ -4761,70 +4766,7 @@ class DiagramGenerator:
                 footer_h = max(52, int(height * 0.07))
                 foot_font_size = max(14, int(width * 0.026))
 
-                footer_img = Image.new("RGB", (width, height + footer_h), (15, 23, 42))
-                footer_img.paste(img, (0, 0))
-                draw2 = ImageDraw.Draw(footer_img)
-
-                # Separator line between diagram and footer
-                draw2.line([(0, height), (width, height)], fill=(56, 189, 248), width=2)
-
-                # Load font — try system fonts in order (Linux first, then Windows)
-                foot_font = foot_font_bold = None
-                _font_candidates = [
-                    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-                    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-                    "C:\\Windows\\Fonts\\segoeuib.ttf",
-                    "C:\\Windows\\Fonts\\segoeui.ttf",
-                ]
-                for _fp in _font_candidates:
-                    try:
-                        if foot_font_bold is None:
-                            foot_font_bold = ImageFont.truetype(_fp, foot_font_size)
-                        elif foot_font is None:
-                            foot_font = ImageFont.truetype(_fp, foot_font_size)
-                        if foot_font_bold and foot_font:
-                            break
-                    except Exception:
-                        continue
-                if not foot_font_bold:
-                    foot_font_bold = ImageFont.load_default()
-                if not foot_font:
-                    foot_font = foot_font_bold
-
-                author_name = _COPYRIGHT_NAME
-                footer_text = f"© {author_name}"
-                tb = draw2.textbbox((0, 0), footer_text, font=foot_font_bold)
-                text_h = tb[3] - tb[1]
-                text_x = int(width * 0.03)
-                circle_r = text_h // 2 + 2
-                circle_cx = text_x + circle_r
-                circle_cy = height + footer_h // 2
-                draw2.ellipse(
-                    [circle_cx - circle_r, circle_cy - circle_r,
-                     circle_cx + circle_r, circle_cy + circle_r],
-                    fill=(56, 189, 248),
-                )
-                copy_bb = draw2.textbbox((0, 0), "©", font=foot_font_bold)
-                copy_w = copy_bb[2] - copy_bb[0]
-                copy_h = copy_bb[3] - copy_bb[1]
-                draw2.text(
-                    (circle_cx - copy_w // 2, circle_cy - copy_h // 2),
-                    "©",
-                    font=foot_font_bold,
-                    fill=(15, 23, 42),
-                )
-                name_x = circle_cx + circle_r + 8
-                name_bb = draw2.textbbox((0, 0), author_name, font=foot_font_bold)
-                name_h = name_bb[3] - name_bb[1]
-                draw2.text(
-                    (name_x, height + (footer_h - name_h) // 2),
-                    author_name,
-                    font=foot_font_bold,
-                    fill=(255, 255, 255),
-                )
-
+                footer_img = add_branded_footer(img, author_name=_COPYRIGHT_NAME)
                 footer_img.save(png_filename)
                 log.info(f"Internet diagram saved with attribution footer: {png_filename}")
                 return png_filename
