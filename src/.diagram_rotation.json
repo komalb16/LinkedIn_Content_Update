@@ -1,42 +1,11 @@
-[
-  {
-    "timestamp": "2026-05-10T22:53:17.043111",
-    "style_idx": 2,
-    "style_name": "Pyramid/Funnel",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "diagram_type": "Architecture Diagram"
-  },
-  {
-    "timestamp": "2026-05-11T21:07:59.986882",
-    "style_idx": 29,
-    "style_name": "Style 29",
-    "topic_id": "trend-qr-code-auth",
-    "topic_name": "Secure Auth Flows",
-    "diagram_type": "Leverage Ladder"
-  },
-  {
-    "timestamp": "2026-05-12T22:14:38.212604",
-    "style_idx": 29,
-    "style_name": "Style 29",
-    "topic_id": "data-evolution",
-    "topic_name": "Data Architecture Evolution",
-    "diagram_type": "Leverage Ladder"
-  },
-  {
-    "timestamp": "2026-05-13T00:03:41.124956",
-    "style_idx": 29,
-    "style_name": "Style 29",
-    "topic_id": "trend-googlebook-tech",
-    "topic_name": "RAG",
-    "diagram_type": "Leverage Ladder"
-  },
-  {
-    "timestamp": "2026-05-13T20:50:31.891007",
-    "style_idx": 23,
-    "style_name": "Info-Frame Card",
-    "topic_id": "story-personal-ai-daily-life",
-    "topic_name": "Agent System",
-    "diagram_type": "Viral Poster"
-  }
-]
+{
+  "rotation_index": 25,
+  "style_history": [
+    2,
+    29,
+    29,
+    29,
+    23,
+    27
+  ]
+}
