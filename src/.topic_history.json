@@ -1459,5 +1459,30 @@
     "status": "success",
     "quality_score": 86,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-05-17T23:00:23.198591",
+    "topic_id": "trend-vpn-privacy-tools",
+    "topic_name": "Secure Data Transmission",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 73,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 73,
+        "raw_score": 73,
+        "similarity": 0.0573,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 61,
+        "raw_score": 61,
+        "similarity": 0.0417,
+        "penalty": 0
+      }
+    ]
   }
 ]
