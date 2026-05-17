@@ -1414,5 +1414,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-17T00:02:52.975290",
+    "topic_id": "finops-for-ai",
+    "topic_name": "FinOps for AI Systems",
+    "category": "AI",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": []
   }
 ]

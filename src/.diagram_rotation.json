@@ -1,10 +1,7 @@
-[
-  {
-    "timestamp": "2026-05-16T20:49:43.507493",
-    "style_idx": 1,
-    "style_name": "Mind Map",
-    "topic_id": "trend-ctf-format-break",
-    "topic_name": "Kubernetes",
-    "diagram_type": "Flow Chart"
-  }
-]
+{
+  "rotation_index": 3,
+  "style_history": [
+    1,
+    3
+  ]
+}
