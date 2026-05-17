@@ -1449,5 +1449,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-17T19:20:49.277087",
+    "topic_id": "llm-architecture",
+    "topic_name": "LLM Architecture",
+    "category": "AI",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": []
   }
 ]
