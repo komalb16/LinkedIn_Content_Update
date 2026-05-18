@@ -1484,5 +1484,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-18T23:13:22.491864",
+    "topic_id": "aws-architecture",
+    "topic_name": "AWS Architecture Patterns",
+    "category": "Cloud",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": []
   }
 ]
