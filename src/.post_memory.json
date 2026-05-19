@@ -642,5 +642,12 @@
     "topic_name": "AWS Architecture Patterns",
     "category": "topic",
     "text": "\ud83d\udccc AWS Architecture Patterns\n\n\ud83d\ude80 Most AWS architectures are over-engineered, and I've seen it happen to the best of us.\n\nWhen to use serverless, microservices on ECS/EKS, or event-driven with SQS/SNS/EventBridge depends on your specific use case.\n\n\ud83d\udcca Let's walk through the diagram:\nIn Compute, we have EC2, Lambda, ECS, and Fargate - each with its own cost implications.\n\nFor Storage, S3, EBS, EFS, and Glacier offer different trade-offs between durability, availability, and cost.\n\n\ud83d\udca1 In Database, RDS, DynamoDB, and ElastiCache provide a range of options for relational, NoSQL, and caching use cases.\n\nIn Network, VPC, ALB, CloudFront, and Route53 help us manage traffic, security, and latency.\n\nIn Security, IAM, KMS, GuardDuty, and Secrets Manager are essential for keeping our apps and data safe.\n\nAWS Architecture\nCompute: EC2, Lambda, ECS, Fargate\nStorage: S3, EBS, EFS, Glacier\nDatabase: RDS, DynamoDB, ElastiCache\nNetwork: VPC, ALB, CloudFront, Route53\nSecurity: IAM, KMS, GuardDuty, Secrets Manager\n\nRight now? We are at a crossroads, where the wrong choice can lead to cost overruns and performance issues.\n\nI was wrong about the importance of serverless until I saw a 40% reduction in latency with a well-designed Lambda function.\n\n\ud83d\udcac What's your most painful lesson learned from an AWS architecture mistake, and how did you recover from it?\n\n#AWSServerless #Microservices #EventDriven #CloudArchitecture #AWSBestPractices"
+  },
+  {
+    "timestamp": "2026-05-19T23:13:36.205274",
+    "topic_id": "responsible-ai-security-stack",
+    "topic_name": "Responsible AI Security Stack",
+    "category": "topic",
+    "text": "\ud83d\udccc Responsible AI Security Stack\n\nResponsible AI Security Stack is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: Responsible AI is not a checklist slide; it is an operating stack with controls at each layer.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #ScaleEngineering #Scalability #TechLeadership"
   }
 ]
