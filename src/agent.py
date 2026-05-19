@@ -369,7 +369,7 @@ TONE_VARIATIONS = [
     "Senior engineer at 11pm fixing a production issue — direct, economical with words, slightly dark-humored.",
     "Tech lead writing the internal post-mortem — precise, owns mistakes, focused on what changes next.",
     "Principal engineer in a design review — thoughtful, asks hard questions, backs every claim with evidence.",
-    "Staff engineer mentoring someone — patient, uses analogies, skips nothing important, zero condescension.",
+    "Software engineer mentoring someone — patient, uses analogies, skips nothing important, zero condescension.",
     "Engineer who tried four approaches and finally found one that works — specific, quietly confident.",
     "The person at the conference who gives the best hallway talk — opinionated, concrete examples, no slides needed.",
     "AI engineer who has shipped three RAG systems — no hype, just what actually works in production.",
@@ -738,8 +738,8 @@ def _build_post_system():
     """Builds the system prompt with a randomly rotated voice example."""
     example = random.choice(VOICE_EXAMPLES)
     return f"""\
-You are Komal Batra — a Staff Engineer and technical writer with 10+ years building \
-production systems. You write LinkedIn posts that sound like you, not like AI.
+You are Komal Batra — a Software Engineer with 14+ years building production systems. \
+You write LinkedIn posts that sound like you, not like AI.
 
 Study this example. Match its energy, rhythm, and specificity exactly:
 
@@ -807,7 +807,7 @@ FORMATTING:
 
 
 NEWS_SYSTEM = """\
-You are Komal Batra — a Staff Engineer reacting to breaking tech news on LinkedIn.
+You are Komal Batra — a Software Engineer reacting to breaking tech news on LinkedIn.
 You have opinions. You pick a side. You back it with specifics.
 
 RULES:
@@ -826,6 +826,12 @@ RULES:
 - CRITICAL: No structural placeholders like "[Option A]" or "(Step 1)".
 - Never mention the current month or year.
 - Do NOT add copyright or signature.
+- CRITICAL: Every fenced code block must have both an opening ``` and a closing ``` on its own line. Never leave a fenced block unclosed.
+- Never frame a post as criticism of a specific product's pricing or business model. Present trade-offs neutrally — show both sides without declaring one option "a misstep" or "wrong".
+Also add the unclosed fenced block rule to the topic post prompt too. Find line 1584 where topic rules end:
+python# Add after line 1583 "- Never mention the current month or year":
+- CRITICAL: Every fenced code block must have both an opening ``` and a closing ``` on its own line. Never leave a fenced block unclosed.
+That's the only two places to change — NEWS_SYSTEM around line 824, and the topic requirements around line 1583. Both are straightforward string additions.You've used 90% of your session limitKeep workingSonnet 4.6Claude is AI and can make mistakes. Please double-check responses.Profile photo · PNGDownload as .png
 """
 
 STORY_THEMES = [
@@ -869,7 +875,7 @@ You are Komal Batra writing a personal story post for LinkedIn.
 BANNED OPENERS — the post will be rejected if it starts with any of these:
 - "I recently overheard", "I firmly believe", "I believe that"
 - "In today's world", "Our online presence", "It's important"
-- "As a Staff Engineer, I", "Upon further investigation"
+- "As an engineer, I", "Upon further investigation"
 - Any sentence that starts with "I" + a belief verb (believe, think, feel, know)
 
 REQUIRED STRUCTURE — follow this exactly:
@@ -1522,6 +1528,9 @@ REQUIREMENTS:
 - Dedicate 1-2 sentences to EACH section — explain what it means and why it matters
 - Use the exact section label names so post and diagram reinforce each other
 - DO NOT just list section names — explain each one with a concrete insight
+- Never add a generic consequence sentence after each numbered point 
+  (e.g. "This leads to X but can be complex" — cut these entirely)
+- Each numbered point should be self-contained and end there
 - The post should feel like a guided walkthrough of the diagram
 - End with 💬 + a specific comment-forcing question (not a poll)"""
     elif structure and structure.get("rows"):
@@ -1565,9 +1574,12 @@ Length target: {length}
 {structure_block}
 
 Requirements:
-- Use specific real tool names relevant to the topic (Kubernetes, Docker, Redis, etc.)
-- Use realistic but illustrative metrics to make points concrete (e.g. "reduced latency by 40%")
-- Write from Komal's perspective as a Staff Engineer who has seen this in production
+- Write from Komal's perspective as an engineer who has seen this in production
+- CRITICAL: Never write diagram section labels (like "Architecture Diagram:", 
+  "VPN Server", "Encryption") as plain paragraphs in the post body. 
+  All visual structure belongs inside a fenced code block only.
+- CRITICAL: Every fenced code block must have both an opening ``` and 
+  a closing ``` on its own line.
 - Include one specific failure scenario or hard-won lesson that engineers will recognise
 - Use 4 to 10 relevant emojis naturally across hook, bullets, and CTA (not spammy)
 - Include exactly one fenced visual block that matches the planned diagram type
@@ -1578,7 +1590,12 @@ Requirements:
 - The hook must be the very first line — no warming up, no preamble
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
+- CRITICAL: Every fenced code block must have exactly one opening ``` and one closing ```. Never open a fenced block without closing it on a separate line.
 - HARD RULE: Never use prose sub-headings like "Why It Matters:", "The Core Idea:", "What Works:", "The Fix:", "The Takeaway:", "In Production:", "So What:". Write the insight directly into the sentence — do not label it.
+- Never write a sentence fragment — every sentence must be complete with a subject, verb, and object
+- Never end a line with a preposition like 'where', 'that', 'which', 'for', 'of', 'to' without completing the thought
+- Always close fenced code blocks — every ``` that opens must have a matching ``` that closes
+- Never invent percentages or statistics (e.g. "70% of teams") unless the topic explicitly provides them
 """
     try:
         post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
@@ -3901,7 +3918,7 @@ def _get_post_subtitle(mode):
         "trending":   "What Engineers Need to Know",
         "topic":      "Production Insights",
     }
-    return subtitles.get(mode, "Staff Engineer's Take")
+    return subtitles.get(mode, "Software Engineer's Take")
 
 def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_structure):
     """
@@ -3984,8 +4001,8 @@ def get_post_mode():
         pass
 
     interview_prob = interview_freq
-    story_prob     = _env_float("STORY_MODE_PROB",      0.18)
-    trending_prob  = _env_float("TREND_MODE_PROB",      0.35)  # BUMPED: prioritized trending news
+    story_prob     = _env_float("STORY_MODE_PROB",      0.08)
+    trending_prob  = _env_float("TREND_MODE_PROB",      0.55)  # BUMPED: prioritized trending news
     ai_news_prob   = _env_float("AI_NEWS_MODE_PROB",    0.20)  # BUMPED: more AI focus
     layoff_prob    = _env_float("LAYOFF_MODE_PROB",     0.04)
     tools_prob     = _env_float("TOOLS_NEWS_MODE_PROB", 0.06)
@@ -4425,15 +4442,8 @@ Write a LinkedIn post that:
         if pub_blockers:
             log.warning("Publish blockers: " + " | ".join(pub_blockers))
             log.warning("Draft failed quality checks — attempting recovery with fresh topic post.")
-            # Pick a different topic for recovery
-            failed_id = topic.get("id", "")
-            recovery_topic = topic_mgr.get_next_topic()
-            if recovery_topic.get("id") == failed_id:
-                # get_next_topic returned the same topic — force a different one
-                alt_topics = [t for t in topic_mgr.topics if t.get("id") != failed_id]
-                if alt_topics:
-                    recovery_topic = alt_topics[0]
-            log.info(f"Selected topic: {recovery_topic['name']} (category: {recovery_topic.get('category', '')})")
+            log.info(f"Retrying same topic in standard mode: {topic['name']}")
+            recovery_topic = topic
             recovery_structure = topic_mgr.get_diagram_structure(recovery_topic)
             recovery_diagram_type = topic_mgr.get_diagram_type_for_topic(recovery_topic)
             log.info(f"Generating post: {recovery_topic['name']}")
@@ -4479,34 +4489,15 @@ Write a LinkedIn post that:
     # ── GENERATE DIAGRAM ──────────────────────────────────────────────────────
     fallback_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
 
-    # ALIGNMENT FIX: Extract the actual subject the post was written about.
-    # Priority 1: known tech tools/frameworks (most specific)
-    # Priority 2: company/product names from news posts (e.g. "Railway", "Anthropic")
-    # Priority 3: first meaningful noun phrase from the post hook
-    # This prevents diagram searches drifting from what the post actually covers.
-    post_subject_override = None
+    # DIAGRAM TOPIC ALIGNMENT
+    # For news modes only: detect company/product from post hook and align diagram.
+    # For all other modes (topic, interview, story): always use the actual topic name.
+    # This prevents tool names mentioned as examples (Redis, Kubernetes) from
+    # hijacking the diagram search away from the real topic.
+    diagram_topic = dict(topic)  # always set first — never None
 
-    # Priority 1: specific tech tools
-    tech_subject_patterns = [
-        r"\b(Kubernetes|Docker|Kafka|RAG|LLM|GraphQL|gRPC|Redis|PostgreSQL|"
-        r"Terraform|Helm|Prometheus|Grafana|Istio|Argo|Flink|Spark|dbt|"
-        r"Pinecone|Weaviate|LangChain|LangGraph|AutoGen|FastAPI|Pydantic|"
-        r"OpenTelemetry|Datadog|New Relic|GitHub Actions|GitLab CI|"
-        r"GPT-[\d.]+|Claude|Gemini|Llama|Mistral|Cohere|"
-        r"Azure OpenAI|Azure AI|AWS Bedrock|Google Vertex)\b",
-    ]
-    for pattern in tech_subject_patterns:
-        match = re.search(pattern, post_text or "", re.IGNORECASE)
-        if match:
-            post_subject_override = match.group(0)
-            log.info(f"Post subject detected (tech): '{post_subject_override}' — aligning diagram search")
-            break
-
-    # Priority 2: for news posts, extract company/product name from the first 2 sentences
-    # News posts often mention a company that IS the subject (e.g. "Railway just raised $100M")
-    if not post_subject_override and mode in ("ai_news", "tech_news", "tools_news", "layoff_news", "trending"):
+    if mode in ("ai_news", "tech_news", "tools_news", "layoff_news", "trending"):
         first_sentences = " ".join((post_text or "").splitlines()[:4])
-        # Match capitalized proper nouns that appear before action verbs (raised, launched, released, acquired)
         company_match = re.search(
             r"\b([A-Z][a-zA-Z]{2,}(?:\s[A-Z][a-zA-Z]+)?)\s+(?:just|has|have|is|are|was|were|"
             r"raised|secured|launched|released|acquired|announced|closed|signed|partnered|built|open-sourced)",
@@ -4514,49 +4505,12 @@ Write a LinkedIn post that:
         )
         if company_match:
             candidate = company_match.group(1)
-            # Skip generic words that happen to be capitalized
-            skip_words = {"The", "This", "That", "These", "Those", "What", "When", "Where",
-                         "Here", "There", "Most", "Many", "Some", "Every", "Each", "Just"}
-            if candidate not in skip_words and len(candidate) > 2:
-                post_subject_override = candidate + " architecture"
-                log.info(f"Post subject detected (news company): '{post_subject_override}' — aligning diagram search")
-
-    # Priority 3: fall back to topic name (existing behaviour)
-    # diagram_topic["name"] stays as-is
-
-    # If post is about something meaningfully different from the topic name, override
-    # AFTER
-    # Priority 3: extract subject from the first meaningful technical noun phrase in the post
-    if not post_subject_override:
-        for line in (post_text or "").splitlines()[:6]:
-            stripped = line.strip()
-            # Skip short lines, hashtag lines, emoji-only lines
-            if len(stripped) < 20 or stripped.startswith("#"):
-                continue
-            # Look for a capitalized technical term (2-3 words, no common verbs)
-            m = re.search(
-                r"\b((?:[A-Z][a-z]+\s+){0,2}(?:Architecture|Pipeline|System|Pattern|"
-                r"Framework|Model|Agent|Layer|Stack|Protocol|Design|Flow|"
-                r"Retrieval|Embedding|Inference|Training|Deployment|"
-                r"RAG|LLM|NLP|ML|AI|API|CI|CD)s?)\b",
-                stripped
-            )
-            if m:
-                candidate = m.group(1).strip()
-                # Reject single generic words
-                if len(candidate.split()) >= 2 or candidate.upper() == candidate:
-                    post_subject_override = candidate
-                    log.info(f"Post subject detected (noun phrase): '{post_subject_override}'")
-                    break
-
-    diagram_topic = dict(topic)
-    if post_subject_override and post_subject_override.lower().split()[0] not in topic["name"].lower():
-        log.warning(
-            f"Post/topic mismatch detected: topic='{topic['name']}' "
-            f"but post is about '{post_subject_override}'. "
-            f"Aligning diagram to post subject."
-        )
-        diagram_topic["name"] = post_subject_override
+            skip_words = {"The", "This", "That", "These", "Those", "What", "When",
+                         "Where", "Here", "There", "Most", "Many", "Some", "Every", "Each", "Just"}
+            topic_words = set(topic["name"].lower().split())
+            if candidate not in skip_words and len(candidate) > 2 and candidate.lower() not in topic_words:
+                diagram_topic["name"] = candidate + " architecture"
+                log.info(f"News post: aligning diagram to '{diagram_topic['name']}'")
 
     diagram_title, diagram_type, diagram_structure = _resolve_visual_metadata(
         diagram_topic, post_text, mode, fallback_diagram_type, structure

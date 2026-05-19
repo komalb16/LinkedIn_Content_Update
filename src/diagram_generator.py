@@ -2956,7 +2956,7 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
     else:
         sections = [{"id": i+1, "label": f"Point {i+1}", "desc": ""} for i in range(5)]
 
-    subtitle = (structure or {}).get("subtitle", "Staff Engineer's Take")
+    subtitle = (structure or {}).get("subtitle", "Software Engineer's Take")
     n = len(sections)
 
     svg = ""
@@ -3085,7 +3085,7 @@ def _style_viral_poster(topic_id, topic_name, C, structure=None):
     svg += (f'<text x="{PAD+86}" y="{foot_y+16}" fill="white" font-size="14" '
             f'font-weight="700" font-family="{FONT}">{xe(_COPYRIGHT_NAME)}</text>')
     svg += (f'<text x="{PAD+86}" y="{foot_y+32}" fill="{lighten(accent,0.40)}" '
-            f'font-size="11" font-family="{FONT}">Staff Engineer · AI &amp; Systems</text>')
+            f'font-size="11" font-family="{FONT}">Software Engineer · AI &amp; Systems</text>')
     svg += (f'<text x="{W-PAD-50}" y="{foot_y+28}" text-anchor="middle" fill="{lighten(accent,0.60)}" '
             f'font-size="13" font-weight="700" font-family="{FONT}">🔖 Save</text>')
 
@@ -3224,7 +3224,7 @@ def _style_tile_grid(topic_id, topic_name, C, structure=None):
             f'font-size="9" font-weight="900" font-family="{FONT}">KB</text>')
     svg += (f'<text x="{W//2-68}" y="{foot_y+32}" fill="{lighten(accent,0.50)}" '
             f'font-size="13" font-weight="700" font-family="{FONT}">'
-            f'{xe(_COPYRIGHT_NAME)} · Staff Engineer · AI &amp; Systems</text>')
+            f'{xe(_COPYRIGHT_NAME)} · Software Engineer · AI &amp; Systems</text>')
 
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" '
             f'width="{W}" height="{H}" style="display:block;font-family:{FONT}">'

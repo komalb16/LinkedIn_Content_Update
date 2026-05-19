@@ -10,7 +10,7 @@ from logger import get_logger
 log = get_logger("trend_to_topic")
 
 CONVERT_SYSTEM = """\
-You are a content strategist for a Staff Engineer LinkedIn account.
+You are a content strategist for a Software Engineer LinkedIn account.
 Your job is to turn trending tech news titles into structured post topics
 written from the perspective of a senior engineer with practical opinions.
 
@@ -34,7 +34,7 @@ def convert_trend_to_topic(trend_item, call_ai_fn):
     prompt = f"""Trending topic: "{title}"
 Source: {source}
 
-Convert this into a LinkedIn post topic for a Staff Engineer audience.
+Convert this into a LinkedIn post topic for a Software Engineer audience.
 Respond ONLY with this exact JSON structure, no other text:
 {{
   "id": "kebab-case-unique-id-max-5-words",
