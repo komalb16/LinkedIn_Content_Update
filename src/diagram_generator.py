@@ -253,7 +253,7 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
                    f'</pattern>'
                    f'<rect width="{W}" height="{H}" fill="url(#bg_pat)"/>')
 
-    title_c = clamp(title, 52)
+    title_c = clamp(title, 72)
 
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="display:block;font-family:{FONT};overflow:hidden">
 <defs>

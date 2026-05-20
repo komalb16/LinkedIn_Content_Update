@@ -3562,8 +3562,8 @@ def _sanitize_visual_title(title, fallback_title):
         or _is_generic_visual_phrase(candidate)
         or re.fullmatch(r"\d+[%\)]?", candidate)
     ):
-        return (fallback_title or "Production Insight")[:54]
-    return candidate[:54]
+        return (fallback_title or "Production Insight")[:72]
+    return candidate[:72]
 
 
 def _replacement_visual_label(label, topic_stub):
