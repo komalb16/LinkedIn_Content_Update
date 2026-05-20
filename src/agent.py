@@ -1525,9 +1525,10 @@ The diagram has {n} sections:
 {section_list}
 
 REQUIREMENTS:
-- Dedicate 1-2 sentences to EACH section — explain what it means and why it matters
-- Use the exact section label names so post and diagram reinforce each other
-- DO NOT just list section names — explain each one with a concrete insight
+- Dedicate 1-2 sentences to EACH section — explain what it means and why it matters in production
+- NEVER use the section label names directly in prose (e.g. never write "At the Start section" or "In the Need section")
+- Instead explain the concept in your own words — the diagram shows the labels, the post gives the insight
+- DO NOT just list section names — explain each one with a concrete engineering insight
 - Never add a generic consequence sentence after each numbered point 
   (e.g. "This leads to X but can be complex" — cut these entirely)
 - Each numbered point should be self-contained and end there
