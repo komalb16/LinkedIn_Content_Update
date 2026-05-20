@@ -1575,44 +1575,29 @@ Length target: {length}
 
 Requirements:
 - Write from Komal's perspective as an engineer who has seen this in production
-- CRITICAL: Never write diagram section labels (like "Architecture Diagram:", 
-  "VPN Server", "Encryption") as plain paragraphs in the post body. 
-  All visual structure belongs inside a fenced code block only.
-- CRITICAL: Every fenced code block must have both an opening ``` and 
-  a closing ``` on its own line.
-- Stay strictly on topic — never introduce unrelated frameworks, methodologies 
-  or concepts from other domains. A post about Git should only contain Git 
-  concepts. A post about RAG should only contain RAG concepts.
-- Never describe a workflow using arrow notation (→) in prose paragraphs — 
-  use it only inside fenced code blocks.
-- CRITICAL: Every numbered point must be a complete sentence with subject, 
-  verb and object. Never end a point mid-sentence (e.g. "SRP ensures one 
-  class has one" is incomplete — write "SRP ensures one class has one 
-  clear responsibility").
-- CRITICAL: Never write diagram section names as standalone paragraphs 
-  (e.g. "The LSP section is about..." — instead write flowing prose that 
-  explains the concept directly without referencing section labels).
-- CRITICAL: Never use diagram section names (like "Positioning section", 
-  "AI Approach", "Best Fit") as paragraph headers in the post body.
-  Write flowing prose only — section names are for the diagram, not the text.
-- Each paragraph must stand alone as a complete thought without referencing 
-  diagram structure labels.
 - Include one specific failure scenario or hard-won lesson that engineers will recognise
 - Use 4 to 10 relevant emojis naturally across hook, bullets, and CTA (not spammy)
 - Include exactly one fenced visual block that matches the planned diagram type
 - Keep the fenced visual block concise (3 to 6 lines); avoid large ASCII box art
 - Do not use Mermaid syntax or graph declarations like `graph LR`, `graph TD`, or `flowchart`
 - Keep this to exactly one topic only; do not append or preview a second post
-- Poll/CTA options must be concrete answer choices (not repeated section headers like "Task Shape", "Need Tools")
+- Poll/CTA options must be concrete answer choices (not repeated section headers)
 - The hook must be the very first line — no warming up, no preamble
+- The opening hook must be a complete grammatical sentence making a bold claim or observation. Never start with a fragment. Good: "Most teams pick Gitflow — and switch to trunk-based 2 years later." Bad: "like Gitflow vs trunk-based"
 - Keep paragraphs short and punchy (1 to 2 sentences where possible)
 - Never mention the current month or year
-- CRITICAL: Every fenced code block must have exactly one opening ``` and one closing ```. Never open a fenced block without closing it on a separate line.
-- HARD RULE: Never use prose sub-headings like "Why It Matters:", "The Core Idea:", "What Works:", "The Fix:", "The Takeaway:", "In Production:", "So What:". Write the insight directly into the sentence — do not label it.
+- HARD RULE: Never use prose sub-headings like "Why It Matters:", "The Core Idea:", "What Works:", "The Fix:", "The Takeaway:". Write the insight directly into the sentence.
 - Never write a sentence fragment — every sentence must be complete with a subject, verb, and object
 - Never end a line with a preposition like 'where', 'that', 'which', 'for', 'of', 'to' without completing the thought
-- Always close fenced code blocks — every ``` that opens must have a matching ``` that closes
-- Never invent percentages or statistics (e.g. "70% of teams") unless the topic explicitly provides them
+- CRITICAL: Every fenced code block must have exactly one opening ``` and one closing ``` on its own line. Never leave a fenced block unclosed.
+- CRITICAL: Never mirror diagram row labels (like "Positioning", "AI Approach", "Best Fit", "Trade-off") as paragraph openers. These are visual labels only — write natural prose instead.
+- Never start a paragraph with "When considering X", "In terms of X", or "The X section" where X is a diagram label.
+- CRITICAL: Never write diagram section names as standalone paragraphs. Write flowing prose that explains the concept directly.
+- Each paragraph must stand alone as a complete thought without referencing diagram structure labels.
+- Stay strictly on topic — never introduce concepts from unrelated domains. A post about Git must only contain Git concepts.
+- Never use arrow notation (→) in prose paragraphs — only inside fenced code blocks.
+- CRITICAL: Every numbered point must be a complete sentence. Never end a numbered point mid-sentence.
+- Never invent percentages or statistics unless the topic explicitly provides them.
 """
     try:
         post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
@@ -3716,7 +3701,7 @@ def _build_comparison_structure_from_post(post_text, title, fallback_entities=No
             left, right = parts[0].strip(), parts[1].strip()
             if not left or not right:
                 continue
-            label = "Positioning" if not rows else f"Point {len(rows) + 1}"
+            label = f"Point {len(rows) + 1}"
             rows.append({
                 "label": label,
                 "text": f"{left[:22]} -> {right[:22]}",
@@ -3728,10 +3713,10 @@ def _build_comparison_structure_from_post(post_text, title, fallback_entities=No
 
     if not rows:
         rows = [
-            {"label": "Positioning", "text": "Established platform -> Emerging alternative"},
-            {"label": "AI Approach", "text": "Add-on automation -> AI-native workflow"},
-            {"label": "Best Fit", "text": "Enterprise breadth -> Developer speed"},
-            {"label": "Trade-off", "text": "More control, more weight -> Simpler, less mature"},
+            {"label": "Option A",   "text": "Established approach -> Broader ecosystem"},
+            {"label": "Option B",   "text": "Modern approach -> Faster iteration"},
+            {"label": "Use When",   "text": "Complex projects -> Simpler projects"},
+            {"label": "Trade-off",  "text": "More control -> Less overhead"},
         ]
 
     return {
