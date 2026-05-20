@@ -30,7 +30,7 @@ from PIL import Image, ImageDraw, ImageFont
 # ── Branding config ───────────────────────────────────────────────────────────
 
 DEFAULT_AUTHOR  = "Komal Batra"
-DEFAULT_TAGLINE = "Staff Engineer · AI & Systems"
+DEFAULT_TAGLINE = "Microsoft Engineer · Turning AI Research into Production Reality"
 DEFAULT_CTA     = "Follow for more AI & Engineering content"
 
 # Colours — light lavender style matching sample image
@@ -81,7 +81,7 @@ def _load_font(size, bold=False):
 # ── Profile photo loader ──────────────────────────────────────────────────────
 
 def _load_profile_photo(diameter):
-    """Load profile photo, centre-crop to square, resize to diameter. Returns RGBA Image or None."""
+    """Load profile photo, centre-crop to square, resize to diameter."""
     for path in PROFILE_PHOTO_CANDIDATES:
         if os.path.exists(path):
             try:
@@ -105,7 +105,6 @@ def _paste_circle(canvas, image_rgba, cx, cy, r):
     diameter = r * 2
     mask = Image.new("L", (diameter, diameter), 0)
     ImageDraw.Draw(mask).ellipse([0, 0, diameter, diameter], fill=255)
-    # Convert to RGB
     rgb = Image.new("RGB", (diameter, diameter), (255, 255, 255))
     if image_rgba.mode == "RGBA":
         rgb.paste(image_rgba.convert("RGB"), mask=image_rgba.split()[3])
@@ -154,7 +153,6 @@ def add_branded_footer(
 ):
     """
     Add a professional branded footer to a PIL Image (RGB mode).
-
     Returns a new PIL Image with the footer appended at the bottom.
     """
     width, height = img.size
@@ -163,10 +161,10 @@ def add_branded_footer(
     footer_h = max(72, min(110, int(height * 0.10)))
     avatar_r = footer_h // 2 - 8
 
-    # Font sizes
+    # Font sizes — scale with image width
     name_fs = max(16, int(width * 0.022))
-    tag_fs  = max(13, int(width * 0.016))
-    cta_fs  = max(13, int(width * 0.016))
+    tag_fs  = max(11, int(width * 0.014))   # slightly smaller for longer tagline
+    cta_fs  = max(11, int(width * 0.014))
 
     # Create output canvas
     out  = Image.new("RGB", (width, height + footer_h), FOOTER_BG)
@@ -193,8 +191,8 @@ def add_branded_footer(
     tag_bb  = draw.textbbox((0, 0), tagline,     font=font_tag)
     tag_h   = tag_bb[3]  - tag_bb[1]
 
-    block_h     = name_h + 5 + tag_h
-    text_y      = height + (footer_h - block_h) // 2
+    block_h = name_h + 5 + tag_h
+    text_y  = height + (footer_h - block_h) // 2
 
     draw.text((text_x, text_y),              author_name, font=font_name, fill=NAME_COLOR)
     draw.text((text_x, text_y + name_h + 5), tagline,     font=font_tag,  fill=TAGLINE_COLOR)
@@ -255,7 +253,6 @@ def add_branded_footer_to_bytes(
 # ── Smoke test ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    # Creates a dummy diagram + branded footer to check output
     test_img = Image.new("RGB", (900, 600), (240, 242, 255))
     draw = ImageDraw.Draw(test_img)
     draw.rectangle([40, 40, 860, 560], outline=(99, 102, 241), width=3)
@@ -263,18 +260,12 @@ if __name__ == "__main__":
         font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 28)
     except Exception:
         font = ImageFont.load_default()
-    draw.text((260, 270), "Sample Diagram — Komal Batra", fill=(50, 50, 80), font=font)
+    draw.text((180, 270), "Sample Diagram — Komal Batra", fill=(50, 50, 80), font=font)
 
-    out = add_branded_footer(
-        test_img,
-        author_name="Komal Batra",
-        tagline="Staff Engineer · AI & Systems",
-        cta="Follow for more AI & Engineering content",
-    )
+    out = add_branded_footer(test_img)
     out_path = "test_branded_footer.png"
     out.save(out_path)
     print(f"Saved: {out_path}  ({out.size[0]}x{out.size[1]}px)")
+    print(f"Tagline: {DEFAULT_TAGLINE}")
     photo_found = any(os.path.exists(p) for p in PROFILE_PHOTO_CANDIDATES)
     print(f"Profile photo: {'found ✅' if photo_found else 'not found — using initials fallback'}")
-    if not photo_found:
-        print("  → Save your photo as src/profile_photo.jpg to use your real photo")

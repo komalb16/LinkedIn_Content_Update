@@ -1580,6 +1580,11 @@ Requirements:
   All visual structure belongs inside a fenced code block only.
 - CRITICAL: Every fenced code block must have both an opening ``` and 
   a closing ``` on its own line.
+- CRITICAL: Never use diagram section names (like "Positioning section", 
+  "AI Approach", "Best Fit") as paragraph headers in the post body.
+  Write flowing prose only — section names are for the diagram, not the text.
+- Each paragraph must stand alone as a complete thought without referencing 
+  diagram structure labels.
 - Include one specific failure scenario or hard-won lesson that engineers will recognise
 - Use 4 to 10 relevant emojis naturally across hook, bullets, and CTA (not spammy)
 - Include exactly one fenced visual block that matches the planned diagram type
