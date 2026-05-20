@@ -49,7 +49,16 @@ def download_preview_bundle(repo, run_id, artifact_name, token):
     if artifact is None:
         raise RuntimeError("No artifact found for approved preview run")
 
-    zip_resp = gh_get(artifact["archive_download_url"], token, accept="application/octet-stream")
+    # For ZIP downloads, GitHub requires Accept: application/vnd.github.v3+json (NOT the v2022 version)
+    # Do NOT include X-GitHub-Api-Version header for artifact ZIP downloads
+    zip_resp = requests.get(
+        artifact["archive_download_url"],
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github.v3+json",
+        },
+        timeout=60,
+    )
     zip_resp.raise_for_status()
     return zip_resp.content
 
