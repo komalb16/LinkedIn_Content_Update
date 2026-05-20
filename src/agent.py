@@ -1580,6 +1580,13 @@ Requirements:
   All visual structure belongs inside a fenced code block only.
 - CRITICAL: Every fenced code block must have both an opening ``` and 
   a closing ``` on its own line.
+- CRITICAL: Every numbered point must be a complete sentence with subject, 
+  verb and object. Never end a point mid-sentence (e.g. "SRP ensures one 
+  class has one" is incomplete — write "SRP ensures one class has one 
+  clear responsibility").
+- CRITICAL: Never write diagram section names as standalone paragraphs 
+  (e.g. "The LSP section is about..." — instead write flowing prose that 
+  explains the concept directly without referencing section labels).
 - CRITICAL: Never use diagram section names (like "Positioning section", 
   "AI Approach", "Best Fit") as paragraph headers in the post body.
   Write flowing prose only — section names are for the diagram, not the text.
