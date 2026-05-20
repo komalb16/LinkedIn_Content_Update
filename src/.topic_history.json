@@ -1527,5 +1527,30 @@
     "category": "Engineering",
     "mode": "topic",
     "status": "success"
+  },
+  {
+    "timestamp": "2026-05-20T23:20:59.965026",
+    "topic_id": "kafka-streaming",
+    "topic_name": "Apache Kafka and Streaming",
+    "category": "Data",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0144,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 74,
+        "raw_score": 74,
+        "similarity": 0.0344,
+        "penalty": 0
+      }
+    ]
   }
 ]
