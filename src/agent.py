@@ -1580,6 +1580,11 @@ Requirements:
   All visual structure belongs inside a fenced code block only.
 - CRITICAL: Every fenced code block must have both an opening ``` and 
   a closing ``` on its own line.
+- Stay strictly on topic — never introduce unrelated frameworks, methodologies 
+  or concepts from other domains. A post about Git should only contain Git 
+  concepts. A post about RAG should only contain RAG concepts.
+- Never describe a workflow using arrow notation (→) in prose paragraphs — 
+  use it only inside fenced code blocks.
 - CRITICAL: Every numbered point must be a complete sentence with subject, 
   verb and object. Never end a point mid-sentence (e.g. "SRP ensures one 
   class has one" is incomplete — write "SRP ensures one class has one 
