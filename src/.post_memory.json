@@ -782,5 +782,12 @@
     "topic_name": "RAG Systems",
     "category": "topic",
     "text": "\ud83d\udccc RAG Systems\n\nWe're at the peak of Retrieval-Augmented Generation (RAG) hype \ud83d\ude80, but most teams are still struggling to move beyond fine-tuning \ud83e\udd14.\n\nI've seen companies waste months on fine-tuning, only to realize that RAG is the better approach \ud83d\udcca.\n\nThe key to building production RAG systems lies in vector databases, chunking strategies, re-ranking, and evaluation metrics \ud83d\udcc8.\n\nA basic RAG setup involves storing documents in a vector database, which is then queried by a large language model (LLM) \ud83d\udcc4.\n\nHowever, this naive approach can be improved by introducing a reranker that filters retrieved context, ensuring that only relevant information is considered \ud83d\udcdd.\n\nMultimodal RAG takes this a step further by incorporating text, images, audio, and video into the retrieval process \ud83d\udcf9.\n\nRAG Architecture:\nDocuments\nVector DB\nLLM\nReranker\nMultimodal Input\nGraph RAG and hybrid RAG offer even more advanced capabilities, leveraging knowledge graphs and structured retrieval to improve performance \ud83d\udcca.\n\nAgentic RAG and multi-agent RAG introduce agent-based routing and collaboration, allowing for more complex and dynamic retrieval decisions \ud83e\udd16.\n\nI've seen teams achieve significant improvements in retrieval accuracy by implementing these strategies \ud83d\udcc8.\n\nSo, what's your approach to building production RAG systems?\n\n\ud83d\udcac What's your vector database of choice \u2014 Faiss, Pinecone, or something custom? \ud83d\udcc1\n\n#LLM #GenAI #VectorDB #AIEngineering #RAG"
+  },
+  {
+    "timestamp": "2026-05-21T23:11:06.325346",
+    "topic_id": "enterprise-ai",
+    "topic_name": "Enterprise AI Architecture",
+    "category": "topic",
+    "text": "Enterprise AI Architecture is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: Practical implementation guidance, trade-offs, and mistakes to avoid. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
