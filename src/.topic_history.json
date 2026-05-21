@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-09T23:02:17.243111",
-    "topic_id": "aws-architecture",
-    "topic_name": "Aws Architecture",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-10T23:02:17.243111",
     "topic_id": "ai-agents-2026",
     "topic_name": "Ai Agents 2026",
@@ -1552,5 +1545,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-21T12:23:54.827392",
+    "topic_id": "interview-tools-framework-mistakes",
+    "topic_name": "Interview: Tools_Frameworks",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 98,
+    "ab_variants": []
   }
 ]
