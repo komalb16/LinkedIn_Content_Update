@@ -1591,8 +1591,18 @@ REQUIREMENTS:
 - Never add a generic consequence sentence after each numbered point 
   (e.g. "This leads to X but can be complex" — cut these entirely)
 - Each numbered point should be self-contained and end there
+- CRITICAL: Every numbered point (1️⃣, 2️⃣, 3️⃣) must be a complete standalone 
+  sentence on its own line. Never end a numbered point mid-sentence with 
+  words like "is just", "but so does", "is another". Complete the thought 
+  fully before starting the next paragraph.
 - The post should feel like a guided walkthrough of the diagram
-- End with 💬 + a specific comment-forcing question (not a poll)"""
+- End with 💬 + a specific comment-forcing question (not a poll)
+- CRITICAL: Every fenced code block must have a closing ``` on its own line
+- CRITICAL: Every numbered point must be a complete sentence — never end mid-sentence
+- Never start a paragraph with "When considering X" or "In terms of X" where X is a diagram label
+- Stay strictly on topic — never introduce concepts from unrelated domains
+- Never use arrow notation (→) in prose paragraphs — only inside fenced code blocks
+- Never invent percentages or statistics unless the topic explicitly provides them"""
     elif structure and structure.get("rows"):
         rows = structure["rows"]
         n = len(rows)
@@ -1608,7 +1618,7 @@ The diagram has {n} rows:
 {row_list}
 
 REQUIREMENTS:
-- Reference each row label explicitly and explain WHY it matters
+- NEVER reference row labels by name in prose — explain what each concept means without using the label words
 - The post should feel like a guided walkthrough of the diagram"""
     else:
         structure_block = ""
