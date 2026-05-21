@@ -5,67 +5,39 @@
   "custom_topics": [
     {
       "id": "azure",
-      "name": "Azure"
+      "name": "Azure Architecture Patterns"
     },
     {
       "id": "ai-agents-2026",
-      "name": "AI Agents 2026"
+      "name": "AI Agents in Production 2026"
     },
     {
       "id": "llm",
-      "name": "LLM"
-    },
-    {
-      "id": "ai-in-real-world-applications",
-      "name": "AI in Real-World Applications"
-    },
-    {
-      "id": "responsible-ethical-ai",
-      "name": "Responsible & Ethical AI"
-    },
-    {
-      "id": "ai-career-skills",
-      "name": "AI + Career & Skills"
-    },
-    {
-      "id": "ai-trends-industry-insights",
-      "name": "AI Trends & Industry Insights"
-    },
-    {
-      "id": "ai-myths-misconceptions",
-      "name": "AI Myths & Misconceptions"
-    },
-    {
-      "id": "ai-innovation-experiments",
-      "name": "AI + Innovation Experiments"
+      "name": "LLM Architecture"
     },
     {
       "id": "data-engineering",
-      "name": "Data Engineering"
-    },
-    {
-      "id": "microsoft-365",
-      "name": "Microsoft 365"
+      "name": "Data Engineering Pipelines"
     },
     {
       "id": "copilot",
-      "name": "Copilot"
+      "name": "GitHub Copilot in Production"
     },
     {
       "id": "agentic-ai",
-      "name": "Agentic AI"
+      "name": "Agentic AI System Design"
     },
     {
       "id": "langchain",
-      "name": "LangChain"
+      "name": "LangChain vs LangGraph"
     },
     {
       "id": "ai-observability",
-      "name": "AI Observability"
+      "name": "AI Observability with OpenTelemetry"
     },
     {
       "id": "enterprise-ai",
-      "name": "Enterprise AI"
+      "name": "Enterprise AI Architecture"
     },
     {
       "id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
@@ -73,8 +45,36 @@
     },
     {
       "id": "llm-agents",
-      "name": "LLM Agents"
+      "name": "LLM Agents Architecture"
+    },
+    {
+      "id": "rag-production",
+      "name": "RAG in Production"
+    },
+    {
+      "id": "llm-cost-optimization",
+      "name": "LLM Cost Optimization"
+    },
+    {
+      "id": "vector-db-comparison",
+      "name": "Vector Database Comparison"
+    },
+    {
+      "id": "prompt-engineering-prod",
+      "name": "Prompt Engineering for Production"
+    },
+    {
+      "id": "ai-system-design",
+      "name": "AI System Design Patterns"
+    },
+    {
+      "id": "mlops-best-practices",
+      "name": "MLOps Best Practices"
+    },
+    {
+      "id": "platform-engineering",
+      "name": "Platform Engineering"
     }
   ],
-  "updated_at": "2026-04-17T21:49:45.503Z"
+  "updated_at": "2026-05-20T00:00:00.000Z"
 }

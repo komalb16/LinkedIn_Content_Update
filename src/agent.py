@@ -384,10 +384,11 @@ HOOK_STYLES = [
         "Use Month 1, Month 3, Month 6, Month 12 as markers. "
         "Conclude with a simple 1-2-3 call to action."
     ),
-    (
-        "Start with 'Everyone is talking about X. Almost nobody is explaining it correctly.' "
-        "Follow with a simple definition, then a 4-step loop (Perceive/Plan/Act/Learn). "
-        "Give a concrete 'Goal -> Agent actions' example to make it real."
+     (
+        "Start with a surprising production failure or counterintuitive truth you discovered firsthand. "
+        "Make the first sentence a bold claim that challenges conventional wisdom. "
+        "Never use 'Everyone is talking about' as an opener — it's overused and signals AI-generated content. "
+        "Follow with 3-4 specific technical insights drawn from real engineering experience."
     ),
 ]
 
