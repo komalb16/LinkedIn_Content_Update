@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-10T23:02:17.243111",
-    "topic_id": "ai-agents-2026",
-    "topic_name": "Ai Agents 2026",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-11T23:02:17.243111",
     "topic_id": "ai-innovation-experiments",
     "topic_name": "Ai Innovation Experiments",
@@ -1555,5 +1548,13 @@
     "status": "success",
     "quality_score": 98,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-05-21T21:30:01.568999",
+    "topic_id": "rag-systems",
+    "topic_name": "RAG Systems",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success"
   }
 ]
