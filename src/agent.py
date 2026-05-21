@@ -217,14 +217,41 @@ VULNERABILITY_PATTERNS = [
 ]
 
 # High-engagement hashtags (reach multiplier)
+# High-engagement hashtags — topic-specific for better reach
 TRENDING_HASHTAGS = {
-    "ai": ["#AIengineering", "#LLM", "#RAG", "#Agentic", "#VectorDB"],
-    "story": ["#CareerGrowth", "#LessonsLearned", "#EngineeringLife", "#HonestConversation"],
-    "system": ["#SystemDesign", "#SoftwareArchitecture", "#DistributedSystems", "#ScaleEngineering"],
-    "devops": ["#DevOps", "#Kubernetes", "#CloudNative", "#CICD"],
-    "interview": ["#InterviewQuestions", "#EngineeringMindset", "#SkillDevelopment", "#TechInterviews"],
+    # AI/ML specific
+    "ai":           ["#AIEngineering", "#LLM", "#GenerativeAI", "#MLOps", "#AIInProduction"],
+    "rag":          ["#RAG", "#LLM", "#AIEngineering", "#VectorDB", "#GenAI"],
+    "llm":          ["#LLM", "#GenerativeAI", "#AIEngineering", "#PromptEngineering", "#GenAI"],
+    "agent":        ["#AIAgents", "#AgenticAI", "#LLM", "#AIEngineering", "#AutomationAI"],
+    "mlops":        ["#MLOps", "#MachineLearning", "#DataScience", "#AIEngineering", "#ModelDeployment"],
+    # Data
+    "kafka":        ["#ApacheKafka", "#EventStreaming", "#DataEngineering", "#StreamProcessing", "#DistributedSystems"],
+    "data":         ["#DataEngineering", "#DataPipeline", "#ApacheKafka", "#DataArchitecture", "#BigData"],
+    "finops":       ["#FinOps", "#CloudCostOptimization", "#CloudEngineering", "#AICostManagement", "#PlatformEngineering"],
+    # Infrastructure
+    "kubernetes":   ["#Kubernetes", "#CloudNative", "#DevOps", "#K8s", "#PlatformEngineering"],
+    "docker":       ["#Docker", "#Containers", "#DevOps", "#CloudNative", "#Kubernetes"],
+    "devops":       ["#DevOps", "#CICD", "#PlatformEngineering", "#CloudNative", "#SRE"],
+    "cicd":         ["#CICD", "#DevOps", "#GitOps", "#PlatformEngineering", "#Automation"],
+    "terraform":    ["#Terraform", "#InfrastructureAsCode", "#DevOps", "#CloudEngineering", "#PlatformEngineering"],
+    "observability":["#Observability", "#OpenTelemetry", "#SRE", "#Monitoring", "#PlatformEngineering"],
+    # Architecture
+    "system":       ["#SystemDesign", "#SoftwareArchitecture", "#DistributedSystems", "#ScaleEngineering", "#BackendEngineering"],
+    "api":          ["#APIDesign", "#SystemDesign", "#SoftwareArchitecture", "#BackendEngineering", "#REST"],
+    "microservice": ["#Microservices", "#SystemDesign", "#DistributedSystems", "#SoftwareArchitecture", "#CloudNative"],
+    "security":     ["#CyberSecurity", "#DevSecOps", "#ZeroTrust", "#CloudSecurity", "#AppSecurity"],
+    # Languages/tools
+    "python":       ["#Python", "#SoftwareEngineering", "#BackendEngineering", "#DataEngineering", "#AIEngineering"],
+    "git":          ["#Git", "#DevOps", "#SoftwareEngineering", "#CICD", "#BackendEngineering"],
+    "redis":        ["#Redis", "#Caching", "#SystemDesign", "#DistributedSystems", "#BackendEngineering"],
+    "postgres":     ["#PostgreSQL", "#DatabaseEngineering", "#SystemDesign", "#BackendEngineering", "#DataEngineering"],
+    # Career/story
+    "story":        ["#CareerGrowth", "#LessonsLearned", "#EngineeringLife", "#SoftwareEngineering", "#TechLeadership"],
+    "interview":    ["#TechInterviews", "#SoftwareEngineering", "#CareerGrowth", "#EngineeringMindset", "#CodingInterview"],
+    # Default fallback
+    "default":      ["#SoftwareEngineering", "#SystemDesign", "#BackendEngineering", "#TechLeadership", "#EngineeringLife"],
 }
-
 # ─── NEWS SOURCES ─────────────────────────────────────────────────────────────
 # RSS_FEEDS: Used for news reaction posts (ai_news, tech_news, layoff_news modes)
 # For trending topic discovery (trending mode), see trend_discovery.py which uses HN + Reddit APIs
@@ -910,53 +937,84 @@ Do NOT mention the current month or year.
 # ─── HASHTAG OPTIMIZATION ─────────────────────────────────────────────────────
 
 def optimize_hashtags_for_reach(post_text, post_type="topic"):
-    """Replace generic hashtags with trending ones for better reach."""
+    """Replace generic hashtags with topic-specific ones for better reach."""
     existing_tags = re.findall(r"(?<!\w)#\w+", post_text)
     existing_lower = {t.lower() for t in existing_tags}
-    
-    # Get relevant trend tag list
-    type_key = "interview" if "interview" in post_type.lower() else post_type
-    trending = TRENDING_HASHTAGS.get(type_key, TRENDING_HASHTAGS.get("system", []))
-    
-    if not trending:
-        return post_text
-    
-    # Replace generic tags with trending ones (priority)
-    generic_tags = {"#AI", "#Tech", "#DevOps", "#Engineering", "#Learning"}
+    post_lower = post_text.lower()
+
+    # Detect topic from post content — check specific topics first
+    TOPIC_KEYWORDS = [
+        ("rag",          ["rag", "retrieval augmented", "vector db", "embedding"]),
+        ("llm",          ["llm", "large language model", "gpt", "claude", "gemini", "llama"]),
+        ("agent",        ["ai agent", "agentic", "langgraph", "autogen", "langchain"]),
+        ("mlops",        ["mlops", "ml pipeline", "model deployment", "feature store"]),
+        ("kafka",        ["kafka", "event streaming", "message queue", "event-driven"]),
+        ("kubernetes",   ["kubernetes", "k8s", "helm", "pod", "container orchestration"]),
+        ("docker",       ["dockerfile", "docker compose", "containeriz"]),
+        ("cicd",         ["ci/cd", "github actions", "gitlab ci", "pipeline", "deployment"]),
+        ("terraform",    ["terraform", "infrastructure as code", "iac", "pulumi"]),
+        ("observability",["observability", "opentelemetry", "prometheus", "grafana", "tracing"]),
+        ("finops",       ["finops", "cloud cost", "cost optimiz", "cost control"]),
+        ("security",     ["zero trust", "devsecops", "security", "vulnerability", "auth"]),
+        ("redis",        ["redis", "caching", "cache layer", "in-memory"]),
+        ("postgres",     ["postgres", "postgresql", "database", "sql"]),
+        ("microservice", ["microservice", "service mesh", "api gateway"]),
+        ("api",          ["graphql", "grpc", "rest api", "api design"]),
+        ("git",          ["git", "gitflow", "trunk-based", "branching strategy"]),
+        ("python",       ["python", "fastapi", "django", "flask", "pydantic"]),
+        ("data",         ["data engineering", "data pipeline", "spark", "dbt", "lakehouse"]),
+        ("mlops",        ["mlflow", "kubeflow", "ray", "bentoml"]),
+        ("story",        ["i was wrong", "years ago", "i learned", "my mistake", "hard lesson"]),
+        ("interview",    ["interview", "system design question", "hiring"]),
+        ("devops",       ["devops", "sre", "platform engineering", "on-call"]),
+        ("ai",           ["ai", "machine learning", "neural network", "transformer"]),
+        ("system",       ["system design", "architecture", "distributed", "scalab"]),
+    ]
+
+    type_key = "default"
+    for key, keywords in TOPIC_KEYWORDS:
+        if any(kw in post_lower for kw in keywords):
+            type_key = key
+            break
+
+    # Override with post_type for story/interview modes
+    if post_type in ("story", "interview"):
+        type_key = post_type
+
+    trending = TRENDING_HASHTAGS.get(type_key, TRENDING_HASHTAGS["default"])
+
+    # Replace generic tags
+    generic_tags = {"#AI", "#Tech", "#DevOps", "#Engineering", "#Learning",
+                    "#SoftwareArchitecture", "#SystemDesign", "#ScaleEngineering",
+                    "#DistributedSystems"}
     tags_to_replace = [t for t in existing_tags if t in generic_tags]
-    
+
     updatedText = post_text
-    for old_tag in tags_to_replace[:2]:  # Replace max 2 generic tags
+    for old_tag in tags_to_replace[:3]:
         candidates = [t for t in trending if t.lower() not in existing_lower]
         if candidates:
             new_tag = random.choice(candidates)
             updatedText = updatedText.replace(old_tag, new_tag, 1)
             existing_lower.add(new_tag.lower())
-    
-    # Ensure double newline before hashtags if we are adding them
+
+    # Ensure double newline before hashtags
     if not re.search(r"\n\n#", updatedText):
-        # If text ends with text (not hashtags/newlines), add the spacing
-        if not updatedText.rstrip().endswith("#"):
-            # If it already has hashtags but no double newline, try to inject it
-            if "#" in updatedText and not "\n\n#" in updatedText:
-                updatedText = re.sub(r"([^\n])(\s*#)", r"\1\n\n\2", updatedText, count=1)
-    
-    # Ensure 5-7 total hashtags (sweet spot for LinkedIn)
+        if "#" in updatedText and "\n\n#" not in updatedText:
+            updatedText = re.sub(r"([^\n])(\s*#)", r"\1\n\n\2", updatedText, count=1)
+
+    # Ensure 5 total hashtags
     final_tags = re.findall(r"(?<!\w)#\w+", updatedText)
     seen_lower = {t.lower() for t in final_tags}
     if len(final_tags) < 5 and trending:
-        # Add missing tags — only add ones not already present
         for _ in range(5 - len(final_tags)):
             candidates = [t for t in trending if t.lower() not in seen_lower]
             if candidates:
                 new_tag = random.choice(candidates)
-                # Ensure spacing for the first newly added tag if none existed
                 sep = " " if "#" in updatedText else "\n\n"
                 updatedText = updatedText.rstrip() + f"{sep}{new_tag}"
                 seen_lower.add(new_tag.lower())
-    
-    return updatedText
 
+    return updatedText
 
 
 def _deduplicate_hashtags(text):
@@ -1894,6 +1952,10 @@ def _shorten_poll_label(label, max_words=6, max_chars=42):
 
 
 def _tighten_poll_options(text):
+    # Remove raw diagram structure lines like "Task Shape -> Need Retrieval | Need Tools"
+    text = re.sub(r"^.{0,40}\s*->\s*.+\|.+$", "", text or "", flags=re.MULTILINE)
+    text = re.sub(r"\n{3,}", "\n\n", text)  # clean up extra blank lines left behind
+
     lines = (text or "").splitlines()
     if not lines:
         return text
@@ -4643,7 +4705,7 @@ Write a LinkedIn post that:
 Only {_mentioned}/{len(_dsections)} sections mentioned. Rewrite so every section is covered:
 - Keep the hook (first 2 lines) and hashtags unchanged
 - Add 1-2 sentences per section explaining what it means and why it matters
-- Use the exact section names so post and diagram reinforce each other
+- NEVER use section label names directly in prose (e.g. never write "At the Start section" or "The Need section"). The diagram shows the labels — your post explains the concepts in natural language.
 - Target {_tmin}–{_tmax} words
 
 Current post:
