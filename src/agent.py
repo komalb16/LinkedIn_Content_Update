@@ -1784,9 +1784,13 @@ def _cleanup_generated_post(text):
                     # Remove this line by setting it empty
                     new_lines[i] = ""
         text = "\n".join(ln for ln in new_lines if ln or not ln.isspace()).strip()
-
-
-    return text
+    # 4. Fix unclosed fenced blocks — wrap orphaned plain-text lists
+    # Detect pattern: "X Architecture:\nItem1\nItem2\nItem3" with no fences
+    text = re.sub(
+        r'([A-Za-z ]+Architecture:|[A-Za-z ]+Stack:|[A-Za-z ]+Flow:)\n((?:[A-Za-z][^\n]{0,40}\n){2,6})',
+        lambda m: "```\n" + m.group(1) + "\n" + m.group(2).rstrip() + "\n```\n",
+        text
+    )
 
     # Collapse accidental repeated title/header lines at the top.
     split_lines = text.splitlines()
