@@ -1787,35 +1787,35 @@ def _cleanup_generated_post(text):
     # 4. Fix unclosed fenced blocks — wrap orphaned plain-text lists
     # Detect pattern: "X Architecture:\nItem1\nItem2\nItem3" with no fences
     text = re.sub(
-        # Also wrap "Label: items" lists (e.g. "Identity: IdP, MFA, PAM")
-lines = text.splitlines()
-new_lines = []
-i = 0
-while i < len(lines):
-    line = lines[i].strip()
-    # Detect 3+ consecutive "Word: content" lines not already in a fence
-    if (re.match(r'^[A-Z][a-zA-Z ]{2,20}:\s+\S', line)
-            and i + 2 < len(lines)
-            and re.match(r'^[A-Z][a-zA-Z ]{2,20}:\s+\S', lines[i+1].strip())
-            and re.match(r'^[A-Z][a-zA-Z ]{2,20}:\s+\S', lines[i+2].strip())):
-        # Collect the run
-        run = []
-        j = i
-        while j < len(lines) and re.match(r'^[A-Z][a-zA-Z ]{2,20}:\s+\S', lines[j].strip()):
-            run.append(lines[j].strip())
-            j += 1
-        new_lines.append("```")
-        new_lines.extend(run)
-        new_lines.append("```")
-        i = j
-    else:
-        new_lines.append(lines[i])
-        i += 1
-text = "\n".join(new_lines).strip()
         r'([A-Za-z ]+Architecture:|[A-Za-z ]+Stack:|[A-Za-z ]+Flow:)\n((?:[A-Za-z][^\n]{0,40}\n){2,6})',
         lambda m: "```\n" + m.group(1) + "\n" + m.group(2).rstrip() + "\n```\n",
         text
     )
+    # Also wrap "Label: items" lists (e.g. "Identity: IdP, MFA, PAM")
+    lines = text.splitlines()
+    new_lines = []
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        # Detect 3+ consecutive "Word: content" lines not already in a fence
+        if (re.match(r'^[A-Z][a-zA-Z ]{2,20}:\s+\S', line)
+                and i + 2 < len(lines)
+                and re.match(r'^[A-Z][a-zA-Z ]{2,20}:\s+\S', lines[i+1].strip())
+                and re.match(r'^[A-Z][a-zA-Z ]{2,20}:\s+\S', lines[i+2].strip())):
+            # Collect the run
+            run = []
+            j = i
+            while j < len(lines) and re.match(r'^[A-Z][a-zA-Z ]{2,20}:\s+\S', lines[j].strip()):
+                run.append(lines[j].strip())
+                j += 1
+            new_lines.append("```")
+            new_lines.extend(run)
+            new_lines.append("```")
+            i = j
+        else:
+            new_lines.append(lines[i])
+            i += 1
+    text = "\n".join(new_lines).strip()
 
     # Collapse accidental repeated title/header lines at the top.
     split_lines = text.splitlines()
