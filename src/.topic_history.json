@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-11T23:02:17.243111",
-    "topic_id": "ai-innovation-experiments",
-    "topic_name": "Ai Innovation Experiments",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-12T23:02:17.243111",
     "topic_id": "ai-skills-map",
     "topic_name": "Ai Skills Map",
@@ -1556,5 +1549,30 @@
     "category": "AI",
     "mode": "topic",
     "status": "success"
+  },
+  {
+    "timestamp": "2026-05-21T23:11:06.327318",
+    "topic_id": "enterprise-ai",
+    "topic_name": "Enterprise AI Architecture",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 51,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 39,
+        "raw_score": 51,
+        "similarity": 0.6567,
+        "penalty": 12
+      },
+      {
+        "variant_index": 3,
+        "score": 39,
+        "raw_score": 51,
+        "similarity": 0.6567,
+        "penalty": 12
+      }
+    ]
   }
 ]
