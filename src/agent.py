@@ -1934,7 +1934,16 @@ def _cleanup_generated_post(text):
             f"Hook exceeds 210-char LinkedIn cutoff ({len(_first_line)} chars): "
             f"{_first_line[:80]}..."
         )
-
+    # Auto-remove invented percentage statistics before publishing
+    text = re.sub(
+        r'\b\d{1,3}%\s+of\s+(?:security\s+)?(?:teams?|engineers?|companies|'
+        r'organizations?|breaches?|attacks?|projects?|developers?)[^.]*\.',
+        '',
+        text,
+        flags=re.IGNORECASE
+    )
+    text = re.sub(r'\n{3,}', '\n\n', text).strip()
+    
     return text
 
 
@@ -2809,7 +2818,19 @@ def _has_structural_integrity_issues(text):
             "Fabricated company incident reference detected (e.g. 'as seen in Vercel's breach'). "
             "Remove unless the topic explicitly provides this case study."
         )
-
+     # Block posts with invented percentage statistics
+    import re as _re
+    invented_stat = _re.search(
+        r'\b\d{1,3}%\s+of\s+(?:security\s+)?(?:teams?|engineers?|companies|'
+        r'organizations?|breaches?|attacks?|projects?|developers?|businesses?)',
+        post_text or "",
+        _re.IGNORECASE
+    )
+    if invented_stat:
+        blockers.append(
+            f"Invented percentage statistic detected: '{invented_stat.group(0)}' — "
+            f"remove or replace with qualitative language."
+        )
     return blockers
 
 def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
@@ -4503,7 +4524,7 @@ Write a LinkedIn post that:
 
     # ── HARD PUBLISH BLOCKERS ─────────────────────────────────────────────────
     # Minimum bar for a live post. Dry-run and manual triggers bypass this gate.
-    PUBLISH_SCORE_MIN = 60
+    PUBLISH_SCORE_MIN = 72
     if not dry_run and not manual:
         pub_blockers = []
         if score_card["score"] < PUBLISH_SCORE_MIN:
