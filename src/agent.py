@@ -2848,7 +2848,7 @@ def _has_structural_integrity_issues(text):
     invented_stat = _re.search(
         r'\b\d{1,3}%\s+of\s+(?:security\s+)?(?:teams?|engineers?|companies|'
         r'organizations?|breaches?|attacks?|projects?|developers?|businesses?)',
-        post_text or "",
+        text or "",
         _re.IGNORECASE
     )
     if invented_stat:
