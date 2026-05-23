@@ -817,5 +817,12 @@
     "topic_name": "Zero Trust Architecture",
     "category": "topic",
     "text": "Three years ago, Zero Trust security was a niche topic \ud83e\udd2b.\nNow, it's a business requirement \ud83d\ude80.\n\n1\ufe0f\u20e3 Identity is the foundation of Zero\n\nIn production, I've seen identity-first approaches pay off big time, with IdP, MFA, and PAM working together seamlessly \ud83d\udcc8.\n\nThe policy engine is where the magic happens, with OPA rules and ABAC ensuring that access is granted only when necessary \ud83d\udca1.\n\nZero Trust Architecture\n\nIdentity\n(IdP, MFA,\nPAM, SPIFFE)\n\nPolicy Engine\n(OPA, ABAC,\ntime-limits)\n\nNetwork\n(Micro-seg,\nmTLS)\n\nDevice\n(Posture, EDR)\n\nData\n(DLP, encrypt,\nVault)\n\nMicrosegmentation and mTLS are crucial for securing the network \ud83d\udcca.\n\nPosture checks and EDR ensure devices are secure \ud83d\udcc8.\nData protection with DLP, encryption, and Vault is the final piece of the puzzle \ud83e\udd1d.\n\n\ud83d\udcac What's your biggest Zero Trust implementation challenge right now?"
+  },
+  {
+    "timestamp": "2026-05-23T15:09:57.220466",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust Architecture",
+    "category": "topic",
+    "text": "Zero Trust Architecture is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: Practical implementation: identity-first, microsegmentation, continuous verification. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]

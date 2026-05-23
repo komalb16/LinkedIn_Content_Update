@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-12T23:02:17.243111",
-    "topic_id": "ai-skills-map",
-    "topic_name": "Ai Skills Map",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-13T23:02:17.243111",
     "topic_id": "system-design",
     "topic_name": "System Design",
@@ -1572,6 +1565,31 @@
         "raw_score": 51,
         "similarity": 0.6567,
         "penalty": 12
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-05-23T15:09:57.222679",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust Architecture",
+    "category": "Security",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 51,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 90,
+        "raw_score": 90,
+        "similarity": 0.055,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.1169,
+        "penalty": 0
       }
     ]
   }
