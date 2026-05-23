@@ -1069,7 +1069,7 @@ def call_ai(prompt, system, json_mode=False):
     }
     
     last_err = None
-    for attempt in range(3):
+    for attempt in range(5):
         payload = {
             "model": current_model,
             "messages": [
@@ -1083,42 +1083,46 @@ def call_ai(prompt, system, json_mode=False):
         if json_mode:
             payload["response_format"] = {"type": "json_object"}
 
-        try:
-            resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=45)
-            
-            if resp.status_code == 429:
-                if current_model == MODEL:
-                    log.warning(f"Groq primary model (70B) rate-limited. Falling back INSTANTLY to 8B model...")
-                    current_model = MODEL_FALLBACK
-                    continue
-                else:
-                    wait = int(resp.headers.get("Retry-After", 20))
-                    log.warning(f"Groq fallback model also rate-limited. Waiting {wait}s...")
-                    time.sleep(wait)
-                    continue
-                    
-            if resp.status_code >= 500:
-                log.warning(f"Groq server error {resp.status_code} (attempt {attempt+1}/3) — retrying in 5s")
-                time.sleep(5)
-                continue
-                
-            if resp.status_code != 200:
-                log.error(f"Groq error ({resp.status_code}): {resp.text}")
-                
-            resp.raise_for_status()
-            return resp.json()["choices"][0]["message"]["content"].strip()
-            
-        except requests.exceptions.Timeout:
-            log.warning(f"Groq request timed out (attempt {attempt+1}/3) — retrying")
-            last_err = "timeout"
-            time.sleep(3)
-        except requests.exceptions.RequestException as e:
-            log.warning(f"Groq request failed (attempt {attempt+1}/3): {e}")
-            last_err = str(e)
-            time.sleep(3)
-            
-    raise RuntimeError(f"Groq call failed after 3 attempts: {last_err}")
+    try:
+        resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=45)
 
+    if resp.status_code == 429:
+        if current_model == MODEL:
+            # Primary 70B rate-limited — wait briefly then try 8B
+            wait = int(resp.headers.get("Retry-After", 8))
+            log.warning(f"Groq 70B rate-limited. Waiting {wait}s then switching to 8B...")
+            time.sleep(wait)
+            current_model = MODEL_FALLBACK
+            payload["model"] = current_model
+            continue
+        else:
+            # 8B also rate-limited — wait longer and retry same model
+            wait = int(resp.headers.get("Retry-After", 30))
+            log.warning(f"Groq 8B also rate-limited. Waiting {wait}s...")
+            time.sleep(wait)
+            continue
+
+    if resp.status_code >= 500:
+        log.warning(f"Groq server error {resp.status_code} (attempt {attempt+1}/3) — retrying in 5s")
+        time.sleep(5)
+        continue
+
+    if resp.status_code != 200:
+        log.error(f"Groq error ({resp.status_code}): {resp.text}")
+
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"].strip()
+
+except requests.exceptions.Timeout:
+    log.warning(f"Groq request timed out (attempt {attempt+1}/3) — retrying")
+    last_err = "timeout"
+    time.sleep(3)
+except requests.exceptions.RequestException as e:
+    log.warning(f"Groq request failed (attempt {attempt+1}/3): {e}")
+    last_err = str(e)
+    time.sleep(3)
+
+raise RuntimeError(f"Groq call failed after 3 attempts: {last_err}")
 
 def _fallback_visual_block(structure=None):
     if structure and structure.get("sections"):
@@ -1136,18 +1140,31 @@ def _fallback_topic_post(topic, structure=None):
     title = topic.get("name", "Engineering Topic")
     angle = topic.get("angle", "practical production insights")
     visual = _fallback_visual_block(structure)
+
+    import hashlib
+    hook_idx = int(hashlib.md5(title.encode()).hexdigest()[:4], 16) % 5
+    hooks = [
+        f"Most teams get {title} wrong in the same way.",
+        f"I was wrong about {title} for two years — here's what changed.",
+        f"The hardest part of {title} isn't the technology. It's the trade-offs.",
+        f"{title} looks simple until you have to run it in production.",
+        f"Nobody talks about the failure modes in {title}. Let's fix that.",
+    ]
+
     return (
-        f"{title} is less about theory and more about trade-offs in production. ⚙️\n\n"
+        f"{hooks[hook_idx]}\n\n"
         f"My current lens: {angle}. I optimize for clarity first, then scale, then cost. 🚀\n\n"
-        "The fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. "
+        "The fastest way to improve outcomes is to choose the simplest design "
+        "that still meets reliability goals. "
         "That keeps systems easier to debug, cheaper to run, and safer to evolve. 🧠\n\n"
-        "```text\n"
+        "```\n"
         f"{visual}\n"
         "```\n\n"
-        "💬 If you had to simplify one part of your current architecture this week, what would you change first?\n\n"
-        "#SystemDesign #SoftwareArchitecture #Engineering #Scalability #TechLeadership"
+        "💬 If you had to simplify one part of your current architecture "
+        "this week, what would you change first?\n\n"
+        "#SystemDesign #SoftwareArchitecture #BackendEngineering "
+        "#Scalability #TechLeadership"
     )
-
 
 # ─── RSS FETCH ────────────────────────────────────────────────────────────────
 
@@ -1860,7 +1877,7 @@ def _cleanup_generated_post(text):
     elif first_line.startswith("'") and first_line.count("'") == 1:
         text = first_line[1:].lstrip() + ("\n" + "\n".join(text.splitlines()[1:]) if len(text.splitlines()) > 1 else "")
 
-     # Strip structure-block leakage — LLM sometimes echoes the diagram labels verbatim
+    # Strip structure-block leakage — LLM sometimes echoes the diagram labels verbatim
     # Pattern: "Label: description" on its own line where label matches known section words
 # Pattern 1: "Label: description" lines
     STRUCTURE_ECHO_PATTERN = re.compile(
@@ -2843,7 +2860,7 @@ def _has_structural_integrity_issues(text):
             "Fabricated company incident reference detected (e.g. 'as seen in Vercel's breach'). "
             "Remove unless the topic explicitly provides this case study."
         )
-     # Block posts with invented percentage statistics
+    # Block posts with invented percentage statistics
     import re as _re
     invented_stat = _re.search(
         r'\b\d{1,3}%\s+of\s+(?:security\s+)?(?:teams?|engineers?|companies|'
