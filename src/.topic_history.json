@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-14T23:02:17.243111",
-    "topic_id": "llm",
-    "topic_name": "Llm",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-15T23:02:17.243111",
     "topic_id": "solid-principles",
     "topic_name": "Solid Principles",
@@ -1593,5 +1586,30 @@
     "category": "Engineering",
     "mode": "topic",
     "status": "success"
+  },
+  {
+    "timestamp": "2026-05-24T14:41:47.777987",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 39,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 41,
+        "raw_score": 41,
+        "similarity": 0.0052,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 41,
+        "raw_score": 41,
+        "similarity": 0.0062,
+        "penalty": 0
+      }
+    ]
   }
 ]
