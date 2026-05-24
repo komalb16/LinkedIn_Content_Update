@@ -60,8 +60,8 @@
       "name": "Vector Database Comparison"
     },
     {
-      "id": "prompt-engineering-prod",
-      "name": "Prompt Engineering for Production"
+      "id": "prompt-chaining-patterns", 
+      "name": "Prompt Chaining Patterns for Production LLMs"
     },
     {
       "id": "ai-system-design",

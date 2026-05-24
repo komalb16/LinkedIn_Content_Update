@@ -1685,6 +1685,14 @@ Requirements:
 - Never use arrow notation (→) in prose paragraphs — only inside fenced code blocks.
 - CRITICAL: Every numbered point must be a complete sentence. Never end a numbered point mid-sentence.
 - Never invent percentages or statistics unless the topic explicitly provides them.
+- CRITICAL: Never start the hook by restating the topic name.
+  BAD: "Most engineers think [Topic Name] is just about X"
+  BAD: "[Topic Name] is less about theory and more about trade-offs"
+  GOOD: "I shipped a RAG system that cost $4,000/month. One change dropped it to $200."
+  GOOD: "We deleted 60% of our prompt engineering code last quarter. Performance improved."
+  The hook must contain a specific number, outcome, or surprising fact — not a generic observation.
+- Never start paragraphs with generic transitions like "To begin with", "Next we must", 
+  "This involves", "This helps us" — write direct insights instead.
 """
     try:
         post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
