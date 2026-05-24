@@ -1114,13 +1114,13 @@ def call_ai(prompt, system, json_mode=False):
         return resp.json()["choices"][0]["message"]["content"].strip()
 
     except requests.exceptions.Timeout:
-    log.warning(f"Groq request timed out (attempt {attempt+1}/3) — retrying")
-    last_err = "timeout"
-    time.sleep(3)
-except requests.exceptions.RequestException as e:
-    log.warning(f"Groq request failed (attempt {attempt+1}/3): {e}")
-    last_err = str(e)
-    time.sleep(3)
+        log.warning(f"Groq request timed out (attempt {attempt+1}/3) — retrying")
+        last_err = "timeout"
+        time.sleep(3)
+    except requests.exceptions.RequestException as e:
+        log.warning(f"Groq request failed (attempt {attempt+1}/3): {e}")
+        last_err = str(e)
+        time.sleep(3)
 
 raise RuntimeError(f"Groq call failed after 3 attempts: {last_err}")
 
