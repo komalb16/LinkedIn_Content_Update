@@ -1086,34 +1086,34 @@ def call_ai(prompt, system, json_mode=False):
     try:
         resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=45)
 
-    if resp.status_code == 429:
-        if current_model == MODEL:
-            # Primary 70B rate-limited — wait briefly then try 8B
-            wait = int(resp.headers.get("Retry-After", 8))
-            log.warning(f"Groq 70B rate-limited. Waiting {wait}s then switching to 8B...")
-            time.sleep(wait)
-            current_model = MODEL_FALLBACK
-            payload["model"] = current_model
+        if resp.status_code == 429:
+            if current_model == MODEL:
+                # Primary 70B rate-limited — wait briefly then try 8B
+                wait = int(resp.headers.get("Retry-After", 8))
+                log.warning(f"Groq 70B rate-limited. Waiting {wait}s then switching to 8B...")
+                time.sleep(wait)
+                current_model = MODEL_FALLBACK
+                payload["model"] = current_model
+                continue
+            else:
+                # 8B also rate-limited — wait longer and retry same model
+                wait = int(resp.headers.get("Retry-After", 30))
+                log.warning(f"Groq 8B also rate-limited. Waiting {wait}s...")
+                time.sleep(wait)
+                continue
+
+        if resp.status_code >= 500:
+            log.warning(f"Groq server error {resp.status_code} (attempt {attempt+1}/3) — retrying in 5s")
+            time.sleep(5)
             continue
-        else:
-            # 8B also rate-limited — wait longer and retry same model
-            wait = int(resp.headers.get("Retry-After", 30))
-            log.warning(f"Groq 8B also rate-limited. Waiting {wait}s...")
-            time.sleep(wait)
-            continue
 
-    if resp.status_code >= 500:
-        log.warning(f"Groq server error {resp.status_code} (attempt {attempt+1}/3) — retrying in 5s")
-        time.sleep(5)
-        continue
+        if resp.status_code != 200:
+            log.error(f"Groq error ({resp.status_code}): {resp.text}")
 
-    if resp.status_code != 200:
-        log.error(f"Groq error ({resp.status_code}): {resp.text}")
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"].strip()
 
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
-
-except requests.exceptions.Timeout:
+    except requests.exceptions.Timeout:
     log.warning(f"Groq request timed out (attempt {attempt+1}/3) — retrying")
     last_err = "timeout"
     time.sleep(3)
