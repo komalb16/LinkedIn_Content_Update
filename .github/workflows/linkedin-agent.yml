@@ -17,14 +17,13 @@ on:
   # configure post slots at exactly :00 (e.g. 13:00) because the cron meant
   # to fire at 13:00 may arrive at 13:40, which would look like a "skipped" run.
   #
-  # schedule_checker.py uses a two-sided window:
-  #   LOOKBACK  = 55 min  → catches crons that fire UP TO 55 min AFTER the slot
-  #   LOOKAHEAD = 20 min  → catches crons that fire UP TO 20 min BEFORE the slot
+ # schedule_checker.py uses a two-sided window:
+  #   LOOKBACK  = 110 min → catches crons that fire UP TO 110 min AFTER the slot
+  #   LOOKAHEAD = 45 min  → catches crons that fire UP TO 45 min BEFORE the slot
   #
-  # Combined (-20 min … +55 min) the system tolerates even a 40-min-late cron.
-  # Example — slot at 17:45 EST (21:45 UTC):
-  #   21:00 cron (fires at ~21:38) → 21:45 is 7 min in future → early-claim ✅
-  #   22:00 cron (fires at ~22:40) → 21:45 is 55 min ago     → lock held ✅
+  # Combined (-45 min … +110 min) the system tolerates GitHub's unpredictable
+  # cron delays of up to 3-4 hours seen in practice.
+  # With slots spaced 9+ hours apart, no double-posting risk.
   # The slot lock (.post_lock.json) is a second line of defence against double-posts.
   schedule:
     - cron: "0 * * * *"
@@ -170,7 +169,8 @@ jobs:
           GH_EVENT_NAME: ${{ github.event_name }}
           # 55 min window < 60 min cron interval — prevents double-posting.
           # Two consecutive hourly crons can never both match the same slot.
-          SCHEDULE_WINDOW_MINUTES: "55"
+          SCHEDULE_WINDOW_MINUTES: "110"
+          SCHEDULE_LOOKAHEAD_MINUTES: "45"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
