@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-15T23:02:17.243111",
-    "topic_id": "solid-principles",
-    "topic_name": "Solid Principles",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-16T23:02:17.243111",
     "topic_id": "agentic-ai",
     "topic_name": "Agentic Ai",
@@ -1611,5 +1604,13 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-05-25T19:13:30.686107",
+    "topic_id": "azure",
+    "topic_name": "Azure Architecture Patterns",
+    "category": "Cloud",
+    "mode": "topic",
+    "status": "success"
   }
 ]
