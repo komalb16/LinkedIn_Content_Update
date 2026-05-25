@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T06:01:03.466484",
-    "topic_id": "trend-railway-systems",
-    "topic_name": "Reliable Railway Tech",
-    "category": "topic",
-    "text": "\ud83d\udccc Reliable Railway Tech\n\n\"I recently heard a colleague say 'our system is too complex to be fail-safe' \ud83d\udea8.\n\nThis got me thinking - what can we learn from Japan's reliable railway systems to improve our own system's uptime and performance?\n\nThe answer lies in applying modular redundancy and fail-safe design principles to distributed systems.\n\nBest Practices: loose coupling\nCommon Mistakes: tight dependencies\n\nIn reality, simplicity and loose coupling are key to creating reliable systems \ud83d\ude82.\n\nMost engineers get wrong the idea that complexity is unavoidable, when in fact, it's often a result of tight dependencies and poor design \ud83e\udd26.\n\nThe one thing to remember is that simplicity scales, and it's essential to prioritize it when designing distributed systems \ud83d\udca1.\n\n\ud83d\udcac What's the most important consideration when designing a reliable system?\n\ud83d\ude82 The Problem\n\ud83d\udd0d Core Concept\n\ud83d\udd27 How It Works\n\ud83d\udcda Best Practices\n\ud83d\udeab Common Mistakes\n\ud83d\udca1 Key Takeaway\n\n#ReliableSystems #DistributedSystems #ModularRedundancy #FailSafeDesign #SimplicityScales #SystemDesign"
-  },
-  {
     "timestamp": "2026-04-19T06:07:50.619586",
     "topic_id": "trend-ai-detection-methods",
     "topic_name": "Detecting AI Written Code",
@@ -838,5 +831,12 @@
     "topic_name": "RAG Strategy Shift",
     "category": "story",
     "text": "Most teams get RAG Strategy Shift wrong in the same way.\n\nMy current lens: Focus on the performance metrics (latency/relevance) and 3 specific retrieval optimizations.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nWhen it comes to speed, every millisecond counts - that's why I prioritize optimizing for low-latency queries. By doing so, I can ensure a better user experience and faster response times.\n\nA well-designed retrieval system is also crucial, as it directly impacts the quality of the results. By selecting the right algorithms and fine-tuning parameters, I can significantly improve the accuracy of the retrieved information.\n\nFurthermore, the choice of database has a major impact on the overall performance. I prefer vector databases that can efficiently handle high-dimensional data and provide fast querying capabilities.\n\nTo measure success, I track key performance metrics such as query speed, relevance, and recall. By monitoring these metrics, I can identify areas for improvement and make data-driven decisions to optimize the system.\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-05-25T19:12:28.613951",
+    "topic_id": "azure",
+    "topic_name": "Azure Architecture Patterns",
+    "category": "topic",
+    "text": "Three years ago, Azure Architecture Patterns were a niche topic \ud83d\udcca.\n\nNow, they're a must-know for any cloud engineer \ud83d\ude80.\n\nIf the task is open-ended, the architecture must adapt to changing requirements \ud83c\udf1f.\n\nData retrieval, prediction, or orchestration are key considerations when designing the architecture \ud83d\udcc8.\n\nThe simplest architecture that works is often the best choice, to avoid unnecessary complexity \ud83d\udea7.\n\nIf you've worked on a project that required a complex architecture, what was the turning point that made you realize you needed to scale \ud83e\udd14?\n\n\ud83d\udcac What's your go-to strategy for balancing simplicity and reliability in Azure Architecture Patterns?"
   }
 ]
