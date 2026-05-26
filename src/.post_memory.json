@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T06:13:27.591185",
-    "topic_id": "trend-detecting-ai-written",
-    "topic_name": "AI Written Work",
-    "category": "topic",
-    "text": "\ud83d\udccc AI Written Work\n\nI used to think AI detection tools could catch all AI-generated content in student submissions \ud83e\udd16.\n\n1\ufe0f\u20e3 AI writes better essays now\n\n2\ufe0f\u20e3 Tools can't keep up always\n\n- > Best Practices -> Common Mistakes\n3\ufe0f\u20e3 Human evaluation is key still\n\n4\ufe0f\u20e3 Context matters in evaluation\n\n5\ufe0f\u20e3 Mistakes happen without context\n\n\ud83d\udcac Which part of identifying AI-generated content is most important to you?\nBest Practices\nCommon Mistakes\n\n#AIEthics #AcademicIntegrity #EducationTechnology #ArtificialIntelligence #TeachingTips #EdTech"
-  },
-  {
     "timestamp": "2026-04-19T06:22:28.089074",
     "topic_id": "trend-ai-detection-strategies",
     "topic_name": "Authentic Code Detection",
@@ -838,5 +831,12 @@
     "topic_name": "Data Engineering Pipelines",
     "category": "topic",
     "text": "I spent 6 months building a Data Engineering Pipeline that failed to deliver \ud83d\udea8.\n\nThe goal was to automate data workflows, but the result was a complex mess \ud83e\udd2f.\n\nIf you're about to embark on a similar journey, here's what I learned:\n\n1\ufe0f\u20e3 Building a pipeline requires a clear\n\n2\ufe0f\u20e3 Deterministic tasks are easier to automate\nTo avoid my mistakes, consider the following decision tree:\n\n1. open- -> retrieval -> simplest -> add complexity\n\nIf your task is deterministic, you can use a simple architecture \ud83d\udcc8.\n\nHowever, if it's open-ended, you may need to consider more complex options \ud83e\udd14.\n\nI was wrong to assume that a one-size-fits-all approach would work \ud83d\ude45\u200d\u2642\ufe0f.\n\nIt took me years to learn that the key to a successful pipeline is to start small and scale only when necessary \ud83d\ude80.\n\nWhat's your approach to building Data Engineering Pipelines \u2014 do you prioritize simplicity or complexity? \ud83d\udcac"
+  },
+  {
+    "timestamp": "2026-05-26T23:17:08.040184",
+    "topic_id": "langchain",
+    "topic_name": "LangChain vs LangGraph",
+    "category": "topic",
+    "text": "\ud83d\udccc LangChain vs LangGraph\n\nNobody talks about the hidden costs of choosing between LangChain and LangGraph.\n\nAs an engineer who's seen both in production, I can tell you that the choice between them can make or break your project's scalability.\n\nWhen building AI systems, understanding the implications of this choice is crucial, as it affects how your project will perform under heavy loads and large datasets.\n\nThe core idea is to enable efficient processing of language tasks, but the mechanism underneath is where they differ.\n\nLangChain uses a chain-based approach, which can lead to simple, straightforward workflows, while LangGraph uses a graph-based approach, allowing for more complex workflows.\n\nIn practice, this means LangChain can struggle with low scalability, whereas LangGraph can handle high scalability, making it a better fit for large projects.\n\nHowever, choosing the wrong one can lead to significant problems, and most engineers get it wrong by opting for LangChain for large projects.\n\nWhen evaluating these options, it's essential to consider the project's specific needs and requirements.\n\nLangGraph isn't always the better choice, and the decision should be based on factors like workflow complexity and scalability requirements.\n\n\ud83d\udcac What's the most important factor for you when choosing between LangChain and LangGraph?"
   }
 ]
