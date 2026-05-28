@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T06:22:28.089074",
-    "topic_id": "trend-ai-detection-strategies",
-    "topic_name": "Authentic Code Detection",
-    "category": "topic",
-    "text": "\ud83d\udccc Authentic Code Detection\n\nMost engineers believe automated tools can detect AI-generated code on their own \ud83e\udd16.\n\nHowever, I've found that relying solely on these tools can lead to false negatives and overlooked vulnerabilities \ud83d\udea8.\n\nTo identify and prevent AI-generated code, a combination of automated tools and human review is necessary \ud83d\udcc8.\n\nAutomated Tools -> Human Review\nFalse Negatives -> Caught Vulnerabilities\nOverlooked Code -> Secure Codebase\n\n5\ufe0f\u20e3 Common Mistakes include relying solely on\n\nThe rule-of-thumb is to use automated tools for initial screening, but always have a human reviewer verify the results \ud83d\udcca.\n\nThis ensures that AI-generated code is accurately identified and prevented from entering the project \ud83d\udeab.\n\n\ud83d\udcac What's your approach to detecting AI-generated code?\n\n#AIGeneratedCode #CodeAuthenticity #HumanReview #AutomatedTools #CodeSecurity #SecureCodingPractices"
-  },
-  {
     "timestamp": "2026-04-19T06:25:40.506753",
     "topic_id": "trend-openclaw-challenge",
     "topic_name": "Optimizing Claw Code",
@@ -838,5 +831,12 @@
     "topic_name": "LangChain vs LangGraph",
     "category": "topic",
     "text": "\ud83d\udccc LangChain vs LangGraph\n\nNobody talks about the hidden costs of choosing between LangChain and LangGraph.\n\nAs an engineer who's seen both in production, I can tell you that the choice between them can make or break your project's scalability.\n\nWhen building AI systems, understanding the implications of this choice is crucial, as it affects how your project will perform under heavy loads and large datasets.\n\nThe core idea is to enable efficient processing of language tasks, but the mechanism underneath is where they differ.\n\nLangChain uses a chain-based approach, which can lead to simple, straightforward workflows, while LangGraph uses a graph-based approach, allowing for more complex workflows.\n\nIn practice, this means LangChain can struggle with low scalability, whereas LangGraph can handle high scalability, making it a better fit for large projects.\n\nHowever, choosing the wrong one can lead to significant problems, and most engineers get it wrong by opting for LangChain for large projects.\n\nWhen evaluating these options, it's essential to consider the project's specific needs and requirements.\n\nLangGraph isn't always the better choice, and the decision should be based on factors like workflow complexity and scalability requirements.\n\n\ud83d\udcac What's the most important factor for you when choosing between LangChain and LangGraph?"
+  },
+  {
+    "timestamp": "2026-05-28T00:07:09.593702",
+    "topic_id": "ai-governance-playbook",
+    "topic_name": "AI Governance Playbook",
+    "category": "topic",
+    "text": "The hardest part of AI Governance Playbook isn't the technology. It's the trade-offs.\n\nMy current lens: Governance should accelerate adoption by reducing ambiguity, not slow teams with vague compliance theater.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nRisk Tiering\nModel Registry\nPolicy Controls\nMonitoring\nAuditability\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
