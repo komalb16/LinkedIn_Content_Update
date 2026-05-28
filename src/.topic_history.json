@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-19T23:02:17.243111",
-    "topic_id": "ai-disciplines",
-    "topic_name": "Ai Disciplines",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-20T23:02:17.243111",
     "topic_id": "ml-algorithms",
     "topic_name": "Ml Algorithms",
@@ -1633,6 +1626,31 @@
         "score": 78,
         "raw_score": 78,
         "similarity": 0.0108,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-05-28T23:25:59.998540",
+    "topic_id": "mlops-best-practices",
+    "topic_name": "MLOps Best Practices",
+    "category": "Engineering",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 62,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0765,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0852,
         "penalty": 0
       }
     ]
