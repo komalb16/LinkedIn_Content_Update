@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-20T23:02:17.243111",
-    "topic_id": "ml-algorithms",
-    "topic_name": "Ml Algorithms",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-21T23:02:17.243111",
     "topic_id": "llm-vs-agentic",
     "topic_name": "Llm Vs Agentic",
@@ -1651,6 +1644,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.0852,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-05-29T21:59:57.350227",
+    "topic_id": "story-personal-ai-daily-life",
+    "topic_name": "Personal AI Productivity",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 54,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 39,
+        "raw_score": 39,
+        "similarity": 0.0109,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 39,
+        "raw_score": 39,
+        "similarity": 0.0111,
         "penalty": 0
       }
     ]
