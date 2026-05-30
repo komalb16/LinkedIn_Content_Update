@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-02-22T23:02:17.243111",
-    "topic_id": "genai-roadmap",
-    "topic_name": "Genai Roadmap",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-02-23T23:02:17.243111",
     "topic_id": "data-evolution",
     "topic_name": "Data Evolution",
@@ -1687,6 +1680,31 @@
         "score": 48,
         "raw_score": 48,
         "similarity": 0.0097,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-05-30T20:15:10.196216",
+    "topic_id": "vector-db-comparison",
+    "topic_name": "Vector Database Comparison",
+    "category": "Data",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.029,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0425,
         "penalty": 0
       }
     ]
