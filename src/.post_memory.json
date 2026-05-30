@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T06:28:35.963933",
-    "topic_id": "trend-browser-tab-closure",
-    "topic_name": "Tab Closure Strategies",
-    "category": "topic",
-    "text": "\ud83d\udccc Tab Closure Strategies\n\n\"I recently heard someone say 'too many tabs is a coding emergency' \ud83d\udea8.\n\nThis got me thinking about effective tab closure techniques to reduce context switching and increase coding efficiency \ud83d\udca1.\n\nModern Cards\nTab Management\nPrioritize Tasks\nLimit Open Tabs\nI've tried various approaches, but one thing works: closing unnecessary tabs \ud83d\udcc8.\n\nNow, I'd like to hear from you:\n\n\ud83d\udcac What's your top strategy for optimizing browser tab management?\n\n#ProductivityHacks #CodingEfficiency #TabManagement #DeveloperTools #BrowserOptimization #CodingTips"
-  },
-  {
     "timestamp": "2026-04-19T06:32:20.894725",
     "topic_id": "trend-tab-closure-optimization",
     "topic_name": "Browser Tab Closure",
@@ -838,5 +831,12 @@
     "topic_name": "Personal AI Productivity",
     "category": "story",
     "text": "Goal: Automate travel planning. The agent did book flights, hotels, and itineraries, zero human steps.\n\n1\ufe0f\u20e3 I built a custom AI agent\n\n2\ufe0f\u20e3 It automated travel planning\n\nThe fundamental idea is to reduce manual friction in personal tasks, like travel planning, by leveraging AI automation.\n\nThis is crucial in production systems, where efficiency and scalability are key.\n\nFor instance, I used LangGraph to create a custom AI agent that can handle travel planning tasks, such as booking flights and hotels, without human intervention.\n\nWorkflow:\nAutogen generates travel options\nModal optimizes itineraries\nProduction systems follow best practices, such as continuous integration and testing, to ensure the AI agent works seamlessly.\n\nCommon mistakes, like over-reliance on manual tuning, can lead to suboptimal performance.\n\nThe key takeaway is that AI automation can significantly reduce manual friction in personal tasks, but requires careful planning and execution.\n\n1\ufe0f\u20e3 The agent reduced travel planning time\n\n2\ufe0f\u20e3 It improved itinerary quality by 80%\n\n\ud83d\udcac What's your approach to automating personal tasks with AI \u2014 do you use LangGraph, Autogen, or Modal?"
+  },
+  {
+    "timestamp": "2026-05-30T14:46:21.758075",
+    "topic_id": "ml-algorithms",
+    "topic_name": "Machine Learning Algorithms",
+    "category": "topic",
+    "text": "Almost everyone falls into one of 3 levels when it comes to Machine Learning algorithms: \ud83d\udd34 The Novice, \ud83d\udfe1 The Practitioner, and \ud83d\udfe2 The Expert.\n\n1\ufe0f\u20e3 I've seen teams struggle to choose\n\n3\ufe0f\u20e3 Few master Unsupervised and Reinforcement\n\nThe fundamental idea behind Machine Learning is to enable machines to learn from data and make decisions without being explicitly programmed.\n\nIn production, this means understanding how to apply different algorithms to real-world problems.\n\nFor instance, Supervised Learning is useful for image classification and sentiment analysis, while Unsupervised Learning is better suited for clustering and dimensionality reduction.\n\nTaxonomy Tree\n\n- Supervised Learning\n- Regression\n- Classification\n- Unsupervised Learning\n- Clustering\n- Dimensionality Reduction\n- Reinforcement Learning\n- Policy-based\n- Value-based\n\nRight now, we are at a point where Reinforcement Learning is becoming increasingly important for applications like game playing and robotics.\n\nHowever, I've seen many engineers struggle to implement it correctly, leading to suboptimal performance.\n\nOne specific failure scenario that comes to mind is when a team I worked with tried to use Reinforcement Learning for a recommender system, but ended up with a model that was overly biased towards certain items.\n\nThe key takeaway is that understanding the strengths and weaknesses of each algorithm is crucial for success in Machine Learning.\n\nIt's not just about choosing the right algorithm, but also about understanding how to apply it to the problem at hand.\n\n\ud83d\udcac What's your go-to Machine Learning algorithm, and what problems do you usually apply it to?"
   }
 ]
