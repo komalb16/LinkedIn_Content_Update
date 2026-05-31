@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T07:05:50.072060",
-    "topic_id": "trend-ai-work-curf-curb-strategies",
-    "topic_name": "Detecting AI-written Code in Reviews",
-    "category": "topic",
-    "text": "\ud83d\udccc Detecting AI-written Code in Reviews\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\nI just read a comment from a code reviewer that makes me cringe: \"This code looks too perfect, it must be written by a bot.\" \ud83e\udd14 While detecting AI-generated code is not a new problem, it's becoming increasingly critical in code reviews.\n\n\u2014 Most people rely on code complexity, but that's a flawed approach. \ud83c\udf2a\ufe0f\n\u2014 Production systems use these top 3 strategies to identify AI-written code:\n\n1\ufe0f\u20e3 **Red flags in naming conventions** are\n\n3\ufe0f\u20e3 **Lack of technical debt** is often\n\n|   Naming | Complex, unclear   | Follows a standard format |\n|   Style  | Random, inconsistent | Consistent, readable      |\n|   Debt   | Allows for refactoring | Embraces technical debt    |\n\u2014 To avoid being fooled by AI-written code, ask yourself: Are the code's naming conventions too perfect? Does the coding style show any signs of automation? Is the code devoid of technical debt?\n\n\ud83d\udcac What's your code review strategy to detect AI-generated code?\n\n#DistributedSystems #CodeReview #SoftwareDevelopment #EngineeringBestPractices #SoftwareArchitecture"
-  },
-  {
     "timestamp": "2026-04-19T07:08:42.231261",
     "topic_id": "trend-japanese-railway-best-practices",
     "topic_name": "5 Railway Efficiency Lessons",
@@ -838,5 +831,12 @@
     "topic_name": "CI/CD Best Practices",
     "category": "topic",
     "text": "I'm shocked by Microsoft's decision to degrade the functionality of perpetually-licensed offline products, specifically Microsoft Office 2019 and 2021 for Mac.\n\nThis move affects engineers building systems that rely on these products, as it forces them to reconsider their software stack.\n\nWhen code is committed, the initial build process sets the stage for potential security vulnerabilities if not properly validated.\n\nA thorough CI build is crucial to catch these issues before they escalate, ensuring the integrity of the system.\n\nAs the image build process progresses, security scans become essential to identify and mitigate potential threats.\n\nThese scans can make or break the reliability of the system, and their outcomes significantly impact the subsequent stage deploy.\n\nIn this phase, careful planning and testing are necessary to prevent errors that could compromise the entire system.\n\nUltimately, the production environment is where all these efforts come together, and any oversights can have severe consequences.\n\nEngineers must carefully evaluate their current workflows and consider alternative solutions, such as open-source office suites or cloud-based services.\n\nWhat offline office suite alternatives are you considering in light of Microsoft's changes? \ud83d\udcac Are you shifting to cloud-based solutions or looking for self-hosted options?"
+  },
+  {
+    "timestamp": "2026-05-31T14:04:50.603061",
+    "topic_id": "cicd-pipelines",
+    "topic_name": "CI/CD Best Practices",
+    "category": "topic",
+    "text": "Most teams blame the model first, but in CI/CD Best Practices the bigger failures usually come from architecture decisions. \ud83e\udde0\n\n1\ufe0f\u20e3 Code commits must pass pre-commit hooks\n\n2\ufe0f\u20e3 Linting saves time in the long\nMost teams do manual checks \u2014 but automated pipelines like GitHub Actions or GitLab CI streamline this process \ud83e\udd16.\n\nIn a well-designed pipeline, tests and SAST scans run in parallel, ensuring both code quality and security \ud83d\udeab.\n\nA security scan using tools like Trivy or Snyk is essential to catch vulnerabilities before they reach production \ud83d\udee1\ufe0f.\n\nWe use Docker multi-stage builds with layer caching to optimize image build times \ud83d\udd52.\n\nStage deployment involves helm upgrades and smoke tests to verify the application is working as expected \ud83c\udf1f.\n\nIn production, we use blue/green deployments, canary releases, and feature flags to minimize downtime and ensure smooth rollbacks \ud83d\udd04.\n\n\ud83d\udcac What's your approach to environment promotion and rollback in your CI/CD pipeline \u2014 do you use a specific tool or custom script?"
   }
 ]
