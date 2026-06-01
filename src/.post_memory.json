@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T07:33:29.708425",
-    "topic_id": "trend-improving-railway-operations",
-    "topic_name": "Real-World Rail Efficiency Tips",
-    "category": "topic",
-    "text": "Most teams blame the model first, but in Real-World Rail Efficiency Tips the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nJapan's railway systems are built on rock-solid foundations \u2013 reliable, scalable, and always on time.\n\nMost engineers copy-paste architectures without tailoring them to our needs \u2014\n\u2014 whereas Japan's design is rooted in meticulous planning and redundancy.\n\nTheir systems have a remarkable 99.9999% uptime, an enviable feat in our industry.\n\n1\ufe0f\u20e3 In contrast, we rely on hotfixes\n\n\ud83d\udca1 **Modern Card: Efficient System Design**\n==============================\n\n*   **Redundancy is not optional**: Japan's systems have multiple redundant routes, trains, and staff.\n*   **Design for failure**: Japan's systems prioritize redundancy and fault-tolerance.\n*   **Real-time monitoring**: Japan's systems use real-time monitoring to identify and rectify issues.\n*   **Scalability by design**: Japan's systems can handle massive volumes and sudden spikes in demand.\n*   **Clear communication**: Japan's staff is trained to communicate effectively during emergencies.\n*   **Continual improvement**: Japan's systems are constantly updated and optimized.\n\nI've seen our team waste resources on over-engineering, only to sacrifice reliability in the process.\n\n1\ufe0f\u20e3 Most engineers prioritize features over\n\n**The one thing to remember** \ud83e\udd14\n\nPoll: What will you prioritize in your next system design? \ud83d\udcca\nA) Reliability over features\nB) Scalability over redundancy\nC) Real-time monitoring only\nD) Hotfixes and finger-crossing\nE) Continual improvement and updates\nF) Focus on user experience\n\n#SoftwareArchitecture #ScaleEngineering #DistributedSystems #SystemDesign"
-  },
-  {
     "timestamp": "2026-04-19T07:38:13.828058",
     "topic_id": "trend-curb-ai-work-in-practice",
     "topic_name": "Authentic Code, Not AI Bylines",
@@ -838,5 +831,12 @@
     "topic_name": "LLM Agents Architecture",
     "category": "topic",
     "text": "Almost everyone falls into one of five levels when implementing LLM Agents Architecture: \ud83d\udd34 beginners, \ud83d\udfe1 explorers, \ud83d\udfe2 integrators, \ud83d\udff5 optimizers, or \ud83d\udfe3 masters.\n\nI've seen teams struggle with open-ended tasks, and I was wrong to think that adding more complexity would help.\n\nWhen you first embark on this journey, it's essential to identify the problem you're trying to solve and understand the needs of your project. This initial step is critical in determining the overall direction of your implementation.\n\nAs you progress, you'll need to gather and prepare the necessary data to feed into your system. This data will serve as the foundation for your LLM Agents, and its quality will directly impact the performance of your architecture.\n\nOnce you have your data in place, you can begin building your LLM Agents Architecture. I've found that using the simplest architecture that works is key, as it allows for easier maintenance and scalability.\n\nAs your system grows, you'll need to consider how to scale it effectively. This involves careful planning and strategic decision-making to ensure that your architecture can handle increased traffic and demand.\n\nWhich level are you? \ud83d\udcac What's the most significant challenge you've faced when implementing LLM Agents Architecture, and how did you overcome it?"
+  },
+  {
+    "timestamp": "2026-06-01T22:15:33.157075",
+    "topic_id": "docker-cheatsheet",
+    "topic_name": "Docker Mastery",
+    "category": "topic",
+    "text": "\ud83d\udccc Docker Mastery\n\nThe hardest part of Docker Mastery isn't the technology. It's the trade-offs.\n\nMy current lens: The 20% of Docker knowledge that covers 80% of daily use. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nDocker Client\nDocker Host\nDocker Hub\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
