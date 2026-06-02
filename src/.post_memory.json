@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T07:38:13.828058",
-    "topic_id": "trend-curb-ai-work-in-practice",
-    "topic_name": "Authentic Code, Not AI Bylines",
-    "category": "topic",
-    "text": "\ud83d\udccc Authentic Code, Not AI Bylines\n\n1\ufe0f\u20e3 I thought \"good enough\" code was\nTurns out, in a world of AI-generated snippets, original work matters more than ever.\n\nAs a Staff Engineer, I used to think that as long as the code worked, who cared about authorship?\n\n\ud83d\udd0d The Problem: AI-Generated Code Snippets\n\ud83d\udcda Core Concept: Code Authorship Matters\n\ud83d\udd04 How It Works: 3-Step Verification\n\ud83d\udcc8 Best Practices: Production System Checks\n\ud83d\udca1 Common Mistakes: Overrelying on AI\n\ud83d\udcdd Key Takeaway: Verify Authorship\n\n2\ufe0f\u20e3 The fundamental idea is this: code\nWhen AI-powered tools spit out code, how do you ensure you're not using someone else's work without credit?\n\nAnd what if that code contains critical bugs or security flaws?\n\n3\ufe0f\u20e3 The mechanism underneath involves 3 steps:\n\n4\ufe0f\u20e3 In production systems, verifying code\nAutomated tools help check for plagiarism, but human review is still essential to prevent accidental AI-generated code incorporation.\n\n5\ufe0f\u20e3 Most engineers get wrong by relying\nThis leads to a lack of transparency and accountability, which can have major consequences in high-pressure production environments.\n\n\ud83d\udcac How does your organization approach code authorship and AI-generated code snippets?\n\n#CodeAuthorship #SoftwareArchitecture #CodeReview #SystemDesign #SoftwareEngineering"
-  },
-  {
     "timestamp": "2026-04-19T07:50:32.293985",
     "topic_id": "trend-curb-plagiarism-with-human-touch",
     "topic_name": "Authentic Work in the Digital Age",
@@ -838,5 +831,12 @@
     "topic_name": "Docker Mastery",
     "category": "topic",
     "text": "\ud83d\udccc Docker Mastery\n\nThe hardest part of Docker Mastery isn't the technology. It's the trade-offs.\n\nMy current lens: The 20% of Docker knowledge that covers 80% of daily use. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nDocker Client\nDocker Host\nDocker Hub\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-06-02T00:21:24.603934",
+    "topic_id": "agentic-ai-decision-tree",
+    "topic_name": "Agentic AI Decision Tree",
+    "category": "topic",
+    "text": "Agentic AI Decision Tree looks simple until you have to run it in production.\n\nMy current lens: The hard part is not building agents. It is deciding when you do not need them.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nTask Shape\nNeed Retrieval\nNeed Tools\nComplexity\nDecision\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
