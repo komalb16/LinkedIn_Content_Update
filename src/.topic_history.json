@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-03-02T23:02:17.243111",
-    "topic_id": "ai-trends-industry-insights",
-    "topic_name": "Ai Trends Industry Insights",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-03T23:02:17.243111",
     "topic_id": "docker-cheatsheet",
     "topic_name": "Docker Cheatsheet",
@@ -1786,6 +1779,31 @@
         "score": 78,
         "raw_score": 78,
         "similarity": 0.0649,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-02T15:02:14.786004",
+    "topic_id": "ai-observability",
+    "topic_name": "AI Observability with OpenTelemetry",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 9,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 53,
+        "raw_score": 53,
+        "similarity": 0.0312,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 53,
+        "raw_score": 53,
+        "similarity": 0.0275,
         "penalty": 0
       }
     ]
