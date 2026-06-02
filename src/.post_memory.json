@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T07:51:13.295344",
-    "topic_id": "trend-japan-railways-lessons",
-    "topic_name": "Lessons from Japan's Rails",
-    "category": "topic",
-    "text": "Most teams blame the model first, but in Lessons from Japan's Rails the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nMost people do it that way\u2014wait for issues to arise, then scramble to fix them under pressure.\n\nBut what actually works in production is having a regular schedule for maintenance, so you can catch and fix problems before they become critical.\n\n**Modern Cards: Lessons from Japan's Rails**\n\n4\ufe0f\u20e3 **Best Practices**: Implement continuous\n\n5\ufe0f\u20e3 **Common Mistakes**: Ignoring maintenance\n\nWhen Japan's railways transitioned to modern systems, they implemented a culture of predictability and automation. This approach ensured that maintenance was always scheduled, and problems were caught before they became catastrophic.\n\nBy applying this principle to our software systems, we can build more reliable and maintainable products.\n\n\ud83d\udcac Which option describes your current team's approach to maintenance and testing?\n\nA) We have a regular maintenance schedule and conduct thorough code reviews.\nB) We use automated testing, but often ignore maintenance schedules.\nC) We rely on manual testing, but have no scheduled maintenance.\nD) We're still figuring out what works best for our team.\nE) We prioritize feature development over maintenance and testing.\nF) We outsource maintenance and testing to third-party providers.\n\n#ScaleEngineering #DistributedSystems #SystemDesign #SoftwareArchitecture"
-  },
-  {
     "timestamp": "2026-04-19T07:57:03.625052",
     "topic_id": "trend-japan-rail-implementation",
     "topic_name": "Railway Efficiency Hacks",
@@ -838,5 +831,12 @@
     "topic_name": "AI Observability with OpenTelemetry",
     "category": "topic",
     "text": "\ud83d\udccc AI Observability with OpenTelemetry\n\nNobody talks about the failure modes in AI Observability with OpenTelemetry. Let's fix that.\n\nMy current lens: Practical implementation guidance, trade-offs, and mistakes to avoid. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-06-02T23:56:34.295255",
+    "topic_id": "platform-engineering",
+    "topic_name": "Platform Engineering",
+    "category": "topic",
+    "text": "\ud83d\udccc Platform Engineering\n\nNobody talks about the failure modes in Platform Engineering. Let's fix that.\n\nMy current lens: Practical implementation guidance, trade-offs, and mistakes to avoid. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
