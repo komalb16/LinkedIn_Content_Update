@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-19T08:08:33.348704",
-    "topic_id": "trend-curbing-ai-work-practice",
-    "topic_name": "Writing Code Worth Reviewing",
-    "category": "topic",
-    "text": "\ud83d\udccc Writing Code Worth Reviewing\n\n\ud83d\uded1\ufe0f Just spent 6 hours fixing last night's automated code generation \"savings\" on production. \ud83d\udca5\n\n**Myth \u2192 Reality**\n\n1\ufe0f\u20e3 **Myth: Automated code generation reduces\nReality: It often creates more debt, hidden in poorly understood AI-generated code. \ud83d\udc80\n\n2\ufe0f\u20e3 **Myth: AI can replace human expertise**\nReality: Human judgment and code review are still essential for quality and maintainability. \ud83e\udd16\n3\ufe0f\u28ff **Myth: Automated code is always correct**\nReality: AI can make mistakes, especially if the training data is incomplete or inaccurate. \u274c\n\n**Prevention Strategies**\n1\ufe0f\u20e3 Review AI-generated code carefully\n\n2\ufe0f\u20e3 Ensure AI training data is accurate\n\n3\ufe0f\u20e3 Implement human code review\n\n4\ufe0f\u20e3 Monitor AI performance metrics\n\n5\ufe0f\u20e3 Re-evaluate AI-generated code over time\n\n6\ufe0f\u20e3 Foster a culture of human expertise\n\n**Poll:** What's your approach to code quality in a world dominated by AI?\n\nA) Automated code generation with no review\nB) Human code review for all critical code\nC) AI-assisted coding with occasional human review\nD) Replacing human engineers with AI tools\nE) Focusing on AI training data quality only\nF) Implementing AI monitoring and optimization metrics\n\n#SystemDesign #SoftwareArchitecture #DistributedSystems #ScaleEngineering"
-  },
-  {
     "timestamp": "2026-04-19T08:12:45.765074",
     "topic_id": "trend-japan-rail-effect",
     "topic_name": "Mastering Railway Efficiency",
@@ -838,5 +831,12 @@
     "topic_name": "AI Skills & Technologies Map",
     "category": "topic",
     "text": "I've seen teams overspend on AI infrastructure without a clear map of skills and technologies \ud83d\ude80.\n\n1\ufe0f\u20e3 Agentic AI requires a deep understanding\n\n2\ufe0f\u20e3 Generative AI relies on advanced neural\nTo navigate the AI ecosystem effectively, engineers must consider the interplay between different subfields, including NLP, computer vision, and robotics \ud83e\udd14.\n\nHoneycomb Map:\n\nThe fundamental idea is to identify which skills to learn and which technologies to adopt for each subfield \ud83d\udcda.\n\n1\ufe0f\u20e3 AI Ethics is crucial\n\n2\ufe0f\u20e3 Machine Learning is a key component\nBy understanding how these technologies work together, engineers can build more effective and efficient AI systems \ud83e\udd1d.\n\n\ud83d\udcac What's the most challenging AI skill for you to learn, and how do you plan to overcome it?"
+  },
+  {
+    "timestamp": "2026-06-05T13:57:08.180683",
+    "topic_id": "devsecops",
+    "topic_name": "DevSecOps Practices",
+    "category": "topic",
+    "text": "\ud83d\udccc DevSecOps Practices\n\nI was wrong about DevSecOps Practices for two years \u2014 here's what changed.\n\nMy current lens: Making security a developer responsibility without slowing teams down. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nPre-commit\nPull Request\nBuild Stage\nContainer Scan\nDeploy Gate\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
