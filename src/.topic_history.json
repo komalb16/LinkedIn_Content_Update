@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-03-07T23:02:17.243111",
-    "topic_id": "ai-career-skills",
-    "topic_name": "Ai Career Skills",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-08T23:02:17.243111",
     "topic_id": "zero-trust",
     "topic_name": "Zero Trust",
@@ -1861,6 +1854,31 @@
         "score": 78,
         "raw_score": 78,
         "similarity": 0.0205,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-05T23:18:09.900961",
+    "topic_id": "vector-databases",
+    "topic_name": "Vector Databases and Retrieval",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 78,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0217,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0289,
         "penalty": 0
       }
     ]
