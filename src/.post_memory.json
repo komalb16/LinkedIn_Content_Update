@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-21T17:00:10.350279",
-    "topic_id": "trend-software-laws-applied",
-    "topic_name": "Real World Laws",
-    "category": "topic",
-    "text": "\ud83d\udccc Real World Laws\n\nOnly 8% of production systems effectively apply software engineering laws \ud83d\udea8.\n\nThis staggering statistic exists because many engineers overlook the fundamental principles that govern software development, leading to technical debt and scalability issues \ud83d\udcc9.\n\nThe core concept is that software engineering laws are not just theoretical guidelines, but rather essential principles that dictate how systems behave and evolve \ud83d\udd04.\n\nUnderstanding these laws is crucial for building scalable and maintainable systems.\n\n- > Best Practices -> Common Mistakes\n\nSo, what's the key takeaway from this \ud83e\udd14?\nIt's that applying software engineering laws is not a nicety, but a necessity for building successful production systems \ud83d\udcbb.\n\n\ud83d\udcac What's the most important aspect of software engineering laws to you?\n\n#SoftwareEngineering #ProductionSystems #TechnicalDebt #Scalability #SystemDesign #EngineeringLaws \ud83d\ude80\ud83d\udca1\ud83d\udc40\ud83d\udcbb\ud83d\udcca\ud83d\udd0d"
-  },
-  {
     "timestamp": "2026-04-21T21:57:05.976421",
     "topic_id": "trend-software-laws",
     "topic_name": "Coding Principles",
@@ -838,5 +831,12 @@
     "topic_name": "LLM Architecture",
     "category": "topic",
     "text": "\ud83d\udccc LLM Architecture\n\nAlmost everyone falls into one of three levels: \ud83d\udfe2 beginner, \ud83d\udfe1 intermediate, or \ud83d\udfe3 advanced.\n\n1\ufe0f\u20e3 I see teams struggle\n\nWhen implementing LLM, you need to consider how raw text is split into sub-word tokens, which are then mapped to dense vectors, allowing for multi-head self-attention mechanisms to transform and project hidden states.\n\nThis process ultimately projects to a vocabulary, sampling a token that makes sense in the given context.\n\n- > Feed-Forward\nIn production, getting the attention mechanism right is crucial, as it allows the model to focus on specific parts of the input when generating text.\n\nIf you're seeing poor performance, it's often due to issues with the feed-forward mechanism, which can be fixed by adjusting the hidden state transformation.\n\n\ud83d\udcac What's your approach to handling multi-head self-attention in your LLM implementation?"
+  },
+  {
+    "timestamp": "2026-06-06T20:16:51.899040",
+    "topic_id": "interview-rag-biggest-failure",
+    "topic_name": "Interview: Rag",
+    "category": "interview",
+    "text": "\ud83d\udccc Interview: Rag\n\nMost teams blame the model first, but in Interview: Rag the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nThe fundamental idea behind RAG is to retrieve relevant information from a large corpus of text, and it matters now because it enables more accurate and efficient question-answering systems \ud83d\udcda.\n\nThe mechanism underneath involves a complex interplay of natural language processing and information retrieval techniques, which can be tricky to get right \ud83e\udd14.\n\nIn practice, production systems often employ best practices such as storing metadata and filtering before retrieval to improve performance \ud83d\udcc8.\n\nHowever, most engineers get wrong the importance of reranking after retrieval, which can significantly impact the overall quality of the results \ud83d\udcca.\n\nI've learned from my mistakes, and one key takeaway is that even small changes can have a significant impact on the overall system \ud83d\ude80.\n\nHere's a high-level outline of the RAG system:\n\nRAG System\n\nQuery\n\nRetrieval\nReranking\n\nResult\n\n\ud83d\udcac What's your biggest RAG failure in production, and how did you recover from it? \ud83e\udd14"
   }
 ]

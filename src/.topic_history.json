@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-03-09T23:02:17.243111",
-    "topic_id": "devsecops",
-    "topic_name": "Devsecops",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-10T23:02:17.243111",
     "topic_id": "microsoft-365",
     "topic_name": "Microsoft 365",
@@ -1900,5 +1893,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-06-06T20:16:51.902092",
+    "topic_id": "interview-rag-biggest-failure",
+    "topic_name": "Interview: Rag",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 78,
+    "ab_variants": []
   }
 ]
