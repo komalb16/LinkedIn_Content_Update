@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-03-08T23:02:17.243111",
-    "topic_id": "zero-trust",
-    "topic_name": "Zero Trust",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-09T23:02:17.243111",
     "topic_id": "devsecops",
     "topic_name": "Devsecops",
@@ -1879,6 +1872,31 @@
         "score": 78,
         "raw_score": 78,
         "similarity": 0.0289,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-06T14:50:24.787889",
+    "topic_id": "llm",
+    "topic_name": "LLM Architecture",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 74,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 90,
+        "raw_score": 90,
+        "similarity": 0.0563,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0115,
         "penalty": 0
       }
     ]
