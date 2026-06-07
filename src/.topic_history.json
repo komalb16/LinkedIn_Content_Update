@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-03-13T23:02:17.243111",
-    "topic_id": "rag-systems",
-    "topic_name": "Rag Systems",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-14T23:02:17.243111",
     "topic_id": "kafka-streaming",
     "topic_name": "Kafka Streaming",
@@ -1942,5 +1935,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-06-07T22:12:39.838182",
+    "topic_id": "aws-architecture",
+    "topic_name": "AWS Architecture Patterns",
+    "category": "Cloud",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 90,
+    "ab_variants": []
   }
 ]

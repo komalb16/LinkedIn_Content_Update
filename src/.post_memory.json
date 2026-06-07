@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-24T01:21:10.124227",
-    "topic_id": "microsoft-365",
-    "topic_name": "Microsoft 365",
-    "category": "topic",
-    "text": "\ud83d\udccc Microsoft 365\n\n70% of Microsoft 365 implementations fail to meet expectations \ud83d\udea8.\n\nThis is because they solve a specific problem: streamlining workplace productivity \ud83d\udcc8.\n\n2\ufe0f\u20e3 Need open-ended tasks require human\n\n3\ufe0f\u20e3 Data retrieval is often the primary\n\nI was wrong to think Microsoft 365 was a one-size-fits-all solution \ud83e\udd26.\n\nIf your task is deterministic, then use the simplest architecture that works \ud83d\udcc8.\n\nWhen you need to scale, then add complexity only when reliability demands it \ud83d\udd12.\n\n\ud83d\udcac What drives your Microsoft 365 implementation:\n\n1\ufe0f\u20e3 Start 2\ufe0f\u20e3 Need 3\ufe0f\u20e3 Data 4\ufe0f\u20e3\n\n#Microsoft365 #Productivity #Implementation #Failure #Success"
-  },
-  {
     "timestamp": "2026-04-24T17:51:59.934786",
     "topic_id": "trend-gpt-optimization",
     "topic_name": "GPT in Production",
@@ -838,5 +831,12 @@
     "topic_name": "Data Lakehouse Architecture",
     "category": "topic",
     "text": "80% of my data teams are moving away from traditional data warehouses and lakes \ud83c\udf0a.\n\nThis shift is driven by the need for a more flexible and scalable architecture that can handle the increasing complexity of data pipelines \ud83d\ude80.\n\nI've seen firsthand how a well-designed data lakehouse pattern can simplify data management and reduce costs \ud83d\udcb8.\n\nThe key to this approach is to use open formats like Delta Lake, Iceberg, and Hudi, which provide a common layer for data storage and processing \ud83d\udcda.\n\nOne of the biggest challenges I've faced is ensuring data governance and quality checks are in place \ud83d\udeab.\n\nThis is where a robust catalog and lineage system come in, providing a clear understanding of data provenance and ownership \ud83d\udcca.\n\nI was wrong to assume that a data lakehouse pattern would be a silver bullet for all our data woes \ud83e\udd26\u200d\u2640\ufe0f.\n\nIt took me years to learn that a successful implementation requires careful planning and consideration of the compute layer and consumer needs \ud83d\udcc8.\n\n\ud83d\udcac What's your approach to data governance and quality checks in your lakehouse architecture? \ud83e\udd14"
+  },
+  {
+    "timestamp": "2026-06-07T22:12:39.835405",
+    "topic_id": "aws-architecture",
+    "topic_name": "AWS Architecture Patterns",
+    "category": "topic",
+    "text": "Almost everyone falls into one of five levels when building on AWS: \ud83d\udd34 novice, \ud83d\udfe1 intermediate, \ud83d\udfe2 advanced, \ud83d\udd35 expert, or \ud83d\udfe3 master.\n\n1\ufe0f\u20e3 I was a novice when I\nI thought serverless was the answer to all my problems, but I soon realized that microservices on ECS/EKS were more suitable for my use case.\n\n2\ufe0f\u20e3 I learned to use event-driven architecture\nWhen it comes to compute, I've found that a combination of EC2, Lambda, ECS, and Fargate provides the most flexibility, allowing me to choose the best tool for each task.\n\nStorage is also crucial, and I've had success with S3, EBS, EFS, and Glacier, each serving a specific purpose in my production environment.\n\nDatabase management is another critical aspect, and I've used RDS, DynamoDB, and ElastiCache to ensure data consistency and availability.\n\nNetwork configuration is vital, and I've set up VPC, ALB, CloudFront, and Route53 to ensure secure and efficient communication between services.\n\nSecurity is a top priority, and I've implemented IAM, KMS, GuardDuty, and Secrets Manager to protect my resources and data.\n\nArchitecture:\n\nI was wrong to think that one pattern fits all, and it took me years to learn the cost implications of each.\n\nWhich level are you? \ud83d\udcac Are you using serverless, microservices, or event-driven architecture, and what's your favorite AWS service?"
   }
 ]
