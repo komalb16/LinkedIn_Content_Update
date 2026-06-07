@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-23T16:25:13.741805",
-    "topic_id": "langchain",
-    "topic_name": "LangChain",
-    "category": "topic",
-    "text": "\ud83d\udccc LangChain\n\nI was wrong about LangChain - I thought it was a silver bullet for all AI tasks \ud83e\udd26.\n\nHowever, I've come to realize that it's a powerful tool that requires careful consideration of the problem, task, and data requirements.\n\nIf the task is open-ended, then LangChain can be a good fit, but if it's mostly deterministic, a simpler approach may be more suitable \ud83e\udd14.\n\nThe type of data needed also plays a crucial role - retrieval, prediction, or orchestration all have different implications for the architecture.\n\nIf you need to build a complex AI system, use the simplest architecture that works, and only add complexity when reliability demands it \ud83d\udcbb.\n\nThis means starting small and scaling up, rather than trying to boil the ocean with a complex LangChain implementation from the start.\n\nSo what's the key decision criterion? \ud83e\udd14\nWhen to use LangChain?\nHere are your options:\n\n\ud83d\udcac Do you use LangChain for:\nStart - exploring the problem\nNeed - determining task requirements\nData - managing data flows\nBuild - implementing the simplest architecture\nScale - adding complexity for reliability\n\n#LangChain #ScaleEngineering #DecisionTree #ScalingComplexity #ArchitectureChoices #AIEngineering #MachineLearning"
-  },
-  {
     "timestamp": "2026-04-24T01:21:10.124227",
     "topic_id": "microsoft-365",
     "topic_name": "Microsoft 365",
@@ -838,5 +831,12 @@
     "topic_name": "Interview: Llm_Optimization",
     "category": "interview",
     "text": "\ud83d\udccc Interview: Llm_Optimization\n\nI was wrong about what matters most when optimizing LLMs - I used to think it was all about the model itself \ud83e\udd16.\n\nBut after shipping three RAG systems, I realized that the quality of the signals entering the system is just as crucial \ud83d\udcca.\n\n1\ufe0f\u20e3 Chips are the foundation of our\n\n2\ufe0f\u20e3 Columns define our retrieval strategy\n\n3\ufe0f\u20e3 Silent failures can occur at runtime\n\nWhen I look at our system, I see a flow of inputs, retrieval, and runtime metrics \ud83d\udcc8.\n\nI recall a specific failure scenario where we ignored token spend and escalation metrics, and it led to a 30% increase in errors \ud83d\udeab.\n\nNow, I prioritize these metrics to ensure our system's quality doesn't slip \ud83d\udcca.\n\n\ud83d\udcac What's your top priority when optimizing LLMs - chip architecture, column configuration, or runtime metrics?"
+  },
+  {
+    "timestamp": "2026-06-07T20:20:49.024340",
+    "topic_id": "data-lakehouse",
+    "topic_name": "Data Lakehouse Architecture",
+    "category": "topic",
+    "text": "80% of my data teams are moving away from traditional data warehouses and lakes \ud83c\udf0a.\n\nThis shift is driven by the need for a more flexible and scalable architecture that can handle the increasing complexity of data pipelines \ud83d\ude80.\n\nI've seen firsthand how a well-designed data lakehouse pattern can simplify data management and reduce costs \ud83d\udcb8.\n\nThe key to this approach is to use open formats like Delta Lake, Iceberg, and Hudi, which provide a common layer for data storage and processing \ud83d\udcda.\n\nOne of the biggest challenges I've faced is ensuring data governance and quality checks are in place \ud83d\udeab.\n\nThis is where a robust catalog and lineage system come in, providing a clear understanding of data provenance and ownership \ud83d\udcca.\n\nI was wrong to assume that a data lakehouse pattern would be a silver bullet for all our data woes \ud83e\udd26\u200d\u2640\ufe0f.\n\nIt took me years to learn that a successful implementation requires careful planning and consideration of the compute layer and consumer needs \ud83d\udcc8.\n\n\ud83d\udcac What's your approach to data governance and quality checks in your lakehouse architecture? \ud83e\udd14"
   }
 ]

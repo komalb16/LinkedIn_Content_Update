@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-03-12T23:02:17.243111",
-    "topic_id": "azure",
-    "topic_name": "Azure",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-13T23:02:17.243111",
     "topic_id": "rag-systems",
     "topic_name": "Rag Systems",
@@ -1924,5 +1917,30 @@
     "status": "success",
     "quality_score": 41,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-07T20:20:49.027370",
+    "topic_id": "data-lakehouse",
+    "topic_name": "Data Lakehouse Architecture",
+    "category": "Data",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 76,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 90,
+        "raw_score": 90,
+        "similarity": 0.0273,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 41,
+        "raw_score": 41,
+        "similarity": 0.475,
+        "penalty": 0
+      }
+    ]
   }
 ]
