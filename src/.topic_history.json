@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-03-10T23:02:17.243111",
-    "topic_id": "microsoft-365",
-    "topic_name": "Microsoft 365",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-11T23:02:17.243111",
     "topic_id": "responsible-ethical-ai",
     "topic_name": "Responsible Ethical Ai",
@@ -1903,5 +1896,30 @@
     "status": "success",
     "quality_score": 78,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-07T00:15:04.740541",
+    "topic_id": "platform-engineering-ai",
+    "topic_name": "Platform Engineering for AI Teams",
+    "category": "Engineering",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 33,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 58,
+        "raw_score": 58,
+        "similarity": 0.0111,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 21,
+        "raw_score": 21,
+        "similarity": 0.5513,
+        "penalty": 0
+      }
+    ]
   }
 ]

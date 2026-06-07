@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-21T21:57:05.976421",
-    "topic_id": "trend-software-laws",
-    "topic_name": "Coding Principles",
-    "category": "topic",
-    "text": "\ud83d\udccc Coding Principles\n\n80% of legacy codebases are maintainable, but only 20% are actually maintained \ud83e\udd14.\n\nThis statistic highlights the disconnect between the potential for maintainability and the reality of neglect.\n\nThe reason for this disparity lies in the lack of adherence to coding principles, which are essential for reducing technical debt \ud83d\udcc8.\n\nCoding principles provide a foundation for writing clean, modular, and scalable code, making it easier to maintain and extend over time.\n\nIn practice, applying software engineering laws to refactor legacy code involves identifying areas of high complexity and simplifying them \ud83d\udcca.\n\nThis can be achieved by breaking down monolithic systems into smaller, independent components, and applying design patterns to improve modularity and reusability \ud83d\udee0\ufe0f.\n\nSo, what's the most important aspect of reducing technical debt in large codebases?\n\nIs it:\n\ud83d\udcac The Problem: identifying the root causes of technical debt\n\ud83d\udcac Core Concept: understanding the fundamental principles of software engineering\n\ud83d\udcac How It Works: learning the mechanisms underlying maintainable code\n\ud83d\udcac Best Practices: adopting production-ready strategies for refactorization\n\ud83d\udcac Common Mistakes: avoiding pitfalls that lead to increased technical debt\n\n\ud83d\udcac Key Takeaway: remembering the one crucial principle for maintainability\n\n#SoftwareEngineering #TechnicalDebt #LegacyCode #Refactoring #CodeMaintainability #DesignPrinciples \ud83d\udcda\ud83d\udcbb"
-  },
-  {
     "timestamp": "2026-04-21T22:14:22.264407",
     "topic_id": "trend-oauth-secure-env-vars",
     "topic_name": "Secure OAuth Envs",
@@ -838,5 +831,12 @@
     "topic_name": "Interview: Rag",
     "category": "interview",
     "text": "\ud83d\udccc Interview: Rag\n\nMost teams blame the model first, but in Interview: Rag the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nThe fundamental idea behind RAG is to retrieve relevant information from a large corpus of text, and it matters now because it enables more accurate and efficient question-answering systems \ud83d\udcda.\n\nThe mechanism underneath involves a complex interplay of natural language processing and information retrieval techniques, which can be tricky to get right \ud83e\udd14.\n\nIn practice, production systems often employ best practices such as storing metadata and filtering before retrieval to improve performance \ud83d\udcc8.\n\nHowever, most engineers get wrong the importance of reranking after retrieval, which can significantly impact the overall quality of the results \ud83d\udcca.\n\nI've learned from my mistakes, and one key takeaway is that even small changes can have a significant impact on the overall system \ud83d\ude80.\n\nHere's a high-level outline of the RAG system:\n\nRAG System\n\nQuery\n\nRetrieval\nReranking\n\nResult\n\n\ud83d\udcac What's your biggest RAG failure in production, and how did you recover from it? \ud83e\udd14"
+  },
+  {
+    "timestamp": "2026-06-07T00:15:04.738665",
+    "topic_id": "platform-engineering-ai",
+    "topic_name": "Platform Engineering for AI Teams",
+    "category": "topic",
+    "text": "\ud83d\udccc Platform Engineering for AI Teams\n\nMost teams blame the model first, but in Platform Engineering for AI Teams the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nOur internal AI platform should provide these essentials to ensure smooth delivery \ud83d\udce6.\n\nDeveloper Experience\nDelivery Path\nControls\nThis architecture ensures that the safe path is the easiest path for product teams \ud83d\ude80.\n\nI've seen teams spend weeks debugging issues that could've been prevented with proper cost controls and deployment paths \ud83d\udd52.\n\n\ud83d\udcac What's the most common issue you've seen in your AI deployments? \ud83e\udd14"
   }
 ]
