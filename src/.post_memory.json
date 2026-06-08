@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-24T17:55:31.512221",
-    "topic_id": "trend-supply-chain-risks",
-    "topic_name": "Securing CLI Tools",
-    "category": "topic",
-    "text": "\ud83d\udccc Securing CLI Tools\n\n70% of supply chain attacks target developer tools \ud83d\udea8.\nThese attacks can have devastating consequences, and it's crucial to understand why securing CLI tools like Bitwarden CLI matters now.\n\nMost engineers rely on manual dependency updates \u2014\n\nThe Core Concept is to implement robust dependency management and vulnerability scanning in CI/CD pipelines \u2014\nthis approach ensures that all dependencies are up-to-date and secure \ud83d\udd12.\n\nBest Practices include using tools like Snyk or Dependabot to automate dependency updates and vulnerability scanning \u2014\nmost engineers get this wrong by not implementing these tools in their CI/CD pipelines \ud83e\udd26.\n\nCommon Mistakes include not regularly updating dependencies or not scanning for vulnerabilities, leaving the system open to attacks \ud83d\udeab.\n\n\ud83d\udcac What is the most critical step in securing CLI tools like Bitwarden CLI?\n\n#SupplyChainSecurity #CLItools #DependencyManagement #VulnerabilityScanning #SecureDeployment #DevSecOps \ud83d\ude80\ud83d\udcbb\ud83d\udd12"
-  },
-  {
     "timestamp": "2026-04-26T22:08:48.873996",
     "topic_id": "trend-ai-math-solutions",
     "topic_name": "AI in Math Problems",
@@ -838,5 +831,12 @@
     "topic_name": "Model Observability Moment",
     "category": "story",
     "text": "Nobody talks about the failure modes in Model Observability Moment. Let's fix that.\n\nMy current lens: Be technical: discuss perplexity, semantic similarity, or drift detection tools.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-06-08T23:20:26.316468",
+    "topic_id": "ai-evals-guardrails",
+    "topic_name": "AI Evals and Guardrails",
+    "category": "topic",
+    "text": "\ud83d\udccc AI Evals and Guardrails\n\nMost teams overrate prompt quality and underrate system quality in production AI \ud83e\udd16.\n\nI've seen this firsthand, where tweaking prompts feels productive but doesn't improve reliability \ud83d\udcca.\n\nThe real foundation of production AI lies in evaluations, red teaming, and guardrails \ud83d\udea7.\n\nEvaluations should include regression checks and task-based scoring to ensure system quality \ud83d\udcc8.\n\nThis is where many teams fall short, focusing on prompt tweaks instead of thorough evaluations \ud83d\udcdd.\n\nIn my experience, a single flawed evaluation metric can lead to a 30% increase in hallucinations \ud83d\udea8.\n\nRed teaming, or stress-testing, is another crucial aspect of production AI \ud83d\ude80.\n\nBy simulating real-world scenarios, you can identify and fix potential issues before they become incidents \ud83d\udcbb.\n\nI've found that red teaming can reduce failure rates by up to 25% \ud83d\udcc9.\n\nHere's a high-level overview of the key components:\n\nSignal: evals, red teaming, guardrails\nNoise: prompt tweaks, over-engineering\n\nSo, what's your approach to ensuring system quality in production AI? \ud83d\udcac What specific evaluation metrics or red teaming strategies have you found most effective? \ud83e\udd14"
   }
 ]
