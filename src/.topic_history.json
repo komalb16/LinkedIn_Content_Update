@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-03-14T23:02:17.243111",
-    "topic_id": "kafka-streaming",
-    "topic_name": "Kafka Streaming",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-15T23:02:17.243111",
     "topic_id": "mlops-pipeline",
     "topic_name": "Mlops Pipeline",
@@ -1945,5 +1938,30 @@
     "status": "success",
     "quality_score": 90,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-08T21:57:38.956209",
+    "topic_id": "story-ml-model-fine-tuning",
+    "topic_name": "Model Observability Moment",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 27,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 27,
+        "raw_score": 27,
+        "similarity": 0.0114,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 21,
+        "raw_score": 21,
+        "similarity": 0.019,
+        "penalty": 0
+      }
+    ]
   }
 ]
