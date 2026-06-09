@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-03-18T22:23:02.363191",
-    "topic_id": "ai-observability",
-    "topic_name": "AI Observability",
-    "category": "AI Reliability",
-    "mode": "ai_news",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-19T23:00:06.950677",
     "topic_id": "enterprise-agentic-strategy",
     "topic_name": "Enterprise Agentic AI Strategy",
@@ -1981,5 +1973,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-06-09T23:23:24.265917",
+    "topic_id": "responsible-ai-security-stack",
+    "topic_name": "Responsible AI Security Stack",
+    "category": "Security",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 50,
+    "ab_variants": []
   }
 ]
