@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-26T22:18:55.372326",
-    "topic_id": "trend-chatgpt-math-solves",
-    "topic_name": "ChatGPT Math Solutions",
-    "category": "topic",
-    "text": "\ud83d\udccc ChatGPT Math Solutions\n\nI used to think brute force was the only way to solve complex mathematical problems with large language models like ChatGPT \ud83e\udd16.\n\n1\ufe0f\u20e3 ChatGPT solves math problems\n\nModern Cards:\nCard 1: The Problem\nCard 2: Core Concept\nCard 3: How It Works\nCard 4: Best Practices\nCard 5: Common Mistakes\nCard 6: Key Takeaway\nNow I know combining AI with mathematical Domain Specific Languages is more efficient \ud83d\udcdd.\n\n\ud83d\udcac Which card matters most to you?\n\n#Mathematics #ScaleEngineering #DSL #ProductionSystems #EfficientSolutions #LargeLanguageModels"
-  },
-  {
     "timestamp": "2026-04-26T22:41:26.891855",
     "topic_id": "trend-ai-solves-math-problems",
     "topic_name": "AI in Math Solutions",
@@ -838,5 +831,12 @@
     "topic_name": "Responsible AI Security Stack",
     "category": "topic",
     "text": "Most teams blame the model first, but in Responsible AI Security Stack the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nThis oversight can lead to costly data breaches and compromised model performance.\n\nTo avoid this, I always integrate Azure AI Content Safety, Defender for Cloud, Purview, and Confidential Computing into my delivery stack.\n\nWhen building a secure-by-default AI delivery stack, it's crucial to consider where signals enter and where context changes \ud83d\udd04.\n\nFor instance, I once worked on a project where a silent failure in our retrieval layer went undetected for weeks, causing our model's performance to degrade \ud83d\udcc9.\n\nTo prevent such issues, I now prioritize observability signals like prompts, retrieval, tool calls, cost, quality, and alerts \ud83d\udcca.\n\nBy monitoring these signals and implementing a layered security approach, you can ensure the integrity of your AI system and prevent potential breaches \ud83d\udeab.\n\nSo, what's one specific signal you'll start tracking in your AI project this week to improve its security and performance? \ud83d\udcac"
+  },
+  {
+    "timestamp": "2026-06-11T00:24:23.593454",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "story",
+    "text": "Most teams get RAG Strategy Shift wrong in the same way.\n\nMy current lens: Focus on the performance metrics (latency/relevance) and 3 specific retrieval optimizations.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
