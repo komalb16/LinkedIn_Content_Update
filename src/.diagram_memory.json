@@ -586,5 +586,12 @@
     "style": 15,
     "signature": "1413ffe5f1efafabcfe099f06835be80",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-06-12T13:35:19.486139",
+    "topic_id": "kafka-streaming",
+    "style": 0,
+    "signature": "a51aa6f7af8fb9879b9119e54dbc8594",
+    "duplicate_avoided": true
   }
 ]

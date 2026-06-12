@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-26T22:43:25.042727",
-    "topic_id": "trend-domain-security-risks",
-    "topic_name": "Securing Domain Transfers",
-    "category": "topic",
-    "text": "\ud83d\udccc Securing Domain Transfers\n\n1\ufe0f\u20e3 My domain transfer verification process\nI've spent years implementing proper domain transfer validation and verification processes in production environments, but I've still learned a thing or two.\n\n**Secure Domain Transfer Flow**\n\nRequest\n\nAuthenticate\nUser/Process\n\nVerify Domain\nOwnership &\nTransfer Lock\n\nConfirm Transfer\n& Update DNS\n\nMonitor & Audit\n\n**The Myth**: Domain transfer verification is easy; just use a simple API call.\n\n**Reality**: Domain transfer verification requires multiple API calls, user authentication, and domain ownership verification.\n\n**Best Practice**: Implement a 2-factor authentication for domain owners and transfer lock verification to prevent unintended losses.\n\n**Common Mistakes**: Engineers tend to overlook domain ownership verification and transfer lock verification, leading to domain hijacking and loss.\n\n\ud83d\udcac What's your current domain transfer security process like? Are you using a simple API call or a multi-step verification process? Please share your thoughts in the comments! \ud83e\udd14\n\n#DomainSecurity #ScaleEngineering #SecurityEngineering #CloudNative #SoftwareArchitecture"
-  },
-  {
     "timestamp": "2026-04-26T22:48:55.167502",
     "topic_id": "trend-chatgpt-math",
     "topic_name": "AI in Math Proofs",
@@ -838,5 +831,12 @@
     "topic_name": "Git Workflow and Commands",
     "category": "topic",
     "text": "\ud83d\udccc Git Workflow and Commands\n\nGit Workflow and Commands looks simple until you have to run it in production.\n\nMy current lens: Commands and patterns that separate juniors from seniors. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBranch\nCommit\nPR Flow\nRebase\nRecovery\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-06-12T13:35:24.976137",
+    "topic_id": "kafka-streaming",
+    "topic_name": "Apache Kafka and Streaming",
+    "category": "topic",
+    "text": "\ud83d\udccc Apache Kafka and Streaming\n\nOur Kafka cluster just hit 10 million messages per second \ud83d\ude80.\n\n1\ufe0f\u20e3 Configurable retention is key to handling\nKafka's high throughput and configurable retention made it an ideal choice for our real-time streaming architecture.\n\nWe also use RabbitMQ for task queuing, which handles 100k tasks per second \u23f1\ufe0f, but lacks replay capabilities.\n\nIn contrast, Redis Streams provide low-latency and memory-first architecture, ideal for certain use cases \ud83d\udcc8.\n\nKinesis offers AWS-native integration with 7-day retention, while Pulsar provides multi-tenancy with infinite retention \ud83d\udcc1.\n\nUnderstanding the strengths of each component is crucial for designing a robust real-time streaming architecture.\n\n\ud83d\udcac What's the most challenging part of your Kafka setup \u2014 producer configuration, consumer groups, or partitioning strategy? \ud83e\udd14"
   }
 ]

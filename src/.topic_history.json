@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-03-21T15:20:07.691634",
-    "topic_id": "cicd-pipelines",
-    "topic_name": "CI/CD Best Practices",
-    "category": "DevOps",
-    "mode": "ai_news",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-23T23:15:07.258648",
     "topic_id": "ai-skills-map",
     "topic_name": "AI Skills & Technologies Map",
@@ -2014,6 +2006,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.0115,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-12T13:35:24.978424",
+    "topic_id": "kafka-streaming",
+    "topic_name": "Apache Kafka and Streaming",
+    "category": "Data",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 29,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0088,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 54,
+        "raw_score": 54,
+        "similarity": 0.0096,
         "penalty": 0
       }
     ]
