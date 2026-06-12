@@ -1,18 +1,10 @@
 [
   {
-    "timestamp": "2026-06-11T23:45:09.284541",
-    "style_idx": 15,
-    "style_name": "Vertical Timeline",
-    "topic_id": "git-workflow",
-    "topic_name": "Git Workflow and Commands",
-    "diagram_type": "Flow Chart"
-  },
-  {
-    "timestamp": "2026-06-12T13:35:19.489417",
-    "style_idx": 0,
-    "style_name": "Vertical Flow",
-    "topic_id": "kafka-streaming",
-    "topic_name": "Apache Kafka and Streaming",
-    "diagram_type": "Architecture Diagram"
+    "timestamp": "2026-06-12T21:56:33.779879",
+    "style_idx": 1,
+    "style_name": "Mind Map",
+    "topic_id": "enterprise-ai",
+    "topic_name": "Enterprise AI Architecture",
+    "diagram_type": "Decision Tree"
   }
 ]
