@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-26T22:53:07.226231",
-    "topic_id": "trend-chatgpt-erdos-solver",
-    "topic_name": "AI Math Breakthroughs",
-    "category": "topic",
-    "text": "\ud83d\udccc AI Math Breakthroughs\n\nThree years ago, applying large language models to complex mathematical problems seemed like a distant dream \ud83c\udf19.\n\nNow, we're seeing breakthroughs that matter for production environments, and it's time to rethink our approach \ud83d\udcca.\n\nHowever, the Core Concept of using language models for math is surprisingly straightforward: by treating math problems as language translation tasks, we can harness the power of AI to solve complex equations \ud83d\udcdd.\n\nBest Practices in production systems involve carefully crafting prompts to elicit specific responses from the model, a process known as prompt engineering \ud83d\udca1.\n\nCommon Mistakes include underestimating the importance of prompt engineering and overestimating the model's ability to understand context \ud83d\udeab.\n\nThe Key Takeaway is that prompt engineering is a critical component of successfully applying large language models to complex mathematical problems \ud83d\udcdd.\n\n\ud83d\udcac What's the most important aspect of applying large language models to math problems?\n\n#SoftwareArchitecture #Math #LanguageModels #ProductionEnvironment #MachineLearning #ProblemSolving\nPoll:\nA) The Problem\nB) Core Concept\nC) How It Works\nD) Best Practices\nE) Common Mistakes\nF) Key Takeaway"
-  },
-  {
     "timestamp": "2026-04-28T20:54:23.752498",
     "topic_id": "trend-cross-platform-sharing",
     "topic_name": "P2P File Sharing",
@@ -838,5 +831,12 @@
     "topic_name": "Enterprise AI Architecture",
     "category": "topic",
     "text": "We're at the peak of AI hype \ud83d\ude80, but most teams I've seen are still struggling to implement it effectively \ud83e\udd14.\n\nI've watched companies cycle through AI projects, only to realize they're not getting the expected returns \ud83d\udcc9.\n\nIf you're building an Enterprise AI system, you need to consider the problem you're trying to solve \ud83e\udd14.\n\n3\ufe0f\u20e3 The architecture should be simple, yet\n\nHere's a high-level overview of how this works:\n\nI was wrong to think that a complex architecture would always yield better results \ud83e\udd26\u200d\u2640\ufe0f.\n\nIt took me years to learn that the simplest architecture that works is often the best approach \ud83d\udcc8.\n\nDo you need to retrieve specific data, predict outcomes, or orchestrate multiple tasks \ud83e\udd37\u200d\u2640\ufe0f?\n\nWhat this means for your work right now is that you need to reassess your AI architecture and make deliberate choices about simplicity and scalability \ud83d\udcca.\n\n\ud83d\udcac What's the most significant challenge you've faced when implementing an Enterprise AI system, and how did you overcome it?"
+  },
+  {
+    "timestamp": "2026-06-13T14:19:08.143146",
+    "topic_id": "ai-system-design",
+    "topic_name": "AI System Design Patterns",
+    "category": "topic",
+    "text": "I've seen 8 out of 10 AI system designs fail due to incorrect architecture choices \ud83d\udea8.\n\nIf your system requires low-latency data access, then you should prioritize a chip-based entry point \ud83d\udcc8.\n\n2\ufe0f\u20e3 Ensure each component can scale\n\n3\ufe0f\u20e3 Implement a robust caching mechanism\n\nIf your system relies on complex business logic, then a column-based service layer is a better fit \ud83d\udca1.\n\n- > Reliability obs\nHowever, if you're dealing with high-volume data ingestion, a Primary DB with replicas and cache is a more suitable choice \ud83d\udcca.\n\nIf you're unsure about the reliability of your system, then an obs-based reliability layer can provide the necessary safeguards \ud83d\udd12.\n\nWhat's your primary concern when designing an AI system \u2014 latency, complexity, or data volume? \ud83d\udcac"
   }
 ]

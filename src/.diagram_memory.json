@@ -600,5 +600,12 @@
     "style": 1,
     "signature": "d1bf5dc11549758bd3c0a5cb2e3917f5",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-06-13T14:19:01.667849",
+    "topic_id": "ai-system-design",
+    "style": 3,
+    "signature": "7991aaad09f37427fefd8704537471b8",
+    "duplicate_avoided": true
   }
 ]

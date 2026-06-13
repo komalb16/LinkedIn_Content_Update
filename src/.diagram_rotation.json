@@ -1,10 +1,10 @@
 [
   {
-    "timestamp": "2026-06-12T21:56:33.779879",
-    "style_idx": 1,
-    "style_name": "Mind Map",
-    "topic_id": "enterprise-ai",
-    "topic_name": "Enterprise AI Architecture",
+    "timestamp": "2026-06-13T14:19:01.671506",
+    "style_idx": 3,
+    "style_name": "Timeline",
+    "topic_id": "ai-system-design",
+    "topic_name": "AI System Design Patterns",
     "diagram_type": "Decision Tree"
   }
 ]

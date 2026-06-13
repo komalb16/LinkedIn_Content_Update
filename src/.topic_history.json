@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-03-24T17:00:07.625984",
-    "topic_id": "multimodal-ai-systems",
-    "topic_name": "Multimodal AI Systems",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-03-25T22:25:20.524105",
     "topic_id": "system-design",
     "topic_name": "System Design Fundamentals",
@@ -2036,5 +2028,30 @@
     "status": "success",
     "quality_score": 88,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-13T14:19:08.145340",
+    "topic_id": "ai-system-design",
+    "topic_name": "AI System Design Patterns",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 45,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 82,
+        "raw_score": 82,
+        "similarity": 0.0238,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 45,
+        "raw_score": 45,
+        "similarity": 0.0164,
+        "penalty": 0
+      }
+    ]
   }
 ]
