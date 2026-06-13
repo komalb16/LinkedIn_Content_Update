@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-28T20:54:23.752498",
-    "topic_id": "trend-cross-platform-sharing",
-    "topic_name": "P2P File Sharing",
-    "category": "topic",
-    "text": "\ud83d\udccc P2P File Sharing\n\nProduction just broke due to a faulty file sharing protocol \ud83d\udea8.\n\n1\ufe0f\u20e3 Files were not synced\n\n2\ufe0f\u20e3 Users were left offline\nTo avoid this, you need a reliable cross-platform file sharing system \ud83d\udcc1.\n\nHere's how the system operates:\n\nYou have four main operating lanes: Inputs, Tools, Control, and Scale \ud83d\udcc8.\n\n\ud83d\udcac Which lane do you focus on when implementing a peer-to-peer file sharing protocol?\n\n#FileSharing #PeerToPeer #SystemDesign #ReliabilityEngineering #ProductionReady \ud83d\udcbb\ud83d\udd0d\ud83d\udcca\ud83d\udc4d"
-  },
-  {
     "timestamp": "2026-04-28T21:07:32.171614",
     "topic_id": "kubernetes-mastery",
     "topic_name": "Kubernetes Deep Dive",
@@ -838,5 +831,12 @@
     "topic_name": "AI System Design Patterns",
     "category": "topic",
     "text": "I've seen 8 out of 10 AI system designs fail due to incorrect architecture choices \ud83d\udea8.\n\nIf your system requires low-latency data access, then you should prioritize a chip-based entry point \ud83d\udcc8.\n\n2\ufe0f\u20e3 Ensure each component can scale\n\n3\ufe0f\u20e3 Implement a robust caching mechanism\n\nIf your system relies on complex business logic, then a column-based service layer is a better fit \ud83d\udca1.\n\n- > Reliability obs\nHowever, if you're dealing with high-volume data ingestion, a Primary DB with replicas and cache is a more suitable choice \ud83d\udcca.\n\nIf you're unsure about the reliability of your system, then an obs-based reliability layer can provide the necessary safeguards \ud83d\udd12.\n\nWhat's your primary concern when designing an AI system \u2014 latency, complexity, or data volume? \ud83d\udcac"
+  },
+  {
+    "timestamp": "2026-06-13T18:17:29.953556",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust Architecture",
+    "category": "topic",
+    "text": "Three years ago, Zero Trust security was a buzzword, but now it's a business requirement \ud83d\udea8.\n\nI've seen companies shift from trusting their networks to verifying every interaction \ud83d\udcca.\n\nThis change is driven by the need for identity-first security, where every user and device is authenticated and authorized before accessing resources \ud83d\udcc8.\n\n2\ufe0f\u20e3 Microsegmentation limits lateral movement\nWe use Policy Engines to define and enforce access rules, ensuring that only authorized users and devices can access sensitive data \ud83d\udeab.\n\nFor example, a company I worked with implemented microsegmentation and reduced their breach response time by 50% \ud83d\udd52.\n\n<---(verify)-------->\n\nv                       v\nDevice --(posture)--> Data\nIn production, this means ensuring that every device and user is continuously verified, and that access is granted based on least privilege principles \ud83d\udcca.\n\nWhat's your approach to implementing Zero Trust in your organization \u2014 are you using Identity and Access Management (IAM) tools or building custom solutions? \ud83d\udcac"
   }
 ]
