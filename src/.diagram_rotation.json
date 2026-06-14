@@ -6,5 +6,13 @@
     "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
     "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
     "diagram_type": "Flow Chart"
+  },
+  {
+    "timestamp": "2026-06-14T19:49:04.373502",
+    "style_idx": 30,
+    "style_name": "Style 30",
+    "topic_id": "data-engineering",
+    "topic_name": "Data Engineering Pipelines",
+    "diagram_type": "Acronym Framework"
   }
 ]
