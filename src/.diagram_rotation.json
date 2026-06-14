@@ -1,10 +1,10 @@
 [
   {
-    "timestamp": "2026-06-14T00:17:58.675581",
-    "style_idx": 1,
-    "style_name": "Mind Map",
-    "topic_id": "azure",
-    "topic_name": "Azure Architecture Patterns",
-    "diagram_type": "Decision Tree"
+    "timestamp": "2026-06-14T15:12:04.036872",
+    "style_idx": 15,
+    "style_name": "Vertical Timeline",
+    "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
+    "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
+    "diagram_type": "Flow Chart"
   }
 ]

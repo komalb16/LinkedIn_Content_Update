@@ -621,5 +621,12 @@
     "style": 1,
     "signature": "2118ebf736cf41576431eea78271377f",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-06-14T15:12:04.033524",
+    "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
+    "style": 15,
+    "signature": "0289118a2edd869d12987615363cc889",
+    "duplicate_avoided": true
   }
 ]

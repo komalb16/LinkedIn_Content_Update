@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-28T21:13:17.378831",
-    "topic_id": "story-personal-ai-daily-life",
-    "topic_name": "Personal AI Productivity",
-    "category": "story",
-    "text": "\ud83d\udccc Personal AI Productivity\n\nI watched a team spend hours manually planning their business trips, only to realize they could have automated the process.\n\nTheir struggle to find the best flights and hotels was a clear moment that led to an insight: AI can handle repetitive tasks.\n\nBuilding a custom AI agent using LangGraph and Autogen can automate travel planning.\n\nThe better decision is to use AI to reduce manual friction.\nHere are three practical actions to take:\n\nThis changed my approach to travel planning, making it more efficient.\n\n\ud83d\udcac How do you use AI to automate repetitive tasks in your personal life?\n\n#AIAutomation #TravelPlanning #ProductivityHacks #LangGraph #Autogen #Modal"
-  },
-  {
     "timestamp": "2026-04-28T21:15:13.415238",
     "topic_id": "story-llm-agent-realization",
     "topic_name": "AI Agent Interaction",
@@ -838,5 +831,12 @@
     "topic_name": "Azure Architecture Patterns",
     "category": "topic",
     "text": "Most teams blame the model first, but in Azure Architecture Patterns the bigger failures usually come from architecture decisions. \ud83e\udde0\n\n1\ufe0f\u20e3 Our team picked the wrong architecture\nIf your task is open-ended, you need a flexible architecture that can adapt to changing requirements \ud83e\udd14.\n\nWhen it's deterministic, a simpler approach will suffice \ud83d\udcc8.\nYou need to determine whether you require data retrieval, prediction, or orchestration to make the right choice \ud83d\udcca.\n\nThe key is to use the simplest architecture that works and add complexity only when reliability demands it \ud83d\udca1.\n\nIf you need retrieval, start with a basic data pipeline \ud83d\udcc4.\nWhen you need prediction, consider a machine learning model \ud83e\udd16.\n\n\ud83d\udcac What's the most common mistake you've seen in implementing Azure Architecture Patterns, and how did you fix it?"
+  },
+  {
+    "timestamp": "2026-06-14T15:12:09.711903",
+    "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
+    "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
+    "category": "topic",
+    "text": "\ud83d\udccc ChatGPT vs Grok vs Gemini vs Claude vs Perplexity\n\nOnly\nThis low success rate stems from misunderstanding the fundamental differences between these models and how they apply to specific use cases.\n\n\ud83d\udd34 Level 1 \u2014 The Novice:\nI've seen many engineers struggle to choose the right model for their task, often defaulting to ChatGPT without considering the trade-offs.\n\nConsequently, they end up with suboptimal performance and frustrated users.\n\n\ud83d\udfe1 Level 2 \u2014 The Explorer:\nAs engineers gain experience, they begin to experiment with different models, but often get stuck in analysis paralysis, unable to commit to a single approach.\n\nThis indecision leads to delayed deployments and missed opportunities.\n\n\ud83d\udfe2 Level 3 \u2014 The Practitioner:\nAt this level, engineers develop a deeper understanding of each model's strengths and weaknesses, allowing them to make informed decisions about when to use each one.\n\nFor instance, Grok excels at handling nuanced, open-ended questions, while Perplexity is better suited for tasks requiring high precision.\n\n\ud83d\udd35 Level 4 \u2014 The Master:\nThe most skilled engineers can seamlessly integrate multiple models into a single workflow, leveraging their unique capabilities to achieve exceptional results.\n\nBy doing so, they unlock new possibilities for their applications and stay ahead of the competition.\n\nleft -> right\nChatGPT -> Conversational interfaces\nGrok -> Open-ended question handling\nGemini -> Multilingual support\nClaude -> Low-latency responses\nPerplexity -> High-precision tasks\nThe key to success lies in understanding the specific needs of your project and selecting the model that best aligns with those requirements.\n\nWhich level are you?\n\n\ud83d\udcac What's your go-to model for handling complex, domain-specific queries, and how do you determine when to use each one?"
   }
 ]
