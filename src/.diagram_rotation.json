@@ -1,18 +1,10 @@
 [
   {
-    "timestamp": "2026-06-14T15:12:04.036872",
-    "style_idx": 15,
-    "style_name": "Vertical Timeline",
-    "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
-    "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
+    "timestamp": "2026-06-14T23:18:26.968091",
+    "style_idx": 0,
+    "style_name": "Vertical Flow",
+    "topic_id": "mlops-pipeline",
+    "topic_name": "MLOps and Model Deployment",
     "diagram_type": "Flow Chart"
-  },
-  {
-    "timestamp": "2026-06-14T19:49:04.373502",
-    "style_idx": 30,
-    "style_name": "Style 30",
-    "topic_id": "data-engineering",
-    "topic_name": "Data Engineering Pipelines",
-    "diagram_type": "Acronym Framework"
   }
 ]
