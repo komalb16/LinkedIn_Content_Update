@@ -1,18 +1,10 @@
 [
   {
-    "timestamp": "2026-06-13T14:19:01.671506",
-    "style_idx": 3,
-    "style_name": "Timeline",
-    "topic_id": "ai-system-design",
-    "topic_name": "AI System Design Patterns",
+    "timestamp": "2026-06-14T00:17:58.675581",
+    "style_idx": 1,
+    "style_name": "Mind Map",
+    "topic_id": "azure",
+    "topic_name": "Azure Architecture Patterns",
     "diagram_type": "Decision Tree"
-  },
-  {
-    "timestamp": "2026-06-13T18:17:24.600157",
-    "style_idx": 0,
-    "style_name": "Vertical Flow",
-    "topic_id": "zero-trust",
-    "topic_name": "Zero Trust Architecture",
-    "diagram_type": "Architecture Diagram"
   }
 ]
