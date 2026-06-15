@@ -1,10 +1,10 @@
 [
   {
-    "timestamp": "2026-06-14T23:18:26.968091",
-    "style_idx": 0,
-    "style_name": "Vertical Flow",
-    "topic_id": "mlops-pipeline",
-    "topic_name": "MLOps and Model Deployment",
-    "diagram_type": "Flow Chart"
+    "timestamp": "2026-06-15T12:34:45.417964",
+    "style_idx": 1,
+    "style_name": "Mind Map",
+    "topic_id": "interview-career-one-skill-learn",
+    "topic_name": "Interview: Career_Growth",
+    "diagram_type": "Winding Roadmap"
   }
 ]

@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-03-31T17:00:18.046394",
-    "topic_id": "ai-innovation-experiments",
-    "topic_name": "AI + Innovation Experiments",
-    "category": "AI",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0425,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0267,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-04-01T22:26:54.541427",
     "topic_id": "platform-engineering-ai",
     "topic_name": "Platform Engineering for AI Teams",
@@ -2070,5 +2045,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-06-15T12:34:52.437772",
+    "topic_id": "interview-career-one-skill-learn",
+    "topic_name": "Interview: Career_Growth",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 90,
+    "ab_variants": []
   }
 ]

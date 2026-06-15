@@ -642,5 +642,12 @@
     "style": 0,
     "signature": "01575a577297ed500d092d1cf5c67c95",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-06-15T12:34:45.414365",
+    "topic_id": "interview-career-one-skill-learn",
+    "style": 1,
+    "signature": "f9a094fac5063f7652ce6cf89c0f1890",
+    "duplicate_avoided": true
   }
 ]
