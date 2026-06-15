@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-28T21:59:47.943806",
-    "topic_id": "story-llm-agent-realization",
-    "topic_name": "AI Agent Interaction",
-    "category": "story",
-    "text": "\ud83d\udccc AI Agent Interaction\n\nA few years ago, I worked on a multi-agent system project where agent communication was a black box. I clicked on an obscure log message last week. The signal-to-noise ratio in agent communication was abysmally low, with most messages being redundant or irrelevant. This made it extremely difficult to debug issues, as the meaningful messages were lost in the noise.\n\nThree key issues stood out: lack of clear message formatting, insufficient logging, and inadequate filtering.\n1. Implement clear message headers\n\n3. Filter out redundant messages\n\n#Action Steps\nThis experience changed my approach to designing agent communication systems, emphasizing the importance of a high signal-to-noise ratio.\n\n\ud83d\udcac What strategies do you use to improve signal-to-noise ratio in multi-agent systems #MultiAgentSystems #AgentCommunication #SignalToNoiseRatio #Debugging #SystemDesign"
-  },
-  {
     "timestamp": "2026-04-28T22:09:59.667324",
     "topic_id": "azure",
     "topic_name": "Azure",
@@ -838,5 +831,12 @@
     "topic_name": "Interview: Career_Growth",
     "category": "interview",
     "text": "\ud83d\udccc Interview: Career_Growth\n\nAlmost everyone falls into one of three levels when it comes to AI engineering: \ud83d\udfe2 beginner, \ud83d\udfe1 intermediate, or \ud83d\udfe0 advanced.\n\nI was a \ud83d\udfe2 beginner once, struggling to make sense of complex models.\n\n1\ufe0f\u20e3 I learned to prioritize model\n\n2\ufe0f\u20e3 I focused on building explainable AI\n\n3\ufe0f\u20e3 I mastered the art of debugging\n\nAs I progressed to \ud83d\udfe1 intermediate, I discovered the importance of understanding how AI systems work underneath the surface \ud83e\udd14.\n\nThis fundamental idea is crucial in building reliable models that can be trusted in mission-critical applications.\n\nThe mechanism underneath is what drives the performance of these systems, and it's essential to grasp this concept to make informed decisions.\n\nIn my journey to \ud83d\udfe0 advanced, I've come to realize that production systems require a unique set of skills, including the ability to identify and mitigate common mistakes \ud83d\udea8.\n\nBest practices such as continuous testing and validation are essential in ensuring the reliability and performance of AI systems.\n\n[The Problem] -> [Core Concept] -> [How It Works]\n\nv\n[Best Practices]\n\n[Common Mistakes]\n\n[Key Takeaway]\nRight now? We are at a critical juncture where AI engineers must be aware of the potential pitfalls and take steps to avoid them.\n\nOne hard-won lesson I've learned is that even a small mistake can have significant consequences, and it's essential to be vigilant and proactive in addressing these issues.\n\nI was wrong to assume that AI engineering was just about building complex models; it's about building systems that can be trusted and relied upon.\n\nFinally, I understood the importance of continuous learning and improvement in AI engineering.\n\nWhat's the one skill that made you a better AI engineer, and how do you think it will impact your work in the future? \ud83d\udcac"
+  },
+  {
+    "timestamp": "2026-06-15T23:53:12.786201",
+    "topic_id": "ai-disciplines",
+    "topic_name": "Comparing Major AI Disciplines",
+    "category": "topic",
+    "text": "Most engineers believe that Artificial Intelligence, Machine Learning, Deep Learning, Generative AI, RAG, and AI Agents are interchangeable terms.\n\nI was wrong about this distinction for years, and it took a failed project to learn the difference.\n\nArtificial Intelligence is the broad field of intelligent systems that can perform tasks that typically require human intelligence.\n\nMachine Learning is a subset of AI that enables systems to learn from data without explicit rules, which is crucial for building adaptive models.\n\nDeep Learning is a type of Machine Learning that uses neural networks with many layers to analyze complex data, such as images and speech.\n\nConceptual Layers:\nAI\nML\nDeep Learning\nGenerative AI\nRAG Systems\nAI Agents\nGenerative AI creates new content from patterns, like text or images, and RAG Systems ground large language models in retrieved knowledge, making them more accurate.\n\nAI Agents, on the other hand, are autonomous tool-using reasoning loops that can interact with their environment and make decisions.\n\nI finally understood the progression of these technologies after a project where we applied Deep Learning to a problem that required Generative AI \ud83e\udd16.\n\nIt was a hard lesson, but now I can see how each technology stacks upon the other \ud83d\udcda.\n\n\ud83d\udcac What's your approach to building AI systems \u2014 do you start with a specific technology or define the problem first? \ud83e\udd14"
   }
 ]
