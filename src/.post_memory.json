@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-28T22:09:59.667324",
-    "topic_id": "azure",
-    "topic_name": "Azure",
-    "category": "topic",
-    "text": "\ud83d\udccc AI\n\nI think Railway's $100 million funding to challenge AWS with AI-native cloud infrastructure is a bold move that will pay off. As a Staff Engineer, I've seen how traditional cloud infrastructure can be a bottleneck for AI workloads. Railway's approach is technically interesting because it's designed from the ground up to handle AI-specific requirements.\n\n$100 million funding\n2 million developers\nAI-native cloud infrastructure\n\nWith 2 million developers already on board, Railway has a significant user base to feedback into their development cycle. I believe their focus on AI-native infrastructure will give them a competitive edge over AWS. Will Railway's AI-native cloud infrastructure be the future of cloud computing? \ud83d\udcac Can AWS keep up with the AI-driven demands of modern applications?\n\n#AIcloud #CloudInfrastructure #Railway #AWS #CloudComputing #AIworkloads"
-  },
-  {
     "timestamp": "2026-04-28T23:59:06.122965",
     "topic_id": "trend-vintage-models",
     "topic_name": "Lessons from Vintage AI",
@@ -838,5 +831,12 @@
     "topic_name": "Comparing Major AI Disciplines",
     "category": "topic",
     "text": "Most engineers believe that Artificial Intelligence, Machine Learning, Deep Learning, Generative AI, RAG, and AI Agents are interchangeable terms.\n\nI was wrong about this distinction for years, and it took a failed project to learn the difference.\n\nArtificial Intelligence is the broad field of intelligent systems that can perform tasks that typically require human intelligence.\n\nMachine Learning is a subset of AI that enables systems to learn from data without explicit rules, which is crucial for building adaptive models.\n\nDeep Learning is a type of Machine Learning that uses neural networks with many layers to analyze complex data, such as images and speech.\n\nConceptual Layers:\nAI\nML\nDeep Learning\nGenerative AI\nRAG Systems\nAI Agents\nGenerative AI creates new content from patterns, like text or images, and RAG Systems ground large language models in retrieved knowledge, making them more accurate.\n\nAI Agents, on the other hand, are autonomous tool-using reasoning loops that can interact with their environment and make decisions.\n\nI finally understood the progression of these technologies after a project where we applied Deep Learning to a problem that required Generative AI \ud83e\udd16.\n\nIt was a hard lesson, but now I can see how each technology stacks upon the other \ud83d\udcda.\n\n\ud83d\udcac What's your approach to building AI systems \u2014 do you start with a specific technology or define the problem first? \ud83e\udd14"
+  },
+  {
+    "timestamp": "2026-06-16T23:43:36.239912",
+    "topic_id": "ai-agents-2026",
+    "topic_name": "AI Agents in Production 2026",
+    "category": "topic",
+    "text": "\ud83d\udccc AI Agents in Production 2026\n\nI've seen 8 out of 10 AI agent deployments fail due to poor architecture choices \ud83d\udea8.\n\nMost teams start with a simple query-prompt-LLM-output flow, but this approach lacks the nuance needed for production-ready AI agents \ud83e\udd16.\n\nThe first step in building a robust AI agent is understanding what not to do: a basic LLM chatbot that takes a query, generates a prompt, and outputs a response is insufficient \ud83d\udd34.\n\nThis approach neglects the importance of memory, planning, and feedback in creating a truly autonomous AI agent.\n\n2\ufe0f\u20e3 Planning enables the agent to make\n\n3\ufe0f\u20e3 Feedback allows the agent to refine\nA more sophisticated approach involves using a combination of retrieval, planning, and feedback to create an agentic AI that can adapt to changing circumstances \ud83d\udfe1.\n\nThis can be achieved through the use of tools like memory-augmented neural networks and planning-based architectures.\n\nArchitecture Diagram:\n\nQuery\n\nOutput\nThe key to a successful AI agent deployment is understanding the trade-offs between different architecture choices and being aware of the common pitfalls that can lead to failure \ud83d\udfe2.\n\nBy prioritizing memory, planning, and feedback, and avoiding the pitfalls of basic LLM chatbots and RPA scripts, developers can create AI agents that are capable of complex decision-making and autonomous action \ud83d\udd35.\n\nWhich level are you? \ud83d\udcac What's the most significant challenge you've faced in deploying an AI agent in production?"
   }
 ]

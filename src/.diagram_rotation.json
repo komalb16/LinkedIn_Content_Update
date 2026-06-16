@@ -1,10 +1,7 @@
-[
-  {
-    "timestamp": "2026-06-15T23:53:11.927139",
-    "style_idx": 19,
-    "style_name": "Style 19",
-    "topic_id": "ai-disciplines",
-    "topic_name": "Agents architecture",
-    "diagram_type": "Conceptual Layers"
-  }
-]
+{
+  "rotation_index": 21,
+  "style_history": [
+    19,
+    23
+  ]
+}
