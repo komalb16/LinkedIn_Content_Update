@@ -1076,7 +1076,7 @@ def call_ai(prompt, system, json_mode=False):
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
             ],
-            "max_tokens": 2048 if json_mode else 1024,
+            "max_tokens": 2048 if json_mode else 1800,
             "temperature": 0.85,
         }
         
