@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-29T03:41:02.086940",
-    "topic_id": "trend-voice-ai-architecture",
-    "topic_name": "Voice AI Systems",
-    "category": "topic",
-    "text": "\ud83d\udccc 80% of teams attempt to integrate voice AI, but only 2\n\n80% of teams attempt to integrate voice AI, but only 20% succeed in production.\n\nArchitecture Diagram\n\nSpeech Rec\n\nSpeech Syn\n\n4\ufe0f\u20e3 Best Practices involve testing\n\n5\ufe0f\u20e3 Common Mistakes are poor testing\n\n\ud83d\udcac Which of the following is your biggest challenge: The Problem, Core Concept, How It Works, Best Practices, Common Mistakes, or Key Takeaway?\n\n#VoiceAI #SpeechRecognition #SpeechSynthesis #AIIntegration #ProductionReady #ArchitectureDesign"
-  },
-  {
     "timestamp": "2026-04-29T20:13:36.588528",
     "topic_id": "azure",
     "topic_name": "Azure",
@@ -838,5 +831,12 @@
     "topic_name": "SOLID and Design Patterns",
     "category": "topic",
     "text": "\ud83d\udccc SOLID and Design Patterns\n\nI'm stunned that Wolfram Language and Mathematica Version 15 boasts over 800 new functions, considering the already vast capabilities of the platform.\n\nThis update matters because it signals a significant shift towards integrating AI-powered tools, such as the new AI Assistant, into core functionality.\n\nNew features in Version 15:\n\n- Symbolic Music\n- Expanded core functionality\nAs an engineer building systems that rely on complex computations, I believe this update is a testament to Wolfram's commitment to pushing the boundaries of what's possible with symbolic manipulation. The inclusion of an AI Assistant will undoubtedly change how we approach problem-solving with Mathematica.\n\nWith Version 15, we can expect more efficient and accurate results, making it an essential tool for any project requiring advanced mathematical modeling.\n\nWhat's the most impactful way you've seen Mathematica's new features simplify your workflow, and how do you envision leveraging the AI Assistant in your next project? \ud83d\udcac What's the first problem you'll tackle with Version 15?"
+  },
+  {
+    "timestamp": "2026-06-17T13:54:10.946820",
+    "topic_id": "vector-db-comparison",
+    "topic_name": "Vector Database Comparison",
+    "category": "topic",
+    "text": "Almost everyone falls into one of three levels: \ud83d\ude80 beginners who think vector databases are a silver bullet, \ud83e\udd14 intermediate engineers who understand the trade-offs, or \ud83d\udca1 experts who have implemented them in production.\n\nI've seen teams at all three levels struggle with vector database comparison.\n\nThe fundamental idea is that vector databases allow for efficient similarity searches, but the mechanism underneath is what trips most teams up.\n\nIn production, this means understanding how the database handles high-dimensional data and what kind of queries it can handle.\n\nBest practices dictate that you should consider the specific use case and choose a database that optimizes for that use case.\n\nMost engineers get wrong the fact that vector databases are not a one-size-fits-all solution, and common mistakes include not considering the trade-offs between different databases.\n\nleft -> Faiss: optimized for similarity search\nleft -> Annoy: optimized for nearest neighbors\nleft -> Pinecone: optimized for filtering\nA clear decision framework for when to use each database is crucial, and I've found that it comes down to the specific requirements of your project.\n\nSo what's your vector database of choice - and what drove that decision?\n\n\ud83d\udcac What's your rule-of-thumb for choosing between Faiss, Annoy, and Pinecone?"
   }
 ]
