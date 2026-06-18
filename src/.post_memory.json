@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-30T03:57:16.924690",
-    "topic_id": "trend-copy-fail-pitfalls",
-    "topic_name": "Copy Fail Lessons",
-    "category": "topic",
-    "text": "\ud83d\udccc Copy Fail Lessons\n\nMost engineers believe copy operations in distributed systems are straightforward \ud83d\ude45\u200d\u2642\ufe0f. However, I was wrong about this until I learned the importance of idempotence and retry mechanisms \ud83e\udd26\u200d\u2642\ufe0f.\n\nIdempotence is the core concept that ensures data consistency during copy operations \ud83d\udcca. It means that an operation can be repeated without changing the result, which is crucial in distributed systems where failures can occur \ud83d\udea8.\n\nRequest -> Idempotent Operation -> Retry Mechanism |-> Consistent Data\n\nBest practices in production systems involve implementing idempotent copy operations and retry mechanisms to handle failures \ud83d\udcc8. Common mistakes include not handling duplicate requests and not implementing retries, which can lead to data inconsistencies \ud83d\udeab.\n\nSo, what's the key takeaway? \ud83d\udcac\nWhat's the most important aspect of copy operations in distributed systems to you?\n\n#DistributedSystems #Idempotence #RetryMechanisms #DataConsistency #SystemDesign #ReliabilityEngineering"
-  },
-  {
     "timestamp": "2026-04-30T14:06:22.921776",
     "topic_id": "ai-agents-2026",
     "topic_name": "AI Agents 2026",
@@ -838,5 +831,12 @@
     "topic_name": "CI/CD Best Practices",
     "category": "topic",
     "text": "Goal: Deploy my app to production with zero human steps. The agent:\n\nThe entire pipeline executed without human intervention, resulting in a successful deployment \ud83d\ude80.\n\nIn a typical CI/CD pipeline, each stage has a specific purpose. The initial stage ensures code quality with automated checks \ud83d\udcca. The next stage builds the application, running tests and security scans in parallel to identify vulnerabilities \ud83d\udee1\ufe0f.\n\nThe security scan stage is critical in identifying potential security risks, using tools like Trivy and Snyk to detect CVEs and vulnerabilities \ud83d\udea8. The final stages of the pipeline involve deploying the application to a staging environment, running smoke tests, and then promoting it to production with techniques like blue/green deployments or canary releases \ud83c\udf1f.\n\nThis process allows for efficient and reliable deployments, making it possible to achieve zero human steps in the deployment process. As an engineer, I've seen firsthand the benefits of a well-designed CI/CD pipeline, including reduced downtime and increased confidence in deployments \ud83d\ude4c.\n\n\ud83d\udcac What's your approach to deploying applications to production, and what tools do you use to ensure reliability and security?"
+  },
+  {
+    "timestamp": "2026-06-18T23:53:37.916367",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "story",
+    "text": "Most teams get RAG Strategy Shift wrong in the same way.\n\nMy current lens: Focus on the performance metrics (latency/relevance) and 3 specific retrieval optimizations.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
