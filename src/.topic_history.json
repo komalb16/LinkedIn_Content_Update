@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-04-07T17:00:17.280861",
-    "topic_id": "responsible-ai-security-stack",
-    "topic_name": "Responsible AI Security Stack",
-    "category": "Security",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 82,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 82,
-        "raw_score": 82,
-        "similarity": 0.0486,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 70,
-        "raw_score": 70,
-        "similarity": 0.0113,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-04-08T22:29:27.808286",
     "topic_id": "git-workflow",
     "topic_name": "Git Workflow and Commands",
@@ -1993,5 +1968,30 @@
     "status": "success",
     "quality_score": 76,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-19T23:07:49.429256",
+    "topic_id": "ai-search-discovery",
+    "topic_name": "AI Search and Discovery",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 41,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0234,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 53,
+        "raw_score": 53,
+        "similarity": 0.4884,
+        "penalty": 0
+      }
+    ]
   }
 ]

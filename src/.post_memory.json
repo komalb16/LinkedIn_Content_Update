@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-02T13:20:11.842528",
-    "topic_id": "story-llm-agent-realization",
-    "topic_name": "AI Agent Interaction",
-    "category": "story",
-    "text": "\ud83d\udccc AI Agent Interaction\n\nI watched a team repeatedly opt for simple vector retrieval in their production AI pipeline.\n\nTheir system struggled with high latency and low relevance, resulting in a poor user experience.\n\nThe team's approach was straightforward, but it lacked the nuances required for a production-ready system.\n\nA better decision would involve adopting a hybrid search approach, combining the strengths of vector retrieval with traditional keyword search.\n\nThis would enable the system to leverage the benefits of both worlds, such as efficient filtering and accurate ranking.\n\nTo achieve this, the team could focus on the following optimizations:\n\n1. Implement caching to reduce latency\n2. Use knowledge graph embeddings\n3. Apply reranking techniques to refine\nBy implementing these optimizations, the team can significantly improve the performance of their AI system, resulting in faster and more accurate results.\n\nThis experience taught me that simple vector retrieval is not enough for production AI, and that a more hybrid approach is often necessary to achieve optimal performance.\n\n\ud83d\udcac What strategies have you used to optimize your AI system's retrieval performance, and what were some of the challenges you faced?\n\n#AIOptimization #HybridSearch #RerankingTechniques #VectorRetrieval #AIperformance #ProductionReadyAI"
-  },
-  {
     "timestamp": "2026-05-03T13:20:06.168294",
     "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
     "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
@@ -838,5 +831,12 @@
     "topic_name": "Interview: Career_Growth",
     "category": "interview",
     "text": "\ud83d\udccc Interview: Career_Growth\n\nI was wrong about the key to becoming a better AI engineer - it's not about mastering the latest frameworks, but rather understanding how to break down complex problems into manageable parts.\n\nOne skill that made me a better AI engineer is the ability to identify whether a task is open-ended or mostly deterministic.\n\n2\ufe0f\u20e3 Prediction is often the goal\n\n3\ufe0f\u20e3 Orchestration is key to scalability\nIf the task is open-ended, then I need to consider what type of data is required to solve it, whether it's retrieval, prediction, or orchestration.\n\nI've learned that using the simplest architecture that works is essential, and adding complexity only when reliability demands it is crucial.\n\nIf the task is mostly deterministic, then I can focus on building a straightforward solution.\n\nBut if it's open-ended, then I need to consider using a more flexible approach, such as a decision tree.\n\nWhich level are you? \ud83d\udcac What's the most challenging part of your current project - is it data quality, model performance, or deployment complexity?"
+  },
+  {
+    "timestamp": "2026-06-19T23:07:49.426831",
+    "topic_id": "ai-search-discovery",
+    "topic_name": "AI Search and Discovery",
+    "category": "topic",
+    "text": "\ud83d\udccc AI Search and Discovery\n\nI spent 6 months perfecting an AI search system, only to realize it was rewarding the wrong signals \ud83d\udea8.\n\nThe user's query intent is what sets the tone for the entire discovery process - specificity is key \ud83d\udd11.\n\nThe evidence gathered from these sources is what builds trust and credibility \ud83d\udcc8.\n\nPosts that showcase accomplishments and outcomes are more valuable than those that simply list skills \ud83d\udcca.\n\nModern Cards\n\nFit and relevance are what ultimately determine the recommendation \ud83d\udcc8.\n\nAI search is not about keyword stuffing, but about clarity, structure, and consistent evidence \ud83d\udeab.\n\nI learned this the hard way, after my team's AI assistant struggled to discover relevant professionals \ud83e\udd26\u200d\u2640\ufe0f.\n\n\ud83d\udcac What is your approach to AI-powered discovery - do you focus on keyword optimization or clarity and structure? \ud83e\udd14"
   }
 ]
