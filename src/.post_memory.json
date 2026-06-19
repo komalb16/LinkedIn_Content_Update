@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-30T14:06:22.921776",
-    "topic_id": "ai-agents-2026",
-    "topic_name": "AI Agents 2026",
-    "category": "topic",
-    "text": "\ud83d\udccc AI Agents 2026\n\nMost teams blame the model first, but in AI Agents 2026 the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nMost people build AI agents with a simple Retrieval-Only approach \u2014 but this breaks when dealing with complex queries \ud83e\udd14.\n\u2014\nA better approach is to use Agentic AI, which adds Memory, Tools, Planning, and Feedback to the mix \ud83d\udcc8.\n\n1\ufe0f\u20e3 LLM Chatbot is not the answer\n\n2\ufe0f\u20e3 RPA is too rigid\n\n3\ufe0f\u20e3 Basic RAG is insufficient\n\n4\ufe0f\u20e3 Agentic AI is the way forward\n\nAgentic AI Architecture:\nI was wrong to think that a simple LLM Chatbot or RPA script would suffice \ud83d\ude45\u200d\u2642\ufe0f.\n\nNow I know that Agentic AI requires a more nuanced approach, with trade-offs between planning and feedback loops \ud83d\udcca.\n\n\ud83d\udcac What type of AI agent architecture are you using:\n\n#AIEngineering #AgenticAI #RAGArchitecture #LLMFailures #AIProduction #SystemDesign"
-  },
-  {
     "timestamp": "2026-05-02T13:20:11.842528",
     "topic_id": "story-llm-agent-realization",
     "topic_name": "AI Agent Interaction",
@@ -838,5 +831,12 @@
     "topic_name": "RAG Strategy Shift",
     "category": "story",
     "text": "Most teams get RAG Strategy Shift wrong in the same way.\n\nMy current lens: Focus on the performance metrics (latency/relevance) and 3 specific retrieval optimizations.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-06-19T14:17:26.960155",
+    "topic_id": "interview-career-one-skill-learn",
+    "topic_name": "Interview: Career_Growth",
+    "category": "interview",
+    "text": "\ud83d\udccc Interview: Career_Growth\n\nI was wrong about the key to becoming a better AI engineer - it's not about mastering the latest frameworks, but rather understanding how to break down complex problems into manageable parts.\n\nOne skill that made me a better AI engineer is the ability to identify whether a task is open-ended or mostly deterministic.\n\n2\ufe0f\u20e3 Prediction is often the goal\n\n3\ufe0f\u20e3 Orchestration is key to scalability\nIf the task is open-ended, then I need to consider what type of data is required to solve it, whether it's retrieval, prediction, or orchestration.\n\nI've learned that using the simplest architecture that works is essential, and adding complexity only when reliability demands it is crucial.\n\nIf the task is mostly deterministic, then I can focus on building a straightforward solution.\n\nBut if it's open-ended, then I need to consider using a more flexible approach, such as a decision tree.\n\nWhich level are you? \ud83d\udcac What's the most challenging part of your current project - is it data quality, model performance, or deployment complexity?"
   }
 ]
