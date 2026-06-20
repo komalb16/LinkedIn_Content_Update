@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-03T21:49:11.986567",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "topic",
-    "text": "\ud83d\udccc LLM Architecture\n\nNobody talks about the internal architecture of Large Language Models \ud83e\udd16.\n\nI was wrong to think that transformers and attention mechanisms were enough to understand how models like GPT-4, Gemini, and Claude work under the hood \ud83d\udcda.\n\nThe reality is that each model has its own unique architecture, with different design choices and trade-offs \ud83d\ude80.\n\nHere's a high-level overview of the internal architecture:\n\n1\ufe0f\u20e3 Tokenisation splits raw text into sub-word\n\n2\ufe0f\u20e3 Embedding maps tokens to dense vectors\n\n3\ufe0f\u20e3 Attention uses multi-head self-attention\n\n4\ufe0f\u20e3 Feed-Forward transforms and projects\n\n5\ufe0f\u20e3 Output Layer projects to vocabulary\n\nThe attention mechanism is particularly interesting, as it allows the model to weigh the importance of different input tokens \ud83d\udcca.\n\nHowever, I've found that this mechanism can also lead to a common failure mode: overfitting to certain input patterns \ud83d\udeab.\n\nWhen building on top of LLMs, it's essential to understand these architectural decisions and their implications \ud83d\udcc8.\n\nSo, which component of the internal architecture do you think is most critical for achieving good performance?\n\n\ud83d\udcac What's your go-to component: Tokenisation, Embedding, Attention, Feed-Forward, or Output Layer?\n\n#LargeLanguageModels #Transformers #AttentionMechanisms #LLMArchitecture #NaturalLanguageProcessing"
-  },
-  {
     "timestamp": "2026-05-03T22:49:55.209458",
     "topic_id": "trend-ai-medical-diagnosis",
     "topic_name": "AI in ER Diagnosis",
@@ -838,5 +831,12 @@
     "topic_name": "MLOps Best Practices",
     "category": "topic",
     "text": "Only\nThis is because most engineers misunderstand the practical architecture choices and common implementation mistakes.\n\nIf you're building an open-ended task, 1\ufe0f\u20e3 Your model needs retrieval.\n\nWhen it's mostly deterministic, 2\ufe0f\u20e3 Your model needs prediction.\n\nIf you're handling both, 3\ufe0f\u20e3 Your model needs orchestration.\n\nTo solve the problem, you need to identify what you're trying to achieve \ud83e\udd14.\n\nThen, determine the type of task you're dealing with \ud83d\udcdd.\nNext, consider the data requirements \ud83d\udcca: do you need retrieval, prediction, or orchestration?\n\nYou should use the simplest architecture that works \ud83d\udca1.\nOnly add complexity when reliability demands it \ud83d\ude80.\n\n\ud83d\udcac What's the most common MLOps mistake you've seen in production, and how did you fix it?"
+  },
+  {
+    "timestamp": "2026-06-20T18:20:26.035890",
+    "topic_id": "story-ml-model-fine-tuning",
+    "topic_name": "Model Observability Moment",
+    "category": "story",
+    "text": "Nobody talks about the failure modes in Model Observability Moment. Let's fix that.\n\nMy current lens: Be technical: discuss perplexity, semantic similarity, or drift detection tools.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]
