@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-04-08T22:29:27.808286",
-    "topic_id": "git-workflow",
-    "topic_name": "Git Workflow and Commands",
-    "category": "Engineering",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 3,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0053,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 92,
-        "raw_score": 92,
-        "similarity": 0.0122,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-04-10T03:57:54.614639",
     "topic_id": "aws-architecture",
     "topic_name": "AWS Architecture Patterns",
@@ -1990,6 +1965,31 @@
         "score": 53,
         "raw_score": 53,
         "similarity": 0.4884,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-20T14:23:18.467232",
+    "topic_id": "mlops-best-practices",
+    "topic_name": "MLOps Best Practices",
+    "category": "Engineering",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 51,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0692,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 52,
+        "raw_score": 52,
+        "similarity": 0.0581,
         "penalty": 0
       }
     ]

@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-03T13:20:06.168294",
-    "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
-    "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
-    "category": "topic",
-    "text": "\ud83d\udccc ChatGPT vs Grok vs Gemini vs Claude vs Perplexity\n\nI've watched teams struggle to choose between ChatGPT, Grok, Gemini, Claude, and Perplexity, often ending up with a suboptimal architecture \ud83e\udd26.\n\nThe core concept is simple: each AI model has strengths and weaknesses that make it better suited for specific use cases \ud83d\udcca.\n\n-> ChatGPT\nright -> Conversational interfaces\nleft -> Grok\nright -> Specialized knowledge domains\nleft -> Gemini\nright -> Multimodal inputs\n\nBest practices dictate that you should consider the trade-offs between these models and your specific requirements \ud83d\udcc8.\n\nCommon mistakes include not evaluating the failure modes of each model, such as overfitting or hallucinations \ud83d\udea8.\n\nSo what's the key takeaway? \ud83e\udd14\nYou should choose the model that best fits your specific needs, considering factors like data quality, latency, and interpretability \ud83d\udcca.\n\n\ud83d\udcac What's your go-to AI model for production systems: ChatGPT, Grok, Gemini, Claude, Perplexity, or something else?\n\n#AIEngineering #LLM #GenerativeAI #SystemDesign #AIFailures"
-  },
-  {
     "timestamp": "2026-05-03T21:49:11.986567",
     "topic_id": "llm-architecture",
     "topic_name": "LLM Architecture",
@@ -838,5 +831,12 @@
     "topic_name": "AI Search and Discovery",
     "category": "topic",
     "text": "\ud83d\udccc AI Search and Discovery\n\nI spent 6 months perfecting an AI search system, only to realize it was rewarding the wrong signals \ud83d\udea8.\n\nThe user's query intent is what sets the tone for the entire discovery process - specificity is key \ud83d\udd11.\n\nThe evidence gathered from these sources is what builds trust and credibility \ud83d\udcc8.\n\nPosts that showcase accomplishments and outcomes are more valuable than those that simply list skills \ud83d\udcca.\n\nModern Cards\n\nFit and relevance are what ultimately determine the recommendation \ud83d\udcc8.\n\nAI search is not about keyword stuffing, but about clarity, structure, and consistent evidence \ud83d\udeab.\n\nI learned this the hard way, after my team's AI assistant struggled to discover relevant professionals \ud83e\udd26\u200d\u2640\ufe0f.\n\n\ud83d\udcac What is your approach to AI-powered discovery - do you focus on keyword optimization or clarity and structure? \ud83e\udd14"
+  },
+  {
+    "timestamp": "2026-06-20T14:23:18.464802",
+    "topic_id": "mlops-best-practices",
+    "topic_name": "MLOps Best Practices",
+    "category": "topic",
+    "text": "Only\nThis is because most engineers misunderstand the practical architecture choices and common implementation mistakes.\n\nIf you're building an open-ended task, 1\ufe0f\u20e3 Your model needs retrieval.\n\nWhen it's mostly deterministic, 2\ufe0f\u20e3 Your model needs prediction.\n\nIf you're handling both, 3\ufe0f\u20e3 Your model needs orchestration.\n\nTo solve the problem, you need to identify what you're trying to achieve \ud83e\udd14.\n\nThen, determine the type of task you're dealing with \ud83d\udcdd.\nNext, consider the data requirements \ud83d\udcca: do you need retrieval, prediction, or orchestration?\n\nYou should use the simplest architecture that works \ud83d\udca1.\nOnly add complexity when reliability demands it \ud83d\ude80.\n\n\ud83d\udcac What's the most common MLOps mistake you've seen in production, and how did you fix it?"
   }
 ]
