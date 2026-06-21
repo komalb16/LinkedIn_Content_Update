@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-04-11T23:39:47.915131",
-    "topic_id": "data-engineering",
-    "topic_name": "Data Engineering",
-    "category": "Data",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0769,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 86,
-        "raw_score": 86,
-        "similarity": 0.1543,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-04-12T14:34:03.555723",
     "topic_id": "ai-disciplines",
     "topic_name": "Comparing Major AI Disciplines",
@@ -1978,5 +1953,30 @@
     "status": "success",
     "quality_score": 64,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-21T16:02:17.394376",
+    "topic_id": "rag-stack",
+    "topic_name": "Open Source RAG Stack",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 76,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0656,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0238,
+        "penalty": 0
+      }
+    ]
   }
 ]
