@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-03T22:49:55.209458",
-    "topic_id": "trend-ai-medical-diagnosis",
-    "topic_name": "AI in ER Diagnosis",
-    "category": "topic",
-    "text": "\ud83d\udccc AI in ER Diagnosis\n\nThree years ago, AI in medical diagnosis was a promising concept, but its integration into real-world pipelines was a daunting task \ud83d\ude80. Now, with advancements in data quality and validation strategies, we're seeing significant improvements in accuracy \ud83d\udcc8.\n\nTo achieve this, production systems focus on creating high-quality training data and implementing robust validation strategies to ensure AI models are accurate and reliable \ud83e\udd16.\n\nArchitecture Diagram:\n\n- > Continuous Monitoring -> Feedback Loop\n\n4\ufe0f\u20e3 Best Practices involve continuous\n\n5\ufe0f\u20e3 Common Mistakes are ignoring data drift\n\nOne common mistake is ignoring data drift, which can lead to decreased model performance over time \ud83d\udcc9. I was wrong to assume that once an AI model is trained, it would remain accurate forever - it took me years to learn the importance of continuous monitoring and feedback loops \ud83d\udcca.\n\n\ud83d\udcac What's the most critical aspect of integrating AI into medical diagnosis pipelines for you:\n\n#AIAccuracy #MedicalDiagnosis #DataQuality #ModelValidation #AIEngineering #HealthcareTechnology"
-  },
-  {
     "timestamp": "2026-05-04T14:10:41.065850",
     "topic_id": "trend-deep-claude-loop",
     "topic_name": "Optimizing Code Agents",
@@ -838,5 +831,12 @@
     "topic_name": "Model Observability Moment",
     "category": "story",
     "text": "Nobody talks about the failure modes in Model Observability Moment. Let's fix that.\n\nMy current lens: Be technical: discuss perplexity, semantic similarity, or drift detection tools.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-06-21T00:17:11.202761",
+    "topic_id": "docker-cheatsheet",
+    "topic_name": "Docker Mastery",
+    "category": "topic",
+    "text": "\ud83d\udccc Docker Mastery\n\nThree years ago, Docker deployments were a mess - I've seen teams spend weeks debugging a single image.\n\nToday, with multi-stage builds and layer caching, we can ship faster and more reliably.\n\nThe key is mastering the 20% of Docker knowledge that covers 80% of daily use.\n\n1\ufe0f\u20e3 I use Docker Client to send\n\n2\ufe0f\u20e3 I build layers and cache them\n\n3\ufe0f\u20e3 I store and share images on\n\nWhen I first started with Docker, I focused on the client - sending requests to the daemon, but it's the host where the magic happens - building layers, caching, and storing images.\n\nThe registry is where we share and deploy images, and it's crucial for collaboration and version control.\n\nDocker Best Practices:\n\nI've learned that security scanning is essential, and commands like docker exec and docker logs are a must-know for every engineer.\n\nWhich level are you?\n\n\ud83d\udcac What's your go-to Docker command for troubleshooting - and what's the one thing you wish you'd known sooner?"
   }
 ]
