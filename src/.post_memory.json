@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-05T23:52:31.818007",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "topic",
-    "text": "\ud83d\udccc LLM Architecture\n\n80% of LLMs rely on transformers, but few engineers truly grasp the internal architecture \ud83e\udd16. I was wrong about the importance of attention mechanisms until I dug deeper \ud83d\udcda. The key to understanding LLMs like GPT-4, Gemini, and Claude lies in their unique combinations of tokenisation, embedding, attention, feed-forward, and output layers \ud83d\udcca.\n\nThe difference between these models often comes down to their attention mechanisms and how they handle multi-head self-attention \ud83e\udd14. A common failure mode is underestimating the impact of tokenisation on downstream performance \ud83d\udcc9.\n\n\ud83d\udcac What's the most critical component in an LLM's internal architecture to you?\n\n#LLM #Transformers #AttentionMechanisms #AIEngineering #LanguageModels"
-  },
-  {
     "timestamp": "2026-05-06T20:26:52.184437",
     "topic_id": "cicd-pipelines",
     "topic_name": "CI/CD Best Practices",
@@ -838,5 +831,12 @@
     "topic_name": "Open Source RAG Stack",
     "category": "topic",
     "text": "Almost everyone falls into one of three levels: \ud83d\udfe2 beginners who struggle to integrate data pipelines, \ud83d\udfe1 intermediate engineers who can build but not optimize, and \ud83d\udfe3 experts who can deploy scalable AI applications.\n\nI've seen many teams try to transform raw data into context-rich intelligence, but most fall short because they don't layer components correctly with LLM frameworks and models.\n\u2014 They often build ingestion pipelines, embeddings, retrieval, and vector databases as separate systems, which leads to complexity and scalability issues\n\u2014 whereas a well-designed stack brings these components together into one cohesive system, enabling trustworthy and production-ready AI applications.\n\n1\ufe0f\u20e3 Ingestion pipelines must handle high\n\n2\ufe0f\u20e3 Embeddings require careful model selection\n\n3\ufe0f\u20e3 Retrieval mechanisms need to be optimized\n\nThe fundamental idea behind this stack is to create a seamless flow of data from ingestion to insights, and this is achieved by integrating each component with the others.\n\u2014 Most teams focus on individual components, but a successful deployment requires a holistic approach\n\u2014 that considers the interactions between ingestion pipelines, embeddings, retrieval mechanisms, and vector databases.\n\nEcosystem Tree:\n\n- Ingestion Pipelines\n- Data Sources\n- Data Processing\n- Embeddings\n- Model Selection\n- Model Training\n- Retrieval\n- Mechanism Optimization\n- Performance Tuning\n- Vector Databases\n- Data Storage\n- Data Retrieval\n\nI've learned that even small mistakes in component integration can lead to significant performance issues, and one specific failure scenario that engineers often encounter is the inability to optimize retrieval mechanisms for large datasets.\n\n\ud83d\udcac What's your approach to optimizing retrieval mechanisms in your AI applications, and what tools do you use to integrate your components?"
+  },
+  {
+    "timestamp": "2026-06-21T18:23:51.061362",
+    "topic_id": "data-evolution",
+    "topic_name": "Data Architecture Evolution",
+    "category": "topic",
+    "text": "I've seen 8 out of 10 data lake implementations fail due to inadequate architecture \ud83d\udea8.\n\n2\ufe0f\u20e3 Ingestion is a critical step\n\n3\ufe0f\u20e3 Compute resources are essential\n\nThe data lakehouse paradigm solves the problems of both data lakes and warehouses by providing a scalable and flexible architecture \ud83c\udf1f.\n\nData comes from various sources such as APIs, CDC, IoT, logs, and events \ud83d\udcca.\n\nIt then gets ingested into a lakehouse, where it's stored in an open format and processed using compute resources \ud83d\udcc8.\n\nFinally, the data is consumed by BI tools, ML models, and data apps \ud83d\udcca.\n\nAPIs, CDC, IoT  ->  Ingestion, Open Format, Compute  ->  BI, ML, Data Apps\n\n\ud83d\udcac What's your current data architecture, and how do you handle data ingestion and processing? \ud83e\udd14"
   }
 ]
