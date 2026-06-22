@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-07T14:22:27.186426",
-    "topic_id": "system-design",
-    "topic_name": "System Design Fundamentals",
-    "category": "topic",
-    "text": "I used to think system design interviews were about recalling fancy architectures \ud83e\udd14.\n\nBut it turns out, building real systems requires a different mindset \ud83d\udca1.\n\nHere are key principles to master:\n\n3\ufe0f\u20e3 Load balancing is crucial\n\nEntry Layer \u2014 chips\nService Layer \u2014 columns\nReliability Layer \u2014 obs\nNow, I approach system design with a focus on trade-offs \ud83d\udcc8.\nWhen designing a system, consider the Entry Layer, Service Layer, Data Layer, and Reliability Layer \ud83d\udcca.\n\n\ud83d\udcac What's the most important system design principle you've learned from a failed project?"
-  },
-  {
     "timestamp": "2026-05-08T17:47:56.926782",
     "topic_id": "trend-cloudflare-layoffs",
     "topic_name": "Rightsize Your Team",
@@ -838,5 +831,12 @@
     "topic_name": "Personal AI Productivity",
     "category": "story",
     "text": "I recently heard a colleague say, \"I spend 2 hours daily planning my meals and workouts.\"\n\n1\ufe0f\u20e3 I realized I could automate this\n\n2\ufe0f\u20e3 I built a custom AI agent\nThe agent uses Modal to generate personalized meal plans and workouts based on my dietary needs and fitness goals.\n\nThe mechanism underneath involves training the agent on a dataset of my preferences and habits, and then fine-tuning it with Autogen to generate optimal plans.\n\nFor example, the agent can suggest a 7-day meal plan with recipes and grocery lists, and even generate a workout routine with exercises and nutritional advice.\n\nProduction systems like mine follow best practices such as continuous monitoring and updating of the agent to ensure it remains accurate and effective.\n\nHowever, most engineers get wrong the importance of fine-tuning the agent with real-world data, which can lead to suboptimal performance.\n\nWorkflow:\n\n- PERCEIVE: Collect user data\n- REASON: Generate meal plans and workouts\n- ACT: Provide personalized recommendations\nThe key takeaway is that automating repetitive tasks like meal prep and workout planning can save time and increase productivity.\n\n\ud83d\udcac What's one task you could hand over to a custom AI agent this week?"
+  },
+  {
+    "timestamp": "2026-06-22T23:26:59.380150",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "story",
+    "text": "Simple vector retrieval isn't enough for production AI - I've seen latency skyrocket to 500ms in systems that relied solely on it \ud83d\ude80.\n\nThis forced us to rethink our retrieval strategy and consider hybrid approaches \ud83e\udd14.\n\nOur system design evolved through several levels:\n\ud83d\udd34 Level 1 was basic vector retrieval, which led to high latency and low relevance \ud83d\udcca.\n\ud83d\udfe1 Level 2 introduced a reranking mechanism, which improved relevance but added complexity \ud83d\udcc8.\n\ud83d\udfe2 Level 3 brought in a hybrid search approach, combining vector retrieval with knowledge graph-based methods, significantly reducing latency \u23f1\ufe0f.\n\ud83d\udd35 Level 4 involved optimizing our retrieval pipeline with techniques like quantization and caching, further boosting performance \ud83d\ude80.\n\nThe key to our success lay in understanding the trade-offs between different retrieval optimizations:\n\n1\ufe0f\u20e3 We optimized vector retrieval\n\n2\ufe0f\u20e3 We applied reranking to improve relevance\n\n3\ufe0f\u20e3 We introduced hybrid search\n\nHere is a high-level overview of our system design:\n\nSystem Design\nRetrieval Layer\nReranking Mechanism\nHybrid Search Approach\nOptimization Techniques\n\nWhich level are you? \ud83d\udcac What retrieval optimizations have you found most effective in your production AI systems?"
   }
 ]
