@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-07T03:31:45.573078",
-    "topic_id": "trend-chrome-ai-model",
-    "topic_name": "AI Model Deployment",
-    "category": "topic",
-    "text": "\ud83d\udccc AI Model Deployment\n\nEngineering Myth: \"Just ship it\" is enough for AI model deployment.\n\nReality: Explicit user consent and transparent model updates are key.\n\n1\ufe0f\u20e3 Users need to trust AI-driven decisions\n\nModel Training \ud83d\udd04  ->  Model Deployment \ud83d\udcc8  ->  User Feedback \ud83d\udd04  ->  Model Update \ud83d\udd04\n\n1\ufe0f\u20e3 Transparency in AI model updates\n\n**Best Practices**\n\n**Common Mistakes**\n\n2\ufe0f\u20e3 Regularly evaluate and update models\n\nPoll: Which is most important for AI model deployment?\na) Transparency in model updates\nb) User consent for model evaluation\nc) Model documentation\nd) Regular A/B testing\ne) Clear explanations for model-driven decisions\nf) Implementing feature toggles\n\n\ud83d\udcac What's your experience with AI model deployment in production?\n\n#SoftwareArchitecture #SystemDesign #ScaleEngineering #DistributedSystems"
-  },
-  {
     "timestamp": "2026-05-07T14:22:27.186426",
     "topic_id": "system-design",
     "topic_name": "System Design Fundamentals",
@@ -838,5 +831,12 @@
     "topic_name": "AI Agent Interaction",
     "category": "story",
     "text": "I realized my multi-agent system wasn't behaving as expected when I saw a 30% increase in failed interactions between agents \ud83d\udea8.\n\nThis was due to a poor signal-to-noise ratio in agent communication, which led to incorrect decisions being made by the agents \ud83e\udd16.\n\nThe technical issue arose from the fact that the agents were not properly filtering out irrelevant data, resulting in a high amount of noise in the system \ud83d\udcca.\n\nTo fix this, I implemented three architectural changes:\n\n1\ufe0f\u20e3 Agents now use a more robust\n\n2\ufe0f\u20e3 Agents prioritize high-priority messages\n\n3\ufe0f\u20e3 Agents use encryption to secure\n\nHere is a high-level overview of the updated system:\n\nAgent 1\n\nFilter\n\nPriority\n\nEncryption\n\nThe key takeaway is that a well-designed agent communication system is crucial for the success of a multi-agent system, and small changes can have a significant impact on performance \ud83d\ude80.\n\n\ud83d\udcac What specific strategies have you used to improve the signal-to-noise ratio in your agent communication systems?"
+  },
+  {
+    "timestamp": "2026-06-22T12:56:03.904972",
+    "topic_id": "story-personal-ai-daily-life",
+    "topic_name": "Personal AI Productivity",
+    "category": "story",
+    "text": "I recently heard a colleague say, \"I spend 2 hours daily planning my meals and workouts.\"\n\n1\ufe0f\u20e3 I realized I could automate this\n\n2\ufe0f\u20e3 I built a custom AI agent\nThe agent uses Modal to generate personalized meal plans and workouts based on my dietary needs and fitness goals.\n\nThe mechanism underneath involves training the agent on a dataset of my preferences and habits, and then fine-tuning it with Autogen to generate optimal plans.\n\nFor example, the agent can suggest a 7-day meal plan with recipes and grocery lists, and even generate a workout routine with exercises and nutritional advice.\n\nProduction systems like mine follow best practices such as continuous monitoring and updating of the agent to ensure it remains accurate and effective.\n\nHowever, most engineers get wrong the importance of fine-tuning the agent with real-world data, which can lead to suboptimal performance.\n\nWorkflow:\n\n- PERCEIVE: Collect user data\n- REASON: Generate meal plans and workouts\n- ACT: Provide personalized recommendations\nThe key takeaway is that automating repetitive tasks like meal prep and workout planning can save time and increase productivity.\n\n\ud83d\udcac What's one task you could hand over to a custom AI agent this week?"
   }
 ]
