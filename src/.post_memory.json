@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-08T17:47:56.926782",
-    "topic_id": "trend-cloudflare-layoffs",
-    "topic_name": "Rightsize Your Team",
-    "category": "topic",
-    "text": "\ud83d\udccc But reality is, load balancing and prioritizing critic\n\nI used to think downsizing engineering teams wouldn't affect productivity \ud83e\udd14.\n\nBut reality is, load balancing and prioritizing critical workflows are crucial \ud83d\udd0d.\n\nHere's what I know now:\n\nWhen restructuring, focus on load balancing and critical workflows \ud83d\udcc8.\n\nWhat's the most important aspect of company restructuring to you?\na) The Problem\nb) Core Concept\nc) How It Works\nd) Best Practices\ne) Common Mistakes\nf) Key Takeaway\n\n#EngineeringProductivity #CompanyRestructuring #LoadBalancing #WorkflowPrioritization #TeamManagement #ProductivityHacks \ud83d\ude80\ud83d\udcbb\ud83d\udcca"
-  },
-  {
     "timestamp": "2026-05-08T17:49:11.778841",
     "topic_id": "trend-staffing-cuts",
     "topic_name": "Rightsizing Engineering Teams",
@@ -838,5 +831,12 @@
     "topic_name": "RAG Strategy Shift",
     "category": "story",
     "text": "Simple vector retrieval isn't enough for production AI - I've seen latency skyrocket to 500ms in systems that relied solely on it \ud83d\ude80.\n\nThis forced us to rethink our retrieval strategy and consider hybrid approaches \ud83e\udd14.\n\nOur system design evolved through several levels:\n\ud83d\udd34 Level 1 was basic vector retrieval, which led to high latency and low relevance \ud83d\udcca.\n\ud83d\udfe1 Level 2 introduced a reranking mechanism, which improved relevance but added complexity \ud83d\udcc8.\n\ud83d\udfe2 Level 3 brought in a hybrid search approach, combining vector retrieval with knowledge graph-based methods, significantly reducing latency \u23f1\ufe0f.\n\ud83d\udd35 Level 4 involved optimizing our retrieval pipeline with techniques like quantization and caching, further boosting performance \ud83d\ude80.\n\nThe key to our success lay in understanding the trade-offs between different retrieval optimizations:\n\n1\ufe0f\u20e3 We optimized vector retrieval\n\n2\ufe0f\u20e3 We applied reranking to improve relevance\n\n3\ufe0f\u20e3 We introduced hybrid search\n\nHere is a high-level overview of our system design:\n\nSystem Design\nRetrieval Layer\nReranking Mechanism\nHybrid Search Approach\nOptimization Techniques\n\nWhich level are you? \ud83d\udcac What retrieval optimizations have you found most effective in your production AI systems?"
+  },
+  {
+    "timestamp": "2026-06-23T23:14:30.134036",
+    "topic_id": "devsecops",
+    "topic_name": "DevSecOps Practices",
+    "category": "topic",
+    "text": "\ud83d\udccc DevSecOps Practices\n\nOnly\n\nThis number exists because many teams view security as a separate entity, rather than an integral part of their development process \ud83e\udd14.\n\n2\ufe0f\u20e3 Automated tests catch vulnerabilities\n\nAs code moves through the pipeline, it's scanned for vulnerabilities and signed to ensure its integrity \ud83d\udce6.\n\nIn production, runtime monitoring tools detect and alert on potential security threats \ud83d\udd0d.\n\nRight now? We are at a point where security is no longer a luxury, but a necessity \ud83d\udea8.\n\nThe truth is, shifting security left doesn't have to slow teams down \ud83d\udeab.\n\nWhat's your approach to integrating security into your CI/CD pipeline \u2014 do you use SAST, DAST, or a combination of both? \ud83d\udcac"
   }
 ]
