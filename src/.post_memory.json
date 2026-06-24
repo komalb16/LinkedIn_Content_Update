@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-09T13:45:23.901232",
-    "topic_id": "docker-cheatsheet",
-    "topic_name": "Docker Mastery",
-    "category": "topic",
-    "text": "\ud83d\udccc Docker Mastery\n\nNobody talks about the 20% of Docker knowledge that covers 80% of daily use \ud83e\udd14.\n\nMost engineers use Docker without understanding its internals \u2014 they just know it works \ud83d\udce6.\n\u2014\nI was wrong to assume that multi-stage builds were a nicety, not a necessity \ud83d\udea8.\n\nDocker Client \u2014 sends API requests\nDocker Host \u2014 builds layers, caches images\nDocker Hub \u2014 registry for sharing\nMost people only know how to push images to Docker Hub \ud83d\udcc8.\nBut understanding the Docker Client, Host, and Hub is key to optimizing your workflow \ud83d\ude80.\n\n\ud83d\udcac What's your primary Docker interaction \u2014 Client, Host, or Hub?\n\n#Docker #Containerization #ScaleEngineering #CloudComputing #Security"
-  },
-  {
     "timestamp": "2026-05-09T15:57:01.918362",
     "topic_id": "llm-architecture",
     "topic_name": "LLM Architecture",
@@ -838,5 +831,12 @@
     "topic_name": "Prompt Chaining Patterns for Production LLMs",
     "category": "topic",
     "text": "\ud83d\udccc Prompt Chaining Patterns for Production LLMs\n\nI've seen 9 out of 10 LLM production deployments fail due to over-engineering of prompt chaining patterns \ud83d\udea8.\n\n2\ufe0f\u20e3 They then determine if the task\nIf the task is open-ended, they need to decide whether they require retrieval, prediction, or orchestration of data \ud83d\udcca.\n\n3\ufe0f\u20e3 The architecture choice is critical, as\nIf reliability demands it, complexity can be added later, but this should be done with caution \u26a0\ufe0f.\n\nI've learned that adding complexity too early can lead to maintenance nightmares and decreased performance \ud83d\udcc9.\n\n\ud83d\udcac What's the most common mistake you've seen in implementing prompt chaining patterns for production LLMs?"
+  },
+  {
+    "timestamp": "2026-06-24T23:14:41.304367",
+    "topic_id": "platform-engineering-ai",
+    "topic_name": "Platform Engineering for AI Teams",
+    "category": "topic",
+    "text": "Most teams blame the model first, but in Platform Engineering for AI Teams the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nAs an engineer, I've seen most teams struggle to provide a comprehensive AI platform \u2014 they either focus on templates or guardrails, but rarely both.\n\n1\ufe0f\u20e3 I ensure my team has templates\n\n2\ufe0f\u20e3 I implement guardrails to prevent costly\nWhat actually works is providing a clear path for product teams to follow, making the safe path the easiest path \u2014 this includes eval pipelines, cost controls, and deployment paths.\n\nMost teams try to DIY their AI platform, but this approach often leads to a mess \u2014 \ud83d\udeab a single misstep can result in a 3x increase in costs or a 2x decrease in performance.\n\nI learned this the hard way when our team's DIY approach resulted in a $10,000/month bill for a single misplaced comma \ud83e\udd26\u200d\u2640\ufe0f.\n\nNow, I prioritize making the safe path the easiest path for our product teams, and it's paid off \ud83d\udcc8.\n\n\ud83d\udcac What's your approach to providing a comprehensive AI platform \u2014 do you focus on templates, guardrails, or something else?"
   }
 ]
