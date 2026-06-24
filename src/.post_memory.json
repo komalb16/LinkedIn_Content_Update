@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-08T17:49:11.778841",
-    "topic_id": "trend-staffing-cuts",
-    "topic_name": "Rightsizing Engineering Teams",
-    "category": "topic",
-    "text": "\ud83d\udccc The fundamental idea is to prioritize \ud83d\udca1.\n\nStaffing cuts don't have to cripple engineering productivity \ud83d\udea8.\n\nBest practices include focusing on high-impact tasks \ud83d\udcc8.\nCommon mistakes are trying to preserve every role \ud83d\udeab.\n\nThe one thing to remember is that velocity is key \u2699\ufe0f.\n\n\ud83d\udcac What's the most important aspect of minimizing the impact of staffing cuts on engineering productivity and team morale?\nIs it:\n\n#EngineeringProductivity #TeamMorale #StaffingCuts #Rightsizing #EfficiencyMatters #Velocity"
-  },
-  {
     "timestamp": "2026-05-09T13:45:23.901232",
     "topic_id": "docker-cheatsheet",
     "topic_name": "Docker Mastery",
@@ -838,5 +831,12 @@
     "topic_name": "DevSecOps Practices",
     "category": "topic",
     "text": "\ud83d\udccc DevSecOps Practices\n\nOnly\n\nThis number exists because many teams view security as a separate entity, rather than an integral part of their development process \ud83e\udd14.\n\n2\ufe0f\u20e3 Automated tests catch vulnerabilities\n\nAs code moves through the pipeline, it's scanned for vulnerabilities and signed to ensure its integrity \ud83d\udce6.\n\nIn production, runtime monitoring tools detect and alert on potential security threats \ud83d\udd0d.\n\nRight now? We are at a point where security is no longer a luxury, but a necessity \ud83d\udea8.\n\nThe truth is, shifting security left doesn't have to slow teams down \ud83d\udeab.\n\nWhat's your approach to integrating security into your CI/CD pipeline \u2014 do you use SAST, DAST, or a combination of both? \ud83d\udcac"
+  },
+  {
+    "timestamp": "2026-06-24T14:48:59.086934",
+    "topic_id": "prompt-chaining-patterns",
+    "topic_name": "Prompt Chaining Patterns for Production LLMs",
+    "category": "topic",
+    "text": "\ud83d\udccc Prompt Chaining Patterns for Production LLMs\n\nI've seen 9 out of 10 LLM production deployments fail due to over-engineering of prompt chaining patterns \ud83d\udea8.\n\n2\ufe0f\u20e3 They then determine if the task\nIf the task is open-ended, they need to decide whether they require retrieval, prediction, or orchestration of data \ud83d\udcca.\n\n3\ufe0f\u20e3 The architecture choice is critical, as\nIf reliability demands it, complexity can be added later, but this should be done with caution \u26a0\ufe0f.\n\nI've learned that adding complexity too early can lead to maintenance nightmares and decreased performance \ud83d\udcc9.\n\n\ud83d\udcac What's the most common mistake you've seen in implementing prompt chaining patterns for production LLMs?"
   }
 ]
