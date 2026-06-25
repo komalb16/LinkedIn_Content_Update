@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-09T15:57:01.918362",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "topic",
-    "text": "\ud83d\udccc LLM Architecture\n\nI was wrong about Large Language Models - I thought the magic happened in the training data, but it's actually the internal architecture that makes them tick \ud83e\udd16.\n\nThe transformer architecture is the backbone of LLMs, with its attention mechanisms and feed-forward layers working together to generate human-like text \ud83d\udcac.\n\nI've come to realize that understanding these components is crucial for building on top of LLMs \ud83d\udcda. The attention mechanism, in particular, allows the model to focus on specific parts of the input sequence and weigh their importance \u2696\ufe0f.\n\nSo, what's the most important component of an LLM's internal architecture?\n\n\ud83d\udcac Which one do you think is key: Tokenisation, Embedding, Attention, Feed-Forward, or Output Layer?\n\n#LLM #Transformer #AttentionMechanism #NLP #AIEngineering \ud83d\ude80\ud83d\udcbb\ud83d\udd0d"
-  },
-  {
     "timestamp": "2026-05-10T20:53:43.759681",
     "topic_id": "trend-chatgpt-pro",
     "topic_name": "ChatGPT Pro Lessons",
@@ -838,5 +831,12 @@
     "topic_name": "Platform Engineering for AI Teams",
     "category": "topic",
     "text": "Most teams blame the model first, but in Platform Engineering for AI Teams the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nAs an engineer, I've seen most teams struggle to provide a comprehensive AI platform \u2014 they either focus on templates or guardrails, but rarely both.\n\n1\ufe0f\u20e3 I ensure my team has templates\n\n2\ufe0f\u20e3 I implement guardrails to prevent costly\nWhat actually works is providing a clear path for product teams to follow, making the safe path the easiest path \u2014 this includes eval pipelines, cost controls, and deployment paths.\n\nMost teams try to DIY their AI platform, but this approach often leads to a mess \u2014 \ud83d\udeab a single misstep can result in a 3x increase in costs or a 2x decrease in performance.\n\nI learned this the hard way when our team's DIY approach resulted in a $10,000/month bill for a single misplaced comma \ud83e\udd26\u200d\u2640\ufe0f.\n\nNow, I prioritize making the safe path the easiest path for our product teams, and it's paid off \ud83d\udcc8.\n\n\ud83d\udcac What's your approach to providing a comprehensive AI platform \u2014 do you focus on templates, guardrails, or something else?"
+  },
+  {
+    "timestamp": "2026-06-25T11:47:35.554600",
+    "topic_id": "ai-governance-playbook",
+    "topic_name": "AI Governance Playbook",
+    "category": "topic",
+    "text": "Most teams think they're ahead of the curve on AI governance \ud83d\ude80, but the reality is, many are stuck in a cycle of vague compliance theater \ud83c\udfad, while the winners are accelerating adoption by reducing ambiguity \ud83d\udeab.\n\nThe difference between these two groups often comes down to a practical governance playbook that streamlines risk management.\n\nWe typically see teams struggling to classify use cases by impact and exposure \ud83e\udd14 \u2014 this is where a clear governance strategy can help.\n\nIn production, I've seen that tracking versions, owners, and approvals of models is crucial for transparency \ud83d\udcca.\n\n2\ufe0f\u20e3 Track versions and owners\nBy putting constraints on prompt, data, and tool usage, teams can prevent common pitfalls \ud83d\udeab.\n\n3\ufe0f\u20e3 Apply constraints on prompt and data\n\nTo ensure smooth operations, latency, quality, and incident telemetry must be monitored closely \ud83d\udcc8.\n\nIn my experience, decision trace and evidence retention are essential for auditability \ud83d\udcc1.\n\nWhen it comes to responding to incidents, having a clear escalation, rollback, and remediation plan in place is vital \ud83d\udcde.\n\nFinally, risk posture and executive visibility can be achieved through regular reporting \ud83d\udcca.\n\nLayer 1: Risk Tiering\nLayer 2: Model Registry\nLayer 3: Policy Controls\nLayer 4: Monitoring\nLayer 5: Auditability\nLayer 6: Response\nLayer 7: Reporting\nI've learned that a well-structured governance playbook can make all the difference in accelerating AI adoption \ud83d\ude80.\n\n\ud83d\udcac What's the most significant challenge you've faced in implementing AI governance in your organization? \ud83d\udc47"
   }
 ]
