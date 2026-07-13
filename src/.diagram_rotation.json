@@ -14,5 +14,13 @@
     "topic_id": "data-lakehouse",
     "topic_name": "Data Lakehouse Architecture",
     "diagram_type": "Architecture Diagram"
+  },
+  {
+    "timestamp": "2026-07-13T22:02:04.131368",
+    "style_idx": 0,
+    "style_name": "Vertical Flow",
+    "topic_id": "aws-architecture",
+    "topic_name": "AWS Architecture Patterns",
+    "diagram_type": "Architecture Diagram"
   }
 ]

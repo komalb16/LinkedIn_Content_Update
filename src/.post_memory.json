@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-10T21:17:26.672932",
-    "topic_id": "trend-chatgpt-pro-tips",
-    "topic_name": "ChatGPT Pro Optimization",
-    "category": "topic",
-    "text": "\ud83d\udccc Production just broke at 11pm due to ChatGPT 5.5 Pro f\n\nProduction just broke at 11pm due to ChatGPT 5.5 Pro fine-tuning issues \ud83d\udea8.\n\nThe fundamental idea is that conversational AI model fine-tuning requires careful consideration of real-world applications \ud83e\udd16.\n\nProduction just broke at context: this means our model failed to understand the user's question or scenario, leading to irrelevant responses.\n\nWe must prioritize context-aware fine-tuning to improve performance.\n\nProduction just broke at principle: our model's guiding principles, such as fairness and transparency, were compromised during fine-tuning.\n\nAdhering to these principles ensures our model serves its purpose without harming users.\n\nProduction just broke at flow: the conversation flow was disrupted, causing frustration for users.\n\nSmoothing out the flow requires fine-tuning the model to handle multi-turn conversations effectively.\n\nProduction just broke at priorities: the model's objectives were misaligned with our priorities, resulting in suboptimal performance.\n\nRe-evaluating priorities during fine-tuning helps maintain focus on key goals.\n\nProduction just broke at risks: we underestimated potential risks, such as data leakage or bias, during the fine-tuning process.\n\nMitigating these risks is essential for reliable model performance.\n\nProduction just broke at outcome: the fine-tuning process did not yield the desired outcome, indicating a need to reassess our approach.\n\nBy analyzing the outcome, we can refine our fine-tuning strategy to achieve better results.\n\n\ud83d\udcac What's your approach to addressing these breakdowns in conversational AI model fine-tuning for real-world applications?\n\n#ConversationalAI #ChatGPT #AIModelFineTuning #ProductionWorkflows #ROIOptimization"
-  },
-  {
     "timestamp": "2026-05-10T21:20:01.031058",
     "topic_id": "trend-ai-deployment-strategies",
     "topic_name": "Local AI Adoption",
@@ -838,5 +831,12 @@
     "topic_name": "Data Lakehouse Architecture",
     "category": "topic",
     "text": "Most teams get Data Lakehouse Architecture wrong in the same way.\n\nMy current lens: Technical trade-offs and when this architecture makes and does not make sense. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nRaw Ingestion\nOpen Format\nCompute Layer\nGovernance\nConsumers\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-07-13T22:02:09.446049",
+    "topic_id": "aws-architecture",
+    "topic_name": "AWS Architecture Patterns",
+    "category": "topic",
+    "text": "I've seen a 10% difference in monthly AWS costs snowball into a $100,000 gap over 12 months \ud83d\ude80.\n\nBy Month 1, the gap is barely noticeable \u2014 $83.\nBy Month 3, it's $250, and by Month 6, $500 \ud83d\udcca.\nBut by Month 12, the difference is staggering: $100,000 \ud83e\udd2f.\n\nMost engineers pick a serverless approach for simplicity \u2014 but I've found that microservices on ECS/EKS offer better scalability \ud83d\ude80.\n\nWhen designing our architecture, we consider storage options like S3 for object storage and EBS for block-level storage \ud83d\udcc8.\n\nOur database choices include RDS for relational data and DynamoDB for NoSQL use cases \ud83d\udcca.\n\nIn production, I've seen the importance of a well-designed network architecture, with VPC, ALB, and CloudFront \ud83c\udf10.\n\nSecurity is also crucial, with IAM, KMS, and GuardDuty protecting our resources \ud83d\udd12.\n\nArchitecture Diagram:\n\nI was wrong to think that a single architecture pattern would fit all use cases \ud83e\udd26\u200d\u2640\ufe0f.\n\nIt took me years to learn that the key to cost optimization is choosing the right pattern for the job \ud83d\udcca.\n\nSo, here's my 1-2-3 call to action:\n1. Evaluate your current architecture \ud83d\udcca\n\n3. Implement changes and monitor results \ud83d\udcc8\n\n\ud83d\udcac What's your go-to architecture pattern for AWS deployments, and how do you handle cost optimization? \ud83e\udd14"
   }
 ]
