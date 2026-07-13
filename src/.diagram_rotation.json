@@ -6,5 +6,13 @@
     "topic_id": "data-lakehouse",
     "topic_name": "Obstacle Pathfinding architecture",
     "diagram_type": "Architecture Diagram"
+  },
+  {
+    "timestamp": "2026-07-13T12:15:45.979337",
+    "style_idx": 0,
+    "style_name": "Vertical Flow",
+    "topic_id": "data-lakehouse",
+    "topic_name": "Data Lakehouse Architecture",
+    "diagram_type": "Architecture Diagram"
   }
 ]
