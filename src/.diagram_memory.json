@@ -684,5 +684,12 @@
     "style": 0,
     "signature": "ac30fd88115248146a8310b664009875",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-14T14:02:29.218899",
+    "topic_id": "story-llm-agent-realization",
+    "style": 23,
+    "signature": "dfe3353b6cc6066fd7a47179c460306c",
+    "duplicate_avoided": true
   }
 ]

@@ -6,5 +6,13 @@
     "topic_id": "model-context-protocol",
     "topic_name": "Model Context Protocol",
     "diagram_type": "Lane Map"
+  },
+  {
+    "timestamp": "2026-07-14T14:02:29.222532",
+    "style_idx": 23,
+    "style_name": "Info-Frame Card",
+    "topic_id": "story-llm-agent-realization",
+    "topic_name": "Current Architecture",
+    "diagram_type": "Viral Poster"
   }
 ]

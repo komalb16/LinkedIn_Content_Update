@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-04-30T03:57:16.925655",
-    "topic_id": "trend-copy-fail-pitfalls",
-    "topic_name": "Copy Fail Lessons",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 73,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 73,
-        "raw_score": 73,
-        "similarity": 0.0588,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 61,
-        "raw_score": 61,
-        "similarity": 0.0397,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-04-30T14:06:22.922786",
     "topic_id": "ai-agents-2026",
     "topic_name": "AI Agents 2026",
@@ -1915,6 +1890,31 @@
         "score": 78,
         "raw_score": 78,
         "similarity": 0.0211,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-14T14:02:36.701709",
+    "topic_id": "story-llm-agent-realization",
+    "topic_name": "AI Agent Interaction",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 39,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0417,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 49,
+        "raw_score": 49,
+        "similarity": 0.0916,
         "penalty": 0
       }
     ]
