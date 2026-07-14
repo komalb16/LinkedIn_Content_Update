@@ -14,5 +14,13 @@
     "topic_id": "story-llm-agent-realization",
     "topic_name": "Current Architecture",
     "diagram_type": "Viral Poster"
+  },
+  {
+    "timestamp": "2026-07-14T23:59:16.638283",
+    "style_idx": 23,
+    "style_name": "Info-Frame Card",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "Ai System",
+    "diagram_type": "Viral Poster"
   }
 ]

@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-04-30T14:06:22.922786",
-    "topic_id": "ai-agents-2026",
-    "topic_name": "AI Agents 2026",
-    "category": "AI",
-    "mode": "tools_news",
-    "status": "success",
-    "quality_score": 73,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-02T13:20:11.843585",
     "topic_id": "story-llm-agent-realization",
     "topic_name": "AI Agent Interaction",
@@ -1915,6 +1905,31 @@
         "score": 49,
         "raw_score": 49,
         "similarity": 0.0916,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-14T23:59:22.534102",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 54,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0754,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 64,
+        "raw_score": 64,
+        "similarity": 0.0707,
         "penalty": 0
       }
     ]

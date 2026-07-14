@@ -691,5 +691,12 @@
     "style": 23,
     "signature": "dfe3353b6cc6066fd7a47179c460306c",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-14T23:59:16.634623",
+    "topic_id": "story-rag-strategy-shift",
+    "style": 23,
+    "signature": "9231037a3ea949bb65b7d97c4a0a20aa",
+    "duplicate_avoided": true
   }
 ]
