@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-02T13:20:11.843585",
-    "topic_id": "story-llm-agent-realization",
-    "topic_name": "AI Agent Interaction",
-    "category": "Story",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 72,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 72,
-        "raw_score": 72,
-        "similarity": 0.0274,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 56,
-        "raw_score": 56,
-        "similarity": 0.0743,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-03T13:20:06.169342",
     "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
     "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
@@ -1930,6 +1905,31 @@
         "score": 64,
         "raw_score": 64,
         "similarity": 0.0707,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T14:01:18.446608",
+    "topic_id": "responsible-ai-security-stack",
+    "topic_name": "Responsible AI Security Stack",
+    "category": "Security",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 46,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 46,
+        "raw_score": 46,
+        "similarity": 0.0124,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 21,
+        "raw_score": 21,
+        "similarity": 0.0096,
         "penalty": 0
       }
     ]

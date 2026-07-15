@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-10T22:53:23.020411",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "topic",
-    "text": "\ud83d\udccc LLM Architecture\n\nNobody talks about the internal architecture of Large Language Models \ud83e\udd14.\n\n1\ufe0f\u20e3 Tokenisation splits raw text into sub-word\nThis is where the model starts to understand the input text, and it's crucial for performance \ud83d\udcca.\n\n2\ufe0f\u20e3 Embedding maps tokens to dense vectors\nThis step is vital as it allows the model to capture the nuances of language, and I was wrong to think it was a simple mapping \ud83d\uddfa\ufe0f.\n\n3\ufe0f\u20e3 Attention uses a multi-head\nThis is what enables the model to focus on specific parts of the input text and weigh their importance \ud83e\udd1d.\n\n4\ufe0f\u20e3 Feed-Forward transforms and projects\nThis step is often overlooked, but it's essential for the model to generate coherent and contextually relevant output \ud83d\udcc4.\n\n5\ufe0f\u20e3 Output Layer projects to vocabulary\nThis is where the model finally generates the output text, and it's amazing to see how it all comes together \ud83d\udce2.\n\nI finally understood the importance of each section after diving deep into the architecture \ud83d\udcda.\n\n\ud83d\udcac What's the most critical section in your Large Language Model architecture, and why?\n\n#LLM #Transformers #AttentionMechanisms #NLP #LanguageModels"
-  },
-  {
     "timestamp": "2026-05-11T21:07:59.990682",
     "topic_id": "trend-qr-code-auth",
     "topic_name": "Secure Auth Flows",
@@ -838,5 +831,12 @@
     "topic_name": "RAG Strategy Shift",
     "category": "story",
     "text": "Almost everyone falls into one of three levels: \ud83d\udfe2 beginner, \ud83d\udca1 intermediate, or \ud83d\udd25 advanced \u2014 when it comes to building production AI systems.\n\nMost teams start with simple vector retrieval \u2014 it's easy to implement, but it's not enough for production AI.\n\u2014\nSimple vector retrieval can lead to high latency and low relevance, which can be devastating for user experience.\n\n1\ufe0f\u20e3 I use a hybrid search approach\n\n3\ufe0f\u20e3 I optimize my indexing to reduce\n\nThe fundamental idea behind production AI is to balance performance metrics like latency and relevance \u2014 this is where most teams struggle.\n\nIn production, the mechanism underneath the retrieval system matters \u2014 it's not just about the retrieval method, but also about how it's implemented and optimized.\n\nBest practices for production systems include monitoring and tweaking the system continuously \u2014 this is where most teams fall short.\n\nMost engineers get wrong the fact that simple vector retrieval is not enough \u2014 they need to consider the trade-offs and optimize for their specific use case.\n\nThe one thing to remember is that production AI is all about performance metrics \u2014 latency and relevance are key to a good user experience.\n\nSystem Design:\n\n- Retrieval Method\n- Reranking Strategy\n- Indexing Optimization\n\n\ud83d\udcac What's your approach to optimizing retrieval in production AI \u2014 do you use hybrid search, reranking, or something else?"
+  },
+  {
+    "timestamp": "2026-07-15T14:01:18.443959",
+    "topic_id": "responsible-ai-security-stack",
+    "topic_name": "Responsible AI Security Stack",
+    "category": "topic",
+    "text": "Most engineers think responsible AI is just about checking boxes \ud83d\udcdd. I've seen teams ship AI models that fail silently in production, causing more harm than good \ud83d\udea8.\n\nThe root cause is often a lack of controls at each layer of the delivery stack \ud83e\udd14.\n\n1\ufe0f\u20e3 Chips must be secure by design\n\n2\ufe0f\u20e3 Columns must detect anomalies\n\n3\ufe0f\u20e3 Governance must classify data correctly\n\nTo build a secure-by-default AI delivery stack, I combine Azure AI Content Safety, Defender for Cloud, Purview, and Confidential Computing \ud83d\udcbb.\n\nThis ensures that signals are prevented from entering the system unchecked, detected and responded to in real-time, and governed by strict compliance reporting \ud83d\udcca.\n\nPrevent  \u00b7 chips\nDetect    \u00b7 columns\nGovern    \u00b7 classification \u00b7 computing \u00b7 reporting\nI've learned that integrating these tools is not a one-time task, but an ongoing process that requires continuous monitoring and evaluation \ud83d\udcc8.\n\nWhat's your approach to securing your AI delivery stack \u2014 do you use Azure AI Content Safety, Defender for Cloud, Purview, or Confidential Computing? \ud83d\udcac"
   }
 ]
