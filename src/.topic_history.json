@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-03T13:20:06.169342",
-    "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
-    "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
-    "category": "Engineering",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 71,
-    "ab_variants": [
-      {
-        "variant_index": 3,
-        "score": 74,
-        "raw_score": 74,
-        "similarity": 0.0807,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 49,
-        "raw_score": 49,
-        "similarity": 0.0877,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-03T21:49:11.987638",
     "topic_id": "llm-architecture",
     "topic_name": "LLM Architecture",
@@ -1933,5 +1908,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-07-15T23:04:04.312738",
+    "topic_id": "interview-career-one-skill-learn",
+    "topic_name": "Interview: Career_Growth",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": []
   }
 ]

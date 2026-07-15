@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-11T21:07:59.990682",
-    "topic_id": "trend-qr-code-auth",
-    "topic_name": "Secure Auth Flows",
-    "category": "topic",
-    "text": "\ud83d\udccc Secure Auth Flows\n\nAlmost everyone falls into one of 3 levels: \ud83d\udfe2 beginner, \ud83d\udfe1 intermediate, or \ud83d\udfe3 advanced.\n\nWhen it comes to implementing QR code-based authentication, I see teams at each level struggle with different aspects.\n\nThe Core Concept is simple: use a QR code to verify user identity, but the implementation can be tricky.\n\nHere's a high-level overview of the process:\n\n- > Best Practices\n- > Common Mistakes\n- > Key Takeaway\nBest Practices dictate that you should use a secure connection and validate user input.\n\nCommon Mistakes include using insecure protocols and not implementing rate limiting.\n\nThe Key Takeaway is that QR code-based authentication can be secure if done correctly.\n\nSo, when implementing it, make sure to follow best practices and avoid common mistakes.\n\n\ud83d\udcac What's your approach to implementing multi-factor authentication in your production environment? \ud83e\udd14\ud83d\udcbb\ud83d\udd12\ud83d\udcc8\ud83d\udc40\n\n#QRcodeAuthentication #Security #Authentication #MultiFactorAuthentication #ProductionEnvironment #SystemDesign #CyberSecurity"
-  },
-  {
     "timestamp": "2026-05-12T22:14:43.523638",
     "topic_id": "data-evolution",
     "topic_name": "Data Architecture Evolution",
@@ -838,5 +831,12 @@
     "topic_name": "Responsible AI Security Stack",
     "category": "topic",
     "text": "Most engineers think responsible AI is just about checking boxes \ud83d\udcdd. I've seen teams ship AI models that fail silently in production, causing more harm than good \ud83d\udea8.\n\nThe root cause is often a lack of controls at each layer of the delivery stack \ud83e\udd14.\n\n1\ufe0f\u20e3 Chips must be secure by design\n\n2\ufe0f\u20e3 Columns must detect anomalies\n\n3\ufe0f\u20e3 Governance must classify data correctly\n\nTo build a secure-by-default AI delivery stack, I combine Azure AI Content Safety, Defender for Cloud, Purview, and Confidential Computing \ud83d\udcbb.\n\nThis ensures that signals are prevented from entering the system unchecked, detected and responded to in real-time, and governed by strict compliance reporting \ud83d\udcca.\n\nPrevent  \u00b7 chips\nDetect    \u00b7 columns\nGovern    \u00b7 classification \u00b7 computing \u00b7 reporting\nI've learned that integrating these tools is not a one-time task, but an ongoing process that requires continuous monitoring and evaluation \ud83d\udcc8.\n\nWhat's your approach to securing your AI delivery stack \u2014 do you use Azure AI Content Safety, Defender for Cloud, Purview, or Confidential Computing? \ud83d\udcac"
+  },
+  {
+    "timestamp": "2026-07-15T23:04:04.309672",
+    "topic_id": "interview-career-one-skill-learn",
+    "topic_name": "Interview: Career_Growth",
+    "category": "interview",
+    "text": "\ud83d\udccc Interview: Career_Growth\n\nGoal: Optimize a model for 10x less compute. The agent:\n\n1\ufe0f\u20e3 Reduced parameters by 75%\n\nZero human steps. \ud83e\udd16\n\nThis experience taught me that understanding the fundamental idea behind model optimization is key.\n\nIt's not just about tweaking hyperparameters, but about grasping how the mechanism underneath works.\n\nFor instance, production systems often employ techniques like knowledge distillation to transfer learning from large models to smaller ones \ud83d\udcda.\n\nBest practices in production involve a combination of these techniques, along with careful evaluation of the trade-offs between model size, accuracy, and compute resources \ud83e\udd14.\n\nHowever, most engineers get wrong the importance of monitoring and adjusting these trade-offs in real-time, leading to suboptimal performance \ud83d\udcca.\n\nI was wrong about this too, and it took me years to learn that a well-optimized model can make all the difference in production \ud83d\udcc8.\n\nTile Grid:\nOptimization  | Techniques\n\nThe one thing to remember is that model optimization is an ongoing process that requires continuous monitoring and adjustment \ud83d\udcca.\n\nSo, what's the most effective technique you've used to optimize your models? \ud83d\udcac"
   }
 ]
