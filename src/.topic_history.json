@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-03T22:49:55.210559",
-    "topic_id": "trend-ai-medical-diagnosis",
-    "topic_name": "AI in ER Diagnosis",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0426,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 74,
-        "raw_score": 74,
-        "similarity": 0.0769,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-04T14:10:41.066998",
     "topic_id": "trend-deep-claude-loop",
     "topic_name": "Optimizing Code Agents",
@@ -1933,5 +1908,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-07-16T22:10:11.844012",
+    "topic_id": "interview-trends-job-impact",
+    "topic_name": "Interview: Industry_Trends",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": []
   }
 ]

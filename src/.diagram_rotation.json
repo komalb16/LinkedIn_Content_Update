@@ -1,18 +1,8 @@
-[
-  {
-    "timestamp": "2026-07-15T14:01:09.733528",
-    "style_idx": 0,
-    "style_name": "Vertical Flow",
-    "topic_id": "responsible-ai-security-stack",
-    "topic_name": "Responsible AI Security Stack",
-    "diagram_type": "Observability Map"
-  },
-  {
-    "timestamp": "2026-07-15T23:03:57.357052",
-    "style_idx": 24,
-    "style_name": "Tile Grid",
-    "topic_id": "interview-career-one-skill-learn",
-    "topic_name": "Interview: Career_Growth",
-    "diagram_type": "Tile Grid"
-  }
-]
+{
+  "rotation_index": 26,
+  "style_history": [
+    0,
+    24,
+    28
+  ]
+}
