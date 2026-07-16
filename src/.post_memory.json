@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-12T22:14:43.523638",
-    "topic_id": "data-evolution",
-    "topic_name": "Data Architecture Evolution",
-    "category": "topic",
-    "text": "\ud83d\udccc Data Architecture Evolution\n\n70% of data architectures still rely on outdated models \ud83d\udea8.\nThis is surprising, given the benefits of modern designs.\n\nLet's explore the evolution into the 3-tier model:\n\ud83d\udd34 Level 1: Data Sources - APIs, CDC, IoT, logs, and events feed our systems.\n\nThis leads to a complex data landscape, making it hard to manage.\n\n\ud83d\udfe1 Level 2: Data Lakehouse - Ingestion, open format, and compute enable flexible processing.\n\nThis is where the lakehouse paradigm solves the problems of both data lakes and warehouses.\n\n\ud83d\udfe2 Level 3: Data Consumers - BI, ML models, and data apps rely on the lakehouse for insights.\n\nThe lakehouse provides a single source of truth, making it easier to serve various consumers.\n\nI was wrong to think that data lakes and warehouses were mutually exclusive \ud83e\udd26.\n\nThe lakehouse model combines the best of both worlds, providing a scalable and flexible architecture.\n\nWhich level are you? \ud83d\udcac What's your biggest challenge in implementing a lakehouse architecture?\n\n#DataArchitecture #Lakehouse #DataEngineering #DataScience #CloudComputing"
-  },
-  {
     "timestamp": "2026-05-13T00:03:56.618197",
     "topic_id": "trend-googlebook-tech",
     "topic_name": "Googlebook Use Cases",
@@ -838,5 +831,12 @@
     "topic_name": "Interview: Career_Growth",
     "category": "interview",
     "text": "\ud83d\udccc Interview: Career_Growth\n\nGoal: Optimize a model for 10x less compute. The agent:\n\n1\ufe0f\u20e3 Reduced parameters by 75%\n\nZero human steps. \ud83e\udd16\n\nThis experience taught me that understanding the fundamental idea behind model optimization is key.\n\nIt's not just about tweaking hyperparameters, but about grasping how the mechanism underneath works.\n\nFor instance, production systems often employ techniques like knowledge distillation to transfer learning from large models to smaller ones \ud83d\udcda.\n\nBest practices in production involve a combination of these techniques, along with careful evaluation of the trade-offs between model size, accuracy, and compute resources \ud83e\udd14.\n\nHowever, most engineers get wrong the importance of monitoring and adjusting these trade-offs in real-time, leading to suboptimal performance \ud83d\udcca.\n\nI was wrong about this too, and it took me years to learn that a well-optimized model can make all the difference in production \ud83d\udcc8.\n\nTile Grid:\nOptimization  | Techniques\n\nThe one thing to remember is that model optimization is an ongoing process that requires continuous monitoring and adjustment \ud83d\udcca.\n\nSo, what's the most effective technique you've used to optimize your models? \ud83d\udcac"
+  },
+  {
+    "timestamp": "2026-07-16T11:48:59.497741",
+    "topic_id": "system-design",
+    "topic_name": "System Design Fundamentals",
+    "category": "topic",
+    "text": "Most teams think system design is about mastering scalability, but it's actually about understanding the trade-offs \ud83e\udd14.\n\nI've seen engineers focus on horizontal scaling, only to realize that their database wasn't designed to handle the load \ud83d\udd34.\n\nAt the foundation, a well-designed system has a clear entry point, with requests being routed through a load balancer to multiple servers \ud83d\udfe1.\n\nThis approach allows for easy scaling, but it also introduces complexity, and a single point of failure can bring down the entire system \ud83d\udfe2.\n\nAs the system grows, it's essential to implement caching strategies to reduce the load on the database and improve performance \ud83d\udd35.\n\nBut, I've seen teams over-rely on caching, only to realize that their cache invalidation strategy was flawed, leading to stale data \ud83d\udfe3.\n\nWhich level are you? \ud83d\udcac Are you still struggling with scalability, or have you mastered the art of caching and database sharding?"
   }
 ]

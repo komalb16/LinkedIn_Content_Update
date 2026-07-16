@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-03T21:49:11.987638",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-03T22:49:55.210559",
     "topic_id": "trend-ai-medical-diagnosis",
     "topic_name": "AI in ER Diagnosis",
@@ -1918,5 +1908,30 @@
     "status": "success",
     "quality_score": 66,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-07-16T11:48:59.500271",
+    "topic_id": "system-design",
+    "topic_name": "System Design Fundamentals",
+    "category": "Engineering",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 70,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 70,
+        "raw_score": 70,
+        "similarity": 0.0201,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 33,
+        "raw_score": 33,
+        "similarity": 0.5833,
+        "penalty": 0
+      }
+    ]
   }
 ]
