@@ -1,670 +1,5 @@
 [
   {
-    "timestamp": "2026-04-04T03:31:07.372589",
-    "topic_id": "ml-algorithms",
-    "topic_name": "Machine Learning Algorithms",
-    "category": "Data Science",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0408,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0126,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-04T18:05:13.576171",
-    "topic_id": "data-evolution",
-    "topic_name": "Data Architecture Evolution",
-    "category": "Data",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 96,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 96,
-        "raw_score": 96,
-        "similarity": 0.0096,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 88,
-        "raw_score": 88,
-        "similarity": 0.0044,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-06T23:15:13.448428",
-    "topic_id": "llm-vs-agentic",
-    "topic_name": "LLM vs Generative AI vs AI Agents Agentic AI",
-    "category": "AI Workflows",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0386,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0492,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-07T00:30:02.511093",
-    "topic_id": "story-name-search-reputation-check",
-    "topic_name": "AI Name Search Reality Check",
-    "category": "Story",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 84,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 84,
-        "raw_score": 84,
-        "similarity": 0.0234,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 84,
-        "raw_score": 84,
-        "similarity": 0.0833,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-07T01:15:08.001590",
-    "topic_id": "agentic-ai",
-    "topic_name": "Agentic AI",
-    "category": "AI",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 92,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 92,
-        "raw_score": 92,
-        "similarity": 0.0941,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 86,
-        "raw_score": 86,
-        "similarity": 0.0311,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-07T17:00:17.280861",
-    "topic_id": "responsible-ai-security-stack",
-    "topic_name": "Responsible AI Security Stack",
-    "category": "Security",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 82,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 82,
-        "raw_score": 82,
-        "similarity": 0.0486,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 70,
-        "raw_score": 70,
-        "similarity": 0.0113,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-08T22:29:27.808286",
-    "topic_id": "git-workflow",
-    "topic_name": "Git Workflow and Commands",
-    "category": "Engineering",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 3,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0053,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 92,
-        "raw_score": 92,
-        "similarity": 0.0122,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-10T03:57:54.614639",
-    "topic_id": "aws-architecture",
-    "topic_name": "AWS Architecture Patterns",
-    "category": "Cloud",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 80,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 80,
-        "raw_score": 80,
-        "similarity": 0.0065,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 68,
-        "raw_score": 68,
-        "similarity": 0.014,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-11T23:12:05.431464",
-    "topic_id": "rag-stack",
-    "topic_name": "Open Source RAG Stack",
-    "category": "AI Tools",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0327,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0282,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-11T23:39:47.915131",
-    "topic_id": "data-engineering",
-    "topic_name": "Data Engineering",
-    "category": "Data",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0769,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 86,
-        "raw_score": 86,
-        "similarity": 0.1543,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-12T14:34:03.555723",
-    "topic_id": "ai-disciplines",
-    "topic_name": "Comparing Major AI Disciplines",
-    "category": "AI",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 80,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 80,
-        "raw_score": 80,
-        "similarity": 0.0231,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 80,
-        "raw_score": 80,
-        "similarity": 0.0063,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-13T16:45:22.220823",
-    "topic_id": "trend-iot-signal-sync",
-    "topic_name": "Realtime Signal Sync",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0498,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 86,
-        "raw_score": 86,
-        "similarity": 0.0552,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-14T22:36:44.295479",
-    "topic_id": "ai-governance-playbook",
-    "topic_name": "AI Governance Playbook",
-    "category": "AI Reliability",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.1288,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 78,
-        "raw_score": 78,
-        "similarity": 0.5584,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-18T02:07:03.330789",
-    "topic_id": "agentic-ai-decision-tree",
-    "topic_name": "Agentic AI Decision Tree",
-    "category": "AI Strategy",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.038,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 90,
-        "raw_score": 90,
-        "similarity": 0.0446,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-18T18:59:42.731228",
-    "topic_id": "zero-trust",
-    "topic_name": "Zero Trust Architecture",
-    "category": "Security",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 92,
-    "ab_variants": [
-      {
-        "variant_index": 3,
-        "score": 92,
-        "raw_score": 92,
-        "similarity": 0.0282,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 84,
-        "raw_score": 84,
-        "similarity": 0.0268,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-19T15:29:00.059095",
-    "topic_id": "trend-pause-game-architecture",
-    "topic_name": "Game Pause Mechanics",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 96,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 96,
-        "raw_score": 96,
-        "similarity": 0.0305,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 90,
-        "raw_score": 90,
-        "similarity": 0.0476,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-23T16:25:13.742605",
-    "topic_id": "langchain",
-    "topic_name": "LangChain",
-    "category": "AI",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0057,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 92,
-        "raw_score": 92,
-        "similarity": 0.0078,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-24T01:21:10.125014",
-    "topic_id": "microsoft-365",
-    "topic_name": "Microsoft 365",
-    "category": "Engineering",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 80,
-    "ab_variants": []
-  },
-  {
-    "timestamp": "2026-04-26T22:43:25.043775",
-    "topic_id": "trend-domain-security-risks",
-    "topic_name": "Securing Domain Transfers",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 70,
-    "ab_variants": [
-      {
-        "variant_index": 3,
-        "score": 70,
-        "raw_score": 70,
-        "similarity": 0.0212,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 59,
-        "raw_score": 59,
-        "similarity": 0.0576,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-28T23:59:06.124182",
-    "topic_id": "trend-vintage-models",
-    "topic_name": "Lessons from Vintage AI",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 74,
-    "ab_variants": [
-      {
-        "variant_index": 3,
-        "score": 74,
-        "raw_score": 74,
-        "similarity": 0.0348,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 71,
-        "raw_score": 71,
-        "similarity": 0.0649,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-29T20:13:36.589895",
-    "topic_id": "azure",
-    "topic_name": "Azure",
-    "category": "Cloud",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 39,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 47,
-        "raw_score": 47,
-        "similarity": 0.0263,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 37,
-        "raw_score": 37,
-        "similarity": 0.08,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-30T03:57:16.925655",
-    "topic_id": "trend-copy-fail-pitfalls",
-    "topic_name": "Copy Fail Lessons",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 73,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 73,
-        "raw_score": 73,
-        "similarity": 0.0588,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 61,
-        "raw_score": 61,
-        "similarity": 0.0397,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-04-30T14:06:22.922786",
-    "topic_id": "ai-agents-2026",
-    "topic_name": "AI Agents 2026",
-    "category": "AI",
-    "mode": "tools_news",
-    "status": "success",
-    "quality_score": 73,
-    "ab_variants": []
-  },
-  {
-    "timestamp": "2026-05-02T13:20:11.843585",
-    "topic_id": "story-llm-agent-realization",
-    "topic_name": "AI Agent Interaction",
-    "category": "Story",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 72,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 72,
-        "raw_score": 72,
-        "similarity": 0.0274,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 56,
-        "raw_score": 56,
-        "similarity": 0.0743,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-05-03T13:20:06.169342",
-    "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
-    "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
-    "category": "Engineering",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 71,
-    "ab_variants": [
-      {
-        "variant_index": 3,
-        "score": 74,
-        "raw_score": 74,
-        "similarity": 0.0807,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 49,
-        "raw_score": 49,
-        "similarity": 0.0877,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-05-03T21:49:11.987638",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": []
-  },
-  {
-    "timestamp": "2026-05-03T22:49:55.210559",
-    "topic_id": "trend-ai-medical-diagnosis",
-    "topic_name": "AI in ER Diagnosis",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0426,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 74,
-        "raw_score": 74,
-        "similarity": 0.0769,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-05-04T14:10:41.066998",
-    "topic_id": "trend-deep-claude-loop",
-    "topic_name": "Optimizing Code Agents",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 80,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 80,
-        "raw_score": 80,
-        "similarity": 0.0275,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 49,
-        "raw_score": 49,
-        "similarity": 0.0444,
-        "penalty": 0
-      }
-    ]
-  },
-  {
-    "timestamp": "2026-05-05T23:52:31.818839",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 61,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-06T20:26:52.185638",
     "topic_id": "cicd-pipelines",
     "topic_name": "CI/CD Best Practices",
@@ -2040,5 +1375,533 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-06-17T00:24:14.837342",
+    "topic_id": "solid-principles",
+    "topic_name": "SOLID and Design Patterns",
+    "category": "Engineering",
+    "mode": "tech_news",
+    "status": "success"
+  },
+  {
+    "timestamp": "2026-06-17T13:54:10.949810",
+    "topic_id": "vector-db-comparison",
+    "topic_name": "Vector Database Comparison",
+    "category": "Data",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 54,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-17T22:51:29.704681",
+    "topic_id": "cicd-pipelines",
+    "topic_name": "CI/CD Best Practices",
+    "category": "DevOps",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0288,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0544,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-18T23:53:37.918438",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 39,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 45,
+        "raw_score": 45,
+        "similarity": 0.0069,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 37,
+        "raw_score": 37,
+        "similarity": 0.0121,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-19T14:17:26.962306",
+    "topic_id": "interview-career-one-skill-learn",
+    "topic_name": "Interview: Career_Growth",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 76,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-19T23:07:49.429256",
+    "topic_id": "ai-search-discovery",
+    "topic_name": "AI Search and Discovery",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 41,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0234,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 53,
+        "raw_score": 53,
+        "similarity": 0.4884,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-20T14:23:18.467232",
+    "topic_id": "mlops-best-practices",
+    "topic_name": "MLOps Best Practices",
+    "category": "Engineering",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 51,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0692,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 52,
+        "raw_score": 52,
+        "similarity": 0.0581,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-20T18:20:26.037977",
+    "topic_id": "story-ml-model-fine-tuning",
+    "topic_name": "Model Observability Moment",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 27,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 31,
+        "raw_score": 31,
+        "similarity": 0.0069,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 24,
+        "raw_score": 24,
+        "similarity": 0.0597,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T00:17:11.205254",
+    "topic_id": "docker-cheatsheet",
+    "topic_name": "Docker Mastery",
+    "category": "Cloud",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 64,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-21T16:02:17.394376",
+    "topic_id": "rag-stack",
+    "topic_name": "Open Source RAG Stack",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 76,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0656,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0238,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T18:23:51.063730",
+    "topic_id": "data-evolution",
+    "topic_name": "Data Architecture Evolution",
+    "category": "Data",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 51,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-21T22:20:52.648148",
+    "topic_id": "story-llm-agent-realization",
+    "topic_name": "AI Agent Interaction",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 50,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 46,
+        "raw_score": 46,
+        "similarity": 0.0063,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 45,
+        "raw_score": 45,
+        "similarity": 0.0069,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-22T12:56:03.908037",
+    "topic_id": "story-personal-ai-daily-life",
+    "topic_name": "Personal AI Productivity",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 54,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 45,
+        "raw_score": 45,
+        "similarity": 0.0069,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 37,
+        "raw_score": 37,
+        "similarity": 0.0169,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-22T23:26:59.382987",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 50,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 41,
+        "raw_score": 41,
+        "similarity": 0.0171,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 39,
+        "raw_score": 39,
+        "similarity": 0.0122,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-06-23T23:14:30.136315",
+    "topic_id": "devsecops",
+    "topic_name": "DevSecOps Practices",
+    "category": "Security",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 37,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-24T14:48:59.089081",
+    "topic_id": "prompt-chaining-patterns",
+    "topic_name": "Prompt Chaining Patterns for Production LLMs",
+    "category": "AI",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 51,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-24T23:14:41.306738",
+    "topic_id": "platform-engineering-ai",
+    "topic_name": "Platform Engineering for AI Teams",
+    "category": "Engineering",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 10,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-06-25T11:47:35.558539",
+    "topic_id": "ai-governance-playbook",
+    "topic_name": "AI Governance Playbook",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0169,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 64,
+        "raw_score": 64,
+        "similarity": 0.0142,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-13T12:15:51.486879",
+    "topic_id": "data-lakehouse",
+    "topic_name": "Data Lakehouse Architecture",
+    "category": "Data",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 41,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.046,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0719,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-13T22:02:09.448743",
+    "topic_id": "aws-architecture",
+    "topic_name": "AWS Architecture Patterns",
+    "category": "Cloud",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-07-13T23:59:40.590102",
+    "topic_id": "model-context-protocol",
+    "topic_name": "Model Context Protocol",
+    "category": "AI",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 41,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 90,
+        "raw_score": 90,
+        "similarity": 0.0504,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0211,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-14T14:02:36.701709",
+    "topic_id": "story-llm-agent-realization",
+    "topic_name": "AI Agent Interaction",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 39,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0417,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 49,
+        "raw_score": 49,
+        "similarity": 0.0916,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-14T23:59:22.534102",
+    "topic_id": "story-rag-strategy-shift",
+    "topic_name": "RAG Strategy Shift",
+    "category": "Story",
+    "mode": "story",
+    "status": "success",
+    "quality_score": 54,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0754,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 64,
+        "raw_score": 64,
+        "similarity": 0.0707,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T14:01:18.446608",
+    "topic_id": "responsible-ai-security-stack",
+    "topic_name": "Responsible AI Security Stack",
+    "category": "Security",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 46,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 46,
+        "raw_score": 46,
+        "similarity": 0.0124,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 21,
+        "raw_score": 21,
+        "similarity": 0.0096,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T23:04:04.312738",
+    "topic_id": "interview-career-one-skill-learn",
+    "topic_name": "Interview: Career_Growth",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-07-16T11:48:59.500271",
+    "topic_id": "system-design",
+    "topic_name": "System Design Fundamentals",
+    "category": "Engineering",
+    "mode": "topic",
+    "status": "success",
+    "quality_score": 70,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 70,
+        "raw_score": 70,
+        "similarity": 0.0201,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 33,
+        "raw_score": 33,
+        "similarity": 0.5833,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-16T22:10:11.844012",
+    "topic_id": "interview-trends-job-impact",
+    "topic_name": "Interview: Industry_Trends",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-07-17T14:49:15.226367",
+    "topic_id": "interview-agentic-tool-selection",
+    "topic_name": "Interview: Agentic_Ai",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 78,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-07-17T22:00:50.508454",
+    "topic_id": "agentic-ai-decision-tree",
+    "topic_name": "Agentic AI Decision Tree",
+    "category": "AI",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 78,
+    "ab_variants": []
   }
 ]

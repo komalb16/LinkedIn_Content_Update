@@ -656,5 +656,61 @@
     "style": 19,
     "signature": "9881f53ef4dcf7ef35126ac4cf498c97",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-13T00:51:41.837386",
+    "topic_id": "data-lakehouse",
+    "style": 0,
+    "signature": "30eacd2cfae68eefa8080268bf92114b",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-13T12:15:45.975746",
+    "topic_id": "data-lakehouse",
+    "style": 0,
+    "signature": "4355b5d6e2198a4f9df1459e414040ac",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-13T22:02:04.127823",
+    "topic_id": "aws-architecture",
+    "style": 0,
+    "signature": "173b8ead6b45d7fc5af41d695b316d94",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-13T23:59:35.614906",
+    "topic_id": "model-context-protocol",
+    "style": 0,
+    "signature": "ac30fd88115248146a8310b664009875",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-14T14:02:29.218899",
+    "topic_id": "story-llm-agent-realization",
+    "style": 23,
+    "signature": "dfe3353b6cc6066fd7a47179c460306c",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-14T23:59:16.634623",
+    "topic_id": "story-rag-strategy-shift",
+    "style": 23,
+    "signature": "9231037a3ea949bb65b7d97c4a0a20aa",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-15T14:01:09.730275",
+    "topic_id": "responsible-ai-security-stack",
+    "style": 0,
+    "signature": "9652d15b5eaf2815fa5d0cd563d196bf",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-07-15T23:03:57.352545",
+    "topic_id": "interview-career-one-skill-learn",
+    "style": 24,
+    "signature": "f6841220c5e8b2e48aa21b837ba458da",
+    "duplicate_avoided": true
   }
 ]
