@@ -1628,15 +1628,20 @@ REQUIREMENTS:
             for idx, row in enumerate(rows)
         )
         structure_block = f"""
-DIAGRAM CONTENT — your post MUST reference every row below.
-The reader sees this diagram next to your post — make them complement each other.
+DIAGRAM CONTENT — your post MUST walk through every row below.
+The reader sees this exact diagram next to your post.
+Every row must be explained, not just referenced.
 
 The diagram has {n} rows:
 {row_list}
 
 REQUIREMENTS:
-- NEVER reference row labels by name in prose — explain what each concept means without using the label words
-- The post should feel like a guided walkthrough of the diagram"""
+- Dedicate 1-2 full sentences to EACH row — explain the decision or concept and why it matters in production, not just what the row says
+- NEVER reference row labels by name in prose (e.g. never write "the Need Tools row" or "In terms of Knowledge Enough") — explain the underlying idea in your own words
+- DO NOT just restate the row text as a fragment or list item — every point must be a complete, self-contained sentence with a subject, verb, and object
+- Never end a point mid-thought or as a bare label — finish the idea before moving to the next row
+- The post should feel like a guided walkthrough of the diagram, written as prose a reader could understand without ever seeing the diagram
+- End with 💬 + a specific comment-forcing question (not a generic poll)"""
     else:
         structure_block = ""
 
@@ -2248,6 +2253,29 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
         covered = sum(1 for term in row_terms if term in lowered)
         if covered < 3:
             issues.append("Align the post to the observability map structure: inputs, retrieval, runtime signals, and quality signals.")
+
+    # Generic row-coverage + fragment check (mirrors the sections check above).
+    # Without this, row-based posts (e.g. decision trees) had no safety net at
+    # all and could ship as bare label dumps with no elaboration.
+    if structure and structure.get("rows"):
+        rows = structure.get("rows", [])
+        row_labels = [r.get("label", "") for r in rows if r.get("label")]
+        covered = sum(1 for label in row_labels if _label_in_post(label, lowered))
+        if row_labels and covered < max(2, len(row_labels) // 2):
+            issues.append("Align the post more closely to the planned diagram rows so the image and text tell the same story.")
+
+        # Detect short, punctuation-light lines that look like restated labels
+        # rather than full explanatory sentences.
+        body_lines = [ln.strip() for ln in cleaned.splitlines() if ln.strip()]
+        fragment_like = sum(
+            1 for ln in body_lines
+            if len(ln.split()) <= 6 and not ln.rstrip().endswith((".", "!", "?", ":", "```"))
+        )
+        if len(body_lines) >= 4 and fragment_like >= max(3, len(body_lines) // 3):
+            issues.append(
+                "The post reads like a list of restated diagram labels instead of full sentences. "
+                "Rewrite it as flowing prose that explains each row with a complete, self-contained sentence."
+            )
 
     return issues
 
