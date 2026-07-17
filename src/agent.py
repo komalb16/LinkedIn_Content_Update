@@ -856,10 +856,6 @@ RULES:
 - Do NOT add copyright or signature.
 - CRITICAL: Every fenced code block must have both an opening ``` and a closing ``` on its own line. Never leave a fenced block unclosed.
 - Never frame a post as criticism of a specific product's pricing or business model. Present trade-offs neutrally — show both sides without declaring one option "a misstep" or "wrong".
-Also add the unclosed fenced block rule to the topic post prompt too. Find line 1584 where topic rules end:
-python# Add after line 1583 "- Never mention the current month or year":
-- CRITICAL: Every fenced code block must have both an opening ``` and a closing ``` on its own line. Never leave a fenced block unclosed.
-That's the only two places to change — NEWS_SYSTEM around line 824, and the topic requirements around line 1583. Both are straightforward string additions.You've used 90% of your session limitKeep workingSonnet 4.6Claude is AI and can make mistakes. Please double-check responses.Profile photo · PNGDownload as .png
 """
 
 STORY_THEMES = [
@@ -1817,9 +1813,11 @@ def _cleanup_generated_post(text):
     # 3. Bullet Validator for CTA (Poll)
     # If we see "1️⃣ The Problem 2️⃣ Core Concept", wipe those specific items as they are hallucinations.
     # An item is valid if it has at least 3 descriptive words or a technical term.
+    _NUM_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
     lines = text.splitlines()
     if lines:
         new_lines = list(lines)
+        kept_numbered_idxs = []
         for i, line in enumerate(lines):
             stripped = line.strip()
             # Match 1️⃣, 2️⃣, etc.
@@ -1830,6 +1828,22 @@ def _cleanup_generated_post(text):
                 if any(content.lower().startswith(p) for p in _PLACEHOLDERS if len(p) > 3) or len(content.split()) < 3:
                     # Remove this line by setting it empty
                     new_lines[i] = ""
+                else:
+                    kept_numbered_idxs.append(i)
+        # Renumber the surviving numbered items sequentially. Without this, wiping
+        # an early item (e.g. 1️⃣) as a hallucination left the rest of the list
+        # starting at 2️⃣/3️⃣ with no 1️⃣ — a visibly broken, mis-numbered post.
+        for seq, idx in enumerate(kept_numbered_idxs, start=1):
+            stripped = new_lines[idx].strip()
+            m = re.match(r"^([1-9]\uFE0F\u20E3|[1-9][\.\)])\s*(.+)$", stripped)
+            if not m:
+                continue
+            marker, content = m.group(1), m.group(2)
+            if "\uFE0F\u20E3" in marker:
+                new_marker = _NUM_EMOJIS[seq - 1] if seq <= len(_NUM_EMOJIS) else marker
+            else:
+                new_marker = f"{seq}{marker[-1]}"  # preserve "N." or "N)" style
+            new_lines[idx] = f"{new_marker} {content}"
         text = "\n".join(ln for ln in new_lines if ln or not ln.isspace()).strip()
     # 4. Fix unclosed fenced blocks — wrap orphaned plain-text lists
     # Detect pattern: "X Architecture:\nItem1\nItem2\nItem3" with no fences
@@ -2108,6 +2122,38 @@ def _remove_raw_flow_only_lines(text):
             continue
         cleaned.append(line)
     return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned)).strip()
+
+
+def _strip_leaked_structure_labels(text, structure):
+    """
+    Remove lines where the model leaked the diagram's own internal scaffold
+    labels verbatim into the post body (e.g. for the Agentic AI Decision Tree
+    structure, a line like "Task Shape Knowledge Enough? Use RAG Need Tools?
+    Use Agent") instead of writing natural prose about the underlying idea.
+    Existing prompt rules tell the model never to do this, but it isn't
+    always followed, so this is a post-processing safety net.
+
+    Only strips a line when 2+ distinct structure labels appear in it — a
+    single incidental label word matching normal prose is not enough to
+    trigger removal, to avoid stripping legitimate sentences.
+    """
+    if not text or not structure:
+        return text
+    items = structure.get("sections") or structure.get("rows") or []
+    labels = [str(item.get("label", "")).strip() for item in items if item.get("label")]
+    labels = [l for l in labels if len(l) > 2]
+    if len(labels) < 2:
+        return text
+
+    label_patterns = [re.compile(r"\b" + re.escape(l) + r"\b", re.IGNORECASE) for l in labels]
+
+    cleaned_lines = []
+    for line in text.splitlines():
+        matches = sum(1 for pat in label_patterns if pat.search(line))
+        if matches >= 2:
+            continue
+        cleaned_lines.append(line)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned_lines)).strip()
 
 
 def _topic_text_blob(topic):
@@ -2943,6 +2989,7 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _fix_truncated_numbered_items(finalized)   # fix LLM truncation
     finalized = _reduce_repetitive_copy(finalized)
     finalized = _remove_raw_flow_only_lines(finalized)
+    finalized = _strip_leaked_structure_labels(finalized, structure)  # drop leaked diagram scaffold text
     
     # ── STAGE 3: Poll Normalization ───────────────────────────────────────────
     finalized = _normalize_poll_separators(finalized)      # fix | separators
@@ -4166,6 +4213,20 @@ def _resolve_visual_metadata(topic, post_text, mode, fallback_type, fallback_str
     )
     diagram_structure = fallback_structure
     if diagram_type != fallback_type:
+        diagram_structure = None
+    # Trend-derived topics that fall through get_diagram_structure() with no
+    # matched pattern come back as the generic "The Problem / Core Concept /
+    # How It Works..." placeholder (see topic_manager.get_diagram_structure).
+    # That boilerplate isn't tied to the actual story, so it should never be
+    # rendered onto the diagram — defer to the post-text-driven builder below
+    # instead, same as the type-mismatch case just above.
+    is_trend_topic = str(topic.get("id", "")).startswith("trend-")
+    is_generic_placeholder = (
+        isinstance(diagram_structure, dict)
+        and [s.get("label") for s in diagram_structure.get("sections", [])]
+        == ["The Problem", "Core Concept", "How It Works", "Best Practices", "Common Mistakes", "Key Takeaway"]
+    )
+    if is_trend_topic and is_generic_placeholder:
         diagram_structure = None
     if diagram_type == "Comparison Table" and not diagram_structure:
         diagram_structure = _build_comparison_structure_from_post(
