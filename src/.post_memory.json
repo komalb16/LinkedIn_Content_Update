@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-16T03:45:48.767901",
-    "topic_id": "trend-app-privacy-design",
-    "topic_name": "Secure Data Storage",
-    "category": "topic",
-    "text": "\ud83d\udccc Secure Data Storage\n\nMost app storage designs compromise user anonymity \ud83d\udea8.\nTo protect users, you must implement differential privacy and anonymization techniques \ud83d\udcca.\n\nIn Secure Data Storage context, understanding the environment and user interactions is crucial to identify potential vulnerabilities. This context informs the subsequent design and implementation of secure data storage.\n\nThe Secure Data Storage principle guides the development of anonymization techniques, ensuring that data is handled in a way that protects user identity.\n\nA well-designed Secure Data Storage flow ensures that data is collected, anonymized, and stored securely, minimizing the risk of data breaches.\n\nWhen prioritizing Secure Data Storage priorities, it's essential to focus on user anonymity and data protection, as these are the foundation of a secure data storage system.\n\nHowever, Secure Data Storage risks such as poor key management and inadequate encryption can compromise the entire system, making it essential to address these risks proactively.\n\nUltimately, the Secure Data Storage outcome is to ensure that user data is protected and anonymized, maintaining user trust and preventing data misuse.\n\n\ud83d\udcac What anonymization technique are you using in your app's data storage, and how do you ensure user anonymity?\n\n#DifferentialPrivacy #Anonymization #AppSecurity #DataStorage #UserAnonymity \ud83d\udcc8\ud83d\udd12\ud83d\udcbb"
-  },
-  {
     "timestamp": "2026-05-16T03:58:27.614057",
     "topic_id": "trend-ai-psycho-mistakes",
     "topic_name": "AI Integration Pitfalls",
@@ -838,5 +831,12 @@
     "topic_name": "Azure Architecture Patterns",
     "category": "topic",
     "text": "I'm still trying to wrap my head around Kaiser nurses claiming AI is making their jobs worse.\n\nKaiser's implementation of AI in healthcare is a stark contrast to what we saw just a few years ago, when AI was supposed to augment nurse workflows.\n\nNow, it seems like AI is being used to surveil and manage nurses, rather than support patient care.\n\nThis trend is alarming, and as engineers, we need to consider the implications of our systems on the people using them.\n\nKaiser AI features:\n\n- Patient data tracking\n- Nurse performance monitoring\n- Automated care planning\nThe fact that Kaiser's AI system is prioritizing efficiency over empathy is a red flag.\n\nAs we build our own systems, we need to ask ourselves: are we prioritizing the needs of our users, or just trying to cut costs?\n\nWhat's the real cost of \"optimization\" when it comes to human care, and how do you balance that with the benefits of automation in your own projects, engineers? \ud83d\udcac What trade-offs are you making in your current project?"
+  },
+  {
+    "timestamp": "2026-07-17T22:55:52.031624",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust Architecture",
+    "category": "topic",
+    "text": "I'm shocked that 71% of Kaiser nurses say AI is making their jobs worse.\n\nKaiser's implementation of AI in their hospitals is a wake-up call for all of us building healthcare systems.\n\nWhen we think about who has access to patient data, we must consider the implications of authentication and authorization on care.\n\nIncorrect identity verification can lead to mistaken patient records, which is a serious concern.\n\nThe rules that govern how patient data is used are also critical - overly restrictive policies can hinder care, while permissive ones can compromise patient privacy.\n\nFinding the right balance is essential to ensuring that AI systems support, rather than hinder, nurse-patient relationships.\n\nNetwork connectivity plays a significant role in the reliability of these systems, as dropped connections or slow data transfer can delay critical care.\n\nEngineers must prioritize robust networking to prevent such issues.\n\nThe devices used to collect and display patient data also require careful consideration, as incorrect or incomplete information can have serious consequences.\n\nDesigning intuitive and user-friendly devices is vital to supporting nurses in their work.\n\nThe data itself is the foundation of these systems, and its quality and relevance directly impact the effectiveness of care.\n\nCollecting and analyzing the right data can help identify areas for improvement, while poor data can lead to misguided decisions.\n\nWhat's your experience with building AI systems in healthcare - have you seen similar issues with surveillance-oriented design? \ud83d\udcac How do you prioritize care over other metrics?"
   }
 ]
