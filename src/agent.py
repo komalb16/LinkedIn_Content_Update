@@ -1267,6 +1267,22 @@ Pick the single most technically interesting story. Write a LinkedIn post that:
                 return True
             if not re.search(r"\b(OpenAI|Anthropic|Google|Meta|Microsoft|NVIDIA|Mistral|Claude|GPT|Gemini|Llama)\b", cleaned, re.I):
                 return True
+
+        # ── Same guardrails generate_topic_post relies on, applied here too ──
+        # No fenced visual block despite the prompt requiring exactly one.
+        if cleaned.count("```") < 2:
+            return True
+        # Naked structural labels leaking prompt scaffolding into the post
+        # (e.g. "Kaiser AI features:" — a bare list header instead of prose).
+        if re.search(
+            r"^[A-Z][\w\s]{2,40}:\s*$",
+            cleaned, re.MULTILINE
+        ):
+            return True
+        # Reused generic filler phrasing — same blocklist used for topic posts.
+        generic_hits = sum(1 for phrase in GENERIC_PHRASES if phrase in lowered)
+        if generic_hits >= 3:
+            return True
         return False
 
     try:
@@ -1275,10 +1291,11 @@ Pick the single most technically interesting story. Write a LinkedIn post that:
             revision_prompt = prompt + """
 
 Revision feedback:
-- The draft reads too generic or too educational.
+- The draft reads too generic or too educational, is missing its required fenced visual block, or leaks bare list headers like "X features:" instead of prose.
 - Anchor the post to one real story from the news list above.
 - Name the company, product, or model in the opening lines.
-- Remove textbook-style explanations and replace them with an opinionated engineering take.
+- Include exactly one ``` fenced visual block that supports the argument — do not just list bullet points.
+- Remove textbook-style explanations and bare label headers; replace them with an opinionated engineering take written in full prose.
 - Keep the discussion current, specific, and tied to what changed in the article.
 
 Rewrite from scratch.
@@ -4572,7 +4589,8 @@ Write a LinkedIn post that:
     score_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
     score_structure = structure or topic_mgr.get_diagram_structure(topic)
     score_card = _score_post_candidate(topic, post_text, score_structure, score_diagram_type)
-    if mode in {"topic", "story"} and score_card["score"] < 75 and not dry_run:
+    regen_eligible_modes = {"topic", "story", "ai_news", "tech_news"}
+    if mode in regen_eligible_modes and score_card["score"] < 75 and not dry_run:
         log.warning(
             f"Low post quality score ({score_card['score']}/100). Regenerating once with the same topic."
         )
@@ -4582,6 +4600,8 @@ Write a LinkedIn post that:
         for _ in range(max(2, candidate_count)):
             if mode == "story":
                 _, regen_text = generate_story_post()
+            elif mode in {"ai_news", "tech_news"}:
+                regen_text = generate_news_post("ai" if mode == "ai_news" else "tech") or ""
             else:
                 regen_text = generate_topic_post(topic, regen_structure, regen_diagram_type)
             regen_candidates.append(_finalize_post_text(topic, regen_text, structure=regen_structure, diagram_type=regen_diagram_type))
