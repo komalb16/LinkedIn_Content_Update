@@ -4589,8 +4589,14 @@ Write a LinkedIn post that:
     score_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
     score_structure = structure or topic_mgr.get_diagram_structure(topic)
     score_card = _score_post_candidate(topic, post_text, score_structure, score_diagram_type)
-    regen_eligible_modes = {"topic", "story", "ai_news", "tech_news"}
-    if mode in regen_eligible_modes and score_card["score"] < 75 and not dry_run:
+    regen_eligible_modes = {"topic", "story", "ai_news", "tech_news", "trending"}
+    # NOTE: intentionally NOT gated on `not dry_run` — this only regenerates the
+    # draft text (never publishes), so preview runs should get the same
+    # quality-driven redo as live runs. Skipping it here was letting weak
+    # first-draft previews (missing visual blocks, unsupported stats, forced
+    # template mismatches) go straight into manual copy/paste-to-LinkedIn
+    # workflows with zero validation.
+    if mode in regen_eligible_modes and score_card["score"] < 75:
         log.warning(
             f"Low post quality score ({score_card['score']}/100). Regenerating once with the same topic."
         )

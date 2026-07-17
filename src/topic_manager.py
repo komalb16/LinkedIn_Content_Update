@@ -1395,14 +1395,23 @@ class TopicManager:
         inferred_type = self.get_diagram_type_for_topic(topic)
         if tid in DIAGRAM_STRUCTURES:
             return DIAGRAM_STRUCTURES[tid]
-        for key in DIAGRAM_STRUCTURES:
-            if key in tid or tid in key:
-                return DIAGRAM_STRUCTURES[key]
+        # Trend-derived topics (id prefixed "trend-") get their structure built
+        # fresh from their own LLM-authored diagram_subject/angle below — never
+        # substring-matched into the curated library. A trending story's
+        # invented id/angle can accidentally contain a curated key like
+        # "zero-trust" (e.g. any topic touching identity/access/data), which
+        # would force an unrelated canned template onto a real news story.
+        is_trend_topic = tid.startswith("trend-")
+        if not is_trend_topic:
+            for key in DIAGRAM_STRUCTURES:
+                if key in tid or tid in key:
+                    return DIAGRAM_STRUCTURES[key]
         if inferred_type != "Architecture Diagram":
             return self._build_structure_from_diagram_type(topic, inferred_type)
-        for key in DIAGRAM_STRUCTURES:
-            if key.replace("-", " ") in name_lower:
-                return DIAGRAM_STRUCTURES[key]
+        if not is_trend_topic:
+            for key in DIAGRAM_STRUCTURES:
+                if key.replace("-", " ") in name_lower:
+                    return DIAGRAM_STRUCTURES[key]
         return self._build_structure_from_diagram_type(
             topic, inferred_type
         )
