@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-05T23:52:31.818839",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 61,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-06T20:26:52.185638",
     "topic_id": "cicd-pipelines",
     "topic_name": "CI/CD Best Practices",
@@ -1900,6 +1890,16 @@
     "topic_name": "Interview: Agentic_Ai",
     "category": "Interview",
     "mode": "interview",
+    "status": "success",
+    "quality_score": 78,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-07-17T22:00:50.508454",
+    "topic_id": "agentic-ai-decision-tree",
+    "topic_name": "Agentic AI Decision Tree",
+    "category": "AI",
+    "mode": "ai_news",
     "status": "success",
     "quality_score": 78,
     "ab_variants": []
