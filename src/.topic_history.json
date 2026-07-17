@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-04T14:10:41.066998",
-    "topic_id": "trend-deep-claude-loop",
-    "topic_name": "Optimizing Code Agents",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 80,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 80,
-        "raw_score": 80,
-        "similarity": 0.0275,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 49,
-        "raw_score": 49,
-        "similarity": 0.0444,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-05T23:52:31.818839",
     "topic_id": "llm-architecture",
     "topic_name": "LLM Architecture",
@@ -1917,6 +1892,16 @@
     "mode": "interview",
     "status": "success",
     "quality_score": 86,
+    "ab_variants": []
+  },
+  {
+    "timestamp": "2026-07-17T14:49:15.226367",
+    "topic_id": "interview-agentic-tool-selection",
+    "topic_name": "Interview: Agentic_Ai",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 78,
     "ab_variants": []
   }
 ]
