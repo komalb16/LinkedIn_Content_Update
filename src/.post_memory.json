@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-16T03:58:27.614057",
-    "topic_id": "trend-ai-psycho-mistakes",
-    "topic_name": "AI Integration Pitfalls",
-    "category": "topic",
-    "text": "\ud83d\udccc AI Integration Pitfalls\n\nWe're at the peak of AI hype, but the curve is about to take a dip, and the uncomfortable truth is that winners will be separated from complainers by their ability to avoid AI psychosis in production environments.\n\nThe fundamental idea is that AI decision-making needs human oversight to avoid psychosis.\n\nIn the AI Integration Pitfalls context, understanding the broader system landscape is crucial to identifying potential risks and designing effective mitigation strategies.\n\nA well-defined AI Integration Pitfalls principle guides the development of AI systems, ensuring that human values and ethics are embedded in decision-making processes.\n\nEffective implementation relies on a clear AI Integration Pitfalls flow, outlining the interactions between human evaluators and automated systems to prevent psychosis.\n\nPrioritizing tasks and resources is essential, as outlined in AI Integration Pitfalls priorities, to allocate attention and budget to the most critical aspects of AI system development.\n\nHowever, even with careful planning, AI Integration Pitfalls risks can still arise, such as data quality issues or unintended biases, which must be addressed through rigorous testing and evaluation.\n\nUltimately, a successful AI integration strategy should yield a positive AI Integration Pitfalls outcome, where human oversight and automated decision-making collaborate to achieve reliable and trustworthy results.\n\n\ud83d\udcac What's your approach to avoiding AI psychosis in production \u2014 do you prioritize human oversight or automated decision-making?\n\n#SoftwareArchitecture #DistributedSystems #SystemDesign #ScaleEngineering"
-  },
-  {
     "timestamp": "2026-05-16T04:00:50.330477",
     "topic_id": "trend-ai-psychosis-test",
     "topic_name": "AI Over-Reliance",
@@ -838,5 +831,12 @@
     "topic_name": "Zero Trust Architecture",
     "category": "topic",
     "text": "I'm shocked that 71% of Kaiser nurses say AI is making their jobs worse.\n\nKaiser's implementation of AI in their hospitals is a wake-up call for all of us building healthcare systems.\n\nWhen we think about who has access to patient data, we must consider the implications of authentication and authorization on care.\n\nIncorrect identity verification can lead to mistaken patient records, which is a serious concern.\n\nThe rules that govern how patient data is used are also critical - overly restrictive policies can hinder care, while permissive ones can compromise patient privacy.\n\nFinding the right balance is essential to ensuring that AI systems support, rather than hinder, nurse-patient relationships.\n\nNetwork connectivity plays a significant role in the reliability of these systems, as dropped connections or slow data transfer can delay critical care.\n\nEngineers must prioritize robust networking to prevent such issues.\n\nThe devices used to collect and display patient data also require careful consideration, as incorrect or incomplete information can have serious consequences.\n\nDesigning intuitive and user-friendly devices is vital to supporting nurses in their work.\n\nThe data itself is the foundation of these systems, and its quality and relevance directly impact the effectiveness of care.\n\nCollecting and analyzing the right data can help identify areas for improvement, while poor data can lead to misguided decisions.\n\nWhat's your experience with building AI systems in healthcare - have you seen similar issues with surveillance-oriented design? \ud83d\udcac How do you prioritize care over other metrics?"
+  },
+  {
+    "timestamp": "2026-07-17T23:06:04.972853",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust Architecture",
+    "category": "topic",
+    "text": "\ud83d\udccc MAX architecture\n\nI'm shocked by the FAA's decision to let Boeing sign off on 737 MAX airworthiness certificates again. Boeing's 737 MAX has had a tumultuous history, and this update raises questions about safety and oversight.\n\nThe news cycle often follows a hype cycle: \ud83d\ude80 introduction, \u2b06\ufe0f growth, \ud83d\udea8 warnings, and \ud83d\udcc9 decline. But the actual curve looks more like: \ud83d\ude80, \ud83d\udcca scrutiny, \ud83d\udea8, and \ud83d\udd0d re-evaluation.\n\n737 MAX history:\n\n- Introduced in 2017\n- Grounded in 2019\n- Recertified in 2020\nThis matters to engineers building systems now because it highlights the tension between self-regulation and external oversight. As we design and deploy complex systems, we must consider the trade-offs between speed, cost, and safety.\n\nThe Boeing 737 MAX case shows that even with advanced technology, human oversight and accountability are essential. \ud83d\udcac What safety protocols do you prioritize when building critical systems, and how do you balance them with production pressures?"
   }
 ]
