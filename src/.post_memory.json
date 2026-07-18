@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-16T14:59:59.100242",
-    "topic_id": "platform-engineering-ai",
-    "topic_name": "Platform Engineering for AI Teams",
-    "category": "topic",
-    "text": "\ud83d\udccc Platform Engineering for AI Teams\n\nOnly 12% of AI projects meet their initial timelines \ud83d\udd52.\nThis statistic exists because platform teams often overlook the importance of providing a seamless developer experience.\n\n1\ufe0f\u20e3 Developer Experience matters \ud83d\udcc8\n\n2\ufe0f\u20e3 Delivery Path simplifies deployment \ud83d\ude80\n\n3\ufe0f\u20e3 Controls ensure security and compliance \ud83d\udd12\n\nArchitecture Diagram\nDeveloper Experience\nDelivery Path\nControls: Identity, Access, Data policy, Audit trails\n\nA well-designed internal AI platform should provide templates, guardrails, eval pipelines, cost controls, and deployment paths \ud83d\udcca.\n\nBy making the safe path the easiest path for product teams, platform teams can increase the success rate of AI projects \ud83d\ude80.\n\n\ud83d\udcac What features does your internal AI platform provide to support product teams? \ud83e\udd14\n\n#AIPlatform #DeveloperExperience #DeliveryPath #Controls #InternalAI"
-  },
-  {
     "timestamp": "2026-05-16T19:18:40.891315",
     "topic_id": "trend-react-alternatives",
     "topic_name": "Python HTMX Wins",
@@ -838,5 +831,12 @@
     "topic_name": "Zero Trust Architecture",
     "category": "topic",
     "text": "Nobody talks about the fact that Zero Trust security is no longer a nice-to-have, but a business requirement \ud83d\udeab.\n\nI've seen teams struggle to implement it, but the key is to start with identity \ud83d\udee1\ufe0f.\n\n1\ufe0f\u20e3 Identity is the foundation of Zero\nWe use IdP, MFA, PAM, and SPIFFE certs to verify user identities \ud83d\udcca.\n\nThe next step is to define access policies \ud83d\udcdd.\n\nRight now? We are at the point where microsegmentation is critical \ud83c\udf10.\n\nWe also need to ensure that devices are secure \ud83d\udcc8.\nPosture checks and EDR help us detect and respond to threats in real-time \ud83d\udea8.\n\nFinally, we need to protect our data \ud83d\udcc1.\nDLP, encryption, and Vault help us ensure that sensitive data is not leaked or compromised \ud83d\udd12.\n\n\ud83d\udd11 I've learned that implementing Zero Trust is a continuous process, and it requires constant verification and monitoring \ud83d\udd52.\n\n\ud83d\udcac What's your biggest challenge in implementing Zero Trust security in your organization?"
+  },
+  {
+    "timestamp": "2026-07-18T15:23:34.858523",
+    "topic_id": "chatgpt-vs-grok-vs-gemini-vs-claude-vs-perplexity",
+    "topic_name": "ChatGPT vs Grok vs Gemini vs Claude vs Perplexity",
+    "category": "topic",
+    "text": "\ud83d\udccc ChatGPT vs Grok vs Gemini vs Claude vs Perplexity\n\nI'm stunned that GPT-5.6 solved a 30-year gap in convex optimization. OpenAI's latest model is a powerhouse, and this feat has massive implications for engineers building systems that rely on complex mathematical models.\n\nThe GPT-5.6 update matters because it demonstrates the potential for large language models to accelerate progress in specialized fields like convex optimization.\n\nProblem: Minimize f(x) = x^2 + 2y^2\nConstraint: x + y = 1\nGPT-5.6: Finds optimal solution\nThis is significant for engineers working on systems that require efficient optimization algorithms. GPT-5.6's ability to close a 30-year gap in convex optimization means we can build more efficient systems, from logistics to finance.\n\nWhat optimization challenges have you faced in your current project, and how do you think GPT-5.6 could help? \ud83d\udcac How are you planning to integrate large language models into your optimization workflows?"
   }
 ]
