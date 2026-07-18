@@ -1667,10 +1667,12 @@ Angle: {topic.get("angle", "practical, production-level insights")}
 Planned diagram type: {diagram_type or topic.get("diagram_type", "Architecture Diagram")}
 
 CRITICAL FORMATTING RULES — violations will cause the post to fail:
-1. Every numbered item (1️⃣ 2️⃣ 3️⃣) MUST be a complete, self-contained sentence.
-2. NEVER write a numbered item that ends without a period. "1️⃣ I will ensure my LinkedIn" is WRONG. "1️⃣ Update your LinkedIn headline to name your exact expertise." is CORRECT.
-3. NEVER list the same content twice. If you write numbered items, do NOT repeat them as plain text below.
-4. Each numbered item must be SHORT enough to fit on ONE line — max 8 words per item.
+1. Each numbered item (1️⃣ 2️⃣ 3️⃣...) is a SHORT HEADER, not a full explanation — 4 to 8 words, no ending period. Example: "1️⃣ Identity is the foundation" or "3️⃣ Microsegmentation limits the blast radius".
+2. Immediately follow each numbered header with 1-3 sentences of prose explaining the idea — never just restate the header in different words.
+3. Where a numbered section covers concrete tools, controls, or steps, list them as short sub-bullets directly below the explanation using one consistent marker (✅, 🔹, or 🔒) — 2 to 5 sub-bullets, each 2-6 words. Not every section needs sub-bullets; use them only where there's a real list of concrete items.
+4. NEVER write a numbered header that stops mid-phrase. "1️⃣ Identity is the" is WRONG — it cuts off before completing the idea. "1️⃣ Identity is the foundation" is CORRECT — it's short but complete.
+5. NEVER list the same content twice. If you write numbered items, do NOT repeat them as plain text below.
+6. Numbered headers must never be shorter than 4 words — a 2-3 word header reads as cut off, not concise.
 
 Story archetype (hook): {hook}
 Voice: {tone}
@@ -1701,7 +1703,7 @@ Requirements:
 - Each paragraph must stand alone as a complete thought without referencing diagram structure labels.
 - Stay strictly on topic — never introduce concepts from unrelated domains. A post about Git must only contain Git concepts.
 - Never use arrow notation (→) in prose paragraphs — only inside fenced code blocks.
-- CRITICAL: Every numbered point must be a complete sentence. Never end a numbered point mid-sentence.
+- CRITICAL: A numbered header must never stop mid-phrase — it should read as a short, complete idea (4-8 words), then be followed by explanatory sentences underneath it.
 - Never invent percentages or statistics unless the topic explicitly provides them.
 - CRITICAL: Never start the hook by restating the topic name.
   BAD: "Most engineers think [Topic Name] is just about X"
@@ -2700,6 +2702,24 @@ def _format_post_structure(text):
     return "\n".join(final_lines).strip()
 
 
+def _build_bigram_completions(text):
+    """
+    Map first_word(lowercase) -> its most common following word, built from
+    consecutive word pairs across the whole post. Used to detect and repair
+    numbered items truncated mid-compound-term — e.g. "...foundation of
+    Zero" when "Zero Trust" appears as a complete phrase elsewhere in the
+    same post. Only returns pairs that recur at least twice, so a repair is
+    only made on corroborated evidence, not a single coincidental adjacency.
+    """
+    from collections import Counter
+    words = re.findall(r"[A-Za-z][A-Za-z\-]{2,}", text)
+    counters = {}
+    for a, b in zip(words, words[1:]):
+        al = a.lower()
+        counters.setdefault(al, Counter())[b] += 1
+    return {al: c.most_common(1)[0][0] for al, c in counters.items() if c.most_common(1)[0][1] >= 2}
+
+
 def _fix_truncated_numbered_items(text):
     """
     Remove numbered items that end mid-sentence (sign of LLM truncation).
@@ -2710,6 +2730,7 @@ def _fix_truncated_numbered_items(text):
         return text
 
     lines = text.splitlines()
+    bigram_completions = _build_bigram_completions(text)
 
     # ── Pass 1: find numbered items and detect sequence restarts ─────────────
     num_items = []  # [(line_index, number)]
@@ -2767,6 +2788,15 @@ def _fix_truncated_numbered_items(text):
             # Drop if too short (< 4 words = probably truncated)
             if len(label.split()) < 4:
                 continue
+            # Repair truncation mid-compound-term: the label doesn't end in
+            # sentence punctuation and its last word is the corroborated
+            # first half of a phrase completed elsewhere in this same post
+            # (e.g. "...of Zero" when "Zero Trust" appears whole elsewhere).
+            if label[-1:] not in ".!?" and last_word in bigram_completions:
+                next_word = bigram_completions[last_word]
+                fixed_label = label + " " + next_word + "."
+                stripped = stripped[: m.start(1)] + fixed_label
+                line = stripped
 
         # Drop plain-text lines that duplicate a numbered item
         norm = re.sub(r"[^a-z0-9 ]", "", stripped.lower())[:30]
