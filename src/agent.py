@@ -3947,9 +3947,20 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         if re.match(r"^[\d\s.:()%/-]+$", line):
             continue
         if len(line) >= 12:
-            # Do NOT use the post hook as diagram title — produces truncated
-            # titles like "80% of teams attempt to integrate voice AI, but only 2".
-            # Fall through to fallback_title (the topic name) instead.
+            # Extract a clean, short title from this line instead of
+            # discarding it — truncate at the first natural clause break
+            # (comma/period/etc.) and cap the word count so it can't end
+            # mid-word. This matters most for auto-sourced posts (news/
+            # story modes) where fallback_title is only an arbitrary
+            # label, not real content — without this, the title always
+            # silently reverted to that unrelated label regardless of
+            # what the post actually said.
+            candidate = re.split(r"(?:(?<!\d)\.(?!\d))|[,!?;—]", line, maxsplit=1)[0].strip()
+            words = candidate.split()
+            if len(words) > 8:
+                candidate = " ".join(words[:8])
+            if len(candidate) >= 12:
+                return _sanitize_visual_title(candidate, fallback_title)
             break
     return _sanitize_visual_title(fallback_title, fallback_title)
 
