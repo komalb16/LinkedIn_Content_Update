@@ -2254,6 +2254,42 @@ def _post_quality_issues(topic, post_text, structure=None, diagram_type=""):
             "Do not invent real-world breaches or outages unless explicitly provided."
         )
 
+    # Check for fabricated personal work-history claims (a false employer or
+    # product credited to the real, named author). This publishes under a
+    # real person's name and photo, so inventing "my own work with LG
+    # ThinQ" or similar is a real reputational risk, not just a style issue.
+    fabricated_employer = re.search(
+        r"\b[Mm]y (?:own )?(?:work|experience|role|time)\s+(?:with|at|on|building)\s+"
+        r"([A-Z][A-Za-z0-9&\-]+(?:\s+[A-Z][A-Za-z0-9&\-]+){0,2})",
+        cleaned
+    )
+    if fabricated_employer:
+        claimed = fabricated_employer.group(1)
+        claimed_lower = claimed.lower()
+        legitimate_employers = {
+            "microsoft", "azure", "copilot", "github", "linkedin", "xbox",
+            "windows", "teams", "bing", "outlook", "office", "power bi",
+        }
+        # Well-known generic technologies/frameworks are fine to reference as
+        # personal experience ("my work with Kubernetes") — they aren't a
+        # false employer/product claim. This check is only for brand- or
+        # company-like claims (e.g. "my own work with LG ThinQ").
+        generic_tech_terms = {
+            "kubernetes", "docker", "python", "react", "kafka", "terraform",
+            "aws", "gcp", "postgres", "postgresql", "redis", "linux",
+            "graphql", "grpc", "spark", "airflow", "jenkins", "git",
+        }
+        if (
+            not any(w in claimed_lower for w in legitimate_employers)
+            and claimed_lower not in generic_tech_terms
+            and claimed_lower not in topic_blob
+        ):
+            issues.append(
+                f"Remove fabricated personal work-history claim ('{claimed}') — the author's real "
+                "employer is Microsoft. Do not invent unrelated companies or products as personal "
+                "work experience; only reference the real employer or generic industry experience."
+            )
+
     if re.search(r"\bnext post\b|\bthird post\b|\bpost 2\b|\banother post\b", cleaned, re.I):
         issues.append("Write exactly one post and remove any extra appended drafts.")
     if re.search(r"```+\s*mermaid|^\s*graph\s+(?:lr|td)|^\s*flowchart", cleaned, re.I | re.M):
@@ -3955,6 +3991,9 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
             # label, not real content — without this, the title always
             # silently reverted to that unrelated label regardless of
             # what the post actually said.
+            # Avoid splitting on a period that's a decimal point within a
+            # number/version string (e.g. "GPT-5.6") and don't split on a
+            # plain hyphen either (used within single compound terms).
             candidate = re.split(r"(?:(?<!\d)\.(?!\d))|[,!?;—]", line, maxsplit=1)[0].strip()
             words = candidate.split()
             if len(words) > 8:
@@ -5033,7 +5072,7 @@ Current post:
         return
 
     # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
-    title_line = f"📌 {topic['name']}\n\n"
+    title_line = f"📌 {diagram_title or topic['name']}\n\n"
     full_post_text = (
         title_line + post_text
         if not post_text.strip().startswith("📌")
@@ -5062,9 +5101,10 @@ Current post:
         write_github_output("POSTED_URL",   result.get("post_url", ""))
         write_github_summary(topic["name"], mode, publish_text, dry_run=False, score_card=score_card)
         _remember_post(topic, publish_text)
+        _rotation_topic_id = topic["id"] if mode not in TOPIC_INDEPENDENT_MODES else f"__{mode}_fallback__"
         topic_mgr.save_run_history({
             "timestamp":  datetime.now().isoformat(),
-            "topic_id":   topic["id"],
+            "topic_id":   _rotation_topic_id,
             "topic_name": topic["name"],
             "category":   topic.get("category", ""),
             "mode":       mode,
@@ -5088,9 +5128,10 @@ Current post:
             log.warning("Notification error (non-fatal): " + str(e))
     else:
         log.error("Failed: " + str(result.get("error")))
+        _rotation_topic_id = topic["id"] if mode not in TOPIC_INDEPENDENT_MODES else f"__{mode}_fallback__"
         topic_mgr.save_run_history({
             "timestamp":  datetime.now().isoformat(),
-            "topic_id":   topic["id"],
+            "topic_id":   _rotation_topic_id,
             "topic_name": topic["name"],
             "category":   topic.get("category", ""),
             "mode":       mode,
