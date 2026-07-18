@@ -85,14 +85,26 @@ NEWSLETTER_FEEDS = [
     ("Simon Willison",         "https://simonwillison.net/atom/everything/",            440),
 ]
 
-# Google Trends seed keywords — used to discover related rising queries
+# Google Trends seed keywords — used to discover related rising queries.
+# Each seed is paired with the Google Trends category ID that actually
+# matches its intent (see https://github.com/pat310/google-trends-api/wiki
+# /Google-Trends-Categories for the full official list):
+#   5  = Computers & Electronics (general tech — NOT 13, which is
+#        "Internet & Telecom" and was being used here incorrectly)
+#   12 = Business & Industrial (funding, enterprise adoption, M&A — the
+#        kind of "hot in the market" business signal that performs well
+#        on LinkedIn but was previously missing entirely)
 GOOGLE_TRENDS_SEEDS = [
-    "LLM architecture",
-    "AI agents production",
-    "RAG system design",
-    "Kubernetes",
-    "platform engineering",
-    "MLOps",
+    ("LLM architecture",        5),
+    ("AI agents production",    5),
+    ("RAG system design",       5),
+    ("Kubernetes",              5),
+    ("platform engineering",    5),
+    ("MLOps",                   5),
+    ("enterprise AI adoption",  12),
+    ("AI startup funding",      12),
+    ("tech acquisition",        12),
+    ("AI venture capital",      12),
 ]
 
 
@@ -334,13 +346,13 @@ def fetch_google_trends(max_items=6):
 
     try:
         pytrends = TrendReq(hl="en-US", tz=360, timeout=(10, 25))
-        seeds    = random.sample(GOOGLE_TRENDS_SEEDS, min(3, len(GOOGLE_TRENDS_SEEDS)))
+        seeds    = random.sample(GOOGLE_TRENDS_SEEDS, min(4, len(GOOGLE_TRENDS_SEEDS)))
 
-        for seed in seeds:
+        for seed, cat in seeds:
             try:
                 pytrends.build_payload(
                     [seed],
-                    cat=13,           # Technology category
+                    cat=cat,
                     timeframe="now 7-d",
                     geo="US",
                 )
@@ -362,12 +374,13 @@ def fetch_google_trends(max_items=6):
                             continue
                         seen.add(slug)
 
+                        category_label = "business" if cat == 12 else "tech"
                         results.append({
                             "title":   query.title(),
                             "score":   min(60, int(value / 80)) + 25,
                             "source":  "google_trends",
-                            "url":     f"https://trends.google.com/trends/explore?q={query}&cat=13",
-                            "summary": f"Rising Google search in tech (breakout index: {value})",
+                            "url":     f"https://trends.google.com/trends/explore?q={query}&cat={cat}",
+                            "summary": f"Rising Google search in {category_label} (breakout index: {value})",
                         })
 
                 time.sleep(1.5)

@@ -184,10 +184,34 @@ def _is_blacklisted(url):
         return True
     return any(p in u for p in URL_BLACKLIST_PATTERNS)
 
-def _relevance_score(url, topic_name):
-    url_lower = url.lower()
-    keywords = {w.lower() for w in re.split(r"\W+", topic_name) if len(w) >= 3}
-    return min(sum(2 for kw in keywords if kw in url_lower), 6)
+_GENERIC_TERMS = {
+    "architecture", "diagram", "diagrams", "system", "systems", "design",
+    "designs", "toolkit", "technical", "infographic", "infographics",
+    "engineering", "framework", "frameworks", "pattern", "patterns",
+    "overview", "guide", "guides", "explained", "chart", "graphic",
+}
+
+
+def _relevance_score(url, topic_name, title=""):
+    keywords = {
+        w.lower() for w in re.split(r"\W+", topic_name)
+        if len(w) >= 3 and w.lower() not in _GENERIC_TERMS
+    }
+    if not keywords:
+        return 0
+    # Match against the URL *path* only, not the hostname — a company/org
+    # name can appear in a domain for reasons unrelated to the image's
+    # actual content (e.g. Apple hosts FoundationDB's docs at
+    # apple.github.io; that's an ownership fact, not a topical match).
+    try:
+        from urllib.parse import urlparse
+        path_lower = (urlparse(url).path or "").lower()
+    except Exception:
+        path_lower = url.lower()
+    title_lower = (title or "").lower()
+    path_hits = sum(1 for kw in keywords if kw in path_lower)
+    title_hits = sum(1 for kw in keywords if kw in title_lower)
+    return min(path_hits * 2 + title_hits * 2, 6)
 
 # ── Image quality checks ──────────────────────────────────────────────────────
 
@@ -351,21 +375,36 @@ def fetch_diagram_image(topic_name, post_text=""):
             if _is_blacklisted(url):
                 continue
             seen_urls.add(url)
+            title     = item.get("title", "")
             priority  = _source_priority(url)
-            relevance = _relevance_score(url, topic_name)
+            relevance = _relevance_score(url, topic_name, title=title)
             score     = relevance * 100 + priority
             size_hint = item.get("original_width", 0) * item.get("original_height", 0)
-            candidates.append((score, size_hint, url))
+            candidates.append((score, size_hint, url, relevance))
 
     if not candidates:
         log.warning(f"No valid candidates for '{topic_name}'")
         return None, ""
 
-    candidates.sort(key=lambda x: (x[0], x[1]), reverse=True)
-    log.info(f"Evaluating top {min(len(candidates), 15)} candidates")
+    # Require at least one real keyword match between the topic and the
+    # image's URL/title. Without this, a completely unrelated image from a
+    # high-authority domain (relevance=0) could still win on domain
+    # priority alone — producing a diagram for a different subject entirely.
+    MIN_RELEVANCE = 2
+    relevant_candidates = [c for c in candidates if c[3] >= MIN_RELEVANCE]
+    if not relevant_candidates:
+        log.warning(
+            f"No sufficiently relevant image candidates for '{topic_name}' "
+            f"(best relevance={max(c[3] for c in candidates)}) — skipping web image, "
+            "falling back to local SVG generation."
+        )
+        return None, ""
 
-    for score, size_hint, url in candidates[:15]:
-        log.info(f"  Trying score={score}: {url[:70]}")
+    relevant_candidates.sort(key=lambda x: (x[0], x[1]), reverse=True)
+    log.info(f"Evaluating top {min(len(relevant_candidates), 15)} candidates")
+
+    for score, size_hint, url, relevance in relevant_candidates[:15]:
+        log.info(f"  Trying score={score} relevance={relevance}: {url[:70]}")
         raw = _download_and_validate(url)
         if raw:
             log.info(f"  Selected: {url}")
