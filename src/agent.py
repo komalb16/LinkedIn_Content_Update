@@ -4641,14 +4641,22 @@ Write a LinkedIn post that:
             log.warning(f"Could not save selection history: {e}")
 
     # ── FALLBACK TOPIC for news posts ─────────────────────────────────────────
+    # NOTE: this topic is only a label for history/logging — these modes write
+    # content independently (RSS articles / a randomly-picked story theme),
+    # unrelated to any curated topic. Deliberately leave `structure` unset:
+    # using this arbitrary topic's diagram structure would render a diagram
+    # for a completely different subject than what the post actually says.
     if not topic:
         topic = topic_mgr.get_next_topic()
-        structure = topic_mgr.get_diagram_structure(topic)
         log.info("Fallback topic for diagram/history: " + topic["name"])
 
     post_text = _finalize_post_text(topic, post_text, structure=structure, diagram_type=topic_mgr.get_diagram_type_for_topic(topic))
     score_diagram_type = topic_mgr.get_diagram_type_for_topic(topic)
-    score_structure = structure or topic_mgr.get_diagram_structure(topic)
+    TOPIC_INDEPENDENT_MODES = {"ai_news", "tech_news", "tools_news", "layoff_news", "story", "interview"}
+    if mode in TOPIC_INDEPENDENT_MODES:
+        score_structure = structure  # never backfill from the unrelated fallback topic
+    else:
+        score_structure = structure or topic_mgr.get_diagram_structure(topic)
     score_card = _score_post_candidate(topic, post_text, score_structure, score_diagram_type)
     regen_eligible_modes = {"topic", "story", "ai_news", "tech_news", "trending"}
     # NOTE: intentionally NOT gated on `not dry_run` — this only regenerates the
@@ -4679,6 +4687,14 @@ Write a LinkedIn post that:
         candidate_snapshot = ranked_regen[:ab_variants]
         post_text = regen_candidates[regen_pick["index"]]
         score_card = _score_post_candidate(topic, post_text, regen_structure, regen_diagram_type)
+        if mode in {"story", "ai_news", "tech_news"}:
+            # generate_story_post()/generate_news_post() each pick their own
+            # independent theme/article — unrelated to `topic`. The diagram
+            # structure computed earlier for the original topic no longer
+            # describes this text, so drop it and let diagram generation
+            # build fresh from the actual regenerated post text instead of
+            # silently rendering a stale, mismatched diagram.
+            structure = None
 
     log.info(
         f"Quality score: {score_card['score']}/100 | "
@@ -4785,7 +4801,14 @@ Write a LinkedIn post that:
     if visual_issues:
         log.warning("Visual coherence override: " + " | ".join(visual_issues))
         diagram_type = fallback_diagram_type
-        diagram_structure = topic_mgr.get_diagram_structure(topic)
+        if mode in TOPIC_INDEPENDENT_MODES:
+            # `topic` here is only an arbitrary fallback label for these
+            # modes (see FALLBACK TOPIC above) — never pull its curated
+            # structure in, or the diagram shows content unrelated to the
+            # actual post (e.g. a governance diagram on a Boeing/FAA post).
+            diagram_structure = None
+        else:
+            diagram_structure = topic_mgr.get_diagram_structure(topic)
     log.info(f"Visual metadata: title='{diagram_title}', type='{diagram_type}'")
 
     
