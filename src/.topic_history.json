@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-07T03:31:45.574108",
-    "topic_id": "trend-chrome-ai-model",
-    "topic_name": "AI Model Deployment",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 69,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 69,
-        "raw_score": 69,
-        "similarity": 0.0208,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 61,
-        "raw_score": 61,
-        "similarity": 0.0385,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-07T14:22:27.187580",
     "topic_id": "system-design",
     "topic_name": "System Design Fundamentals",
@@ -1886,5 +1861,30 @@
     "category": "Cloud",
     "mode": "tech_news",
     "status": "success"
+  },
+  {
+    "timestamp": "2026-07-18T15:03:13.471667",
+    "topic_id": "zero-trust",
+    "topic_name": "Zero Trust Architecture",
+    "category": "Security",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 76,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 46,
+        "raw_score": 46,
+        "similarity": 0.0132,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 46,
+        "raw_score": 46,
+        "similarity": 0.0458,
+        "penalty": 0
+      }
+    ]
   }
 ]
