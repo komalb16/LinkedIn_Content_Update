@@ -2174,22 +2174,52 @@ def _remove_raw_flow_only_lines(text):
 
 def _strip_leaked_tabular_data(text):
     """
-    Remove lines that are raw "Label| Value" comparison-table data leaked
-    into prose (e.g. "Open Weight| 10% of traditional models Traditional|
-    100%") instead of being confined to the diagram. Unlike
-    _strip_leaked_structure_labels, this doesn't depend on a curated
-    `structure` being available — it's a general pattern match, since a
-    pipe character essentially never appears in normal LinkedIn prose, so
-    "short label" + "|" is a reliable signal on its own.
+    Remove lines that are raw leaked comparison/timeline data instead of
+    prose. Two distinct formats, both structural rather than sentence-like:
+      - Pipe-separated: "Open Weight| 10% of traditional models" — a pipe
+        character essentially never appears in normal LinkedIn prose, so
+        "short label" + "|" is a reliable signal on its own.
+      - Colon-separated data points: "Month 1: 5%" / "Month 3: 15%" stacked
+        one per line. Colons are common in normal prose, so this only
+        fires on a run of 2+ consecutive bare "Label: Number%" lines (the
+        whole line is just that, nothing else) — a single such line could
+        be a legitimate standalone statistic, but a run of them is a
+        leaked data table/timeline.
     """
     if not text:
         return text
     pipe_pattern = re.compile(r"[A-Za-z][\w \-]{1,40}\|\s*\S")
-    cleaned_lines = []
-    for line in text.splitlines():
+    data_point_pattern = re.compile(r"^[A-Za-z][\w \-]{1,30}:\s*[\d.]+%?\s*$")
+
+    lines = text.splitlines()
+    to_remove = set()
+    for i, line in enumerate(lines):
         if pipe_pattern.search(line):
-            continue
-        cleaned_lines.append(line)
+            to_remove.add(i)
+
+    run = []
+    def _flush_run():
+        if len(run) >= 2:
+            to_remove.update(run)
+            # Also drop a short, unpunctuated header line directly above
+            # the run (e.g. "Cost Savings Timeline") — otherwise it's left
+            # as an orphaned label with nothing following it.
+            header_idx = run[0] - 1
+            while header_idx >= 0 and header_idx not in to_remove and not lines[header_idx].strip():
+                header_idx -= 1
+            if header_idx >= 0 and header_idx not in to_remove:
+                header = lines[header_idx].strip()
+                if header and len(header) <= 40 and header[-1] not in ".!?:":
+                    to_remove.add(header_idx)
+        run.clear()
+    for i, line in enumerate(lines):
+        if data_point_pattern.match(line.strip()):
+            run.append(i)
+        else:
+            _flush_run()
+    _flush_run()
+
+    cleaned_lines = [line for i, line in enumerate(lines) if i not in to_remove]
     return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned_lines)).strip()
 
 
