@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-19T23:13:36.205274",
-    "topic_id": "responsible-ai-security-stack",
-    "topic_name": "Responsible AI Security Stack",
-    "category": "topic",
-    "text": "\ud83d\udccc Responsible AI Security Stack\n\nResponsible AI Security Stack is less about theory and more about trade-offs in production. \u2699\ufe0f\n\nMy current lens: Responsible AI is not a checklist slide; it is an operating stack with controls at each layer.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?\n\n#SystemDesign #SoftwareArchitecture #ScaleEngineering #Scalability #TechLeadership"
-  },
-  {
     "timestamp": "2026-05-20T04:02:30.241162",
     "topic_id": "git-workflow",
     "topic_name": "Git Workflow and Commands",
@@ -838,5 +831,12 @@
     "topic_name": "Multimodal AI Systems",
     "category": "topic",
     "text": "\ud83d\udccc Databricks open weight AI cost savings\n\nI think Databricks' $188B valuation is a wake-up call for engineers to reconsider open weight AI models. Databricks has been at the forefront of this trend, publishing research on the cost savings of open weight AI models for coding.\n\nThis approach can significantly reduce model sizes and improve inference speeds, making it a crucial consideration for engineers building systems now.\n\nThe implications of Databricks' research are far-reaching, and engineers should take note of the potential benefits of open weight AI models. As the industry continues to shift towards more efficient and cost-effective solutions, Databricks' work in this area will likely have a lasting impact.\n\nWhat open weight AI models are you currently exploring in your projects, and how do you see them changing your development workflow?"
+  },
+  {
+    "timestamp": "2026-07-19T23:21:09.932386",
+    "topic_id": "microsoft-ai-ecosystem",
+    "topic_name": "Microsoft AI Ecosystem Map",
+    "category": "topic",
+    "text": "\ud83d\udccc Databricks open weight AI model valuation\n\nI'm convinced Databricks' $188B valuation is a wake-up call for engineers to rethink their approach to AI models. Databricks' research on open weight AI models has shown significant cost savings, and I believe this is the future of AI development.\n\nAs engineers, we need to consider the implications of open weight models on our coding practices.\n\nCost savings with open weight models:\n\n- Reduced storage needs\n- Faster deployment\n\n- Improved collaboration\nThe shift towards open weight models will require us to adapt our workflows and tooling. For instance, we'll need to prioritize model sharing and reuse, rather than starting from scratch each time. This change will not only reduce costs but also accelerate AI adoption.\nDatabricks' success is a testament to the potential of open weight models, and I expect to see more companies following suit.\nWhat open weight models have you worked with, and how have they impacted your development workflow?"
   }
 ]
