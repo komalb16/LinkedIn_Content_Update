@@ -25,6 +25,7 @@ from topic_manager import TopicManager
 from diagram_generator import DiagramGenerator
 from logger import get_logger
 import notifier
+from trend_discovery import _is_relevant as _is_engineering_ai_relevant
 
 log = get_logger("agent")
 POST_MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".post_memory.json")
@@ -263,16 +264,17 @@ RSS_FEEDS = {
         "https://news.google.com/rss/search?q=AI+Machine+Learning&hl=en-US&gl=US&ceid=US:en"
     ],
     "tech": [
-        "https://hnrss.org/frontpage",
-        "https://techcrunch.com/feed/",
-        "https://www.theverge.com/rss/index.xml"
+        "https://hnrss.org/frontpage?q=software|engineering|architecture|API|backend|database|infrastructure|kubernetes|distributed+systems",
+        "https://techcrunch.com/category/enterprise/feed/",
+        "https://www.infoq.com/feed/",
+        "https://thenewstack.io/feed/"
     ],
     "layoffs": [
         "https://news.google.com/rss/search?q=tech+layoffs&hl=en-US&gl=US&ceid=US:en",
         "https://layoffs.fyi/feed/"
     ],
     "tools": [
-        "https://hnrss.org/newest?q=Show+HN",
+        "https://hnrss.org/newest?q=Show+HN+AI|LLM|developer|engineering|API|framework|infrastructure",
         "https://producthunt.com/feed"
     ]
 }
@@ -1180,7 +1182,7 @@ def fetch_rss_news(category="tech", max_items=5):
                 link     = item.findtext("link", "").strip()
                 pub_date = item.findtext("pubDate", "").strip()
                 desc = re.sub(r'<[^>]+>', '', desc)[:300]
-                if title and len(title) > 10:
+                if title and len(title) > 10 and _is_engineering_ai_relevant(title + " " + desc):
                     articles.append({
                         "title": title,
                         "description": desc,
@@ -3959,7 +3961,13 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
     weak_openers = (
         "i'm", "i am", "here's", "the fact that", "this led me", "nobody talks",
         "our ", "today", "in today's", "let's", "three years ago",
+        "as a ", "as an ", "in my experience", "to be honest", "honestly",
     )
+    # A period only counts as a sentence boundary when followed by
+    # whitespace/end-of-string — this correctly leaves alone periods
+    # inside decimals ("GPT-5.6"), domains ("haxxorwpm.0s.is"), and
+    # abbreviations, none of which are followed by a space.
+    sentence_split_re = re.compile(r"\.(?=\s|$)|[!?;—]")
     in_fence = False
     for raw_line in (post_text or "").splitlines():
         line = raw_line.strip()
@@ -3972,35 +3980,38 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
             continue
         line = re.sub(r"^[\"'`•\-\s]+", "", line)
         line = re.sub(r"\s+", " ", line)
-        if line.lower().startswith(weak_openers):
-            continue
-        if '"' in raw_line or "'" in raw_line:
-            continue
-        if any(tok in line for tok in ("->", "-->", "|>", "[", "]", "{", "}")):
-            continue
-        if _is_generic_visual_phrase(line):
-            continue
-        if re.match(r"^[\d\s.:()%/-]+$", line):
-            continue
-        if len(line) >= 12:
-            # Extract a clean, short title from this line instead of
-            # discarding it — truncate at the first natural clause break
-            # (comma/period/etc.) and cap the word count so it can't end
-            # mid-word. This matters most for auto-sourced posts (news/
-            # story modes) where fallback_title is only an arbitrary
-            # label, not real content — without this, the title always
-            # silently reverted to that unrelated label regardless of
-            # what the post actually said.
-            # Avoid splitting on a period that's a decimal point within a
-            # number/version string (e.g. "GPT-5.6") and don't split on a
-            # plain hyphen either (used within single compound terms).
-            candidate = re.split(r"(?:(?<!\d)\.(?!\d))|[,!?;—]", line, maxsplit=1)[0].strip()
+
+        # Check each sentence in this line independently — a good early
+        # sentence shouldn't be discarded just because a *later* sentence
+        # in the same paragraph happens to contain an apostrophe or quote.
+        for raw_sentence in sentence_split_re.split(line):
+            sentence = raw_sentence.strip()
+            if not sentence:
+                continue
+            if sentence.lower().startswith(weak_openers):
+                continue
+            if '"' in sentence or "'" in sentence:
+                continue
+            if any(tok in sentence for tok in ("->", "-->", "|>", "[", "]", "{", "}")):
+                continue
+            if _is_generic_visual_phrase(sentence):
+                continue
+            if re.match(r"^[\d\s.:()%/-]+$", sentence):
+                continue
+            # Trim an already-qualified full sentence at its first comma
+            # (a natural clause break), but only if that leaves a
+            # meaningful fragment (4+ words) — otherwise a short throwaway
+            # lead-in like "As a result" could pass the length floor while
+            # being meaningless on its own, so use the full sentence.
+            comma_part = sentence.split(",")[0].strip()
+            candidate = comma_part if len(comma_part.split()) >= 4 else sentence
             words = candidate.split()
             if len(words) > 8:
                 candidate = " ".join(words[:8])
             if len(candidate) >= 12:
                 return _sanitize_visual_title(candidate, fallback_title)
-            break
+            # Candidate too short — keep searching later sentences/lines
+            # instead of giving up immediately.
     return _sanitize_visual_title(fallback_title, fallback_title)
 
 
@@ -4954,7 +4965,7 @@ Write a LinkedIn post that:
     diagram_path = diagram_gen.save_svg(
         None, topic["id"], diagram_title, diagram_type,
         structure=diagram_structure_with_style, post_text=post_text,
-        topic_name_override=diagram_topic["name"]   # ← use post-derived subject
+        topic_name_override=diagram_title or diagram_topic["name"]   # ← use the fully-resolved title, not the raw (possibly stale) topic name
     )
     
     alignment = _diagram_alignment_score(diagram_path, diagram_structure_with_style)
