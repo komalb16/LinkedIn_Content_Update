@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-18T23:13:22.490631",
-    "topic_id": "aws-architecture",
-    "topic_name": "AWS Architecture Patterns",
-    "category": "topic",
-    "text": "\ud83d\udccc AWS Architecture Patterns\n\n\ud83d\ude80 Most AWS architectures are over-engineered, and I've seen it happen to the best of us.\n\nWhen to use serverless, microservices on ECS/EKS, or event-driven with SQS/SNS/EventBridge depends on your specific use case.\n\n\ud83d\udcca Let's walk through the diagram:\nIn Compute, we have EC2, Lambda, ECS, and Fargate - each with its own cost implications.\n\nFor Storage, S3, EBS, EFS, and Glacier offer different trade-offs between durability, availability, and cost.\n\n\ud83d\udca1 In Database, RDS, DynamoDB, and ElastiCache provide a range of options for relational, NoSQL, and caching use cases.\n\nIn Network, VPC, ALB, CloudFront, and Route53 help us manage traffic, security, and latency.\n\nIn Security, IAM, KMS, GuardDuty, and Secrets Manager are essential for keeping our apps and data safe.\n\nAWS Architecture\nCompute: EC2, Lambda, ECS, Fargate\nStorage: S3, EBS, EFS, Glacier\nDatabase: RDS, DynamoDB, ElastiCache\nNetwork: VPC, ALB, CloudFront, Route53\nSecurity: IAM, KMS, GuardDuty, Secrets Manager\n\nRight now? We are at a crossroads, where the wrong choice can lead to cost overruns and performance issues.\n\nI was wrong about the importance of serverless until I saw a 40% reduction in latency with a well-designed Lambda function.\n\n\ud83d\udcac What's your most painful lesson learned from an AWS architecture mistake, and how did you recover from it?\n\n#AWSServerless #Microservices #EventDriven #CloudArchitecture #AWSBestPractices"
-  },
-  {
     "timestamp": "2026-05-19T23:13:36.205274",
     "topic_id": "responsible-ai-security-stack",
     "topic_name": "Responsible AI Security Stack",
@@ -838,5 +831,12 @@
     "topic_name": "Enterprise Agentic AI Strategy",
     "category": "topic",
     "text": "I'm surprised Databricks' valuation hit $188B, given their recent pivot to open weight AI models.\n\nThis shift matters because it shows the industry is taking notice of the cost savings these models can bring.\n\nDatabricks' research highlights the potential for open weight AI models to reduce costs, which is a key consideration for engineers building systems now.\n\nAs someone who's worked on multiple AI projects, I can attest that the cost of training and deploying models is a major concern.\n\nCost savings with open weight AI models:\n\n- Reduced storage needs\n- Lower computational requirements\n\n- Faster deployment times\nThe fact that Databricks is investing in this area and seeing significant valuation growth suggests that open weight AI models are worth exploring.\nFor engineers building AI systems, this means considering the trade-offs between model accuracy and cost.\nDatabricks' success with open weight AI models shows that it's possible to achieve good results without breaking the bank.\nWhat's your experience with open weight AI models - have you seen similar cost savings in your own projects?"
+  },
+  {
+    "timestamp": "2026-07-19T23:17:59.122490",
+    "topic_id": "multimodal-ai-systems",
+    "topic_name": "Multimodal AI Systems",
+    "category": "topic",
+    "text": "\ud83d\udccc Databricks open weight AI cost savings\n\nI think Databricks' $188B valuation is a wake-up call for engineers to reconsider open weight AI models. Databricks has been at the forefront of this trend, publishing research on the cost savings of open weight AI models for coding.\n\nThis approach can significantly reduce model sizes and improve inference speeds, making it a crucial consideration for engineers building systems now.\n\nThe implications of Databricks' research are far-reaching, and engineers should take note of the potential benefits of open weight AI models. As the industry continues to shift towards more efficient and cost-effective solutions, Databricks' work in this area will likely have a lasting impact.\n\nWhat open weight AI models are you currently exploring in your projects, and how do you see them changing your development workflow?"
   }
 ]
