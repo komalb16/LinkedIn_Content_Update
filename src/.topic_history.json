@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-09T15:57:01.919358",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 73,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-10T20:53:43.760903",
     "topic_id": "trend-chatgpt-pro",
     "topic_name": "ChatGPT Pro Lessons",
@@ -1913,6 +1903,31 @@
         "score": 46,
         "raw_score": 46,
         "similarity": 0.0375,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T22:05:56.693850",
+    "topic_id": "trend-esp32-cost-savings",
+    "topic_name": "ESP32 in Production",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 76,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0439,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0263,
         "penalty": 0
       }
     ]
