@@ -52,11 +52,15 @@ def ensure_branch(repo, token):
 
 
 def load_preview_bundle(base_dir):
-    payload_files = sorted(glob.glob(str(base_dir / "preview_payload_*.json")))
+    payload_files = glob.glob(str(base_dir / "preview_payload_*.json"))
     if not payload_files:
         raise RuntimeError("No preview payload file found")
 
-    payload_path = Path(payload_files[-1])
+    # Pick the most recently modified file, not the alphabetically last one.
+    # Sorting by filename meant an old leftover payload could permanently
+    # "win" over the current run's fresh payload just because its topic
+    # slug happened to sort later (e.g. "interview-..." > "faa-...").
+    payload_path = Path(max(payload_files, key=lambda p: Path(p).stat().st_mtime))
     payload = json.loads(payload_path.read_text(encoding="utf-8"))
     post_text = (base_dir / payload["post_file"]).read_text(encoding="utf-8")
 
