@@ -857,6 +857,8 @@ RULES:
 - Do NOT add copyright or signature.
 - CRITICAL: Every fenced code block must have both an opening ``` and a closing ``` on its own line. Never leave a fenced block unclosed.
 - Never frame a post as criticism of a specific product's pricing or business model. Present trade-offs neutrally — show both sides without declaring one option "a misstep" or "wrong".
+- CRITICAL: After the post text, on its own final line, output: DIAGRAM_SUBJECT: <4-8 word phrase>
+  This must name the SPECIFIC story (e.g. "Databricks $188B valuation open weight", not "open weight AI models" or "AI training approaches") — specific enough that an image search for it would find something about this exact story, not just the general topic area. This line is stripped before publishing; it is never shown to readers.
 """
 
 STORY_THEMES = [
@@ -1204,7 +1206,37 @@ def fetch_rss_news(category="tech", max_items=5):
 
 # ─── POST GENERATORS ──────────────────────────────────────────────────────────
 
+# Carries the model's self-reported DIAGRAM_SUBJECT (see NEWS_SYSTEM) out of
+# generate_news_post() without changing its return signature at every call
+# site. Single-threaded sequential script, so a module-level variable is
+# safe here — set right after generation, read once right after the call.
+_LAST_NEWS_SUBJECT = None
+
+
+def _extract_llm_subject_field(text):
+    """
+    Find and strip a "DIAGRAM_SUBJECT: ..." line the model was asked to
+    output as its own specific, on-topic image-search subject (see
+    NEWS_SYSTEM) — this replaces reverse-engineering a title from prose
+    after the fact, which can only verify "same topic area", never "same
+    specific story". Returns (cleaned_text, subject_or_None).
+    """
+    if not text:
+        return text, None
+    m = re.search(r"^\s*DIAGRAM_SUBJECT:\s*(.+?)\s*$", text, re.MULTILINE | re.IGNORECASE)
+    if not m:
+        return text, None
+    subject = m.group(1).strip().strip("\"'")
+    cleaned = text[:m.start()] + text[m.end():]
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+    if len(subject) < 4 or len(subject) > 80:
+        return cleaned, None
+    return cleaned, subject
+
+
 def generate_news_post(news_type="ai"):
+    global _LAST_NEWS_SUBJECT
+    _LAST_NEWS_SUBJECT = None
     log.info("Fetching latest " + news_type + " news...")
     articles = fetch_rss_news(news_type, max_items=5)
 
@@ -1289,7 +1321,9 @@ Pick the single most technically interesting story. Write a LinkedIn post that:
         return False
 
     try:
-        draft = _cleanup_generated_post(call_ai(prompt, NEWS_SYSTEM))
+        raw = call_ai(prompt, NEWS_SYSTEM)
+        raw, subject = _extract_llm_subject_field(raw)
+        draft = _cleanup_generated_post(raw)
         if _needs_news_revision(draft):
             revision_prompt = prompt + """
 
@@ -1303,10 +1337,15 @@ Revision feedback:
 
 Rewrite from scratch.
 """
-            draft = _cleanup_generated_post(call_ai(revision_prompt, NEWS_SYSTEM))
+            raw = call_ai(revision_prompt, NEWS_SYSTEM)
+            raw, revised_subject = _extract_llm_subject_field(raw)
+            subject = revised_subject or subject
+            draft = _cleanup_generated_post(raw)
+        _LAST_NEWS_SUBJECT = subject
         return draft
     except Exception as e:
         log.warning(f"News generation failed ({news_type}), falling back to topic mode: {e}")
+        _LAST_NEWS_SUBJECT = None
         return None
 
 def _extract_story_sections(post_text, theme):
@@ -2131,6 +2170,27 @@ def _remove_raw_flow_only_lines(text):
             continue
         cleaned.append(line)
     return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned)).strip()
+
+
+def _strip_leaked_tabular_data(text):
+    """
+    Remove lines that are raw "Label| Value" comparison-table data leaked
+    into prose (e.g. "Open Weight| 10% of traditional models Traditional|
+    100%") instead of being confined to the diagram. Unlike
+    _strip_leaked_structure_labels, this doesn't depend on a curated
+    `structure` being available — it's a general pattern match, since a
+    pipe character essentially never appears in normal LinkedIn prose, so
+    "short label" + "|" is a reliable signal on its own.
+    """
+    if not text:
+        return text
+    pipe_pattern = re.compile(r"[A-Za-z][\w \-]{1,40}\|\s*\S")
+    cleaned_lines = []
+    for line in text.splitlines():
+        if pipe_pattern.search(line):
+            continue
+        cleaned_lines.append(line)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned_lines)).strip()
 
 
 def _strip_leaked_structure_labels(text, structure):
@@ -3063,6 +3123,7 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _reduce_repetitive_copy(finalized)
     finalized = _remove_raw_flow_only_lines(finalized)
     finalized = _strip_leaked_structure_labels(finalized, structure)  # drop leaked diagram scaffold text
+    finalized = _strip_leaked_tabular_data(finalized)  # drop leaked "Label| Value" comparison data
     
     # ── STAGE 3: Poll Normalization ───────────────────────────────────────────
     finalized = _normalize_poll_separators(finalized)      # fix | separators
@@ -3968,6 +4029,10 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
         "our ", "today", "in today's", "let's", "three years ago",
         "as a ", "as an ", "in my experience", "to be honest", "honestly",
     )
+    # Corroborated word-pair completions from the rest of the post, so an
+    # 8-word cap doesn't land mid-compound-phrase (e.g. cutting "open
+    # weight AI models" down to "...open weight", leaving it hanging).
+    bigram_completions = _build_bigram_completions(post_text or "")
     # A period only counts as a sentence boundary when followed by
     # whitespace/end-of-string — this correctly leaves alone periods
     # inside decimals ("GPT-5.6"), domains ("haxxorwpm.0s.is"), and
@@ -4012,7 +4077,15 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
             candidate = comma_part if len(comma_part.split()) >= 4 else sentence
             words = candidate.split()
             if len(words) > 8:
-                candidate = " ".join(words[:8])
+                words = words[:8]
+                # If the cut lands mid-phrase (e.g. "...open weight" where
+                # "weight" is corroborated to continue into another word
+                # elsewhere in the post), extend by one word rather than
+                # leaving it hanging.
+                last_word = words[-1].rstrip(".,!?;:").lower()
+                if last_word in bigram_completions:
+                    words.append(bigram_completions[last_word])
+                candidate = " ".join(words)
             if len(candidate) >= 12:
                 return _sanitize_visual_title(candidate, fallback_title)
             # Candidate too short — keep searching later sentences/lines
@@ -4970,7 +5043,7 @@ Write a LinkedIn post that:
     diagram_path = diagram_gen.save_svg(
         None, topic["id"], diagram_title, diagram_type,
         structure=diagram_structure_with_style, post_text=post_text,
-        topic_name_override=diagram_title or diagram_topic["name"]   # ← use the fully-resolved title, not the raw (possibly stale) topic name
+        topic_name_override=_LAST_NEWS_SUBJECT or diagram_title or diagram_topic["name"]   # ← prefer the model's own reported subject, then the resolved title, then the raw topic name
     )
     
     alignment = _diagram_alignment_score(diagram_path, diagram_structure_with_style)
@@ -5043,7 +5116,7 @@ Current post:
         log.warning(f"Diagram alignment check failed (non-fatal): {_e}")
 
     if dry_run:
-        title_line = f"📌 {diagram_title}\n\n"
+        title_line = f"📌 {_LAST_NEWS_SUBJECT or diagram_title}\n\n"
         full_post_text = (
             title_line + post_text
             if not post_text.strip().startswith("📌")
@@ -5088,7 +5161,7 @@ Current post:
         return
 
     # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
-    title_line = f"📌 {diagram_title or topic['name']}\n\n"
+    title_line = f"📌 {_LAST_NEWS_SUBJECT or diagram_title or topic['name']}\n\n"
     full_post_text = (
         title_line + post_text
         if not post_text.strip().startswith("📌")
