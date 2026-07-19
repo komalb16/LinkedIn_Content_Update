@@ -25,7 +25,6 @@ from topic_manager import TopicManager
 from diagram_generator import DiagramGenerator
 from logger import get_logger
 import notifier
-from trend_discovery import _is_relevant as _is_engineering_ai_relevant
 
 log = get_logger("agent")
 POST_MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".post_memory.json")
@@ -1167,6 +1166,12 @@ def _fallback_topic_post(topic, structure=None):
 # ─── RSS FETCH ────────────────────────────────────────────────────────────────
 
 def fetch_rss_news(category="tech", max_items=5):
+    try:
+        from trend_discovery import _is_relevant as _is_engineering_ai_relevant
+    except Exception as e:
+        log.warning("Relevance filter unavailable (" + str(e) + "), skipping topic filtering")
+        _is_engineering_ai_relevant = lambda text: True
+
     feeds = RSS_FEEDS.get(category, RSS_FEEDS["tech"])
     articles = []
     for feed_url in feeds:
