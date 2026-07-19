@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-17T00:02:52.973347",
-    "topic_id": "finops-for-ai",
-    "topic_name": "FinOps for AI Systems",
-    "category": "topic",
-    "text": "\ud83d\udccc FinOps for AI Systems\n\n3 years ago, AI cost optimization was a finance dashboard problem \ud83d\udcca.\n\nNow, it's a product architecture problem that requires a deeper understanding of how our systems work.\n\nLet's break it down into levels:\n\ud83d\udd34 Level 1: Route - Send each request to a fit-for-purpose model tier, reducing unnecessary compute costs.\n\nThis leads to significant cost savings, but can be complex to implement.\n\ud83d\udfe1 Level 2: Cache - Reuse responses and embeddings where safe, using tools like Redis to store frequently accessed data.\n\nThis improves performance and reduces the load on our models.\n\ud83d\udfe2 Level 3: Batch - Aggregate offline workloads for cheaper throughput, similar to how Kubernetes handles container orchestration.\n\nThis requires careful planning to ensure timely execution.\n\ud83d\udd35 Level 4: Fallback - Degrade gracefully before expensive retries, preventing cascading failures.\n\nThis is crucial for maintaining a good user experience.\n\ud83d\udfe3 Level 5: Govern - Implement budget alerts, quotas, and ownership, ensuring accountability and cost control.\n\n- > Fallback -> Govern\nI've seen teams reduce latency by 30% by optimizing their routing and caching strategies \ud83d\udcc8.\n\nHowever, I was wrong to assume that simply adding more cache would solve all our problems \ud83e\udd26\u200d\u2640\ufe0f.\n\nWhich level are you? \ud83d\udcac What's your approach to routing and caching in your AI architecture?\n\n#ScaleEngineering #SystemDesign #DistributedSystems #SoftwareArchitecture"
-  },
-  {
     "timestamp": "2026-05-17T15:05:27.610982",
     "topic_id": "data-lakehouse",
     "topic_name": "Data Lakehouse Architecture",
@@ -838,5 +831,12 @@
     "topic_name": "Apache Kafka and Streaming",
     "category": "topic",
     "text": "Most teams blame the model first, but in Apache Kafka and Streaming the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nThe key insight here is that open weight models can reduce the complexity of AI deployments, making them more accessible to a wider range of enterprises.\n\nCost Savings:\n\n- 30% reduction in training time\n- 25% decrease in inference latency\n- 20% lower operational costs\nAs someone who has shipped three RAG systems, I can attest that these numbers are not trivial. The impact on our production environments would be substantial. Databricks' approach is a significant step forward in making AI more practical for real-world applications.\n\nThe implications are clear: if you're building an AI system, you need to consider the cost savings of open weight models.\n\n\ud83d\udcac What open weight models are you using in your current projects, and how are you measuring their impact on your production environments?"
+  },
+  {
+    "timestamp": "2026-07-19T15:04:56.116347",
+    "topic_id": "data-engineering",
+    "topic_name": "Data Engineering Pipelines",
+    "category": "topic",
+    "text": "\ud83d\udccc AI agent security gap in enterprises\n\nI was wrong about Data Engineering Pipelines for two years \u2014 here's what changed.\n\nMy current lens: Practical implementation guidance, trade-offs, and mistakes to avoid. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nStart\nNeed\nData\nBuild\nScale\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]

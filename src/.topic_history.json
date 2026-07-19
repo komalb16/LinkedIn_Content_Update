@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-09T13:45:23.902148",
-    "topic_id": "docker-cheatsheet",
-    "topic_name": "Docker Mastery",
-    "category": "Cloud",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 71,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-09T15:57:01.919358",
     "topic_id": "llm-architecture",
     "topic_name": "LLM Architecture",
@@ -1898,6 +1888,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.0101,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T15:04:56.118339",
+    "topic_id": "__ai_news_fallback__",
+    "topic_name": "Data Engineering Pipelines",
+    "category": "Data",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 53,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 46,
+        "raw_score": 46,
+        "similarity": 0.0343,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 46,
+        "raw_score": 46,
+        "similarity": 0.0375,
         "penalty": 0
       }
     ]
