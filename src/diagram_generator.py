@@ -37,6 +37,49 @@ except Exception:
 
 _COPYRIGHT_NAME = "Komal Batra"
 
+_DIAGRAM_HERE = os.path.dirname(os.path.abspath(__file__))
+_PROFILE_PHOTO_DATA_URI = None  # cached after first load
+
+
+def _get_profile_photo_data_uri():
+    """
+    Load and base64-encode the real profile photo once, for embedding in
+    the local SVG footer as an <image> element — same source file and
+    candidate list as branded_footer.py (used for web-search-sourced
+    diagrams), so both paths show the real photo instead of local diagrams
+    falling back to a plain text initial.
+    """
+    global _PROFILE_PHOTO_DATA_URI
+    if _PROFILE_PHOTO_DATA_URI is not None:
+        return _PROFILE_PHOTO_DATA_URI
+    candidates = [
+        os.path.join(_DIAGRAM_HERE, "profile_photo.jpg"),
+        os.path.join(_DIAGRAM_HERE, "profile_photo.png"),
+        os.path.join(_DIAGRAM_HERE, "profile_photo.webp"),
+    ]
+    _FORMAT_TO_MIME = {"JPEG": "image/jpeg", "PNG": "image/png", "WEBP": "image/webp"}
+    for path in candidates:
+        if os.path.exists(path):
+            try:
+                with open(path, "rb") as f:
+                    raw = f.read()
+                # Detect the real format from content — don't trust the
+                # filename extension (found this file is actually
+                # JPEG-encoded despite the .png name).
+                try:
+                    detected_format = Image.open(io.BytesIO(raw)).format
+                except Exception:
+                    detected_format = None
+                mime = _FORMAT_TO_MIME.get(detected_format, "image/png")
+                b64 = base64.b64encode(raw).decode("ascii")
+                _PROFILE_PHOTO_DATA_URI = f"data:{mime};base64,{b64}"
+                return _PROFILE_PHOTO_DATA_URI
+            except Exception as e:
+                log.warning(f"Could not load profile photo for SVG footer: {e}")
+                break
+    _PROFILE_PHOTO_DATA_URI = ""
+    return _PROFILE_PHOTO_DATA_URI
+
 try:
     from logger import get_logger
     log = get_logger("diagrams")
@@ -232,6 +275,28 @@ ANIM = """<style>
 </style>"""
 
 # ── Common footer / header wrapper ─────────────────────────────────────────────
+def _footer_avatar_svg(H):
+    """
+    Real profile photo circle for the local-diagram SVG footer (matching
+    the photo shown on web-search-sourced diagrams via branded_footer.py),
+    with graceful fallback to a plain text-initial circle if the photo
+    file can't be loaded for any reason.
+    """
+    data_uri = _get_profile_photo_data_uri()
+    cy = H - 16
+    if data_uri:
+        return (
+            f'<defs><clipPath id="footerAvatarClip"><circle cx="28" cy="{cy}" r="10"/></clipPath></defs>'
+            f'<image x="18" y="{cy-10}" width="20" height="20" href="{data_uri}" '
+            f'clip-path="url(#footerAvatarClip)" preserveAspectRatio="xMidYMid slice"/>'
+            f'<circle cx="28" cy="{cy}" r="10" fill="none" stroke="#6366F1" stroke-width="1"/>'
+        )
+    return (
+        f'<circle cx="28" cy="{cy}" r="10" fill="#6366F1"/>'
+        f'<text x="28" y="{cy+3.5}" text-anchor="middle" fill="white" font-size="8.5" font-weight="900" font-family="{FONT}">KB</text>'
+    )
+
+
 def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
     dark_hdr  = darken(accent, 0.58)
     mid_hdr   = darken(accent, 0.32)
@@ -280,11 +345,11 @@ def _wrap(inner_svg, W, H, title, subtitle, accent, bg_top, bg_bot, dark=False):
 {inner_svg}
 <rect x="0" y="{H-32}" width="{W}" height="32" fill="{foot_bg}"/>
 <rect x="0" y="{H-33}" width="{W}" height="1" fill="{foot_bdr}"/>
-<rect x="0" y="{H-32}" width="4" height="32" fill="{accent}" opacity="0.55"/>
-<text x="18" y="{H-12}" fill="{foot_txt}" font-size="8.5" font-family="{FONT}">{datetime.now().strftime("%B %Y")}</text>
-<rect x="{W-218}" y="{H-26}" width="206" height="20" rx="10" fill="{rgba(accent,0.12)}" stroke="{rgba(accent,0.35)}" stroke-width="1"/>
-<circle cx="{W-208}" cy="{H-16}" r="7" fill="{accent}"/>
-<text x="{W-198}" cy="{H-16}" y="{H-12}" fill="{accent}" font-size="9" font-weight="800" letter-spacing="0.5" font-family="{FONT}">AI · {_COPYRIGHT_NAME}</text>
+<rect x="0" y="{H-32}" width="4" height="32" fill="#6366F1"/>
+{_footer_avatar_svg(H)}
+<text x="44" y="{H-19}" fill="#111827" font-size="10" font-weight="900" font-family="{FONT}">{_COPYRIGHT_NAME}</text>
+<text x="44" y="{H-9}" fill="#4B5563" font-size="7.5" font-family="{FONT}">Microsoft Engineer · AI &amp; Engineering</text>
+<text x="{W-18}" y="{H-12}" text-anchor="end" fill="#6366F1" font-size="8.5" font-weight="700" font-family="{FONT}">Follow for more AI &amp; Engineering content</text>
 </svg>'''
 
 
@@ -390,7 +455,7 @@ def _style_vertical_flow(topic_id, topic_name, C, structure=None):
         for li, ln in enumerate(sub_lines):
             svg += f'<text x="{bx+58}" y="{sub_y_start + li*11}" fill="#64748B" font-size="9.5" font-weight="500">{xe(ln)}</text>'
         
-        svg += f'<text x="{bx+BOX_W-40}" y="{y+BOX_H//2+9}" fill="{rgba(col,0.18)}" font-size="28" font-weight="900">{i+1:02d}</text>'
+        svg += f'<text x="{bx+BOX_W-40}" y="{y+BOX_H//2+9}" fill="{rgba(col,0.30)}" font-size="28" font-weight="900">{i+1:02d}</text>'
 
 
         if i < len(steps) - 1:

@@ -347,6 +347,26 @@ def _download_and_validate(url):
 
 # ── Main public function ──────────────────────────────────────────────────────
 
+_PR_ANNOUNCEMENT_PATTERNS = (
+    "partner of the year", "award winner", "wins award", "receives award",
+    "receives the", "announces partnership", "press release", "recognized as",
+    "named a leader", "named to the", "honored with", "proud to announce",
+    "excited to announce", "wins the", "awarded the",
+)
+
+
+def _is_pr_announcement(title, url=""):
+    """
+    Corporate PR/award-announcement graphics (partner-of-the-year badges,
+    "X wins award" slides, etc.) pass keyword relevance easily when the
+    company name is right there in the title — but they're never a useful
+    explanatory diagram, so this is a category filter, not a relevance
+    check.
+    """
+    text = (title or "").lower() + " " + (url or "").lower()
+    return any(p in text for p in _PR_ANNOUNCEMENT_PATTERNS)
+
+
 def fetch_diagram_image(topic_name, post_text=""):
     """
     Search Google Images via SerpApi for a technical diagram.
@@ -374,8 +394,11 @@ def fetch_diagram_image(topic_name, post_text=""):
                 continue
             if _is_blacklisted(url):
                 continue
+            title = item.get("title", "")
+            if _is_pr_announcement(title, url):
+                log.info(f"  Skipping PR/award announcement: {title[:70]}")
+                continue
             seen_urls.add(url)
-            title     = item.get("title", "")
             priority  = _source_priority(url)
             relevance = _relevance_score(url, topic_name, title=title)
             score     = relevance * 100 + priority
