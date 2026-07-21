@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-10T22:53:23.021427",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-12T22:14:43.524927",
     "topic_id": "data-evolution",
     "topic_name": "Data Architecture Evolution",
@@ -1928,6 +1918,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.022,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-21T23:04:56.704825",
+    "topic_id": "__ai_news_fallback__",
+    "topic_name": "AI Observability with OpenTelemetry",
+    "category": "AI",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 42,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 34,
+        "raw_score": 34,
+        "similarity": 0.0355,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 34,
+        "raw_score": 34,
+        "similarity": 0.0497,
         "penalty": 0
       }
     ]
