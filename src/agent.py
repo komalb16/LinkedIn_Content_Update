@@ -1620,7 +1620,15 @@ def _build_visual_block_instruction(diagram_type):
     )
 
 
+# Carries the model's self-reported DIAGRAM_SUBJECT for topic-mode posts
+# out of generate_topic_post() without changing its return signature at
+# every call site — mirrors _LAST_NEWS_SUBJECT for news-mode posts.
+_LAST_TOPIC_SUBJECT = None
+
+
 def generate_topic_post(topic, structure=None, diagram_type="", dry_run=False):
+    global _LAST_TOPIC_SUBJECT
+    _LAST_TOPIC_SUBJECT = None
     log.info("Generating post: " + topic["name"])
 
     # If no diagram type was provided (the most common path), pick one dynamically
@@ -1759,9 +1767,14 @@ Requirements:
   The hook must contain a specific number, outcome, or surprising fact — not a generic observation.
 - Never start paragraphs with generic transitions like "To begin with", "Next we must", 
   "This involves", "This helps us" — write direct insights instead.
+- CRITICAL: After the post text, on its own final line, output: DIAGRAM_SUBJECT: <4-8 word phrase>
+  This must name the SPECIFIC tool, concept, or story this post is actually about (e.g. "OpenTelemetry AI observability cost tracing", not "Observability Map" or "AI observability" alone) — specific enough that an image search for it would find something about this exact topic, not just the general category. This line is stripped before publishing; it is never shown to readers.
 """
     try:
-        post_text = _cleanup_generated_post(call_ai(prompt, _build_post_system()))
+        raw = call_ai(prompt, _build_post_system())
+        raw, subject = _extract_llm_subject_field(raw)
+        _LAST_TOPIC_SUBJECT = subject
+        post_text = _cleanup_generated_post(raw)
     except Exception as e:
         log.warning(f"Topic generation failed for {topic.get('id', 'unknown')}, using fallback copy: {e}")
         return _fallback_topic_post(topic, structure=structure)
@@ -1776,7 +1789,10 @@ Requirements:
                 + "\nRewrite the post from scratch and fix every issue above."
             )
             try:
-                post_text = _cleanup_generated_post(call_ai(revision_prompt, _build_post_system()))
+                raw = call_ai(revision_prompt, _build_post_system())
+                raw, revised_subject = _extract_llm_subject_field(raw)
+                _LAST_TOPIC_SUBJECT = revised_subject or _LAST_TOPIC_SUBJECT
+                post_text = _cleanup_generated_post(raw)
             except Exception as e:
                 log.warning(f"Topic revision failed for {topic.get('id', 'unknown')}, keeping first draft: {e}")
     return _cleanup_generated_post(post_text)
@@ -2223,35 +2239,69 @@ def _strip_leaked_tabular_data(text):
     return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned_lines)).strip()
 
 
-def _strip_leaked_structure_labels(text, structure):
+def _strip_leaked_structure_labels(text, structure, diagram_type=""):
     """
-    Remove lines where the model leaked the diagram's own internal scaffold
-    labels verbatim into the post body (e.g. for the Agentic AI Decision Tree
-    structure, a line like "Task Shape Knowledge Enough? Use RAG Need Tools?
-    Use Agent") instead of writing natural prose about the underlying idea.
+    Remove lines where the model leaked internal scaffold text verbatim
+    into the post body instead of writing natural prose:
+      - The diagram_type's own name as a bare orphaned line (e.g.
+        "Observability Map" on its own line) — this leaks from the
+        "Planned diagram type: X" prompt instruction line the model sees
+        directly, independent of whether a curated `structure` exists.
+      - Structure section/row labels leaking inline within one line (e.g.
+        "Task Shape Knowledge Enough? Use RAG Need Tools? Use Agent").
+      - Structure section/row labels leaking as a bare vertical list, one
+        label per line (e.g. "Start" / "Need" / "Data" / "Build" /
+        "Scale" stacked with nothing else).
     Existing prompt rules tell the model never to do this, but it isn't
     always followed, so this is a post-processing safety net.
-
-    Only strips a line when 2+ distinct structure labels appear in it — a
-    single incidental label word matching normal prose is not enough to
-    trigger removal, to avoid stripping legitimate sentences.
     """
-    if not text or not structure:
+    if not text:
         return text
+
+    lines = text.splitlines()
+
+    # Diagram-type-name leak: a bare line that is exactly the diagram
+    # type's own name (case-insensitive), nothing else on the line.
+    if diagram_type and len(diagram_type) > 2:
+        dt_lower = diagram_type.strip().lower()
+        lines = [ln for ln in lines if ln.strip().rstrip(".:!?").lower() != dt_lower]
+
+    if not structure:
+        return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
     items = structure.get("sections") or structure.get("rows") or []
     labels = [str(item.get("label", "")).strip() for item in items if item.get("label")]
     labels = [l for l in labels if len(l) > 2]
     if len(labels) < 2:
-        return text
+        return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
+    label_set = {l.lower() for l in labels}
     label_patterns = [re.compile(r"\b" + re.escape(l) + r"\b", re.IGNORECASE) for l in labels]
+    to_remove = set()
 
-    cleaned_lines = []
-    for line in text.splitlines():
-        matches = sum(1 for pat in label_patterns if pat.search(line))
-        if matches >= 2:
-            continue
-        cleaned_lines.append(line)
+    # Inline leak: 2+ distinct labels appearing together in one line — a
+    # single incidental label word is not enough on its own, to avoid
+    # stripping legitimate sentences.
+    for i, line in enumerate(lines):
+        if sum(1 for pat in label_patterns if pat.search(line)) >= 2:
+            to_remove.add(i)
+
+    # Vertical-list leak: a run of 3+ consecutive lines that are each
+    # essentially just one bare label and nothing else.
+    run = []
+    def _flush_run():
+        if len(run) >= 3:
+            to_remove.update(run)
+        run.clear()
+    for i, line in enumerate(lines):
+        bare = line.strip().rstrip(".:!?").lower()
+        if bare in label_set:
+            run.append(i)
+        else:
+            _flush_run()
+    _flush_run()
+
+    cleaned_lines = [line for i, line in enumerate(lines) if i not in to_remove]
     return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned_lines)).strip()
 
 
@@ -3152,7 +3202,7 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _fix_truncated_numbered_items(finalized)   # fix LLM truncation
     finalized = _reduce_repetitive_copy(finalized)
     finalized = _remove_raw_flow_only_lines(finalized)
-    finalized = _strip_leaked_structure_labels(finalized, structure)  # drop leaked diagram scaffold text
+    finalized = _strip_leaked_structure_labels(finalized, structure, diagram_type=diagram_type)  # drop leaked diagram scaffold text
     finalized = _strip_leaked_tabular_data(finalized)  # drop leaked "Label| Value" comparison data
     
     # ── STAGE 3: Poll Normalization ───────────────────────────────────────────
@@ -4115,6 +4165,15 @@ def _extract_visual_title_for_type(post_text, fallback_title, diagram_type, fall
                 last_word = words[-1].rstrip(".,!?;:").lower()
                 if last_word in bigram_completions:
                     words.append(bigram_completions[last_word])
+                else:
+                    # No corroborated completion (common for generic
+                    # prepositions/articles like "for" or "with", which
+                    # attach to too many different words to have one
+                    # dominant follow-up) — trim trailing stopwords
+                    # instead of leaving the cut hanging mid-phrase.
+                    stopwords = {"and","or","the","a","an","my","your","of","to","in","for","with","is"}
+                    while len(words) > 4 and words[-1].rstrip(".,!?;:").lower() in stopwords:
+                        words.pop()
                 candidate = " ".join(words)
             if len(candidate) >= 12:
                 return _sanitize_visual_title(candidate, fallback_title)
@@ -5073,7 +5132,7 @@ Write a LinkedIn post that:
     diagram_path = diagram_gen.save_svg(
         None, topic["id"], diagram_title, diagram_type,
         structure=diagram_structure_with_style, post_text=post_text,
-        topic_name_override=_LAST_NEWS_SUBJECT or diagram_title or diagram_topic["name"]   # ← prefer the model's own reported subject, then the resolved title, then the raw topic name
+        topic_name_override=_LAST_NEWS_SUBJECT or _LAST_TOPIC_SUBJECT or diagram_title or diagram_topic["name"]   # ← prefer the model's own reported subject, then the resolved title, then the raw topic name
     )
     
     alignment = _diagram_alignment_score(diagram_path, diagram_structure_with_style)
@@ -5146,7 +5205,7 @@ Current post:
         log.warning(f"Diagram alignment check failed (non-fatal): {_e}")
 
     if dry_run:
-        title_line = f"📌 {_LAST_NEWS_SUBJECT or diagram_title}\n\n"
+        title_line = f"📌 {_LAST_NEWS_SUBJECT or _LAST_TOPIC_SUBJECT or diagram_title}\n\n"
         full_post_text = (
             title_line + post_text
             if not post_text.strip().startswith("📌")
@@ -5191,7 +5250,7 @@ Current post:
         return
 
     # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
-    title_line = f"📌 {_LAST_NEWS_SUBJECT or diagram_title or topic['name']}\n\n"
+    title_line = f"📌 {_LAST_NEWS_SUBJECT or _LAST_TOPIC_SUBJECT or diagram_title or topic['name']}\n\n"
     full_post_text = (
         title_line + post_text
         if not post_text.strip().startswith("📌")
