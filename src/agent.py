@@ -2174,6 +2174,48 @@ def _reduce_repetitive_copy(text):
     return re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip()
 
 
+def _fix_orphaned_fragments(text):
+    """
+    Fix or remove orphaned sentence fragments — a line starting with a
+    lowercase copula ("is", "are", "was", "were") with no subject, e.g.
+    "is crucial to prevent model exploitation..." This happens when the
+    model drops a sentence's subject (should have been something like
+    "Data encoding is crucial to..."). Normal English never starts a new
+    sentence with a lowercase copula, so this is a reliable, low-false-
+    positive signal.
+
+    If the preceding non-empty line looks like a short label/bullet (no
+    ending punctuation — likely what the fragment's subject should have
+    attached to), merge them into one complete sentence. Otherwise there's
+    no safe attachment point, so the fragment is dropped rather than left
+    as broken grammar.
+    """
+    if not text:
+        return text
+    lines = text.splitlines()
+    # Only an exact lowercase start counts as the anomaly signal —
+    # "Is this really the future?" (capitalized, a real question) is fine.
+    orphan_re_strict = re.compile(r"^(?:is|are|was|were)\s+\w")
+
+    cleaned = []
+    for line in lines:
+        stripped = line.strip()
+        if orphan_re_strict.match(stripped):
+            # Find the previous non-empty output line to decide: merge or drop.
+            prev_idx = len(cleaned) - 1
+            while prev_idx >= 0 and not cleaned[prev_idx].strip():
+                prev_idx -= 1
+            if prev_idx >= 0:
+                prev_line = cleaned[prev_idx].strip()
+                if prev_line and prev_line[-1] not in ".!?:":
+                    cleaned[prev_idx] = cleaned[prev_idx].rstrip() + " " + stripped
+                    continue
+            # No safe attachment point — drop the orphaned fragment.
+            continue
+        cleaned.append(line)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned)).strip()
+
+
 def _remove_raw_flow_only_lines(text):
     lines = (text or "").splitlines()
     if not lines:
@@ -3204,6 +3246,7 @@ def _finalize_post_text(topic, post_text, structure=None, diagram_type=""):
     finalized = _remove_raw_flow_only_lines(finalized)
     finalized = _strip_leaked_structure_labels(finalized, structure, diagram_type=diagram_type)  # drop leaked diagram scaffold text
     finalized = _strip_leaked_tabular_data(finalized)  # drop leaked "Label| Value" comparison data
+    finalized = _fix_orphaned_fragments(finalized)  # fix/drop dropped-subject sentence fragments
     
     # ── STAGE 3: Poll Normalization ───────────────────────────────────────────
     finalized = _normalize_poll_separators(finalized)      # fix | separators
