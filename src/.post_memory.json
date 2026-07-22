@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-20T04:45:04.261038",
-    "topic_id": "git-workflow",
-    "topic_name": "Git Workflow and Commands",
-    "category": "topic",
-    "text": "\ud83d\udccc Git Workflow and Commands\n\nEveryone is talking about Git mastery. Almost nobody is explaining it correctly.\n\nGit mastery is about using the right branching strategies, like Gitflow or trunk-based development, to streamline your workflow.\n\nGoal: Implement a new feature. The agent: \u2192 creates a feature branch \u2192 commits changes \u2192 pushes to remote \u2192 merges with main.\n\nThis 4-step loop is crucial: Perceive the change, Plan the implementation, Act on the plan, and Learn from the outcome.\n\nWhen it comes to Git, I've seen many engineers struggle with recovery.\n\n1\ufe0f\u20e3 I use reset to undo changes\n\n2\ufe0f\u20e3 I use reflog to recover lost\n\n3\ufe0f\u20e3 I use cherry-pick to apply changes\nThe Branch section is where you define your main, develop, and feature branches.\n\nThe Commit section is where you use conventional commits and GPG signed commits to ensure security and clarity.\n\nCheat Sheet:\nBranch: main, develop, feature\nCommit: conventional, GPG signed\nPR Flow: 2-reviewer gate, squash merge\nRebase: clean history, no merge noise\nRecovery: reset, reflog, cherry-pick\nThe PR Flow section is where you set up a 2-reviewer gate and use squash merge to keep your history clean.\n\nThe Rebase section is where you use rebase to avoid merge noise and keep your history linear.\n\nI've learned that senior engineers use Git differently, they prioritize a clean history and use tools like rebase and squash merge to achieve it.\n\n\ud83d\udcac What's your go-to Git command when you're in a crisis, and how do you use it to recover?\n\n#GitMastery #BranchingStrategies #Gitflow #TrunkBasedDevelopment #RecoveryTechniques #GitCommands #SoftwareEngineering"
-  },
-  {
     "timestamp": "2026-05-20T04:47:42.583844",
     "topic_id": "git-workflow",
     "topic_name": "Git Workflow and Commands",
@@ -838,5 +831,12 @@
     "topic_name": "AI Observability with OpenTelemetry",
     "category": "topic",
     "text": "\ud83d\udccc I used to think OpenTelemetry was overkill for\n\nI used to think OpenTelemetry was overkill for AI observability \u2014 until I saw a $10,000/month bill for a single misplaced logging statement \ud83d\udcca.\n\nMost teams add OpenTelemetry as an afterthought, dumping all signals into a black hole of unanalyzed data.\n\u2014 What actually works is capturing specific inputs, like chip IDs and model versions, to pinpoint issues early \ud83d\ude80.\n\nRequires understanding where data enters and flows through your system, including retrieval paths and runtime metrics like latency and token spend \ud83d\udd52.\n\nSignals like errors, rate limits, and throughput are crucial for production AI, as they can indicate silent failures or quality issues \ud83d\udea8.\n\nInvolves more than just tracking observability metrics \u2014 it requires a deep understanding of how these signals impact your model's performance and user experience \ud83d\udcc8.\n\nThis includes monitoring quality signals, such as output accuracy and relevance, to ensure your AI system is functioning as expected \ud83d\udcca.\n\nObservability Map\n\nMeans recognizing the importance of context and avoiding common pitfalls, such as over-reliance on a single metric or ignoring silent failures \ud83d\udd14.\n\nThis includes implementing a decision framework for when to use OpenTelemetry, considering factors like system complexity, data volume, and performance requirements \ud83e\udd14.\n\n\ud83d\udcac What's your approach to AI observability \u2014 do you use OpenTelemetry, custom logging, or a combination of both? \ud83d\udcca"
+  },
+  {
+    "timestamp": "2026-07-22T14:14:57.522763",
+    "topic_id": "trend-model-security-checks",
+    "topic_name": "Secure Model Eval",
+    "category": "topic",
+    "text": "Most machine learning models are vulnerable to security incidents during evaluation in production environments \ud83d\udea8.\n\nI've seen teams spend months building robust models, only to have them exploited by malicious input data \ud83e\udd16.\n\n1\ufe0f\u20e3 Secure model evaluation starts\nThis means checking user input data for potential threats, such as SQL injection or cross-site scripting \ud83c\udf10.\nis crucial to prevent model exploitation, and this includes removing special characters and encoding user input data \ud83d\udd12.\n\u2705 Input validation\n\u2705 Data encoding\n\u2705 Access controls\nis key to detecting potential security incidents, and this includes tracking metrics such as accuracy and latency \ud83d\udcca.\n\nI was wrong to assume that model security was someone else's problem \ud83d\ude45\u200d\u2642\ufe0f, but I finally understood the importance of implementing robust validation and sanitization controls.\n\n\ud83d\udcac What's your approach to securing machine learning models in production environments \u2014 do you use input validation, data encoding, or something else?"
   }
 ]
