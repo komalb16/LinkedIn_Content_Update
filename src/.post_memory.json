@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-20T04:47:42.583844",
-    "topic_id": "git-workflow",
-    "topic_name": "Git Workflow and Commands",
-    "category": "topic",
-    "text": "\ud83d\udccc Git Workflow and Commands\n\nOnly 12% of engineers use Git masterfully \ud83e\udd2f.\nThis statistic shocks me because I've seen firsthand how Git mastery can make or break a project's success \ud83d\ude80.\n\nAs I walk through the Git workflow, I notice a pattern \ud83d\udcc8:\n\n1\ufe0f\u20e3 Branch strategy is key to avoiding\nThe Branch section is where you define your main, develop, and feature branches \ud83c\udf1f.\n\n2\ufe0f\u20e3 Commit history is crucial\nIn the Commit section, I use Conventional commits and GPG signed commits for security \ud83d\udd12.\n\n3\ufe0f\u20e3 PR Flow ensures code quality\n\nGit Workflow:\nBranch: main + develop + feature/*\nCommit: Conventional commits, GPG signed\nPR Flow: 2-reviewer gate, squash merge\nRebase: Clean history, no merge noise\nRecovery: reset, reflog, cherry-pick\n\nRight now? We are at the Rebase stage, where a clean history is crucial for understanding code changes \ud83d\udcca.\n\nIn the Recovery stage, I've learned to use reset, reflog, and cherry-pick to rescue my code from disasters \ud83c\udf2a\ufe0f.\n\nHere's a hard truth: most engineers don't master Git until they've spent years debugging merge conflicts \ud83e\udd26\u200d\u2642\ufe0f.\n\n\ud83d\udcac What's your go-to Git command when you're in a crisis, and how did you learn it?\n\n#GitMastery #BranchingStrategies #CodeQuality #Debugging #SoftwareEngineering #GitWorkflow"
-  },
-  {
     "timestamp": "2026-05-20T04:48:23.624354",
     "topic_id": "git-workflow",
     "topic_name": "Git Workflow and Commands",
@@ -838,5 +831,12 @@
     "topic_name": "Secure Model Eval",
     "category": "topic",
     "text": "Most machine learning models are vulnerable to security incidents during evaluation in production environments \ud83d\udea8.\n\nI've seen teams spend months building robust models, only to have them exploited by malicious input data \ud83e\udd16.\n\n1\ufe0f\u20e3 Secure model evaluation starts\nThis means checking user input data for potential threats, such as SQL injection or cross-site scripting \ud83c\udf10.\nis crucial to prevent model exploitation, and this includes removing special characters and encoding user input data \ud83d\udd12.\n\u2705 Input validation\n\u2705 Data encoding\n\u2705 Access controls\nis key to detecting potential security incidents, and this includes tracking metrics such as accuracy and latency \ud83d\udcca.\n\nI was wrong to assume that model security was someone else's problem \ud83d\ude45\u200d\u2642\ufe0f, but I finally understood the importance of implementing robust validation and sanitization controls.\n\n\ud83d\udcac What's your approach to securing machine learning models in production environments \u2014 do you use input validation, data encoding, or something else?"
+  },
+  {
+    "timestamp": "2026-07-23T00:10:34.809299",
+    "topic_id": "trend-single-file-collab",
+    "topic_name": "Collab in HTML",
+    "category": "topic",
+    "text": "\ud83d\udccc Most teams get Collab in HTML wrong\n\nMost teams get Collab in HTML wrong in the same way.\n\nMy current lens: Optimizing collaboration features for low-latency and real-time updates in web applications. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
   }
 ]

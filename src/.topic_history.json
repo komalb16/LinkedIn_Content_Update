@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-13T00:03:56.619539",
-    "topic_id": "trend-googlebook-tech",
-    "topic_name": "Googlebook Use Cases",
-    "category": "topic",
-    "mode": "trending",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 98,
-        "raw_score": 98,
-        "similarity": 0.0574,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 86,
-        "raw_score": 86,
-        "similarity": 0.0352,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-13T20:50:37.240047",
     "topic_id": "story-personal-ai-daily-life",
     "topic_name": "Personal AI Productivity",
@@ -1958,6 +1933,31 @@
         "score": 54,
         "raw_score": 54,
         "similarity": 0.0143,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-23T00:10:34.811279",
+    "topic_id": "trend-single-file-collab",
+    "topic_name": "Collab in HTML",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 39,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0192,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0133,
         "penalty": 0
       }
     ]
