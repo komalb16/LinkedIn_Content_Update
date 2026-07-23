@@ -2328,11 +2328,11 @@ def _strip_leaked_structure_labels(text, structure, diagram_type=""):
         if sum(1 for pat in label_patterns if pat.search(line)) >= 2:
             to_remove.add(i)
 
-    # Vertical-list leak: a run of 3+ consecutive lines that are each
+    # Vertical-list leak: a run of 2+ consecutive lines that are each
     # essentially just one bare label and nothing else.
     run = []
     def _flush_run():
-        if len(run) >= 3:
+        if len(run) >= 2:
             to_remove.update(run)
         run.clear()
     for i, line in enumerate(lines):
