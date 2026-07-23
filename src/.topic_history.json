@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-13T20:50:37.240047",
-    "topic_id": "story-personal-ai-daily-life",
-    "topic_name": "Personal AI Productivity",
-    "category": "Story",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 62,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 62,
-        "raw_score": 62,
-        "similarity": 0.0625,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 37,
-        "raw_score": 37,
-        "similarity": 0.0336,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-16T13:39:34.192173",
     "topic_id": "devsecops",
     "topic_name": "DevSecOps Practices",
@@ -1958,6 +1933,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.0133,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-23T23:06:57.308361",
+    "topic_id": "trend-hand-writing-code",
+    "topic_name": "Coding by Hand",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0167,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0192,
         "penalty": 0
       }
     ]

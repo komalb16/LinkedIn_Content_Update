@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-20T04:48:23.624354",
-    "topic_id": "git-workflow",
-    "topic_name": "Git Workflow and Commands",
-    "category": "topic",
-    "text": "\ud83d\udccc like Gitflow vs trunk-based\n\nThree years ago, Git mastery was all about memorizing commands \ud83e\udd26\u200d\u2642\ufe0f. Now, it's about understanding the nuances of branching strategies, like Gitflow vs trunk-based \ud83d\udfe2.\n\nI've seen teams struggle with Gitflow, only to switch to trunk-based and simplify their workflow \ud83d\udfe1.\n\nWhen considering Positioning, it's essential to understand where Git fits into your overall development workflow and how it impacts your team's collaboration.\n\nIn terms of AI Approach, integrating AI-powered tools can significantly enhance your Git workflow, from automated code reviews to predictive merge conflict resolution.\n\nThe Best Fit for your team depends on the project's complexity, team size, and desired release cadence - Gitflow might be suitable for large, complex projects, while trunk-based is better for smaller, agile teams.\n\nUltimately, there's a Trade-off between the simplicity of trunk-based and the control of Gitflow - balancing these trade-offs is crucial for achieving Git mastery.\n\nWhich level are you? \ud83d\udcac What's the most challenging Git concept you've faced, and how did you overcome it?\n\n#GitMastery #BranchingStrategies #Gitflow #TrunkBased #GitCheatSheet"
-  },
-  {
     "timestamp": "2026-05-20T21:57:52.917639",
     "topic_id": "git-workflow",
     "topic_name": "Git Workflow and Commands",
@@ -838,5 +831,12 @@
     "topic_name": "Collab in HTML",
     "category": "topic",
     "text": "\ud83d\udccc Most teams get Collab in HTML wrong\n\nMost teams get Collab in HTML wrong in the same way.\n\nMy current lens: Optimizing collaboration features for low-latency and real-time updates in web applications. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nBest Practices\nCommon Mistakes\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-07-23T23:06:57.305623",
+    "topic_id": "trend-hand-writing-code",
+    "topic_name": "Coding by Hand",
+    "category": "topic",
+    "text": "\ud83d\udccc Handwriting Code for Better Retention\n\nMost engineers think writing code by hand is a relic of the past \ud83e\udd16. But I've seen teams that still manually write code snippets have better retention and understanding of complex algorithms \ud83d\udcdd.\n\nWriting code by hand helps solidify the concepts in your mind, making it easier to recall them later \ud83d\udcda. This is especially true for complex algorithms, where a deep understanding is crucial for implementation.\n\n1\ufe0f\u20e3 Manual coding reduces bugs\nManually writing code forces you to think through each line, reducing the likelihood of syntax errors and logical flaws \ud83d\udc1c.\n\u2705 Fewer syntax errors\n\u2705 Better logic flow\n\nThe fundamental idea is that handwriting code helps you understand the underlying mechanics of the language \ud83d\udee0\ufe0f.\n\nIn production systems, this translates to more efficient debugging and maintenance \ud83d\udd52.\n\n2\ufe0f\u20e3 Best practices include review Continuous\nProduction systems also emphasize regular code review, which helps catch errors and improves overall code quality \ud83d\udcca.\n\u2705 Regular code review\n\u2705 Continuous integration\n\n3\ufe0f\u20e3 Common mistakes to avoid\nOne common mistake is relying too heavily on auto-completion and syntax highlighting, which can lead to a lack of understanding of the underlying code \ud83d\udeab.\n\n#Handwriting Code\n##Benefits\nImproved retention\nReduced bugs\n##Best Practices\nRegular review\n\n\ud83d\udcac What's your approach to coding \u2014 do you write by hand or rely on auto-completion? #AIInProduction #LLM"
   }
 ]
