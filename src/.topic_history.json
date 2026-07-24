@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-16T14:59:59.101642",
-    "topic_id": "platform-engineering-ai",
-    "topic_name": "Platform Engineering for AI Teams",
-    "category": "Engineering",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 17,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 70,
-        "raw_score": 70,
-        "similarity": 0.0556,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 47,
-        "raw_score": 47,
-        "similarity": 0.0342,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-16T19:18:40.892724",
     "topic_id": "trend-react-alternatives",
     "topic_name": "Python HTMX Wins",
@@ -1958,6 +1933,31 @@
         "score": 52,
         "raw_score": 52,
         "similarity": 0.0086,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-24T22:12:15.345640",
+    "topic_id": "__ai_news_fallback__",
+    "topic_name": "Git Workflow and Commands",
+    "category": "Engineering",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 23,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 46,
+        "raw_score": 46,
+        "similarity": 0.0328,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 9,
+        "raw_score": 9,
+        "similarity": 0.0,
         "penalty": 0
       }
     ]
