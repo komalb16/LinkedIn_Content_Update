@@ -1626,9 +1626,18 @@ def _build_visual_block_instruction(diagram_type):
 _LAST_TOPIC_SUBJECT = None
 
 
+# Set when generate_topic_post() had to fall back to the hardcoded
+# template (the actual AI call failed) — checked before live publish so a
+# failed generation doesn't silently publish generic, mismatched
+# boilerplate under a real name. Dry runs still show it, so failures stay
+# visible for debugging.
+_LAST_GENERATION_USED_FALLBACK = False
+
+
 def generate_topic_post(topic, structure=None, diagram_type="", dry_run=False):
-    global _LAST_TOPIC_SUBJECT
+    global _LAST_TOPIC_SUBJECT, _LAST_GENERATION_USED_FALLBACK
     _LAST_TOPIC_SUBJECT = None
+    _LAST_GENERATION_USED_FALLBACK = False
     log.info("Generating post: " + topic["name"])
 
     # If no diagram type was provided (the most common path), pick one dynamically
@@ -1777,6 +1786,7 @@ Requirements:
         post_text = _cleanup_generated_post(raw)
     except Exception as e:
         log.warning(f"Topic generation failed for {topic.get('id', 'unknown')}, using fallback copy: {e}")
+        _LAST_GENERATION_USED_FALLBACK = True
         return _fallback_topic_post(topic, structure=structure)
     # Skip revision pass in dry run — saves one full LLM round-trip (~30s)
     if not dry_run:
@@ -2334,6 +2344,16 @@ def _strip_leaked_structure_labels(text, structure, diagram_type=""):
     def _flush_run():
         if len(run) >= 2:
             to_remove.update(run)
+            # Also drop a short, unpunctuated header line directly above
+            # the run (e.g. "Napkin Math") — otherwise it's left as an
+            # orphaned label with nothing following it.
+            header_idx = run[0] - 1
+            while header_idx >= 0 and header_idx not in to_remove and not lines[header_idx].strip():
+                header_idx -= 1
+            if header_idx >= 0 and header_idx not in to_remove:
+                header = lines[header_idx].strip()
+                if header and len(header) <= 40 and header[-1] not in ".!?:":
+                    to_remove.add(header_idx)
         run.clear()
     for i, line in enumerate(lines):
         bare = line.strip().rstrip(".:!?").lower()
@@ -5290,6 +5310,20 @@ Current post:
         write_github_summary(topic["name"], mode, publish_text, dry_run=True, score_card=score_card)
         _remember_post(topic, publish_text)
         log.info("DRY RUN complete. Post saved.")
+        return
+
+    if _LAST_GENERATION_USED_FALLBACK:
+        log.error(
+            "Skipping live publish: AI generation failed and only the generic "
+            "fallback template was available. Publishing that under a real name "
+            "does more harm than skipping this run — check the 'Topic generation "
+            "failed' warning above for the actual error."
+        )
+        write_github_summary(
+            topic["name"], mode,
+            "[SKIPPED] AI generation failed — fallback template was not published live.",
+            dry_run=True, score_card=score_card,
+        )
         return
 
     # ── POST TO LINKEDIN ───────────────────────────────────────────────────────
