@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-20T22:07:29.220799",
-    "topic_id": "git-workflow",
-    "topic_name": "Git Workflow and Commands",
-    "category": "topic",
-    "text": "Most teams blame the model first, but in Git Workflow and Commands the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nI've seen teams struggle with Gitflow, only to switch to trunk-based development later on.\n\nThe Branch section of our Git workflow is where it all starts, with main, develop, and feature branches playing a crucial role in organizing our code.\n\nIn the Commit section, using conventional commits and GPG signed commits ensures our changes are trackable and secure.\n\n#Git Mastery Cheat Sheet\n\n* Branch: main + develop + feature\n* Commit: conventional + GPG signed\n* PR Flow: 2-reviewer gate + squash merge\n* Rebase: clean history + no merge noise\n* Recovery: reset + reflog + cherry-pick\nThe PR Flow section is where we ensure quality, with a 2-reviewer gate and squash merge keeping our history clean.\n\nIn the Rebase section, we maintain a clean history by avoiding merge noise.\n\nI've learned the hard way that the Recovery section is crucial, with commands like reset, reflog, and cherry-pick saving me from crises.\n\nWhich level are you? \ud83d\udcac What's your go-to Git command when fixing a production issue? #SoftwareArchitecture #DistributedSystems #SystemDesign #ScaleEngineering"
-  },
-  {
     "timestamp": "2026-05-20T22:09:29.618862",
     "topic_id": "git-workflow",
     "topic_name": "Git Workflow and Commands",
@@ -838,5 +831,12 @@
     "topic_name": "Git Workflow and Commands",
     "category": "topic",
     "text": "\ud83d\udccc Claude Code vs Goose Pricing Comparison\n\nGit Workflow and Commands looks simple until you have to run it in production.\n\nMy current lens: Commands and patterns that separate juniors from seniors. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
+  },
+  {
+    "timestamp": "2026-07-25T13:54:36.843202",
+    "topic_id": "trend-open-ai-regulations",
+    "topic_name": "Responsible AI",
+    "category": "topic",
+    "text": "Most teams blame the model first, but in Responsible AI the bigger failures usually come from architecture decisions. \ud83e\udde0\n\nThe root cause was simple: our open-weight model was too permissive, allowing unauthorized access to sensitive data \ud83e\udd2f.\n\nWe had to rethink our approach to balancing model openness with regulatory requirements.\n\nOur team conducts thorough risk assessments to determine the level of openness required for each model \ud83d\udcca.\n\nWe use techniques like:\n\u2705 Role-based access control\n\u2705 Attribute-based access control\n\u2705 Mandatory access control\nto ensure that only authorized personnel can access the model and its data \ud83d\udeab.\n\nWe use anonymization techniques to protect sensitive information, ensuring that our models can be shared without compromising data privacy \ud83d\udcc1.\n\n\u2705 Model interpretability\n\u2705 Model transparency\n\u2705 Model accountability\nto provide insights into our models' decision-making processes, ensuring that they are fair and unbiased \ud83d\udcdd.\n\nModel Risk Assessment\nAccess Control Mechanisms\nData Anonymization\nModel Explainability\nAs engineers, we must prioritize model openness while ensuring regulatory compliance \ud83d\udcbc.\n\nWhat strategies do you use to balance model openness with regulatory requirements in your production environments? \ud83e\udd14\n\n\ud83d\udcac What's your approach to ensuring model explainability and transparency?"
   }
 ]
