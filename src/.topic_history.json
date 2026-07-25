@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-17T00:02:52.975290",
-    "topic_id": "finops-for-ai",
-    "topic_name": "FinOps for AI Systems",
-    "category": "AI",
-    "mode": "interview",
-    "status": "success",
-    "quality_score": 86,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-17T15:05:27.612465",
     "topic_id": "data-lakehouse",
     "topic_name": "Data Lakehouse Architecture",
@@ -1958,6 +1948,31 @@
         "score": 64,
         "raw_score": 64,
         "similarity": 0.0099,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-25T23:03:13.393208",
+    "topic_id": "trend-napkin-math-engineering",
+    "topic_name": "Napkin Math Essentials",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 54,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0195,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 64,
+        "raw_score": 64,
+        "similarity": 0.0505,
         "penalty": 0
       }
     ]
