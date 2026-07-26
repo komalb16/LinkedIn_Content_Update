@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-17T19:20:49.277087",
-    "topic_id": "llm-architecture",
-    "topic_name": "LLM Architecture",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 86,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-17T23:00:23.198591",
     "topic_id": "trend-vpn-privacy-tools",
     "topic_name": "Secure Data Transmission",
@@ -1973,6 +1963,31 @@
         "score": 78,
         "raw_score": 78,
         "similarity": 0.0345,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-26T22:08:35.693377",
+    "topic_id": "trend-napkin-math-limits",
+    "topic_name": "Estimation Simplified",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": [
+      {
+        "variant_index": 3,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0275,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0248,
         "penalty": 0
       }
     ]
