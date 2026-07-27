@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-20T23:19:19.039817",
-    "topic_id": "data-engineering",
-    "topic_name": "Data Engineering",
-    "category": "topic",
-    "text": "\ud83d\udccc Data Engineering\n\nOur Data Engineering pipeline just broke in production \ud83d\udea8.\nI diagnosed the issue \u2014 we overcomplicated the architecture \ud83e\udd26.\n\nMost teams over-engineer their Data Engineering pipelines \u2014\nthey add unnecessary complexity that hurts reliability \ud83d\udcc9.\nWhat actually works is using the simplest architecture that solves the problem \u2014\nstart with a clear understanding of the problem you're trying to solve, which is what the Start section is all about \ud83d\udcca.\n\nAt the Need section, you determine if the task is open-ended or mostly deterministic \u2014\n\n2\ufe0f\u20e3 Stick to simpler scripts\nThen, at the Data section, you decide whether you need retrieval, prediction, or orchestration \u2014\nthis choice dictates the overall pipeline design \ud83d\udcc8.\n\nThe Build section is where you apply the simplest architecture that works,\nand the Scale section is where you add complexity only when reliability demands it \ud83d\ude80.\n\nIf you need high reliability, then you should scale your pipeline \u2014\nbut only after you've optimized the architecture \ud83d\udcca.\n\n\ud83d\udcac What's your go-to Data Engineering architecture \u2014 do you prioritize simplicity or complexity? \ud83e\udd14\n\n#DataEngineering #PipelineDesign #ReliabilityMatters #ScalabilitySolutions #SimplicityWins"
-  },
-  {
     "timestamp": "2026-05-20T23:20:59.963399",
     "topic_id": "kafka-streaming",
     "topic_name": "Apache Kafka and Streaming",
@@ -838,5 +831,12 @@
     "topic_name": "Estimation Simplified",
     "category": "topic",
     "text": "\ud83d\udccc 1\ufe0f\u20e3 Simplistic estimation is a common pitfall\n\nI recently heard a colleague say, \"Our project timeline is realistic, we've accounted for everything.\" \ud83d\udea8\n\nThis approach often ignores the complexity of real-world systems, leading to inaccurate project planning.\n\n1\ufe0f\u20e3 Core idea is fundamental\nUnderstanding the underlying mechanics of your system is key to making realistic estimates, and this involves considering factors like team velocity, dependencies, and potential roadblocks.\n\nBreaking down complex projects into smaller, manageable tasks helps to identify potential bottlenecks and estimate timelines more accurately, using tools like:\n\u2705 Gantt charts\n\u2705 Kanban boards\n\u2705 Burn-down charts\n\n2\ufe0f\u20e3 Best practices in production\nExperienced teams follow established methodologies like Agile or Waterfall, and continuously monitor and adjust their estimates as the project progresses.\n\n3\ufe0f\u20e3 Common mistakes to avoid\nEngineers often underestimate the impact of external factors, such as changes in requirements or unexpected technical debt, which can significantly affect project timelines.\n\nRealistic estimation requires a deep understanding of the system, the team, and the potential risks involved, and this knowledge should be used to inform and adjust project planning.\n\nEstimation\nComplexity\nTeam Velocity\nDependencies\n\n\ud83d\udcac What's your go-to method for estimating project timelines, and how do you handle unexpected changes or technical debt?"
+  },
+  {
+    "timestamp": "2026-07-27T12:32:50.835427",
+    "topic_id": "interview-system-biggest-bottleneck",
+    "topic_name": "Interview: System_Design",
+    "category": "interview",
+    "text": "I was on a call with my team when our AI system's latency spiked to 500ms \ud83d\udea8. We diagnosed it to a single bottleneck: our chunking strategy \ud83e\udd14.\n\n1\ufe0f\u20e3 Bottleneck identification is key\nThis is where most engineers go wrong - they focus on the model or data pipeline, but neglect the retrieval layer \ud83d\udd0d. I've seen this mistake repeated in three RAG systems I've shipped \ud83d\udea2.\n\nThe mechanism underneath is what drives performance - in our case, it was the chunk size and retrieval algorithm \ud83d\udcca.\n\u2705 RAGAS for automated metrics\n\u2705 DeepEval for regression testing\n\nProduction systems prioritize simplicity and reliability - we switched to a hybrid chunking strategy and saw a 3x improvement \ud83d\udcc8.\n\n2\ufe0f\u20e3 Common mistakes in AI engineering\nMost engineers overcomplicate their systems - I've learned to focus on one metric at a time, like latency or throughput \ud83d\udcca.\n\nThe one thing to remember is that measurement beats intuition - don't guess, test and iterate \ud83d\ude80.\n\nDiscipline in measurement, testing, and iteration - this is what separates good systems from great ones \ud83d\udcaa.\n\nRAGAS\nDeepEval\n\nHybrid\nChunking\n\n\ud83d\udcac What's your biggest bottleneck in production - model, data, or retrieval?"
   }
 ]
