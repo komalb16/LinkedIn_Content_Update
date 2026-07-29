@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-20T23:24:58.827777",
-    "topic_id": "agentic-ai-decision-tree",
-    "topic_name": "Agentic AI Decision Tree",
-    "category": "topic",
-    "text": "\ud83d\udccc Agentic AI Decision Tree\n\nMost engineers think building agents is the hard part, but I've found that deciding when you don't need them is actually the bigger challenge \ud83e\udd14.\n\nIf you're working on a structured task, you might not need an agent at all - a simple RAG setup could be enough \ud83d\udcca.\n\n2\ufe0f\u20e3 I consider agents when actions matter\nBut what if your task requires open-ended reasoning or complex decision-making?\n\nThat's when you need to think about the tools and complexity involved \ud83d\udee0\ufe0f.\n\nIf actions are crucial, you might need an agent to handle the workflow \ud83e\udd16.\n\nTask Shape -> Need Retrieval | Need Tools\n\n- > Complexity -> Decision\nIn production, I've seen teams overcomplicate their architecture when a simple one would suffice \ud83d\udeab.\n\nThe key is to start with a single-agent approach and scale up as needed, using the simplest architecture that works \ud83d\udd29.\n\nSo, when designing your system, remember that the simplest solution is often the best one \ud83d\udca1.\n\n\ud83d\udcac What's the most complex task you've had to automate, and how did you decide on the architecture? \ud83d\udc47\n\n#DistributedSystems #Agents #RAG #SoftwareEngineering #Automation #DecisionMaking #SystemDesign"
-  },
-  {
     "timestamp": "2026-05-21T04:40:55.480076",
     "topic_id": "ai-trends-industry-insights",
     "topic_name": "AI Trends & Industry Insights",
@@ -838,5 +831,12 @@
     "topic_name": "Efficient Software Builds",
     "category": "topic",
     "text": "Goal: Optimize Anthropic's software development pipeline. The agent: analyzed 10,000 lines of code, identified 300 redundant functions, and removed them. Zero human steps.\n\nThis automated process led to a significant reduction in build time, from 10 hours to just 30 minutes.\n\nBy reusing compiled code and minimizing the number of dependencies, we can significantly speed up our build process.\n\u2705 Modular code structure\n\u2705 Dependency analysis tools\nBy using tools like code coverage analyzers and static analysis tools, we can identify and remove redundant code, reducing the overall codebase.\n\nBy building only the components that have changed, we can avoid rebuilding the entire codebase, saving time and resources.\n\nEach of these steps is crucial in optimizing our build process, and by following them, we can significantly improve our development efficiency.\n\nWhich level are you?\n\n\ud83d\udcac What's your strategy for avoiding unnecessary recompilation in large codebases?"
+  },
+  {
+    "timestamp": "2026-07-29T23:05:40.229460",
+    "topic_id": "llm-agents",
+    "topic_name": "LLM Agents Architecture",
+    "category": "topic",
+    "text": "Almost everyone falls into one of three levels when it comes to LLM Agents Architecture: \ud83c\udf1f beginners who struggle to define the problem, \ud83d\udcca pragmatists who focus on open-ended tasks, and \ud83d\udd0d experts who master retrieval and prediction.\n\nIf you're solving a well-defined problem, then a deterministic approach is likely sufficient\u2014most people stop here.\n\nTo get started, you need a clear understanding of what you're trying to achieve. This is where problem definition comes in \u2013 it's key to avoiding over-engineered solutions. I've seen teams struggle to define the problem, only to realize that their solution was unnecessary complex.\n\nOnce you have a clear problem statement, you need to understand the requirements of your task. This is where the need for retrieval, prediction, or orchestration becomes apparent. If your task requires question-answering, forecasting, or workflow management, you'll need to design your system accordingly.\n\n\ud83d\udcac What's your approach to LLM Agents Architecture\u2014do you focus on retrieval, prediction, or orchestration?"
   }
 ]
