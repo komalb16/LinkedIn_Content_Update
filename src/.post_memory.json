@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-20T23:20:59.963399",
-    "topic_id": "kafka-streaming",
-    "topic_name": "Apache Kafka and Streaming",
-    "category": "topic",
-    "text": "\ud83d\udccc Apache Kafka and Streaming\n\nGoal: Build a scalable real-time streaming architecture with Apache Kafka. My team and I achieved this by implementing a robust partitioning strategy, configuring consumer groups, and optimizing producers and consumers \ud83d\udcc8. Zero human steps were needed once the pipeline was set up.\n\nI was wrong to assume that Kafka would handle everything automatically \ud83e\udd26\u200d\u2640\ufe0f. In reality, configuring Kafka for production requires careful consideration of the entire ecosystem, including producers, consumers, and partitioning strategy. The Kafka section of our architecture handles millions of events per second, with configurable retention \ud83d\udcca.\n\nThe RabbitMQ section serves as a task queue, handling 100k events per second, but without replay capabilities \ud83d\udce8. In contrast, Redis Streams provide low-latency, memory-first processing \ud83d\ude80. Kinesis, being AWS-native, offers 7-day retention, while Pulsar boasts multi-tenant capabilities with infinite retention \ud83c\udf1f.\n\nKafka Architecture:\n\n- Producers\n- Consumers\n- Partitioning Strategy\n- Consumer Groups\nI finally understood the importance of monitoring and adjusting these components after a major failure scenario where our consumer groups were not properly configured, leading to data loss \ud83d\udea8.\n\n\ud83d\udcac What's your approach to handling consumer group rebalancing in your Kafka cluster? \ud83e\udd14\n\n#SoftwareArchitecture #DistributedSystems #ScaleEngineering #SystemDesign"
-  },
-  {
     "timestamp": "2026-05-20T23:24:58.827777",
     "topic_id": "agentic-ai-decision-tree",
     "topic_name": "Agentic AI Decision Tree",
@@ -838,5 +831,12 @@
     "topic_name": "Interview: System_Design",
     "category": "interview",
     "text": "I was on a call with my team when our AI system's latency spiked to 500ms \ud83d\udea8. We diagnosed it to a single bottleneck: our chunking strategy \ud83e\udd14.\n\n1\ufe0f\u20e3 Bottleneck identification is key\nThis is where most engineers go wrong - they focus on the model or data pipeline, but neglect the retrieval layer \ud83d\udd0d. I've seen this mistake repeated in three RAG systems I've shipped \ud83d\udea2.\n\nThe mechanism underneath is what drives performance - in our case, it was the chunk size and retrieval algorithm \ud83d\udcca.\n\u2705 RAGAS for automated metrics\n\u2705 DeepEval for regression testing\n\nProduction systems prioritize simplicity and reliability - we switched to a hybrid chunking strategy and saw a 3x improvement \ud83d\udcc8.\n\n2\ufe0f\u20e3 Common mistakes in AI engineering\nMost engineers overcomplicate their systems - I've learned to focus on one metric at a time, like latency or throughput \ud83d\udcca.\n\nThe one thing to remember is that measurement beats intuition - don't guess, test and iterate \ud83d\ude80.\n\nDiscipline in measurement, testing, and iteration - this is what separates good systems from great ones \ud83d\udcaa.\n\nRAGAS\nDeepEval\n\nHybrid\nChunking\n\n\ud83d\udcac What's your biggest bottleneck in production - model, data, or retrieval?"
+  },
+  {
+    "timestamp": "2026-07-29T15:14:14.149225",
+    "topic_id": "trend-anthropic-software-changes",
+    "topic_name": "Efficient Software Builds",
+    "category": "topic",
+    "text": "Goal: Optimize Anthropic's software development pipeline. The agent: analyzed 10,000 lines of code, identified 300 redundant functions, and removed them. Zero human steps.\n\nThis automated process led to a significant reduction in build time, from 10 hours to just 30 minutes.\n\nBy reusing compiled code and minimizing the number of dependencies, we can significantly speed up our build process.\n\u2705 Modular code structure\n\u2705 Dependency analysis tools\nBy using tools like code coverage analyzers and static analysis tools, we can identify and remove redundant code, reducing the overall codebase.\n\nBy building only the components that have changed, we can avoid rebuilding the entire codebase, saving time and resources.\n\nEach of these steps is crucial in optimizing our build process, and by following them, we can significantly improve our development efficiency.\n\nWhich level are you?\n\n\ud83d\udcac What's your strategy for avoiding unnecessary recompilation in large codebases?"
   }
 ]
