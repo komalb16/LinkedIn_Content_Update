@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-21T04:40:55.480076",
-    "topic_id": "ai-trends-industry-insights",
-    "topic_name": "AI Trends & Industry Insights",
-    "category": "topic",
-    "text": "\ud83d\udccc AI Trends & Industry Insights\n\nEveryone is talking about AI Trends & Industry Insights. Almost nobody is explaining it correctly.\n\nTo get it right, you need to understand the problem you're solving: identifying whether your task is open-ended or deterministic.\n\n1\ufe0f\u20e3 Your task is open-ended if it\nIf your task is deterministic, then you can use a simpler architecture.\n\nIf you need retrieval, prediction, or orchestration, then you should consider the simplest architecture that works.\n\n1\ufe0f\u20e3 Use the simplest architecture\nIn production, I've seen teams overcomplicate their architecture, leading to reliability issues.\n\nTo avoid this, add complexity only when reliability demands it.\n\nFor example, if you're building a recommendation system, you may start with a simple collaborative filtering approach and then add more complexity, such as deep learning-based methods, as your dataset grows.\n\nWhat this means for your work right now is that you should focus on building a scalable architecture that can adapt to changing requirements.\n\n\ud83d\udcac What's the most complex AI architecture you've had to simplify for production, and how did you approach it?\n\n#GenerativeAI #IndustryInsights #ProductionReady #ScalabilityMatters #ArchitectureChoice"
-  },
-  {
     "timestamp": "2026-05-21T12:23:54.825584",
     "topic_id": "interview-tools-framework-mistakes",
     "topic_name": "Interview: Tools_Frameworks",
@@ -838,5 +831,12 @@
     "topic_name": "LLM Agents Architecture",
     "category": "topic",
     "text": "Almost everyone falls into one of three levels when it comes to LLM Agents Architecture: \ud83c\udf1f beginners who struggle to define the problem, \ud83d\udcca pragmatists who focus on open-ended tasks, and \ud83d\udd0d experts who master retrieval and prediction.\n\nIf you're solving a well-defined problem, then a deterministic approach is likely sufficient\u2014most people stop here.\n\nTo get started, you need a clear understanding of what you're trying to achieve. This is where problem definition comes in \u2013 it's key to avoiding over-engineered solutions. I've seen teams struggle to define the problem, only to realize that their solution was unnecessary complex.\n\nOnce you have a clear problem statement, you need to understand the requirements of your task. This is where the need for retrieval, prediction, or orchestration becomes apparent. If your task requires question-answering, forecasting, or workflow management, you'll need to design your system accordingly.\n\n\ud83d\udcac What's your approach to LLM Agents Architecture\u2014do you focus on retrieval, prediction, or orchestration?"
+  },
+  {
+    "timestamp": "2026-07-30T22:14:04.324063",
+    "topic_id": "interview-tools-framework-mistakes",
+    "topic_name": "Interview: Tools_Frameworks",
+    "category": "interview",
+    "text": "Almost everyone falls into one of three levels when choosing a framework: \ud83d\udfe2 beginners, \ud83d\udfe1 intermediate developers, or \ud83d\udfe3 experts.\n\nI've seen teams struggle with this decision, and I've learned from my own mistakes.\n\nOne framework choice I regret is using a complex architecture for a simple task.\n\nIf you're starting a new project, you need to identify the problem you're trying to solve.\n\nThis is where most teams go wrong \u2013 they choose a framework without considering the task at hand.\n\nFor example, if you're building a simple chatbot, you don't need a full-fledged AI framework.\n\nAs you progress, you need to determine if the task is open-ended or mostly deterministic.\n\nThis will help you decide whether you need retrieval, prediction, or orchestration.\n\nI've seen teams try to use retrieval for open-ended tasks, only to realize they need prediction or orchestration.\n\nHere's a simple decision tree:\n\nIf you follow this tree, you'll end up with a simple architecture that works.\n\nBut, if you add complexity too early, you'll end up with a system that's hard to maintain.\n\nSo, what's the key to choosing the right framework?\nIt's not about the framework itself, but about understanding the problem you're trying to solve.\n\nI've learned this the hard way, and I hope you can learn from my mistakes.\n\n\ud83d\udcac What's the most important factor you consider when choosing a framework for your project?"
   }
 ]
