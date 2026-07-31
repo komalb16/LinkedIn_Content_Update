@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-20T23:20:59.965026",
-    "topic_id": "kafka-streaming",
-    "topic_name": "Apache Kafka and Streaming",
-    "category": "Data",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 86,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 86,
-        "raw_score": 86,
-        "similarity": 0.0144,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 74,
-        "raw_score": 74,
-        "similarity": 0.0344,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-21T12:23:54.827392",
     "topic_id": "interview-tools-framework-mistakes",
     "topic_name": "Interview: Tools_Frameworks",
@@ -1993,5 +1968,30 @@
     "status": "success",
     "quality_score": 76,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-07-31T22:15:04.872394",
+    "topic_id": "trend-formal-methods",
+    "topic_name": "Proving Code Correctness",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 78,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0157,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0343,
+        "penalty": 0
+      }
+    ]
   }
 ]
