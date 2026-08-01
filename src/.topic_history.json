@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-21T12:23:54.827392",
-    "topic_id": "interview-tools-framework-mistakes",
-    "topic_name": "Interview: Tools_Frameworks",
-    "category": "Interview",
-    "mode": "interview",
-    "status": "success",
-    "quality_score": 98,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-21T21:30:01.568999",
     "topic_id": "rag-systems",
     "topic_name": "RAG Systems",
@@ -1990,6 +1980,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.0343,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-01T14:39:21.583035",
+    "topic_id": "trend-qm-agent-harness",
+    "topic_name": "Scaling Agent Work",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 78,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 90,
+        "raw_score": 90,
+        "similarity": 0.0267,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.018,
         "penalty": 0
       }
     ]
