@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-05-21T21:30:01.568999",
-    "topic_id": "rag-systems",
-    "topic_name": "RAG Systems",
-    "category": "AI",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-05-21T23:11:06.327318",
     "topic_id": "enterprise-ai",
     "topic_name": "Enterprise AI Architecture",
@@ -2005,6 +1997,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.018,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-02T00:04:34.453995",
+    "topic_id": "trend-formal-methods-practice",
+    "topic_name": "Production Ready Formal Methods",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 54,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0573,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 64,
+        "raw_score": 64,
+        "similarity": 0.0769,
         "penalty": 0
       }
     ]
