@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-22T04:40:01.698380",
-    "topic_id": "zero-trust",
-    "topic_name": "Zero Trust Architecture",
-    "category": "topic",
-    "text": "I used to think that firewalls and VPNs were enough to secure our systems \u2014 but after a major breach, I realized that never trust, always verify is now a business requirement \ud83d\udea8.\n\nMost teams still focus on network security, but in production, identity-first security is what actually works \u2014 this means implementing IdP, MFA, PAM, and SPIFFE certs to ensure that only authorized users and devices can access our systems \ud83d\udcca.\n\n\u2014 this approach allows for fine-grained access control and reduces the risk of lateral movement in case of a breach.\n\nIn contrast to traditional network security, microsegmentation and mTLS are essential for securing communication between services \u2014 this approach ensures that even if one service is compromised, the attacker cannot move laterally to other services \ud83d\udee1\ufe0f.\n\nArchitecture Diagram:\nDevice posture checks and EDR are critical for ensuring that only trusted devices can access our systems \u2014 this includes monitoring for suspicious activity and enforcing security policies \ud83d\udcc8.\n\nData encryption and DLP are also essential for protecting sensitive data \u2014 this includes using tools like Vault to manage secrets and encrypt data at rest and in transit \ud83d\udd12.\n\n\ud83d\udcac What's your approach to implementing zero trust security in your organization \u2014 do you focus on identity-first, microsegmentation, or continuous verification? \ud83e\udd14"
-  },
-  {
     "timestamp": "2026-05-22T04:40:58.663219",
     "topic_id": "zero-trust",
     "topic_name": "Zero Trust Architecture",
@@ -838,5 +831,12 @@
     "topic_name": "Napkin Math Essentials",
     "category": "topic",
     "text": "\ud83d\udccc Napkin Math for System Scalability\n\nAlmost everyone falls into one of three levels when it comes to napkin math: \ud83c\udf1f the optimistic estimator, \ud83d\ude80 the aggressive scaler, or \ud83d\udcca the meticulous calculator.\n\nI've seen teams pick the first two and then switch to the third after a hard lesson.\n\nOne specific failure scenario I recall is when we underestimated the impact of network latency on our system's performance by a factor of 10.\n\nThe concept of napkin math is simple: it's about making quick, back-of-the-envelope calculations to estimate system performance and scalability.\n\nHowever, it's easy to get wrong, especially when it comes to assuming constant throughput or neglecting the effects of caching.\n\nIn production systems, best practices like accounting for variability in user behavior and using realistic estimates of hardware capabilities can make all the difference.\n\nCommon mistakes, such as ignoring the impact of dependencies or assuming linear scaling, can lead to costly surprises down the line.\n\nOne key takeaway is that napkin math is not just about rough estimates, but about understanding the underlying mechanisms and making informed decisions.\n\nIt's about being aware of the potential pitfalls and taking a holistic approach to system design.\n\nNapkin Math Framework:\n\n- Estimate user growth\n- Calculate resource needs\n- Account\n\nI was wrong to assume that our system would scale linearly, and it took me years to learn the importance of rigorous testing and validation.\n\nNow, I make sure to double-check my calculations and consider multiple scenarios before making any major decisions.\n\n\ud83d\udcac What's your go-to method for napkin math, and what's the most significant mistake you've learned from in your experience with system performance and scalability?"
+  },
+  {
+    "timestamp": "2026-08-03T23:14:16.692567",
+    "topic_id": "trend-sqlite-security-checks",
+    "topic_name": "SQLite Security Essentials",
+    "category": "topic",
+    "text": "I've seen 9 out of 10 teams compromise their SQLite security by misconfiguring the database \ud83d\udea8.\n\nThis is because most engineers overlook the importance of secure configuration, focusing only on development speed \u23f1\ufe0f.\n\n1\ufe0f\u20e3 Database isolation is critical\nto prevent lateral movement in case of a breach.\nThis is achieved by using separate databases for each application or service, reducing the attack surface \ud83c\udf10.\n\u2705 Use separate DB users\n\u2705 Limit DB privileges\n\n2\ufe0f\u20e3 Encryption is not enough\nto protect data at rest.\nYou need to implement secure key management and rotation to prevent unauthorized access \ud83d\udd11.\n\n3\ufe0f\u20e3 Regular updates are essential\nto patch known vulnerabilities.\nThis includes keeping the SQLite library and dependencies up to date, as well as monitoring for new CVEs \ud83d\udcca.\n\nSQLite Security Essentials:\nSecure configuration\nRegular updates\nMonitoring\nBy following these best practices, you can significantly reduce the risk of a security breach in your SQLite database \ud83d\udee1\ufe0f.\n\n\ud83d\udcac What's your approach to securing your SQLite databases \u2014 do you use a specific framework or tool?"
   }
 ]
