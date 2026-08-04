@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-24T14:41:47.777987",
-    "topic_id": "story-rag-strategy-shift",
-    "topic_name": "RAG Strategy Shift",
-    "category": "Story",
-    "mode": "story",
-    "status": "success",
-    "quality_score": 39,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 41,
-        "raw_score": 41,
-        "similarity": 0.0052,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 41,
-        "raw_score": 41,
-        "similarity": 0.0062,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-25T19:13:30.686107",
     "topic_id": "azure",
     "topic_name": "Azure Architecture Patterns",
@@ -2039,6 +2014,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.0466,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-04T23:12:40.915525",
+    "topic_id": "trend-llm-memory-fix",
+    "topic_name": "Optimizing LLM Memory",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 64,
+        "raw_score": 64,
+        "similarity": 0.0189,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 54,
+        "raw_score": 54,
+        "similarity": 0.0214,
         "penalty": 0
       }
     ]
