@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-22T04:46:46.656724",
-    "topic_id": "zero-trust",
-    "topic_name": "Zero Trust Architecture",
-    "category": "topic",
-    "text": "Three years ago, Zero Trust security was a niche topic \ud83e\udd2b.\nNow, it's a business requirement \ud83d\ude80.\n\n1\ufe0f\u20e3 Identity is the foundation of Zero\n\nIn production, I've seen identity-first approaches pay off big time, with IdP, MFA, and PAM working together seamlessly \ud83d\udcc8.\n\nThe policy engine is where the magic happens, with OPA rules and ABAC ensuring that access is granted only when necessary \ud83d\udca1.\n\nZero Trust Architecture\n\nIdentity\n(IdP, MFA,\nPAM, SPIFFE)\n\nPolicy Engine\n(OPA, ABAC,\ntime-limits)\n\nNetwork\n(Micro-seg,\nmTLS)\n\nDevice\n(Posture, EDR)\n\nData\n(DLP, encrypt,\nVault)\n\nMicrosegmentation and mTLS are crucial for securing the network \ud83d\udcca.\n\nPosture checks and EDR ensure devices are secure \ud83d\udcc8.\nData protection with DLP, encryption, and Vault is the final piece of the puzzle \ud83e\udd1d.\n\n\ud83d\udcac What's your biggest Zero Trust implementation challenge right now?"
-  },
-  {
     "timestamp": "2026-05-23T15:09:57.220466",
     "topic_id": "zero-trust",
     "topic_name": "Zero Trust Architecture",
@@ -838,5 +831,12 @@
     "topic_name": "Optimizing LLM Memory",
     "category": "topic",
     "text": "We're at the peak of LLM adoption \ud83d\ude80, but most teams struggle with memory optimization \ud83d\udd34.\n\nI've seen it happen: a model that performs well in testing starts to leak memory in production, causing costly downtime and slower response times \ud83d\udd70\ufe0f.\n\nTo avoid this, it's essential to understand how memory management works in LLMs and implement smart caching strategies \ud83d\udd35.\n\n1\ufe0f\u20e3 Efficient caching is key\nEfficient caching is crucial to reducing memory leaks, and it starts with understanding how your model uses memory.\n\nBy implementing a caching layer, you can reduce the number of requests to your model and minimize memory usage \ud83d\udd39.\n\u2705 Cache frequently accessed data\n\u2705 Implement a least-recently-used (LRU) cache eviction policy\n\u2705 Monitor cache hit ratios\n\nMany engineers make the mistake of not properly configuring their caching layer, leading to memory leaks and performance issues \ud83d\udfe1.\n\u2705 Monitor memory usage\n\u2705 Adjust cache sizes dynamically\n\u2705 Implement memory profiling tools\n\nIn production environments, it's essential to follow best practices for memory management to ensure your model performs optimally \ud83d\udfe2.\n\nThis includes implementing a robust caching strategy, monitoring memory usage, and adjusting your model's configuration as needed \ud83d\udd39.\n\nCaching Strategy\nMemory Profiling\nModel Configuration\nBy following these best practices and avoiding common pitfalls, you can ensure your LLM model performs optimally in production and minimizes costly memory leaks \ud83d\udfe3.\n\n\ud83d\udcac What's your go-to caching strategy for LLMs \u2014 do you use a commercial solution or a homegrown approach?"
+  },
+  {
+    "timestamp": "2026-08-05T23:09:03.118644",
+    "topic_id": "interview-system-monolith-vs-microservices",
+    "topic_name": "Interview: System_Design",
+    "category": "interview",
+    "text": "I've seen 8 out of 10 AI systems built as monoliths, only to be re-architected as microservices within a year.\n\nThis is because the initial simplicity of a monolith hides the complexity that emerges as the system grows.\n\nWhen we first embark on building an AI system, it's essential to identify the core problem we're trying to solve and understand the requirements that will drive our architecture.\n\nDefining the problem is key to choosing the right architecture. If the task is open-ended, a monolith might be sufficient, but if it requires multiple services, microservices are a better choice. Determining if the task is deterministic or open-ended is crucial.\n\nAs we progress, data requirements come into play, and we must consider whether our system needs to handle retrieval, prediction, or orchestration.\n\nRight now, we are at the build stage, where using the simplest architecture that works is essential. However, many teams overcomplicate their architecture, leading to maintainability issues.\n\nAs the system scales, it's critical to ensure that our architecture can handle increased traffic and complexity. I was wrong to assume that a complex architecture would always lead to better performance. It took me years to learn that simplicity is key.\n\n\ud83d\udcac What's your approach to architecting AI systems \u2014 monolith or microservices, and why?"
   }
 ]

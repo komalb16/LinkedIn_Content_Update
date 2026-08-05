@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-05-25T19:13:30.686107",
-    "topic_id": "azure",
-    "topic_name": "Azure Architecture Patterns",
-    "category": "Cloud",
-    "mode": "topic",
-    "status": "success"
-  },
-  {
     "timestamp": "2026-05-25T23:14:14.806553",
     "topic_id": "data-engineering",
     "topic_name": "Data Engineering Pipelines",
@@ -2042,5 +2034,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-08-05T23:09:03.121258",
+    "topic_id": "__interview_fallback__",
+    "topic_name": "Interview: System_Design",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 74,
+    "ab_variants": []
   }
 ]
