@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-24T05:26:05.476363",
-    "topic_id": "prompt-engineering-prod",
-    "topic_name": "Prompt Engineering for Production",
-    "category": "topic",
-    "text": "\ud83d\udccc Prompt Engineering for Production\n\nMost engineers think Prompt Engineering for Production is just about crafting the perfect prompt \ud83e\udd14.\n\nBut I've seen it fail in production because it overlooks the underlying architecture \ud83d\udea7.\n\nTo begin with, we need to understand what problem we're trying to solve \ud83c\udf1f.\n\nThis involves identifying the key objectives and constraints that will guide our approach.\n\nNext, we must determine what drives the task at hand - is it a specific need, a particular dataset, or something else \ud83d\udcca?\n\nThis helps us evaluate if the task requires retrieval, prediction, or orchestration, and what data we'll need to support it \ud83d\udcc8.\n\nWith a clear understanding of our goals and requirements, we can start building our solution \ud83d\udca1.\n\nThis is where we design and develop the core components of our system, using the simplest architecture that works.\n\nAs we progress, we need to consider how to scale our solution to meet the demands of production \ud83d\ude80.\n\nThis involves thinking about reliability, performance, and maintainability, and adding complexity only when necessary \ud83d\udd12.\n\n\ud83d\udcac What's the most common implementation mistake you've seen in Prompt Engineering for Production, and how did you fix it?"
-  },
-  {
     "timestamp": "2026-05-24T14:41:47.775250",
     "topic_id": "story-rag-strategy-shift",
     "topic_name": "RAG Strategy Shift",
@@ -838,5 +831,12 @@
     "topic_name": "Napkin Math Limits",
     "category": "topic",
     "text": "\ud83d\udccc Napkin Math For Distributed Systems\n\nNobody talks about how napkin math fails in distributed systems.\n\nI've seen it happen in production environments where back-of-the-envelope calculations don't account for real-world complexity \ud83d\udfe1.\n\n1\ufe0f\u20e3 Simplistic assumptions are the norm\nNapkin math often relies on oversimplified assumptions that don't hold up in distributed systems, leading to inaccurate estimates of software performance and scalability.\n\n2\ufe0f\u20e3 Ignoring latency and throughput\nIt frequently ignores critical factors like latency and throughput, which can significantly impact system performance \ud83d\udd34.\n\n3\ufe0f\u20e3 Lack of understanding of bottlenecks\nA deeper understanding of bottlenecks and how they affect system performance is necessary for accurate estimates \ud83d\udfe2.\n\nTo adapt napkin math for real-world complexity, consider the following:\n\u2705 Identify critical components\n\u2705 Model system interactions\n\u2705 Account for variability\n\nSection 1: Problem Statement\nSection 2: Core Concept\nSection 3: Mechanism\nSection 4: Best Practices\nSection 5: Common Mistakes\nSection 6: Key Takeaway\nBest practices involve identifying critical components, modeling system interactions, and accounting for variability \ud83d\udd35.\n\nCommon mistakes include ignoring latency and throughput, and making simplistic assumptions about system behavior \ud83d\udfe1.\n\nThe key takeaway is that napkin math can be a useful tool, but it must be adapted to account for the complexities of distributed systems.\n\n\ud83d\udcac What's your approach to estimating software performance and scalability in production environments?"
+  },
+  {
+    "timestamp": "2026-08-08T14:39:10.492737",
+    "topic_id": "interview-rag-one-mistake",
+    "topic_name": "Interview: Rag",
+    "category": "interview",
+    "text": "\ud83d\udccc RAG system architecture layers\n\n80% of RAG systems I've built failed due to poor foundation layers \ud83d\udea7.\n\nThis statistic still surprises me, given the emphasis on retrieval and generation in AI engineering.\n\nI've learned that a solid foundation is crucial for the entire system, including the chips and hardware that power it \ud83d\udcbb.\n\nWithout a well-designed foundation, the entire system can become unstable and prone to errors.\n\nBuilding and orchestrating the system is the next critical step, and it involves creating columns and structures that can support the system's growth \ud83c\udf06.\n\nThis is where most teams focus their efforts, but I've found that it's equally important to consider the foundation and the governance of the system.\n\nGovernance and operations are often overlooked, but they are essential for the long-term success of the system \ud83d\udcca.\n\nThis includes considering identity, security, compliance, cost, and reliability, and ensuring that the system is well-maintained and updated regularly.\n\nI was wrong to assume that a strong build and orchestrate phase would be enough to guarantee success \ud83e\udd26\u200d\u2640\ufe0f.\n\nIt took me years to learn that a solid foundation and good governance are just as important.\n\n\ud83d\udcac What's your approach to building a RAG system \u2014 do you start with the foundation, build and orchestrate, or govern and operate?"
   }
 ]

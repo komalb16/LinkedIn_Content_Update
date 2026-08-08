@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-26T23:17:08.042699",
-    "topic_id": "langchain",
-    "topic_name": "LangChain vs LangGraph",
-    "category": "AI",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 38,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-28T00:07:09.595901",
     "topic_id": "ai-governance-playbook",
     "topic_name": "AI Governance Playbook",
@@ -2059,5 +2049,15 @@
         "penalty": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-08-08T14:39:10.495282",
+    "topic_id": "__interview_fallback__",
+    "topic_name": "Interview: Rag",
+    "category": "Interview",
+    "mode": "interview",
+    "status": "success",
+    "quality_score": 70,
+    "ab_variants": []
   }
 ]
