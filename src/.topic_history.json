@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-28T23:25:59.998540",
-    "topic_id": "mlops-best-practices",
-    "topic_name": "MLOps Best Practices",
-    "category": "Engineering",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 62,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 76,
-        "raw_score": 76,
-        "similarity": 0.0765,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 66,
-        "raw_score": 66,
-        "similarity": 0.0852,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-29T21:59:57.350227",
     "topic_id": "story-personal-ai-daily-life",
     "topic_name": "Personal AI Productivity",
@@ -2056,6 +2031,31 @@
         "score": 25,
         "raw_score": 25,
         "similarity": 0.4524,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-09T14:43:18.354387",
+    "topic_id": "trend-formal-methods",
+    "topic_name": "Proving Code Correctness",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 90,
+        "raw_score": 90,
+        "similarity": 0.0833,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0544,
         "penalty": 0
       }
     ]
