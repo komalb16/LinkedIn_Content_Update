@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-05-30T20:15:10.196216",
-    "topic_id": "vector-db-comparison",
-    "topic_name": "Vector Database Comparison",
-    "category": "Data",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 66,
-    "ab_variants": [
-      {
-        "variant_index": 1,
-        "score": 78,
-        "raw_score": 78,
-        "similarity": 0.029,
-        "penalty": 0
-      },
-      {
-        "variant_index": 2,
-        "score": 66,
-        "raw_score": 66,
-        "similarity": 0.0425,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-05-31T00:08:35.882524",
     "topic_id": "interview-tools-claude-vs-gpt4",
     "topic_name": "Interview: Tools_Frameworks",
@@ -2044,5 +2019,30 @@
     "status": "success",
     "quality_score": 78,
     "ab_variants": []
+  },
+  {
+    "timestamp": "2026-08-11T22:55:10.826877",
+    "topic_id": "__ai_news_fallback__",
+    "topic_name": "LLM vs Generative AI vs AI Agents Agentic AI",
+    "category": "AI",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 50,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 34,
+        "raw_score": 34,
+        "similarity": 0.0156,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 34,
+        "raw_score": 34,
+        "similarity": 0.0065,
+        "penalty": 0
+      }
+    ]
   }
 ]

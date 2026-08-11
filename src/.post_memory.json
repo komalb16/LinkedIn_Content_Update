@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-28T00:07:09.593702",
-    "topic_id": "ai-governance-playbook",
-    "topic_name": "AI Governance Playbook",
-    "category": "topic",
-    "text": "The hardest part of AI Governance Playbook isn't the technology. It's the trade-offs.\n\nMy current lens: Governance should accelerate adoption by reducing ambiguity, not slow teams with vague compliance theater.. I optimize for clarity first, then scale, then cost. \ud83d\ude80\n\nThe fastest way to improve outcomes is to choose the simplest design that still meets reliability goals. That keeps systems easier to debug, cheaper to run, and safer to evolve. \ud83e\udde0\n\nRisk Tiering\nModel Registry\nPolicy Controls\nMonitoring\nAuditability\n\n\ud83d\udcac If you had to simplify one part of your current architecture this week, what would you change first?"
-  },
-  {
     "timestamp": "2026-05-28T23:25:59.995485",
     "topic_id": "mlops-best-practices",
     "topic_name": "MLOps Best Practices",
@@ -838,5 +831,12 @@
     "topic_name": "Interview: Agentic_Ai",
     "category": "interview",
     "text": "\ud83d\udccc Agentic AI challenges and solutions\n\nAlmost everyone falls into one of five levels when it comes to Agentic AI:\n\ud83d\udd34 beginner,\n\ud83d\udfe1 intermediate,\n\ud83d\udfe2 advanced,\n\ud83d\udd35 expert,\n\ud83d\udfe3 master.\nI was at the \ud83d\udfe1 level, thinking I had a good grasp of the concepts, but it took me years to learn that Agentic AI is not just about the technology, but about the entire ecosystem.\n\n1\ufe0f\u20e3 Identifying the problem is key\nI've seen many teams struggle to identify the real problem they're trying to solve with Agentic AI, and this is where the journey begins.\n\nThis is where the concept of Agentic AI as a solution to a specific problem starts to take shape.\n\n2\ufe0f\u20e3 Understanding the core concept\nThe fundamental idea behind Agentic AI is that it enables machines to make decisions autonomously, but this requires a deep understanding of the underlying mechanisms.\n\nThis is where the magic happens, and the machine starts to learn and adapt.\n\nThe mechanism underneath Agentic AI involves complex algorithms and data structures, but it's essential to understand how they work together to produce the desired outcome.\n\nThis is where the engineer's expertise comes in, and they need to have a solid grasp of the technical aspects.\n\n3\ufe0f\u20e3 Best practices in production\nIn production, it's essential to follow best practices such as continuous testing, monitoring, and evaluation to ensure the Agentic AI system is working as expected.\n\nThis is where the rubber meets the road, and the system needs to be able to handle real-world scenarios.\n\n4\ufe0f\u20e3 Common mistakes to avoid\n\n\ud83d\udcac What's your biggest Agentic AI challenge \u2014 data quality, model interpretability, or something else?"
+  },
+  {
+    "timestamp": "2026-08-11T22:55:10.824176",
+    "topic_id": "llm-vs-agentic",
+    "topic_name": "LLM vs Generative AI vs AI Agents Agentic AI",
+    "category": "topic",
+    "text": "\ud83d\udccc LLM vs Generative AI vs Agentic AI pipelines\n\nI used to think LLMs and Generative AI were interchangeable terms.\n\n1\ufe0f\u20e3 Standard LLMs predict tokens\nThey're great for text generation but limited in their ability to reason or understand context.\n\n2\ufe0f\u20e3 Generative AI models create content\nThese models can produce coherent text, images, or music, but they often lack the ability to engage in complex conversations or make decisions.\n\n3\ufe0f\u20e3 Basic AI Agents make decisions\nThese agents can perform tasks autonomously, but they typically rely on pre-programmed rules and lack the ability to learn or adapt.\n\n4\ufe0f\u20e3 Fully autonomous Agentic AI flows reason\nThis is where things get really interesting - these systems can learn, adapt, and make decisions in complex environments.\n\nIn production systems, the differences between these approaches can have significant impacts on performance, scalability, and reliability.\n\n5\ufe0f\u20e3 Autonomous reasoning is key\nTo achieve true autonomy, systems need to be able to reason, learn, and adapt in real-time.\n\n\ud83d\udcac What's the most significant challenge you've faced when implementing autonomous reasoning in your AI systems?"
   }
 ]
