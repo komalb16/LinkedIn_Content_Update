@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-31T00:08:35.882524",
-    "topic_id": "interview-tools-claude-vs-gpt4",
-    "topic_name": "Interview: Tools_Frameworks",
-    "category": "Interview",
-    "mode": "interview",
-    "status": "success",
-    "quality_score": 53,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-31T14:04:50.605800",
     "topic_id": "cicd-pipelines",
     "topic_name": "CI/CD Best Practices",
@@ -2041,6 +2031,31 @@
         "score": 34,
         "raw_score": 34,
         "similarity": 0.0065,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-12T13:27:51.558721",
+    "topic_id": "trend-llm-api-security",
+    "topic_name": "Protecting LLM APIs",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 88,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0315,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 62,
+        "raw_score": 62,
+        "similarity": 0.0302,
         "penalty": 0
       }
     ]
