@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-31T20:18:37.574512",
-    "topic_id": "system-design",
-    "topic_name": "System Design Fundamentals",
-    "category": "Engineering",
-    "mode": "ai_news",
-    "status": "success",
-    "quality_score": 82,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-05-31T22:07:43.159076",
     "topic_id": "interview-trends-ai-winter",
     "topic_name": "Interview: Industry_Trends",
@@ -2056,6 +2046,31 @@
         "score": 54,
         "raw_score": 54,
         "similarity": 0.0393,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-13T21:56:26.153281",
+    "topic_id": "trend-ai-dev-myths",
+    "topic_name": "AI in Dev",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 42,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0309,
+        "penalty": 0
+      },
+      {
+        "variant_index": 3,
+        "score": 76,
+        "raw_score": 76,
+        "similarity": 0.0335,
         "penalty": 0
       }
     ]

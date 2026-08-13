@@ -712,5 +712,12 @@
     "style": 24,
     "signature": "f6841220c5e8b2e48aa21b837ba458da",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-08-13T21:56:20.333943",
+    "topic_id": "trend-ai-dev-myths",
+    "style": 14,
+    "signature": "462cb077043edfc10fd05beb722c601b",
+    "duplicate_avoided": true
   }
 ]
