@@ -1,18 +1,10 @@
 [
   {
-    "timestamp": "2026-08-13T21:56:20.337290",
-    "style_idx": 14,
-    "style_name": "Winding Roadmap",
-    "topic_id": "trend-ai-dev-myths",
-    "topic_name": "This gap is not just about speed",
+    "timestamp": "2026-08-14T22:32:03.145791",
+    "style_idx": 15,
+    "style_name": "Vertical Timeline",
+    "topic_id": "trend-ai-dev-strategy",
+    "topic_name": "The shift has been significant",
     "diagram_type": "Flow Chart"
-  },
-  {
-    "timestamp": "2026-08-14T13:23:58.666644",
-    "style_idx": 20,
-    "style_name": "Dark Column Flow",
-    "topic_id": "trend-gpt-calc-boost",
-    "topic_name": "My current lens: Common mistakes in GPT model",
-    "diagram_type": "Architecture Diagram"
   }
 ]

@@ -1,15 +1,5 @@
 [
   {
-    "timestamp": "2026-05-31T22:07:43.159076",
-    "topic_id": "interview-trends-ai-winter",
-    "topic_name": "Interview: Industry_Trends",
-    "category": "Interview",
-    "mode": "interview",
-    "status": "success",
-    "quality_score": 90,
-    "ab_variants": []
-  },
-  {
     "timestamp": "2026-06-01T12:46:40.236504",
     "topic_id": "llm-agents",
     "topic_name": "LLM Agents Architecture",
@@ -2071,6 +2061,31 @@
         "score": 76,
         "raw_score": 76,
         "similarity": 0.0335,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-14T22:32:09.017670",
+    "topic_id": "trend-ai-dev-strategy",
+    "topic_name": "Practical AI Adoption",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 86,
+    "ab_variants": [
+      {
+        "variant_index": 2,
+        "score": 86,
+        "raw_score": 86,
+        "similarity": 0.0438,
+        "penalty": 0
+      },
+      {
+        "variant_index": 1,
+        "score": 78,
+        "raw_score": 78,
+        "similarity": 0.0378,
         "penalty": 0
       }
     ]
