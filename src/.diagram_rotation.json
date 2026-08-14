@@ -6,5 +6,13 @@
     "topic_id": "trend-ai-dev-myths",
     "topic_name": "This gap is not just about speed",
     "diagram_type": "Flow Chart"
+  },
+  {
+    "timestamp": "2026-08-14T13:23:58.666644",
+    "style_idx": 20,
+    "style_name": "Dark Column Flow",
+    "topic_id": "trend-gpt-calc-boost",
+    "topic_name": "My current lens: Common mistakes in GPT model",
+    "diagram_type": "Architecture Diagram"
   }
 ]
