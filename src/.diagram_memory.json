@@ -733,5 +733,19 @@
     "style": 15,
     "signature": "7539af40cedd218c07f7caa94cd794a3",
     "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-08-15T14:32:25.639694",
+    "topic_id": "trend-anthropic-software",
+    "style": 5,
+    "signature": "caff19eb001441fe5232ec36d9f1caf4",
+    "duplicate_avoided": true
+  },
+  {
+    "timestamp": "2026-08-15T14:32:26.212843",
+    "topic_id": "trend-anthropic-software",
+    "style": 15,
+    "signature": "ecca214a70a73a68a46c28e756b6929d",
+    "duplicate_avoided": true
   }
 ]

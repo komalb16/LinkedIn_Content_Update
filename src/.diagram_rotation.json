@@ -1,10 +1,18 @@
 [
   {
-    "timestamp": "2026-08-14T22:32:03.145791",
+    "timestamp": "2026-08-15T14:32:25.643623",
+    "style_idx": 5,
+    "style_name": "Comparison Table",
+    "topic_id": "trend-anthropic-software",
+    "topic_name": "Scaling AI Systems vs Monolithic",
+    "diagram_type": "Comparison Table"
+  },
+  {
+    "timestamp": "2026-08-15T14:32:26.213800",
     "style_idx": 15,
     "style_name": "Vertical Timeline",
-    "topic_id": "trend-ai-dev-strategy",
-    "topic_name": "The shift has been significant",
-    "diagram_type": "Flow Chart"
+    "topic_id": "trend-anthropic-software",
+    "topic_name": "Scaling AI Systems vs Monolithic",
+    "diagram_type": "Comparison Table"
   }
 ]

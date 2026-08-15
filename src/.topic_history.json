@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-06-01T12:46:40.236504",
-    "topic_id": "llm-agents",
-    "topic_name": "LLM Agents Architecture",
-    "category": "AI",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 86,
-    "ab_variants": [
-      {
-        "variant_index": 2,
-        "score": 62,
-        "raw_score": 62,
-        "similarity": 0.0936,
-        "penalty": 0
-      },
-      {
-        "variant_index": 3,
-        "score": 51,
-        "raw_score": 51,
-        "similarity": 0.0828,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-06-01T22:15:33.159368",
     "topic_id": "docker-cheatsheet",
     "topic_name": "Docker Mastery",
@@ -2086,6 +2061,31 @@
         "score": 78,
         "raw_score": 78,
         "similarity": 0.0378,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-15T14:32:32.711010",
+    "topic_id": "trend-anthropic-software",
+    "topic_name": "Scaling AI Systems",
+    "category": "topic",
+    "mode": "trending",
+    "status": "success",
+    "quality_score": 38,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 66,
+        "raw_score": 66,
+        "similarity": 0.0364,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 62,
+        "raw_score": 62,
+        "similarity": 0.014,
         "penalty": 0
       }
     ]
