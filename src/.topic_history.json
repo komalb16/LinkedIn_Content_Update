@@ -1,30 +1,5 @@
 [
   {
-    "timestamp": "2026-06-02T00:21:24.606127",
-    "topic_id": "agentic-ai-decision-tree",
-    "topic_name": "Agentic AI Decision Tree",
-    "category": "AI",
-    "mode": "topic",
-    "status": "success",
-    "quality_score": 41,
-    "ab_variants": [
-      {
-        "variant_index": 3,
-        "score": 90,
-        "raw_score": 90,
-        "similarity": 0.0889,
-        "penalty": 0
-      },
-      {
-        "variant_index": 1,
-        "score": 78,
-        "raw_score": 78,
-        "similarity": 0.0649,
-        "penalty": 0
-      }
-    ]
-  },
-  {
     "timestamp": "2026-06-02T15:02:14.786004",
     "topic_id": "ai-observability",
     "topic_name": "AI Observability with OpenTelemetry",
@@ -2086,6 +2061,31 @@
         "score": 66,
         "raw_score": 66,
         "similarity": 0.0597,
+        "penalty": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-08-16T14:31:23.131490",
+    "topic_id": "__ai_news_fallback__",
+    "topic_name": "FinOps for AI Systems",
+    "category": "AI",
+    "mode": "ai_news",
+    "status": "success",
+    "quality_score": 66,
+    "ab_variants": [
+      {
+        "variant_index": 1,
+        "score": 34,
+        "raw_score": 34,
+        "similarity": 0.0135,
+        "penalty": 0
+      },
+      {
+        "variant_index": 2,
+        "score": 34,
+        "raw_score": 34,
+        "similarity": 0.0124,
         "penalty": 0
       }
     ]

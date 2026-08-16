@@ -1,10 +1,7 @@
-[
-  {
-    "timestamp": "2026-08-15T23:28:09.069129",
-    "style_idx": 18,
-    "style_name": "Style 18",
-    "topic_id": "trend-formal-methods-done",
-    "topic_name": "This surprising statistic exists because many engineers underestimate",
-    "diagram_type": "Flow Chart"
-  }
-]
+{
+  "rotation_index": 20,
+  "style_history": [
+    18,
+    22
+  ]
+}
