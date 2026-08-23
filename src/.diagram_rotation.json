@@ -1,5 +1,5 @@
 {
-  "rotation_index": 1,
+  "rotation_index": 2,
   "style_history": [
     18,
     22,
@@ -11,6 +11,7 @@
     28,
     29,
     30,
-    0
+    0,
+    1
   ]
 }
